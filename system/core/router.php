@@ -3,6 +3,11 @@ namespace core;
 
 class router extends base
 {
+	static function listen()
+	{
+		
+	}
+	
 	/**
 	 * 将回调函数加入到get请求的队列中
 	 * @param unknown $url

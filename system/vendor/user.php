@@ -1,6 +1,6 @@
 <?php
-namespace system\vendor;
-use system\core\base;
+namespace vendor;
+use core\base;
 
 class user extends base
 {

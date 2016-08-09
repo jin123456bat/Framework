@@ -3,6 +3,24 @@ namespace core;
 class request extends base
 {
 	/**
+	 * 判断是否是https链接
+	 * @return boolean
+	 */
+	static function isHttps()
+	{
+		return isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
+	}
+	
+	/**
+	 * 判断是ajax请求
+	 * @return boolean
+	 */
+	static function isAjax()
+	{
+		return isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && strtolower($_SERVER["HTTP_X_REQUESTED_WITH"])=="xmlhttprequest";
+	}
+	
+	/**
 	 * 读取file变量
 	 * @param unknown $name
 	 */
@@ -10,8 +28,9 @@ class request extends base
 	{
 		if (isset($_FILES[$name]))
 		{
-			
+			return $_FILES[$name];
 		}
+		return false;
 	}
 	
 	/**

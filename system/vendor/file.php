@@ -1,6 +1,6 @@
 <?php
-namespace system\vendor;
-use system\core\base;
+namespace vendor;
+use core\base;
 
 /**
  * 文件基类，包含了文件信息和文件操作

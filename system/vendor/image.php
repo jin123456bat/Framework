@@ -1,5 +1,6 @@
 <?php
-namespace system\vendor;
+namespace vendor;
+
 class image extends file
 {
 	
