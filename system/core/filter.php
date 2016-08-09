@@ -1,5 +1,5 @@
 <?php
-namespace system\core;
+namespace core;
 
 class filter extends base
 {

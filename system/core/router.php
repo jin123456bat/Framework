@@ -1,5 +1,5 @@
 <?php
-use system\core\base;
+namespace core;
 
 class router extends base
 {

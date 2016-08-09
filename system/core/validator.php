@@ -1,5 +1,6 @@
 <?php
-namespace system\core;
+namespace core;
+
 class validator extends base
 {
 	
