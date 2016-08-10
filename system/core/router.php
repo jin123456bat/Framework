@@ -3,7 +3,15 @@ namespace core;
 
 class router extends base
 {
-	static function listen()
+	/**
+	 * url解析
+	 */
+	function parse()
+	{
+		
+	}
+	
+	static function listen($url,$callback)
 	{
 		
 	}
@@ -15,7 +23,6 @@ class router extends base
 	 */
 	static function get($url,$callback)
 	{
-		
 	}
 	
 	/**
