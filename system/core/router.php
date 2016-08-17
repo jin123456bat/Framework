@@ -4,11 +4,17 @@ namespace core;
 class router extends base
 {
 	/**
-	 * url解析
+	 * 获取控制器名称
+	 * @return string 
 	 */
-	function parse()
+	static function getControlName()
 	{
-		
+		return 'control\index';
+	}
+	
+	static function getActionName()
+	{
+		return 'index';
 	}
 	
 	static function listen($url,$callback)

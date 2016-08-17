@@ -5,6 +5,12 @@ use core\base;
 class user extends base
 {
 	/**
+	 * 用户属性
+	 * @var unknown
+	 */
+	private $_attributes;
+	
+	/**
 	 * 是否自动登陆
 	 * @var unknown
 	 */

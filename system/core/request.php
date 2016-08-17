@@ -3,6 +3,15 @@ namespace core;
 class request extends base
 {
 	/**
+	 * 当前请求方式
+	 * @return unknown
+	 */
+	static function method()
+	{
+		return $_SERVER['REQUEST_METHOD'];
+	}
+	
+	/**
 	 * 判断是否是https链接
 	 * @return boolean
 	 */
@@ -128,5 +137,15 @@ class request extends base
 		{
 			return $defaultValue;
 		}
+	}
+	
+	/**
+	 * 获取请求的header
+	 * @param unknown $name
+	 * @return NULL|unknown
+	 */
+	function header($name)
+	{
+		return isset($_SERVER[$name]) ? $_SERVER[$name] : NULL;
 	}
 }

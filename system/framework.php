@@ -1,6 +1,4 @@
 <?php
-use system\core\application;
-
 class framework
 {
 	protected $_root;
@@ -22,11 +20,15 @@ class framework
 		'core',
 		'vendor',
 		'lib',
+		'config'
 	];
 	
 	function __construct()
 	{
+		//自动加载
 		spl_autoload_register([$this,'autoload']);
+		//错误处理
+		set_error_handler([$this,'error']);
 	}
 	
 	/**
@@ -36,7 +38,11 @@ class framework
 	{
 		$this->_root = $root;
 		$isCli = in_array(php_sapi_name(), $this->_cli_spai_name);
-		return self::object('application',[$isCli]);
+		
+		$appConfig = $this->object('config.app');
+		return self::object('core.application',[
+			
+		]);
 	}
 	
 	
@@ -45,33 +51,53 @@ class framework
 	 * @param unknown $classname
 	 * @param unknown $args
 	 */
-	static public function object($classname,$args)
+	static public function object($classname,$args = [])
 	{
+		$classname = str_replace('.', '\\', $classname);
 		$class = new ReflectionClass($classname);
-		//var_dump($class);
+		$classObj = $class->newInstanceArgs($args);
+		if (method_exists($classObj, 'initlize') && is_callable([$classObj,'initlize']))
+		{
+			$classObj->initlize();
+		}
+		return $classObj;
+	}
+	
+	protected function error($a,$b,$c)
+	{
+		var_dump($a);
+		var_dump($b);
+		var_dump($c);
 	}
 	
 	protected function autoload($classname)
 	{
-		
-		$pos = stripos('\\', $classname);
-		if ($pos === false)
+		$pos = stripos($classname,'\\');
+		$root = [
+			$this->_root,//first,find class from user defined folder
+			SYSTEM_ROOT
+		];
+		foreach ($root as $root_path)
 		{
-			foreach ($this->_include_path as $file_path)
+			if ($pos === false)
 			{
-				$path = SYSTEM_ROOT.'\\'.$file_path.'\\'.$classname.'.php';
+				foreach ($this->_include_path as $file_path)
+				{
+					$path = $root_path.'\\'.$file_path.'\\'.$classname.'.php';
+					if (file_exists($path))
+					{
+						include_once $path;
+					}
+				}
+			}
+			else
+			{
+				$path = $root_path.'/'.str_replace('\\', '/', $classname).'.php';
+				var_dump($classname);
 				if (file_exists($path))
 				{
 					include_once $path;
 				}
-			}
-		}
-		else
-		{
-			$path = SYSTEM_ROOT.str_replace('\\', '/', $classname).'.php';
-			if (file_exists($path))
-			{
-				include_once $path;
 			}
 		}
 	}

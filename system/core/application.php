@@ -23,7 +23,6 @@ class application extends base
 			self::$_config = $config;
 		}
 		
-		
 		$this->initlize();
 	}
 	
@@ -31,6 +30,7 @@ class application extends base
 	{
 		//载入环境变量
 		$this->env();
+		
 	}
 	
 	/**
@@ -44,10 +44,13 @@ class application extends base
 	
 	private function env()
 	{
-		foreach (self::$_config as $key => $config)
+		if (is_array(self::$_config) && !empty(self::$_config))
 		{
-			$key = str_replace('_', '.', $key);
-			ini_set($key,$config);
+			foreach (self::$_config as $key => $config)
+			{
+				$key = str_replace('_', '.', $key);
+				ini_set($key,$config);
+			}
 		}
 	}
 	
@@ -56,5 +59,9 @@ class application extends base
 	 */
 	function run()
 	{
+		$control = router::getControlName();
+		$action = router::getActionName();
+		$controlInstance = \framework::object($control, new request());
+		$controlInstance->$action();
 	}
 }

@@ -41,4 +41,9 @@ class base
 			}
 		}
 	}
+	
+	function model($table)
+	{
+		return \framework::object('model.'.$table);
+	}
 }

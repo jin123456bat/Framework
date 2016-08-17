@@ -21,10 +21,7 @@ class response extends base
 	 */
 	function cache($cache)
 	{
-		if ($cache === false)
-		{
-			$this->header->delete($string);
-		}
+		
 	}
 	
 	function getBody()
@@ -34,7 +31,7 @@ class response extends base
 	
 	function setBody($content)
 	{
-		if ($content instanceof file)
+		if ($content instanceof \vendor\file)
 		{
 			$this->body = $content->content();
 		}
