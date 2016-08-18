@@ -62,6 +62,10 @@ class sql extends base
 	
 	private $_duplicate;
 	
+	private $_duplicate_name = [];
+	
+	private $_duplicate_value = [];
+	
 	function __construct()
 	{
 		
@@ -183,16 +187,19 @@ class sql extends base
 	 */
 	function onDuplicateKeyUpdate($name,$value = NULL)
 	{
+		$this->_duplicate = ' ON DUPLICATE KEY UPDATE';
 		if (is_array($name))
 		{
 			foreach ($name as $index => $val)
 			{
-				
+				$this->_duplicate_name[] = $index;
+				$this->_duplicate_value[] = $val;
 			}
 		}
 		else if (is_string($name))
 		{
-			$this->_duplicate = ' ON DUPLICATE KEY UPDATE SET '.$name.'='.$value;
+			$this->_duplicate_name[] = $name;
+			$this->_duplicate_value[] = $value;
 		}
 		return $this;
 	}
