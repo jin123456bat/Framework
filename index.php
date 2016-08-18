@@ -5,10 +5,11 @@
 //定义APP的目录
 !defined('APP_ROOT') & define("APP_ROOT",__DIR__.'/application');
 //定义app的名称
-!define("APP_NAME", "app");
+!define("APP_NAME", "application");
 
 
 include SYSTEM_ROOT.'/framework.php';
 
-$app = new framework();
-$app->createApplication(APP_ROOT)->run();
+$framework = new framework();
+$app = $framework->createApplication(APP_NAME,APP_ROOT);
+$app->run();

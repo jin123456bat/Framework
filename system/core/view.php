@@ -1,6 +1,6 @@
 <?php
-namespace core;
-use system\lib\config;
+namespace framework\core;
+use framework\lib\config;
 
 class view
 {
@@ -28,6 +28,7 @@ class view
 	
 	/**
 	 * 获取模板文件渲染后的html代码
+	 * @return string
 	 */
 	function display()
 	{

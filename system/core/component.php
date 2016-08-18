@@ -1,7 +1,11 @@
 <?php
-namespace core;
-use core\base;
+namespace framework\core;
+use framework\core\base;
 
+/**
+ * @author fx
+ *
+ */
 class component extends base
 {
 	function initlize()

@@ -1,5 +1,5 @@
 <?php
-namespace core\database;
+namespace framework\core\database\driver;
 
 use \PDO;
 /**

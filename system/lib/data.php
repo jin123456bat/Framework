@@ -1,5 +1,7 @@
 <?php
-namespace lib;
+namespace framework\lib;
+
+use lib\error;
 
 abstract class data extends error implements \ArrayAccess
 {

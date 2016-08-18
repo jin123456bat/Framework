@@ -29,12 +29,14 @@ class framework
 		spl_autoload_register([$this,'autoload']);
 		//错误处理
 		set_error_handler([$this,'error']);
+		//异常处理
+		set_exception_handler([$this,'exception']);
 	}
 	
 	/**
 	 * 创建应用程序
 	 */
-	function createApplication($root)
+	function createApplication($name,$root)
 	{
 		$this->_root = $root;
 		$isCli = in_array(php_sapi_name(), $this->_cli_spai_name);
@@ -63,6 +65,11 @@ class framework
 		return $classObj;
 	}
 	
+	protected function exception($exception)
+	{
+		var_dump($exception);
+	}
+	
 	protected function error($a,$b,$c)
 	{
 		var_dump($a);
@@ -73,6 +80,7 @@ class framework
 	protected function autoload($classname)
 	{
 		$pos = stripos($classname,'\\');
+		var_dump($classname);
 		$root = [
 			$this->_root,//first,find class from user defined folder
 			SYSTEM_ROOT
@@ -93,7 +101,6 @@ class framework
 			else
 			{
 				$path = $root_path.'/'.str_replace('\\', '/', $classname).'.php';
-				var_dump($classname);
 				if (file_exists($path))
 				{
 					include_once $path;

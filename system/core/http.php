@@ -1,5 +1,5 @@
 <?php
-namespace core;
+namespace framework\core;
 class http extends base
 {
 	/**

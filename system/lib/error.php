@@ -1,5 +1,5 @@
 <?php
-namespace lib;
+namespace framework\lib;
 use core\base;
 
 class error extends base

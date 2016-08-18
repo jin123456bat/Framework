@@ -1,13 +1,14 @@
 <?php
 namespace vendor;
 use core\base;
+use lib\error;
 
 /**
  * 文件基类，包含了文件信息和文件操作
  * @author fx
  *
  */
-class file extends base
+class file extends error
 {
 	private $_atime;
 	
@@ -31,8 +32,6 @@ class file extends base
 	
 	private $_path;
 	
-	private $_error;
-	
 	function __construct($file)
 	{
 		if (is_string($file))
@@ -51,7 +50,7 @@ class file extends base
 					}
 					else
 					{
-						$this->_error = '创建目录失败';
+						$this->addError('000001', 'create dir failed');
 					}
 				}
 				else
@@ -62,7 +61,7 @@ class file extends base
 					}
 					else
 					{
-						$this->_error = '创建文件失败';
+						$this->addError('000001', 'create file failed');
 					}
 				}
 			}
@@ -73,10 +72,15 @@ class file extends base
 		}
 		else
 		{
-			$this->_error = '构造参数错误';
+			$this->addError('000001', 'constructor parameter $file error');
 		}
 		
 		$this->parse();
+	}
+	
+	public function initlize()
+	{
+		parent::initlize();
 	}
 	
 	/**
@@ -84,6 +88,7 @@ class file extends base
 	 */
 	private function parse()
 	{
+		//清空文件缓存
 		clearstatcache();
 		
 		$this->_mimtType = finfo_file(finfo_open(FILEINFO_MIME_TYPE, NULL), $this->_path);

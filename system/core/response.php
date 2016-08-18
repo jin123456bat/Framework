@@ -1,29 +1,44 @@
 <?php
-namespace core;
+namespace framework\core;
 
-use system\vendor\file;
+use framework\vendor\file;
 
 class response extends base
 {
-	public $status = 200;
+	/**
+	 * http code
+	 * @var integer
+	 */
+	private $_status = 200;
 	
-	public $header = NULL;
+	/**
+	 * http response header
+	 * @var unknown
+	 */
+	private $_header = NULL;
 	
-	public $body = '';
+	/**
+	 * http body
+	 * @var string
+	 */
+	private $_body = '';
 	
-	function __construct()
+	/**
+	 * response content charset
+	 * @var string
+	 */
+	private $_charset = 'utf-8';
+	
+	function __construct($response_string = '')
 	{
+		$this->_body = $response_string;
 		$this->header = new header();
 	}
 	
 	/**
-	 * 设置缓存时间
+	 * get http body
+	 * @return string
 	 */
-	function cache($cache)
-	{
-		
-	}
-	
 	function getBody()
 	{
 		return $this->body;
@@ -40,20 +55,35 @@ class response extends base
 			$this->body = $content->display();
 		}
 		$this->body = $this->setVariableType($content,'s');
-		
 	}
 	
+	/**
+	 * set http code
+	 * @param unknown $status
+	 */
 	function setHttpStatus($status)
 	{
 		$this->status = filter::int($status);
 	}
 	
+	/**
+	 * get http code
+	 * @return int
+	 */
 	function getHttpStatus()
 	{
 		return $this->status;
 	}
 	
-	function setHeader(header $header,$value = '')
+	/**
+	 * set http header or add http header
+	 * @param unknown $header 
+	 * header's name
+	 * @param string [optional] $value
+	 * if $header instanceof header this parameter will be ignore
+	 * otherwise if $value is not empty $header and $value will added into current header
+	 */
+	function setHeader($header,$value = '')
 	{
 		if ($header instanceof header)
 		{

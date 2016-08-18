@@ -1,5 +1,6 @@
 <?php
-namespace core;
+namespace framework\core;
+
 class header extends base
 {
 	private $_header = [];

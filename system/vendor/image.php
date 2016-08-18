@@ -32,8 +32,29 @@ class image extends file
 	
 	/**
 	 * 图片增加水印
+	 * @param string $string 文字或者图片路径
 	 */
-	function water()
+	function water($string,$pos_x,$pos_y)
+	{
+		if ($string instanceof file)
+		{
+			//文件来处理
+			$path = $string->path();
+		}
+		else if (is_file($string))
+		{
+			//文件来处理
+		}
+		else
+		{
+			//文字来处理
+		}
+	}
+	
+	/**
+	 * 裁剪
+	 */
+	function cut($width,$height,$pos_x,$pos_y)
 	{
 		
 	}

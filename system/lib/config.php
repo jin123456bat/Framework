@@ -1,6 +1,6 @@
 <?php
-namespace lib;
-use core\base;
+namespace framework\lib;
+use framework\core\base;
 
 class config extends base implements \ArrayAccess
 {

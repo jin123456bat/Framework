@@ -1,6 +1,6 @@
 <?php
 namespace control;
-use core\control;
+use framework\core\control;
 class index extends control
 {
 	function index()
