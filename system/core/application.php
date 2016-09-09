@@ -1,55 +1,48 @@
 <?php
 namespace framework\core;
-use framework\lib\config;
 
-class application extends base
+class application extends component
 {
-	private static $_config;
 	
-	function __construct($config = NULL)
+	private $_name;
+	
+	private $_path;
+	
+	function __construct($name,$path)
 	{
-		if (is_string($config) && file_exists($config))
-		{
-			include_once $config;
-			$config = pathinfo($config,PATHINFO_FILENAME);
-			
-			if (class_exists($config))
-			{
-				self::$_config = new $config();
-			}
-		}
-		if (is_object($config))
-		{
-			self::$_config = $config;
-		}
-		
-		$this->initlize();
+		$this->_name = $name;
+		$this->_path = $path;
 	}
 	
 	function initlize()
 	{
+		$this->setConfig($this->_name);
 		//载入环境变量
 		$this->env();
 		
 	}
 	
 	/**
-	 * 获取当前application的配置信息
-	 * @return config
+	 * 设置app的环境变量
 	 */
-	static function config()
-	{
-		return self::$_config;
-	}
-	
 	private function env()
 	{
-		if (is_array(self::$_config) && !empty(self::$_config))
+		$env = $this->getConfig('environment');
+		if (is_array($env) && !empty($env))
 		{
-			foreach (self::$_config as $key => $config)
+			foreach ($env as $name => $variable)
 			{
-				$key = str_replace('_', '.', $key);
-				ini_set($key,$config);
+				if (is_array($variable) && !empty($variable))
+				{
+					foreach ($variable as $prefix => $value)
+					{
+						ini_set($name.'.'.$prefix, $value);
+					}
+				}
+				else
+				{
+					ini_set($name, $variable);
+				}
 			}
 		}
 	}
@@ -59,9 +52,5 @@ class application extends base
 	 */
 	function run()
 	{
-		$control = router::getControlName();
-		$action = router::getActionName();
-		$controlInstance = \framework::object($control, new request());
-		$controlInstance->$action();
 	}
 }
