@@ -1,5 +1,6 @@
 <?php
 namespace framework\core;
+
 class base
 {
 	function __construct()
@@ -42,6 +43,11 @@ class base
 		}
 	}
 	
+	/**
+	 * 载入数据模型
+	 * @param unknown $table
+	 * @return object
+	 */
 	function model($table)
 	{
 		return \framework::object('model.'.$table);

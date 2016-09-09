@@ -1,6 +1,6 @@
 <?php
 namespace framework\lib;
-use core\base;
+use framework\core\base;
 
 class error extends base
 {

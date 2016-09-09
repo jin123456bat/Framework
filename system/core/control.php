@@ -1,7 +1,7 @@
 <?php
 namespace framework\core;
 
-class contol extends component
+class control extends component
 {
 	
 }

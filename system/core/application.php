@@ -1,6 +1,6 @@
 <?php
 namespace framework\core;
-use lib\config;
+use framework\lib\config;
 
 class application extends base
 {

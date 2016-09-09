@@ -29,6 +29,7 @@ class router extends base
 	 */
 	static function get($url,$callback)
 	{
+		
 	}
 	
 	/**

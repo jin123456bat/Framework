@@ -1,7 +1,7 @@
 <?php
 namespace framework\lib;
 
-use lib\error;
+use framework\lib\error;
 
 abstract class data extends error implements \ArrayAccess
 {
@@ -15,6 +15,9 @@ abstract class data extends error implements \ArrayAccess
 		parent::initlize();
 	}
 	
+	/**
+	 * 验证数据集合是否符合规则
+	 */
 	function validate()
 	{
 		$rules = $this->rules();
@@ -77,7 +80,10 @@ abstract class data extends error implements \ArrayAccess
 	 * 		]
 	 * ]
 	 */
-	abstract function rules();
+	function rules()
+	{
+		return [];
+	}
 	
 	/**
 	 * {@inheritDoc}

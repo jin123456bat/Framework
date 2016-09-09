@@ -1,10 +1,9 @@
 <?php
 namespace application\control;
+
 use framework\core\control;
-class index extends control
+
+class request extends control
 {
-	function index()
-	{
-		echo "123";
-	}
+	
 }

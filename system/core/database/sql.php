@@ -15,7 +15,19 @@ class sql extends base
 	 * 当为select的时候 select的字段
 	 * @var array
 	 */
-	private $_fields = ['*'];
+	private $_select_fields = ['*'];
+	
+	/**
+	 * insert fields
+	 * @var array
+	 */
+	private $_insert_fields = [];
+	
+	/**
+	 * replace fields
+	 * @var array
+	 */
+	private $_replace_fields = [];
 	
 	/**
 	 * from的table
@@ -58,6 +70,8 @@ class sql extends base
 	
 	private $_distinct = false;
 	
+	private $_forUpdate = '';
+	
 	private $_ignore = false;
 	
 	private $_duplicate;
@@ -69,6 +83,14 @@ class sql extends base
 	function __construct()
 	{
 		
+	}
+	
+	/**
+	 * select for update
+	 */
+	function forUpdate()
+	{
+		$this->_forUpdate = ' FOR UPDATE';
 	}
 	
 	/**
@@ -85,71 +107,93 @@ class sql extends base
 			{
 				if ($field instanceof sql)
 				{
-					if (is_string($as))
-					{
-						$this->_fields[$as] = $field->__toString();
-					}
-					else if (is_int($as))
-					{
-						$this->_fields[] = $field->__toString();
-					}
+					$field = $field->__toString();
 				}
-				else
+				if (is_string($as))
 				{
-					if (is_string($as))
-					{
-						$this->_fields[$as] = $field;
-					}
-					else if (is_int($as))
-					{
-						$this->_fields[] = $field;
-					}
+					$this->_select_fields[$as] = $field;
+				}
+				else if (is_int($as))
+				{
+					$this->_select_fields[] = $field;
 				}
 			}
 		}
 		else if ($fields instanceof sql)
 		{
-			$this->_fields[] = $fields->__toString();
+			$this->_select_fields[] = $fields->__toString();
 		}
 		else if (is_string($fields))
 		{
-			$this->_fields[] = $fields;
+			$this->_select_fields[] = $fields;
 		}
 		return $this;
 	}
 	
 	function update($key,$value = NULL)
 	{
-		$this->_do = 'UPDATE';
-		
-		if (is_array($key))
+		if (empty($this->_do))
 		{
-			foreach ($key as $index=>$value)
+			$this->_do = 'UPDATE';
+			
+			if (is_array($key))
+			{
+				foreach ($key as $index=>$value)
+				{
+					if ($value instanceof sql)
+					{
+						$value = $value->__toString();
+					}
+					if (is_string($index))
+					{
+						$this->_fields[$index] = $value;
+					}
+				}
+			}
+			else if (is_string($key))
 			{
 				if ($value instanceof sql)
 				{
 					$value = $value->__toString();
 				}
-				if (is_string($index))
-				{
-					$this->_fields[$index] = $value;
-				}
+				$this->_fields[$key] = $value;
 			}
 		}
-		else if (is_string($key))
-		{
-			$this->_fields[$key] = $value;
-		}
-		
 		return $this;
 	}
 	
 	/**
 	 * replace into
 	 */
-	function replace()
+	function replace($key,$value = NULL)
 	{
-		$this->_do = 'REPLACE';
+		if (empty($this->_do))
+		{
+			$this->_do = 'REPLACE';
+			
+			if ($value instanceof sql)
+			{
+				$value = $value->__toString();
+			}
+			
+			if (is_string($key))
+			{
+				$this->_fields[] = $key;
+				$this->_params[] = $value;
+			}
+			else if (is_array($key))
+			{
+				foreach ($key as $index => $val)
+				{
+					if ($val instanceof sql)
+					{
+						$val = $val->__toString();
+					}
+					$this->_fields[] = $index;
+					$this->_params[] = $val;
+				}
+			}
+		}
 		return $this;
 	}
 	
@@ -169,12 +213,29 @@ class sql extends base
 		{
 			foreach ($name as $index => $val)
 			{
+				if ($val instanceof sql)
+				{
+					$val = $val->__toString();
+				}
 				$this->insert($index, $val);
 			}
 		}
-		else if (is_string($name) && !empty($name))
+		else if (is_string($name))
 		{
+			if ($value instanceof sql)
+			{
+				$value = $value->__toString();
+			}
 			$this->_fields[] = $name;
+			$this->_params[] = $value;
+		}
+		else if (is_int($name))
+		{
+			if ($value instanceof sql)
+			{
+				$value = $value->__toString();
+			}
+			$this->_fields[] = '?';
 			$this->_params[] = $value;
 		}
 		return $this;
@@ -447,31 +508,49 @@ class sql extends base
 		$this->_distinct = true;
 	}
 	
+	private function fieldFormat($field)
+	{
+		$field = trim($field,'` ');
+		$fields = explode('.', $field);
+		$string = [];
+		foreach ($fields as $value)
+		{
+			$string[] = '`'.trim($value,'` ').'`';
+		}
+		return implode(',', $string);
+	}
+	
 	function __toString()
 	{
 		switch (strtolower(trim($this->_do)))
 		{
 			case 'select':
 				return $this->_do.' '.($this->_distinct?'DISTINCT':'').' '.
-				implode(',', $this->_fields).
+				array_map(function($field){return $this->fieldFormat($field);}, $this->_select_fields).
 				' FROM '.
 				$this->_from.' '.
 				$this->_join.' '.
 				$this->_where.
 				$this->_limit.
 				$this->_group.
-				$this->_having;
+				$this->_having.
+				$this->_forUpdate;
 			case 'insert':
 				return $this->_do.' '.
 					($this->_ignore?'IGNORE':'').' INTO '.
 					$this->_from.
 					' ('.implode(',',$this->_fields).') VALUES ('.implode(',',array_map(function($value){return ':'.$value;}, $this->_fields)).')'.
-					$this->_duplicate;	
+					$this->_duplicate;
+			case 'replace':
+				return $this->_do.' INTO '.$this->_from.' ('.implode(',', $this->_fields).') VALUES ('.implode(',', array_map(function(){return ':'.$value;}, $this->_fields)).')';
 		}
 	}
 	
 	function getParams()
 	{
+		$this->_fields = array_merge($this->_fields,$this->_duplicate_name);
+		$this->_params = array_merge($this->_params,$this->_duplicate_value);
+		
 		return $this->_params;
 	}
 }

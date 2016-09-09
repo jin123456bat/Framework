@@ -1,7 +1,7 @@
 <?php
-namespace config;
+namespace application\config;
 
-use lib\config;
+use framework\lib\config;
 
 class app extends config
 {

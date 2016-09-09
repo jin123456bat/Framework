@@ -28,13 +28,15 @@ class framework
 		//自动加载
 		spl_autoload_register([$this,'autoload']);
 		//错误处理
-		set_error_handler([$this,'error']);
+		//set_error_handler([$this,'error']);
 		//异常处理
-		set_exception_handler([$this,'exception']);
+		//set_exception_handler([$this,'exception']);
 	}
 	
 	/**
 	 * 创建应用程序
+	 * @param string $name app的名称
+	 * @param string $root app的路径
 	 */
 	function createApplication($name,$root)
 	{
@@ -42,9 +44,14 @@ class framework
 		$isCli = in_array(php_sapi_name(), $this->_cli_spai_name);
 		
 		$appConfig = $this->object('config.app');
-		return self::object('core.application',[
-			
-		]);
+		
+		$application = self::object($name.'.extend.application',$appConfig);
+		if ($application === NULL)
+		{
+			$application = self::object('application',$appConfig);
+			var_dump($application);
+		}
+		return $application;
 	}
 	
 	
@@ -55,32 +62,40 @@ class framework
 	 */
 	static public function object($classname,$args = [])
 	{
-		$classname = str_replace('.', '\\', $classname);
+		$classname = $this->findClassNamespace($classname);
+		
 		$class = new ReflectionClass($classname);
-		$classObj = $class->newInstanceArgs($args);
+		$classObj = $class->newInstance($args);
 		if (method_exists($classObj, 'initlize') && is_callable([$classObj,'initlize']))
 		{
-			$classObj->initlize();
+			$response = $classObj->initlize();
+			if ($response !== NULL)
+			{
+				return $response;
+			}
 		}
 		return $classObj;
 	}
 	
 	protected function exception($exception)
 	{
-		var_dump($exception);
+		//异常信息提示
+		//var_dump($exception);
 	}
 	
-	protected function error($a,$b,$c)
+	protected function error($errno,$error,$file,$line,$trace)
 	{
-		var_dump($a);
-		var_dump($b);
-		var_dump($c);
+		//错误信息提示
+		//echo 'ERROR:'.$error.' On File:'.$file;
 	}
 	
-	protected function autoload($classname)
+	/**
+	 * 根据类名猜测命名空间
+	 */
+	private function findClassNamespace($classname)
 	{
+		$classname = str_replace('.', '\\', $classname);
 		$pos = stripos($classname,'\\');
-		var_dump($classname);
 		$root = [
 			$this->_root,//first,find class from user defined folder
 			SYSTEM_ROOT
@@ -94,18 +109,39 @@ class framework
 					$path = $root_path.'\\'.$file_path.'\\'.$classname.'.php';
 					if (file_exists($path))
 					{
-						include_once $path;
+						return $file_path.'\\'.$classname;
 					}
 				}
 			}
 			else
 			{
+				$explode = explode('\\', $classname);
+				if (current($explode) == 'framework' && count($explode)>1)
+				{
+					$root = [
+						SYSTEM_ROOT,
+					];
+					array_shift($explode);
+					$classname = implode('\\', $explode);
+				}
 				$path = $root_path.'/'.str_replace('\\', '/', $classname).'.php';
 				if (file_exists($path))
 				{
-					include_once $path;
+					$namespace = ltrim(str_replace(ROOT, '', $root_path),'\\/').'\\'.$classname;
+					return $namespace;
 				}
 			}
+		}
+	}
+	
+	protected function autoload($classname)
+	{
+		$classname = $this->findClassNamespace($classname);
+		
+		$path = ROOT.'/'.$classname.'.php';
+		if (file_exists($path))
+		{
+			include_once $path;
 		}
 	}
 }

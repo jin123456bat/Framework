@@ -1,6 +1,5 @@
 <?php
 namespace framework\core;
-use framework\core\base;
 
 /**
  * @author fx
@@ -8,6 +7,8 @@ use framework\core\base;
  */
 class component extends base
 {
+	private $_request;
+	
 	function initlize()
 	{
 		parent::initlize();
