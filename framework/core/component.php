@@ -9,6 +9,11 @@ class component extends base
 {
 	private $_config = [];
 	
+	function __construct()
+	{
+		parent::__construct();
+	}
+	
 	function initlize()
 	{
 		parent::initlize();
@@ -27,17 +32,13 @@ class component extends base
 				$config = include $config_path.$config_file;
 				if (is_array($config) && !empty($config))
 				{
-					$this->_config = array_merge($this->_config,$config);
-				}
-				else
-				{
-					$classname = $app.'\\config\\'.pathinfo($config_file,PATHINFO_FILENAME);
-					if (class_exists($classname))
+					if (isset($this->_config[pathinfo($config_file,PATHINFO_FILENAME)]) && is_array($this->_config[pathinfo($config_file,PATHINFO_FILENAME)]))
 					{
-						$class = new $classname();
-						//var_dump($class->toArray());
-						//$this->_config = array_merge($this->_config,$class->toArray());
-						
+						$this->_config[pathinfo($config_file,PATHINFO_FILENAME)] = array_merge($this->_config[pathinfo($config_file,PATHINFO_FILENAME)],$config);
+					}
+					else
+					{
+						$this->_config[pathinfo($config_file,PATHINFO_FILENAME)] = $config;
 					}
 				}
 			}
@@ -60,6 +61,10 @@ class component extends base
 					if (isset($config[$name]))
 					{
 						$config = $config[$name];
+					}
+					else
+					{
+						return NULL;
 					}
 				}
 			}

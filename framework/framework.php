@@ -52,13 +52,12 @@ class framework
 	 */
 	protected function autoload($classname)
 	{
+		$classname = ltrim($classname);
 		$class = explode('\\', $classname);
-		if (trim(strtolower(current($class))) == 'framework')
-		{
-			$class[0] = 'system';
-			$classname = implode('\\', $class);
-		}
 		$path = trim(ROOT,'/').'/'.str_replace('\\', '/', $classname).'.php';
-		include_once $path;
+		if (file_exists($path))
+		{
+			include $path;
+		}
 	}
 }
