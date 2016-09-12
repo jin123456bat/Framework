@@ -5,84 +5,13 @@ use framework\core\base;
 
 class sql extends base
 {
-	/**
-	 * 执行的方法select update insert delete
-	 * @var unknown
-	 */
-	private $_do;
+	private $_temp = array();
 	
-	/**
-	 * 当为select的时候 select的字段
-	 * @var array
-	 */
-	private $_select_fields = ['*'];
-	
-	/**
-	 * insert fields
-	 * @var array
-	 */
-	private $_insert_fields = [];
-	
-	/**
-	 * replace fields
-	 * @var array
-	 */
-	private $_replace_fields = [];
-	
-	/**
-	 * from的table
-	 * @var unknown
-	 */
-	private $_from;
-	
-	/**
-	 * join等sql
-	 * @var unknown
-	 */
-	private $_join;
-	
-	/**
-	 * where的sql
-	 * @var array
-	 */
-	private $_where = [];
-	
-	/**
-	 * sql中的所有参数
-	 * @var array
-	 */
-	private $_params = [];
-	
-	/**
-	 * limit in sql
-	 * ' limit start,length' or ' limit length'
-	 * @var unknown
-	 */
-	private $_limit;
-	
-	private $_order;
-	
-	private $_group;
-	
-	private $_having;
-	
-	private $_having_params = [];
-	
-	private $_distinct = false;
-	
-	private $_forUpdate = '';
-	
-	private $_ignore = false;
-	
-	private $_duplicate;
-	
-	private $_duplicate_name = [];
-	
-	private $_duplicate_value = [];
+	private $_do = '';
 	
 	function __construct()
 	{
-		
+
 	}
 	
 	/**
@@ -90,7 +19,7 @@ class sql extends base
 	 */
 	function forUpdate()
 	{
-		$this->_forUpdate = ' FOR UPDATE';
+		$this->_temp['forUpdate'] = true;
 	}
 	
 	/**
@@ -99,7 +28,7 @@ class sql extends base
 	 */
 	function select($fields)
 	{
-		$this->_do = 'SELECT';
+		$this->_do = 'select';
 		
 		if (is_array($fields))
 		{
@@ -111,21 +40,21 @@ class sql extends base
 				}
 				if (is_string($as))
 				{
-					$this->_select_fields[$as] = $field;
+					$this->_temp['fields'][$as] = $field;
 				}
 				else if (is_int($as))
 				{
-					$this->_select_fields[] = $field;
+					$this->_temp['fields'][] = $field;
 				}
 			}
 		}
 		else if ($fields instanceof sql)
 		{
-			$this->_select_fields[] = $fields->__toString();
+			$this->_temp['fields'][] = $fields->__toString();
 		}
 		else if (is_string($fields))
 		{
-			$this->_select_fields[] = $fields;
+			$this->_temp['fields'][] = $fields;
 		}
 		return $this;
 	}
@@ -281,41 +210,34 @@ class sql extends base
 	
 	function from($table)
 	{
-		$table = '`'.trim($table,'`').'`';
-		if (!empty($this->_from))
-		{
-			$this->_from = $this->_from.','.$table;
-		}
-		else
-		{
-			$this->_from = $table;
-		}
+		$this->_temp['from'][] = $table;
 		return $this;
 	}
 	
-	function where($sql,$array = [],$combine = 'and')
+	function where($sql,$array = array(),$combine = 'and')
 	{
 		if (is_array($sql))
 		{
 			$sql = '('.implode(') '.$combine.' (', $sql).')';
 		}
-		if (empty($this->_where))
+		if (empty($this->_temp['where']))
 		{
-			$this->_where = ' WHERE ('.$sql.')';
+			$this->_temp['where'] = ' WHERE ('.$sql.')';
 		}
 		else
 		{
-			$this->_where = $this->_where.' '.$combine.' ('.$sql.')';
+			$this->_temp['where'] = $this->_temp['where'].' '.$combine.' ('.$sql.')';
 		}
 		
-		if (empty($this->_params))
+		if (empty($this->_temp['params']))
 		{
-			$this->_params = $array;
+			$this->_temp['params'] = $array;
 		}
 		else
 		{
-			$this->_params = array_merge($this->_params,$array);
+			$this->_temp['params'] = array_merge($this->_temp['params'],$array);
 		}
+		return $this;
 	}
 	
 	function join($table,$on)
@@ -357,7 +279,7 @@ class sql extends base
 	{
 		$all = false;
 		$sqls = func_get_args();
-		$sql_string = [];
+		$sql_string = array();
 		foreach ($sqls as $index => $sql)
 		{
 			if ($sql === true)
@@ -376,24 +298,35 @@ class sql extends base
 		return implode(' UNION '.($all?'ALL ':''), $sql_string);
 	}
 	
-	function order($field,$order = 'asc')
+	function order($field,$order = 'ASC')
 	{
 		if (is_array($field))
 		{
-			foreach ($field as $field_temp)
+			foreach ($field as $asc => $field_temp)
 			{
-				$this->order($field_temp,$order);
+				if (in_array(strtolower(trim($asc)), array('asc','desc')))
+				{
+					$this->order($field_temp,$asc);
+				}
+				else if (is_int($asc))
+				{
+					$this->order($field_temp,$order);
+				}
+				else
+				{
+					$this->order($asc,$field_temp);
+				}
 			}
 		}
 		else if (is_string($field))
 		{
-			if (empty($this->_order))
+			if (empty($this->_temp['order']))
 			{
-				$this->_order = ' ORDER BY '.$field.' '.$order;
+				$this->_temp['order'] = ' ORDER BY '.$field.' '.$order;
 			}
 			else
 			{
-				$this->_order .= ','.$field.' '.$order;
+				$this->_temp['order'] .= ','.$field.' '.$order;
 			}
 		}
 		return $this;
@@ -409,11 +342,11 @@ class sql extends base
 	{
 		if ($length === NULL)
 		{
-			$this->_limit = ' LIMIT '.$start;
+			$this->_temp['limit'] = ' LIMIT '.$start;
 		}
 		else
 		{
-			$this->_limit = ' LIMIT '.$start.','.$length;
+			$this->_temp['limit'] = ' LIMIT '.$start.','.$length;
 		}
 		return $this;
 	}
@@ -428,17 +361,17 @@ class sql extends base
 	 */
 	function between($field,$a,$b,$combine = 'and')
 	{
-		$this->where($field.' BETWEEN ? and ?',[$a,$b],$combine);
+		$this->where($field.' BETWEEN ? and ?',array($a,$b),$combine);
 		return $this;
 	}
 	
 	function notbetween($field,$a,$b,$combine = 'and')
 	{
-		$this->where($field.' NOT BETWEEN ? and ?',[$a,$b],$combine);
+		$this->where($field.' NOT BETWEEN ? and ?',array($a,$b),$combine);
 		return $this;
 	}
 	
-	function in($field,array $data = [],$combine = 'and')
+	function in($field,array $data = array(),$combine = 'and')
 	{
 		if ( array_keys($data) !== range(0, count($data) - 1) )
 		{
@@ -463,22 +396,23 @@ class sql extends base
 		{
 			foreach ($fields as $field)
 			{
-				$this->where($field.' is NULL',[],$combine);
+				$this->where($field.' is NULL',array(),$combine);
 			}
 		}
 		else if (is_string($fields))
 		{
-			$this->where($fields.' is NULL',[],$combine);
+			$this->where($fields.' is NULL',array(),$combine);
 		}
+		return $this;
 	}
 	
-	function having($sql,array $data = [],$combine = 'and')
+	function having($sql,array $data = array(),$combine = 'and')
 	{
 		if (is_array($sql))
 		{
 			foreach ($sql as $string)
 			{
-				$this->having($string,[],$combine);
+				$this->having($string,array(),$combine);
 			}
 		}
 		else
@@ -501,18 +435,20 @@ class sql extends base
 		{
 			$this->_having_params = array_merge($this->_having_params,$data);
 		}
+		return $this;
 	}
 	
 	function distinct()
 	{
-		$this->_distinct = true;
+		$this->_temp['distinct'] = true;
+		return $this;
 	}
 	
-	private function fieldFormat($field)
+	static public function fieldFormat($field)
 	{
 		$field = trim($field,'` ');
 		$fields = explode('.', $field);
-		$string = [];
+		$string = array();
 		foreach ($fields as $value)
 		{
 			$string[] = '`'.trim($value,'` ').'`';
@@ -524,26 +460,55 @@ class sql extends base
 	{
 		switch (strtolower(trim($this->_do)))
 		{
-			case 'select':
-				return $this->_do.' '.($this->_distinct?'DISTINCT':'').' '.
-				array_map(function($field){return $this->fieldFormat($field);}, $this->_select_fields).
-				' FROM '.
-				$this->_from.' '.
-				$this->_join.' '.
-				$this->_where.
-				$this->_limit.
-				$this->_group.
-				$this->_having.
-				$this->_forUpdate;
 			case 'insert':
-				return $this->_do.' '.
-					($this->_ignore?'IGNORE':'').' INTO '.
-					$this->_from.
-					' ('.implode(',',$this->_fields).') VALUES ('.implode(',',array_map(function($value){return ':'.$value;}, $this->_fields)).')'.
-					$this->_duplicate;
-			case 'replace':
-				return $this->_do.' INTO '.$this->_from.' ('.implode(',', $this->_fields).') VALUES ('.implode(',', array_map(function(){return ':'.$value;}, $this->_fields)).')';
+				$sql = 'INSERT ';
+				return $sql;
+			case 'select':
+				$distinct = isset($this->_temp['distinct']) && $this->_temp['distinct']===true?'DISTINCT ':'';
+				
+				$fields = '*';
+				if (isset($this->_temp['fields']) && !empty($this->_temp['fields']))
+				{
+					$fields = '';
+					foreach ($this->_temp['fields'] as $as => $field)
+					{
+						if(!is_int($as))
+						{
+							$fields .= $field.' as '.$as.' ';
+						}
+						else
+						{
+							$fields .= $field;
+						}
+					}
+					$fields = implode(',', $this->_temp['fields']);
+				}
+				
+				$table = '';
+				if (isset($this->_temp['from']) && !empty($this->_temp['from']))
+				{
+					$table = '`'.implode('`,`',$this->_temp['from']).'`';
+				}
+				
+				$this->_temp['order'] = isset($this->_temp['order'])?$this->_temp['order']:'';
+				
+				$this->_temp['limit'] = isset($this->_temp['limit'])?$this->_temp['limit']:'';
+				
+				//for update
+				$forUpdate = (isset($this->_temp['forUpdate']) && $this->_temp['forUpdate']===true)?' FOR UPDATE':'';
+				
+				var_dump($this->_temp['params']);
+				
+				$sql = 'SELECT '.$distinct.$fields.' FROM '.$table.$this->_temp['where'].$this->_temp['order'].$this->_temp['limit'].$forUpdate;
+				return $sql;
+			case 'update':
+				$sql = 'UPDATE ';
+				return $sql;
+			case 'delete':
+				$sql = 'DELETE ';
+				return $sql;
 		}
+		return '';
 	}
 	
 	function getParams()
@@ -552,5 +517,11 @@ class sql extends base
 		$this->_params = array_merge($this->_params,$this->_duplicate_value);
 		
 		return $this->_params;
+	}
+	
+	function clear()
+	{
+		$this->_temp = array();
+		$this->_do = '';
 	}
 }

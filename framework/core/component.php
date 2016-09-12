@@ -7,7 +7,7 @@ namespace framework\core;
  */
 class component extends base
 {
-	private $_config = [];
+	private static $_config = array();
 	
 	function __construct()
 	{
@@ -32,13 +32,13 @@ class component extends base
 				$config = include $config_path.$config_file;
 				if (is_array($config) && !empty($config))
 				{
-					if (isset($this->_config[pathinfo($config_file,PATHINFO_FILENAME)]) && is_array($this->_config[pathinfo($config_file,PATHINFO_FILENAME)]))
+					if (isset(self::$_config[pathinfo($config_file,PATHINFO_FILENAME)]) && is_array(self::$_config[pathinfo($config_file,PATHINFO_FILENAME)]))
 					{
-						$this->_config[pathinfo($config_file,PATHINFO_FILENAME)] = array_merge($this->_config[pathinfo($config_file,PATHINFO_FILENAME)],$config);
+						self::$_config[pathinfo($config_file,PATHINFO_FILENAME)] = array_merge(self::$_config[pathinfo($config_file,PATHINFO_FILENAME)],$config);
 					}
 					else
 					{
-						$this->_config[pathinfo($config_file,PATHINFO_FILENAME)] = $config;
+						self::$_config[pathinfo($config_file,PATHINFO_FILENAME)] = $config;
 					}
 				}
 			}
@@ -48,12 +48,12 @@ class component extends base
 	/**
 	 * 获取组件配置
 	 */
-	function getConfig($name = NULL)
+	public static function getConfig($name = NULL)
 	{
 		if ($name !== NULL)
 		{
 			$names = explode('.', $name);
-			$config = $this->_config;
+			$config = self::$_config;
 			foreach ($names as $name)
 			{
 				if (!empty($name))
@@ -72,7 +72,7 @@ class component extends base
 		}
 		else
 		{
-			return $this->_config;
+			return self::$_config;
 		}
 	}
 }

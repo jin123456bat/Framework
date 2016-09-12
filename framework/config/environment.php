@@ -1,6 +1,6 @@
 <?php
-return [
-	'date' => [
+return array(
+	'date' => array(
 		'timezone' => 'Asia/Shanghai',
-	],
-];
+	),
+);

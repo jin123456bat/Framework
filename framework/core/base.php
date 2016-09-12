@@ -3,6 +3,10 @@ namespace framework\core;
 
 class base
 {
+	static $APP_NAME;
+	
+	static $APP_PATH;
+	
 	function __construct()
 	{
 		
@@ -24,7 +28,7 @@ class base
 	 * @param string $type
 	 * @return string|array|boolean|number|StdClass|unknown
 	 */
-	private function setVariableType($variable,$type = 's')
+	protected function setVariableType($variable,$type = 's')
 	{
 		switch ($type)
 		{
@@ -41,5 +45,26 @@ class base
 				return $variable;
 			}
 		}
+	}
+	
+	/**
+	 * 载入数据模型
+	 * @param string $name 模块名
+	 * @return model
+	 */
+	protected function model($name)
+	{
+		static $instance = array();
+		if (!isset($instance[$name])) {
+			$path = ROOT . '/'.self::$APP_NAME.'/model/' . $name . '.php';
+			if (file_exists($path)) {
+				include $path;
+				$model = self::$APP_NAME.'\\model\\' . $name;
+				$instance[$name] = new $model($name);
+			} else {
+				$instance[$name] = new model($name);
+			}
+		}
+		return $instance[$name];
 	}
 }

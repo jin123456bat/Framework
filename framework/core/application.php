@@ -3,15 +3,10 @@ namespace framework\core;
 
 class application extends component
 {
-	
-	private $_name;
-	
-	private $_path;
-	
 	function __construct($name,$path)
 	{
-		$this->_name = $name;
-		$this->_path = $path;
+		base::$APP_NAME = $name;
+		base::$APP_PATH = $path;
 		
 		//spl_autoload_register([$this,'autoload']);
 		
@@ -21,9 +16,9 @@ class application extends component
 	function initlize()
 	{
 		//载入系统默认配置
-		$this->setConfig('system');
+		$this->setConfig('framework');
 		//载入app的配置
-		$this->setConfig($this->_name);
+		$this->setConfig(base::$APP_NAME);
 		//载入环境变量
 		$this->env();
 		parent::initlize();
@@ -34,7 +29,7 @@ class application extends component
 	 */
 	private function env()
 	{
-		$env = $this->getConfig('environment');
+		$env = self::getConfig('environment');
 		if (is_array($env) && !empty($env))
 		{
 			foreach ($env as $name => $variable)
@@ -60,38 +55,108 @@ class application extends component
 	function run()
 	{
 		$router = $this->load('router');
+		$control = $router->getControlName();
+		$action = $router->getActionName();
+		
+		$controller = self::control(base::$APP_NAME,$control);
+		if (method_exists($controller, 'initlize') && is_callable(array($controller,'initlize')))
+		{
+			$response = call_user_func(array($controller,'initlize'));
+			$this->doResponse($response);
+		}
+		if (method_exists($controller, $action) && is_callable(array($controller,$action)))
+		{
+			$response = call_user_func(array($controller,$action));
+			$this->doResponse($response);
+		}
+		else
+		{
+			$this->doResponse(new response('Not Found',404));
+		}
 	}
+	
+	/**
+	 * 如何输出response对象
+	 * @param unknown $response
+	 */
+	protected function doResponse($response)
+	{
+		if ($response !== NULL)
+		{
+			if (is_string($response))
+			{
+				echo $response;
+			}
+			else if ($response instanceof response)
+			{
+				//设置status_code
+				if (function_exists('http_response_code'))
+				{
+					http_response_code($response->getHttpStatus());
+				}
+				else
+				{
+					header('OK',true,$response->getHttpStatus());
+				}
+				$response->getHeader()->sendAll();
+				echo $response->getBody();
+			}
+		}
+	}
+	
+	/**
+	 * 实例化控制器
+	 */
+	public static function control($app,$name)
+	{
+		$namespace = $app.'\\control\\'.$name;
+		if (class_exists($namespace))
+		{
+			return new $namespace();
+		}
+		return NULL;
+	}
+	
 	
 	function load($classname)
 	{
 		$classnames = explode('\\', $classname);
-		$class = end($classnames);
-		
 		if (count($classnames) == 1)
 		{
-			$namespaces = [
-				$this->_name.'\\extend',
+			$namespaces = array(
+				base::$APP_NAME.'\\extend',
 				'framework\\core',
 				'framework\\core\\database',
 				'framework\\core\\response',
 				'framework\\lib',
 				'framework\\vendor',
-			];
+			);
 		}
 		else
 		{
 			array_pop($classnames);
-			$namespaces = [
+			$namespaces = array(
 				implode('\\',$classnames),
-			];
+			);
 		}
+		
+		static $instance;
+		
 		foreach ($namespaces as $namespace)
 		{
-			var_dump($namespace.'\\'.$classname);
-			
-			if(class_exists($namespace.'\\'.$classname,true))
+			$class = $namespace.'\\'.$classname;
+			if (isset($instance[$class]))
 			{
-				return new $namespace.'\\'.$classname();
+				return $instance[$class];
+			}
+			else
+			{
+				if(class_exists($class,true))
+				{
+					$instance[$class] = new $class();
+					$instance[$class]->initlize();
+					return $instance[$class];
+				}
 			}
 		}
 	}

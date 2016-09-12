@@ -45,7 +45,6 @@ class mysql
 			$this->config['db_user'], 
 			$this->config['db_password'], 
 			array(
-				PDO::ATTR_PERSISTENT => $this->config['db_forever'],/*持久化连接*/
 				PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION,//抛出异常模式
 				PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '.$this->config['db_charset'],//设置字符集
 			)

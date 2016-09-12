@@ -37,7 +37,7 @@ abstract class data extends error implements \ArrayAccess
 				{
 					$fields = $rule['required'];
 				}
-				$do = 'required';	
+				$do = 'required';
 			}
 			
 			switch ($do)

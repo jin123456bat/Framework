@@ -1,13 +1,21 @@
 <?php
 namespace framework\core;
+
+use framework\core\database\sql;
+use framework\core\database\driver\mysql;
+
 class model extends component
 {
 	private $_table;
 	
 	private $_sql;
 	
+	private $_db;
+	
 	function __construct($table = NULL)
 	{
+		$this->_sql = new sql();
+		$this->_db = mysql::getInstance($this->getConfig('db'));
 		$this->setTable($table);
 	}
 	
@@ -19,6 +27,18 @@ class model extends component
 	function initlize()
 	{
 		parent::initlize();
+	}
+	
+	/**
+	 * only for sql
+	 * @param unknown $name
+	 * @param unknown $args
+	 * @return \framework\core\model
+	 */
+	function __call($name,$args)
+	{
+		call_user_func_array(array($this->_sql,$name),$args);
+		return $this;
 	}
 	
 	/**
@@ -51,24 +71,63 @@ class model extends component
 	/**
 	 * find all rows from result
 	 */
-	function select()
+	function select($fields = '*')
 	{
-		
+		$this->_sql->from($this->_table);
+		$sql = $this->_sql->select($fields);
+		var_dump($sql->__toString());
+		exit();
+		return $this->_db->query($sql);
 	}
 	
 	/**
 	 * find a row from result
 	 */
-	function find()
+	function find($fields = '*')
 	{
-		
+		$result = $this->select();
+		return isset($result[0])?$result[0]:NULL;
 	}
 	
 	/**
 	 * find the first field's value from frist row
 	 */
-	function scalar()
+	function scalar($field)
+	{
+		foreach ($this->find($field) as $index => $value)
+		{
+			return $value;
+		}
+	}
+	
+	function update()
 	{
 		
+	}
+	
+	function insert()
+	{
+		
+	}
+	
+	function delete()
+	{
+		
+	}
+	
+	/**
+	 * 执行自定义sql
+	 * @param unknown $sql
+	 * @param array $array
+	 * @return boolean
+	 */
+	function query($sql,$array = array())
+	{
+		if ($sql instanceof sql)
+		{
+			$sql = $sql->__toString();
+			$array = $sql->getParams();
+		}
+		return $this->_db->query($sql,$array);
 	}
 }

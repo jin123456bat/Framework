@@ -13,7 +13,7 @@ class response extends base
 	
 	/**
 	 * http response header
-	 * @var unknown
+	 * @var header
 	 */
 	private $_header = NULL;
 	
@@ -29,10 +29,12 @@ class response extends base
 	 */
 	private $_charset = 'utf-8';
 	
-	function __construct($response_string = '')
+	function __construct($response_string = '',$status = 200)
 	{
 		$this->_body = $response_string;
-		$this->header = new header();
+		$this->_status = filter::int($status);
+		$this->_header = new header();
+		parent::__construct();
 	}
 	
 	/**
@@ -41,20 +43,20 @@ class response extends base
 	 */
 	function getBody()
 	{
-		return $this->body;
+		return $this->_body;
 	}
 	
 	function setBody($content)
 	{
 		if ($content instanceof \vendor\file)
 		{
-			$this->body = $content->content();
+			$this->_body = $content->content();
 		}
 		if ($content instanceof view)
 		{
-			$this->body = $content->display();
+			$this->_body = $content->display();
 		}
-		$this->body = $this->setVariableType($content,'s');
+		$this->_body = $this->setVariableType($content,'s');
 	}
 	
 	/**
@@ -63,7 +65,7 @@ class response extends base
 	 */
 	function setHttpStatus($status)
 	{
-		$this->status = filter::int($status);
+		$this->_status = filter::int($status);
 	}
 	
 	/**
@@ -72,7 +74,7 @@ class response extends base
 	 */
 	function getHttpStatus()
 	{
-		return $this->status;
+		return $this->_status;
 	}
 	
 	/**
@@ -87,13 +89,21 @@ class response extends base
 	{
 		if ($header instanceof header)
 		{
-			$this->header = $header;
+			$this->_header = $header;
 		}
 		else if (!empty($value))
 		{
-			$this->header->add($header,$value);
+			$this->_header->add($header,$value);
 		}
 	}
 	
+	function getHeader()
+	{
+		return $this->_header;
+	}
 	
+	function __toString()
+	{
+		return $this->getBody();
+	}
 }

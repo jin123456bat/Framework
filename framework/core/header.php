@@ -3,15 +3,17 @@ namespace framework\core;
 
 class header extends base
 {
-	private $_header = [];
+	private static $_header = array();
 	
 	function __construct()
 	{
 		$headers = headers_list();
-		foreach ($headers as $header) {
+		foreach ($headers as $header)
+		{
 			$header = explode(":", $header);
-			$this->_header[trim(array_shift($header))] = trim(implode(":", $header));
+			self::$_header[trim(array_shift($header))] = trim(implode(":", $header));
 		}
+		
 	}
 	
 	/**
@@ -29,23 +31,23 @@ class header extends base
 			$name = trim(array_shift($header));
 			$value = trim(implode(":", $header));
 			
-			if (isset($this->_header[$name]))
+			if (isset(self::$_header[$name]))
 			{
-				if (is_array($this->_header[$name]))
+				if (is_array(self::$_header[$name]))
 				{
-					$this->_header[$name][] = $value;
+					self::$_header[$name][] = $value;
 				}
 				else
 				{
-					$this->_header[$name] = [$this->_header[$name],$value];
+					self::$_header[$name] = array(self::$_header[$name],$value);
 				}
 			}
 			else
 			{
-				$this->_header[$name] = $value;
+				self::$_header[$name] = $value;
 			}
 		} else {
-			$this->_header[$key] = $value;
+			self::$_header[$key] = $value;
 		}
 	}
 
@@ -57,9 +59,9 @@ class header extends base
 	 */
 	function check($string)
 	{
-		if (isset($this->_header[$string]))
+		if (isset(self::$_header[$string]))
 			return true;
-		return in_array($string, $this->_header);
+		return in_array($string, self::$_header);
 	}
 
 	/**
@@ -69,14 +71,14 @@ class header extends base
 	 */
 	function delete($string)
 	{
-		foreach ($this->_header as $key => $value) {
+		foreach (self::$_header as $key => $value) {
 			if ($key === $string) {
-				unset($this->_header[$key]);
+				unset(self::$_header[$key]);
 				return true;
 			}
 			
 			if ($key . ': ' . $value === $string) {
-				unset($this->_header[$key]);
+				unset(self::$_header[$key]);
 				return true;
 			}
 			header_remove(substr($string, 0, strpos($string, ':')));
@@ -85,12 +87,12 @@ class header extends base
 	
 	function set($name,$value)
 	{
-		$this->_header[$name] = $value;
+		self::$_header[$name] = $value;
 	}
 	
 	function get($name)
 	{
-		return $this->_header[$name];
+		return self::$_header[$name];
 	}
 
 	/**
@@ -113,7 +115,7 @@ class header extends base
 	 */
 	function sendAll()
 	{
-		foreach ($this->_header as $key => $value) {
+		foreach (self::$_header as $key => $value) {
 			header($key . ': ' . $value, true);
 		}
 	}

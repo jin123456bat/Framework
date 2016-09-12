@@ -29,12 +29,7 @@ class filter extends base
 		}
 		else
 		{
-			$pattern = '\d+';
-			if(preg_match($pattern, $string,$matches))
-			{
-				return implode('', $matches[0]);
-			}
-			return 0;
+			return intval($string);
 		}
 	}
 	
@@ -57,7 +52,7 @@ class filter extends base
 		{
 			$number .= '0';
 		}
-		$pattern = '\d+.\d*';
+		$pattern = '$\d+.\d*$';
 		if (preg_match($pattern, $number,$matches))
 		{
 			return $matches[0];
@@ -72,7 +67,7 @@ class filter extends base
 	 */
 	static function word($string)
 	{
-		$pattern = '\w+';
+		$pattern = '$\w+$';
 		if(preg_match($pattern, $string,$matches))
 		{
 			return implode('', $matches[0]);
@@ -86,7 +81,7 @@ class filter extends base
 	 */
 	static function anyspace($string)
 	{
-		$pattern = '\S+';
+		$pattern = '$\S+$';
 		if(preg_match($pattern, $string,$matches))
 		{
 			return implode('', $matches[0]);

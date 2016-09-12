@@ -3,7 +3,7 @@
 //定义根目录
 !defined('ROOT') & define('ROOT', __DIR__);
 //定义框架的目录
-!defined('SYSTEM_ROOT') & define("SYSTEM_ROOT",ROOT.'/system');
+!defined('SYSTEM_ROOT') & define("SYSTEM_ROOT",ROOT.'/framework');
 
 //定义APP的目录
 !defined('APP_ROOT') & define("APP_ROOT",ROOT.'/application');
