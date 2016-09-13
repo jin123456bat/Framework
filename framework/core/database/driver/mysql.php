@@ -2,6 +2,7 @@
 namespace framework\core\database\driver;
 
 use \PDO;
+use framework\core\database\sql;
 /**
  * mysql类
  *
@@ -61,10 +62,14 @@ class mysql
 		if ($statement) {
 			$result = $statement->execute($array);
 			if ($result) {
-				if (strtolower(substr($statement->queryString, 0, 6)) == 'select') {
+				if (in_array(strtolower(substr($statement->queryString, 0, 6)), array('select'))) {
 					return $statement->fetchAll(PDO::FETCH_ASSOC);
 				}
-				return $statement->rowCount();
+				else if (in_array(strtolower(substr($statement->queryString, 0, 6)), array('insert','delete','update')))
+				{
+					return $statement->rowCount();
+				}
+				return $statement->fetchAll(PDO::FETCH_ASSOC);
 			}
 		}
 		return false;

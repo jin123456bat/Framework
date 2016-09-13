@@ -26,7 +26,7 @@ class sql extends base
 	 * do select
 	 * @param unknown $field
 	 */
-	function select($fields)
+	function select($fields = '*')
 	{
 		$this->_do = 'select';
 		
@@ -61,32 +61,25 @@ class sql extends base
 	
 	function update($key,$value = NULL)
 	{
-		if (empty($this->_do))
+		$this->_do = 'update';
+		
+		if (is_array($key))
 		{
-			$this->_do = 'UPDATE';
-			
-			if (is_array($key))
+			foreach ($key as $index=>$value)
 			{
-				foreach ($key as $index=>$value)
+				if (is_int($index))
 				{
-					if ($value instanceof sql)
-					{
-						$value = $value->__toString();
-					}
-					if (is_string($index))
-					{
-						$this->_fields[$index] = $value;
-					}
+					$this->_temp['update'][] = $value;
+				}
+				else
+				{
+					$this->_temp['update'][$index] = $value;
 				}
 			}
-			else if (is_string($key))
-			{
-				if ($value instanceof sql)
-				{
-					$value = $value->__toString();
-				}
-				$this->_fields[$key] = $value;
-			}
+		}
+		else if (is_string($key))
+		{
+			$this->_temp['update'][$key] = $value;
 		}
 		return $this;
 	}
@@ -142,30 +135,21 @@ class sql extends base
 		{
 			foreach ($name as $index => $val)
 			{
-				if ($val instanceof sql)
-				{
-					$val = $val->__toString();
-				}
 				$this->insert($index, $val);
 			}
 		}
 		else if (is_string($name))
 		{
-			if ($value instanceof sql)
-			{
-				$value = $value->__toString();
-			}
-			$this->_fields[] = $name;
-			$this->_params[] = $value;
+			$this->_temp['insert'][$name] = $value;
 		}
 		else if (is_int($name))
 		{
-			if ($value instanceof sql)
-			{
-				$value = $value->__toString();
-			}
-			$this->_fields[] = '?';
-			$this->_params[] = $value;
+			$this->_temp['insert'][] = $value;
+		}
+		else if ($name instanceof sql && $name->getType()=='select')
+		{
+			//insert select
+			$this->_temp['insert'] = $name;
 		}
 		return $this;
 	}
@@ -175,9 +159,9 @@ class sql extends base
 	 * @param unknown $name
 	 * @param unknown $value
 	 */
-	function onDuplicateKeyUpdate($name,$value = NULL)
+	function duplicate($name,$value = NULL)
 	{
-		$this->_duplicate = ' ON DUPLICATE KEY UPDATE';
+		$this->_temp['duplicate'] = ' ON DUPLICATE KEY UPDATE';
 		if (is_array($name))
 		{
 			foreach ($name as $index => $val)
@@ -188,8 +172,7 @@ class sql extends base
 		}
 		else if (is_string($name))
 		{
-			$this->_duplicate_name[] = $name;
-			$this->_duplicate_value[] = $value;
+			$this->_temp['duplicate'] .= $name = $value;
 		}
 		return $this;
 	}
@@ -199,7 +182,8 @@ class sql extends base
 	 */
 	function ignore()
 	{
-		$this->_ignore = true;
+		$this->_temp['ignore'] = true;
+		return $this;
 	}
 	
 	function delete()
@@ -240,38 +224,93 @@ class sql extends base
 		return $this;
 	}
 	
-	function join($table,$on)
+	function join($table,$on,$combine = 'AND')
 	{
-		$table = '`'.trim($table).'`';
-		$this->_join = ' JOIN `'.$table.'` ON '.$on;
+		$table = '`'.trim($table,'`').'`';
+		if (is_array($on))
+		{
+			$on = implode(' '.$combine.' ', $on);
+		}
+		if (!empty($this->_temp['join']))
+		{
+			$this->_temp['join'] .= ' JOIN '.$table.' ON '.$on;
+		}
+		else
+		{
+			$this->_temp['join'] = ' JOIN '.$table.' ON '.$on;
+		}
 		return $this;
 	}
 	
-	function leftJoin($table,$on)
+	function leftJoin($table,$on,$combine = 'AND')
 	{
-		$table = '`'.trim($table).'`';
-		$this->_join = ' LEFT JOIN `'.$table.'` ON '.$on;
+		$table = '`'.trim($table,'`').'`';
+		if (is_array($on))
+		{
+			$on = implode(' '.$combine.' ', $on);
+		}
+		if (!empty($this->_temp['join']))
+		{
+			$this->_temp['join'] .= ' LEFT JOIN '.$table.' ON '.$on;
+		}
+		else
+		{
+			$this->_temp['join'] = ' LEFT JOIN '.$table.' ON '.$on;
+		}
 		return $this;
 	}
 	
-	function rightJoin($table,$on)
+	function rightJoin($table,$on,$combine = 'AND')
 	{
-		$table = '`'.trim($table).'`';
-		$this->_join = ' RIGHT JOIN `'.$table.'` ON '.$on;
+		$table = '`'.trim($table,'`').'`';
+		if (is_array($on))
+		{
+			$on = implode(' '.$combine.' ', $on);
+		}
+		if (!empty($this->_temp['join']))
+		{
+			$this->_temp['join'] .= ' RIGHT JOIN '.$table.' ON '.$on;
+		}
+		else
+		{
+			$this->_temp['join'] = ' RIGHT JOIN '.$table.' ON '.$on;
+		}
 		return $this;
 	}
 	
-	function innerJoin($table,$on)
+	function innerJoin($table,$on,$combine = 'AND')
 	{
-		$table = '`'.trim($table).'`';
-		$this->_join = ' INNER JOIN `'.$table.'` ON '.$on;
+		$table = '`'.trim($table,'`').'`';
+		if (is_array($on))
+		{
+			$on = implode(' '.$combine.' ', $on);
+		}
+		if (!empty($this->_temp['join']))
+		{
+			$this->_temp['join'] .= ' INNER JOIN '.$table.' ON '.$on;
+		}
+		else
+		{
+			$this->_temp['join'] = ' INNER JOIN '.$table.' ON '.$on;
+		}
 		return $this;
 	}
 	
-	function fullJoin($table,$on)
+	function fullJoin($table,$on,$combine = 'AND')
 	{
-		$table = '`'.trim($table).'`';
-		$this->_join = ' FULL JOIN `'.$table.'` ON '.$on;
+		$table = '`'.trim($table,'`').'`';
+		if (is_array($on))
+		{
+			$on = implode(' '.$combine.' ', $on);
+		}
+		if (!empty($this->_temp['join']))
+		{
+			$this->_temp['join'] .= ' FULL JOIN '.$table.' ON '.$on;
+		}
+		else
+		{
+			$this->_temp['join'] = ' FULL JOIN '.$table.' ON '.$on;
+		}
 		return $this;
 	}
 	
@@ -332,9 +371,13 @@ class sql extends base
 		return $this;
 	}
 	
-	function group($field)
+	function group($fields)
 	{
-		$this->_group = ' GROUP BY '.$field;
+		if (is_array($fields))
+		{
+			$fields = implode(',', $fields);
+		}
+		$this->_temp['group'] = ' GROUP BY '.$fields;
 		return $this;
 	}
 	
@@ -373,19 +416,7 @@ class sql extends base
 	
 	function in($field,array $data = array(),$combine = 'and')
 	{
-		if ( array_keys($data) !== range(0, count($data) - 1) )
-		{
-			$sql= '';
-			foreach ($data as $index => $value)
-			{
-				$sql .= ':'.$index.',';
-			}
-			$sql = $field.' IN ('.rtrim($sql,',').')';
-		}
-		else
-		{
-			$sql = $field.' IN ('.implode(',', array_fill(0, count($data), '?')).')';
-	    }
+		$sql = self::fieldFormat($field).' IN ('.implode(',', array_fill(0, count($data), '?')).')';
 	    $this->where($sql,$data,$combine);
 		return $this;
 	}
@@ -410,30 +441,25 @@ class sql extends base
 	{
 		if (is_array($sql))
 		{
-			foreach ($sql as $string)
-			{
-				$this->having($string,array(),$combine);
-			}
-		}
-		else
-		{
-			if (empty($this->_having))
-			{
-				$this->_having = ' HAVING '.$sql;
-			}
-			else
-			{
-				$this->_having .= ' '.$combine.' '.$sql;
-			}
+			$sql = '('.implode(') '.$combine.' (', $sql).')';
 		}
 		
-		if (empty($this->_having_params))
+		if (empty($this->_temp['having']))
 		{
-			$this->_having_params = $data;
+			$this->_temp['having'] = ' HAVING ('.$sql.')';
 		}
 		else
 		{
-			$this->_having_params = array_merge($this->_having_params,$data);
+			$this->_temp['having'] .= ' '.$combine.' ('.$sql.')';
+		}
+		
+		if (empty($this->_temp['_having_params']))
+		{
+			$this->_temp['_having_params'] = $data;
+		}
+		else
+		{
+			$this->_temp['_having_params'] = array_merge($this->_temp['_having_params'],$data);
 		}
 		return $this;
 	}
@@ -461,7 +487,41 @@ class sql extends base
 		switch (strtolower(trim($this->_do)))
 		{
 			case 'insert':
-				$sql = 'INSERT ';
+				$table = '';
+				if (isset($this->_temp['from']) && !empty($this->_temp['from']))
+				{
+					$table = '`'.implode('`,`',$this->_temp['from']).'`';
+				}
+				
+				$this->_temp['ignore'] = isset($this->_temp['ignore']) && $this->_temp['ignore']?' IGNORE':'';
+				
+				if (isset($this->_temp['insert']))
+				{
+					if (is_array($this->_temp['insert']))
+					{
+						//数字下标
+						if (array_keys($this->_temp['insert']) == range(0, count($this->_temp['insert'])-1,1))
+						{
+							$fields = '';
+							$this->_temp['params'] = array_values($this->_temp['insert']);
+							$values = array_fill(0, count($this->_temp['params']), '?');
+						}
+						else
+						{
+							//字符串下标
+							$fields = '(`'.implode('`,`', array_keys($this->_temp['insert'])).'`)';
+							$this->_temp['params'] = $this->_temp['insert'];
+							$values = array_map(function($value){return ':'.$value;}, array_keys($this->_temp['insert']));
+						}
+						$sql = 'INSERT'.$this->_temp['ignore'].' INTO '.$table.' '.$fields.' VALUES ('.implode(',', $values).')';
+					}
+					else if ($this->_temp['insert'] instanceof sql)
+					{
+						$sql = 'INSERT'.$this->_temp['ignore'].' INTO '.$table.' '.$this->_temp['insert']->__toString();
+						$this->_temp['params'] = $this->_temp['insert']->getParams();
+					}
+				}
+				
 				return $sql;
 			case 'select':
 				$distinct = isset($this->_temp['distinct']) && $this->_temp['distinct']===true?'DISTINCT ':'';
@@ -490,6 +550,14 @@ class sql extends base
 					$table = '`'.implode('`,`',$this->_temp['from']).'`';
 				}
 				
+				$this->_temp['where'] = isset($this->_temp['where'])?$this->_temp['where']:'';
+				
+				$this->_temp['join'] = isset($this->_temp['join'])?$this->_temp['join']:'';
+				
+				$this->_temp['group'] = isset($this->_temp['group'])?$this->_temp['group']:'';
+				
+				$this->_temp['having'] = isset($this->_temp['having'])?$this->_temp['having']:'';
+				
 				$this->_temp['order'] = isset($this->_temp['order'])?$this->_temp['order']:'';
 				
 				$this->_temp['limit'] = isset($this->_temp['limit'])?$this->_temp['limit']:'';
@@ -497,12 +565,48 @@ class sql extends base
 				//for update
 				$forUpdate = (isset($this->_temp['forUpdate']) && $this->_temp['forUpdate']===true)?' FOR UPDATE':'';
 				
-				var_dump($this->_temp['params']);
-				
-				$sql = 'SELECT '.$distinct.$fields.' FROM '.$table.$this->_temp['where'].$this->_temp['order'].$this->_temp['limit'].$forUpdate;
+				$sql = 'SELECT '.$distinct.$fields.' FROM '.$table.$this->_temp['join'].$this->_temp['where'].$this->_temp['group'].$this->_temp['having'].$this->_temp['order'].$this->_temp['limit'].$forUpdate;
 				return $sql;
 			case 'update':
-				$sql = 'UPDATE ';
+				$table = '';
+				if (isset($this->_temp['from']) && !empty($this->_temp['from']))
+				{
+					$table = '`'.implode('`,`',$this->_temp['from']).'`';
+				}
+				
+				$set = ' SET ';
+				if (isset($this->_temp['update']) && is_array($this->_temp['update']))
+				{
+					foreach ($this->_temp['update'] as $index=>$value)
+					{
+						if (substr($index, -2) == '+=')
+						{
+							$index = substr($index, 0,-2);
+							$set .= self::fieldFormat($index).'='.self::fieldFormat($index).'+'.$value.',';
+						}
+						else if (substr($index, -2) == '-=')
+						{
+							$index = substr($index, 0,-2);
+							$set .= self::fieldFormat($index).'='.self::fieldFormat($index).'-'.$value.',';
+						}
+						else
+						{
+							$set .= self::fieldFormat($index).'='.$value.',';
+						}
+					}
+					$set = rtrim($set,',');
+				}
+				else
+				{
+					$set = '';
+				}
+				
+				$this->_temp['where'] = isset($this->_temp['where'])?$this->_temp['where']:'';
+				
+				$this->_temp['limit'] = isset($this->_temp['limit'])?$this->_temp['limit']:'';
+				
+				$sql = 'UPDATE '.$table.$set.$this->_temp['where'].$this->_temp['limit'];
+				
 				return $sql;
 			case 'delete':
 				$sql = 'DELETE ';
@@ -513,15 +617,61 @@ class sql extends base
 	
 	function getParams()
 	{
-		$this->_fields = array_merge($this->_fields,$this->_duplicate_name);
-		$this->_params = array_merge($this->_params,$this->_duplicate_value);
+		$this->_temp['params'] = isset($this->_temp['params'])?$this->_temp['params']:array();
+		$this->_temp['_having_params'] = isset($this->_temp['_having_params'])?$this->_temp['_having_params']:array();
 		
-		return $this->_params;
+		$this->_temp['params'] = array_merge($this->_temp['params'],$this->_temp['_having_params']);
+		return $this->_temp['params'];
+	}
+	
+	/**
+	 * 关联params和sql后的sql
+	 */
+	function getSql($sql = NULL,$params = array())
+	{
+		if (empty($sql))
+		{
+			$sql = $this->__toString();
+		}
+		$sql_s = str_replace('?', '%s', $sql);
+		if (empty($params))
+		{
+			$params = $this->getParams();
+		}
+		$num_params = array();
+		$word_params = array();
+		foreach ($params as $index=>$value)
+		{
+			if (is_int($index))
+			{
+				$num_params[] = $value;
+			}
+			else
+			{
+				$word_params[$index] = $value;
+			}
+		}
+		$sql_w = vsprintf($sql_s,$num_params);
+		
+		foreach ($word_params as $index => $value)
+		{
+			$sql_w = str_replace(':'.$index, $value, $sql_w);
+		}
+		return $sql_w;
 	}
 	
 	function clear()
 	{
 		$this->_temp = array();
 		$this->_do = '';
+	}
+	
+	/**
+	 * sql查询的类型
+	 * @return string
+	 */
+	function getType()
+	{
+		return strtolower(trim($this->_do));
 	}
 }
