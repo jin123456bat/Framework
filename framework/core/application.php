@@ -59,19 +59,24 @@ class application extends component
 		$action = $router->getActionName();
 		
 		$controller = self::control(base::$APP_NAME,$control);
+		
+		//control的初始化返回内容
 		if (method_exists($controller, 'initlize') && is_callable(array($controller,'initlize')))
 		{
 			$response = call_user_func(array($controller,'initlize'));
 			$this->doResponse($response);
 		}
-		if (method_exists($controller, $action) && is_callable(array($controller,$action)))
+		
+		$filter = $this->load('actionFilter');
+		$filter->load($controller,$action);
+		if (!$filter->allow())
 		{
-			$response = call_user_func(array($controller,$action));
-			$this->doResponse($response);
+			$this->doResponse($filter->getMessage());
 		}
 		else
 		{
-			$this->doResponse(new response('Not Found',404));
+			$response = call_user_func(array($controller,$action));
+			$this->doResponse($response);
 		}
 	}
 	

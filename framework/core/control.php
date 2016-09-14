@@ -7,5 +7,16 @@ namespace framework\core;
  */
 class control extends component
 {
+	function initlize()
+	{
+		
+	}
 	
+	/**
+	 * action的访问控制
+	 */
+	function __access()
+	{
+		return array();
+	}
 }
