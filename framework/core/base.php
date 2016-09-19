@@ -28,7 +28,7 @@ class base
 	 * @param string $type
 	 * @return string|array|boolean|number|StdClass|unknown
 	 */
-	protected function setVariableType($variable,$type = 's')
+	protected static function setVariableType($variable,$type = 's')
 	{
 		switch ($type)
 		{
@@ -63,6 +63,10 @@ class base
 				$instance[$name] = new $model($name);
 			} else {
 				$instance[$name] = new model($name);
+			}
+			if (method_exists($instance[$name], 'initlize'))
+			{
+				$instance[$name]->initlize();
 			}
 		}
 		return $instance[$name];

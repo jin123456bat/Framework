@@ -18,9 +18,7 @@ class model extends component
 	
 	function __construct($table = NULL)
 	{
-		$this->_sql = new sql();
-		$this->_db = mysql::getInstance($this->getConfig('db'));
-		$this->setTable($table);
+		$this->_table = $table;
 	}
 	
 	public static function debug_trace_sql()
@@ -35,6 +33,24 @@ class model extends component
 	 */
 	function initlize()
 	{
+		$this->_sql = new sql();
+		
+		if (method_exists($this, '__config'))
+		{
+			$db = $this->__config();
+		}
+		else
+		{
+			$db = $this->getConfig('db');
+		}
+		$this->_db = mysql::getInstance($db);
+		
+		if (method_exists($this, '__tableName'))
+		{
+			$this->_table = $this->__tableName();
+		}
+		
+		$this->setTable($this->_table);
 		parent::initlize();
 	}
 	
@@ -109,12 +125,41 @@ class model extends component
 		return NULL;
 	}
 	
+	/**
+	 * 获取数量
+	 * @param unknown $field
+	 * @return NULL|mixed
+	 */
+	function count($field)
+	{
+		return $this->scalar('count('.$field.')');
+	}
+	
+	function max($field)
+	{
+		return $this->scalar('max('.$field.')');
+	}
+	
+	function sum($field)
+	{
+		return $this->scalar('sum('.$field.')');
+	}
+	
+	function avg($field)
+	{
+		return $this->scalar('avg('.$field.')');
+	}
+	
+	/**
+	 * 更新数据表
+	 * @param unknown $name
+	 * @param string $value
+	 * @return boolean
+	 */
 	function update($name,$value = '')
 	{
 		$this->_sql->from($this->_table);
 		$sql = $this->_sql->update($name,$value);
-		var_dump($sql->__toString());
-		var_dump($sql->getParams());
 		return $this->query($sql);
 	}
 	
@@ -180,9 +225,16 @@ class model extends component
 		
 	}
 	
+	/**
+	 * 删除
+	 * @return boolean
+	 */
 	function delete()
 	{
-		self::$_history[] = $sql->getSql();
+		$this->_sql->from($this->_table);
+		self::$_history[] = $this->_sql->getSql();
+		$sql = $this->_sql->delete();
+		return $this->query($sql);
 	}
 	
 	/**

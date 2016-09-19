@@ -54,13 +54,13 @@ class request extends base
 	{
 		if (isset($_POST[$name]))
 		{
-			$data = $this->setVariableType($_POST[$name],$type);
+			$data = self::setVariableType($_POST[$name],$type);
 				
 			if (is_callable($filter))
 			{
-				return call_user_func_array($filter, [$data]);
+				return call_user_func_array($filter, array($data));
 			}
-			else if (is_callable(['core\filter',$filter]))
+			else if (is_callable(array('core\filter',$filter)))
 			{
 				return filter::$filter($data);
 			}
@@ -86,13 +86,13 @@ class request extends base
 	{
 		if (isset($_GET[$name]))
 		{
-			$data = $this->setVariableType($_GET[$name],$type);
+			$data = self::setVariableType($_GET[$name],$type);
 		
 			if (is_callable($filter))
 			{
-				return call_user_func_array($filter, [$data]);
+				return call_user_func_array($filter, array($data));
 			}
-			else if (is_callable(['core\filter',$filter]))
+			else if (is_callable(array('core\filter',$filter)))
 			{
 				return filter::$filter($data);
 			}
@@ -118,13 +118,13 @@ class request extends base
 	{
 		if (isset($_REQUEST[$name]))
 		{
-			$data = $this->setVariableType($_REQUEST[$name],$type);
+			$data = self::setVariableType($_REQUEST[$name],$type);
 		
 			if (is_callable($filter))
 			{
-				return call_user_func_array($filter, [$data]);
+				return call_user_func_array($filter, array($data));
 			}
-			else if (is_callable(['core\filter',$filter]))
+			else if (is_callable(array('core\filter',$filter)))
 			{
 				return filter::$filter($data);
 			}

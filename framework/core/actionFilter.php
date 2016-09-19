@@ -1,9 +1,10 @@
 <?php
-namespace system\core;
+namespace framework\core;
 use framework\core\control;
 use framework\core\response;
+use framework\core\component;
 
-class actionFilter
+class actionFilter extends component
 {
 	/**
 	 * @var control
@@ -31,10 +32,55 @@ class actionFilter
 	 */
 	function allow()
 	{
+		//不存在
 		if (!method_exists($this->_control, $this->_action))
 		{
-			
+			$this->_message = new response('not found',404);
+			return false;
 		}
+		if (!is_callable(array($this->_control,$this->_action)))
+		{
+			$this->_message = new response('forbidden',403);
+			return false;
+		}
+		
+		if (method_exists($this->_control, '__access'))
+		{
+			$accesses = call_user_func(array($this->_control,'__access'));
+			if (is_array($accesses) && !empty($accesses))
+			{
+				foreach($accesses as $access)
+				{
+					if ($access['express'])
+					{
+						if (is_array($access['actions']))
+						{
+							if (in_array($this->_action, $access['actions']))
+							{
+								if (trim(strtolower($access[0])) == 'deny')
+								{
+									$this->_message = isset($access['message'])?$access['message']:new response('forbidden',403);
+									
+									return false;
+								}
+							}
+						}
+						else if (is_string($access['actions']))
+						{
+							if ($access['actions'] == $this->_action || $access['actions'] == '*')
+							{
+								if (trim(strtolower($access[0])) == 'deny')
+								{
+									$this->_message = isset($access['message'])?$access['message']:new response('forbidden',403);
+									return false;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return true;
 	}
 	
 	/**
@@ -42,6 +88,6 @@ class actionFilter
 	 */
 	function getMessage()
 	{
-		
+		return $this->_message;
 	}
 }
