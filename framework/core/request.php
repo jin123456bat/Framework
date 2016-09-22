@@ -56,16 +56,33 @@ class request extends base
 		{
 			$data = self::setVariableType($_POST[$name],$type);
 				
-			if (is_callable($filter))
+			if (is_string($filter))
 			{
-				return call_user_func_array($filter, array($data));
-			}
-			else if (is_callable(array('core\filter',$filter)))
-			{
-				return filter::$filter($data);
+				$filters = explode('|', $filter);
+				foreach ($filters as $filter_t)
+				{
+					
+					if (is_callable($filter_t))
+					{
+						$data = call_user_func($filter_t, $data);
+					}
+					else 
+					{
+						$filterClass = application::load('filter');
+						if (is_callable(array($filterClass,$filter_t)))
+						{
+							$data = filter::$filter_t($data);
+						}
+					}
+				}
+				return $data;
 			}
 			else
 			{
+				if (is_callable($filter))
+				{
+					return call_user_func($filter, $data);
+				}
 				return $data;
 			}
 		}
@@ -88,16 +105,33 @@ class request extends base
 		{
 			$data = self::setVariableType($_GET[$name],$type);
 		
-			if (is_callable($filter))
+			if (is_string($filter))
 			{
-				return call_user_func_array($filter, array($data));
-			}
-			else if (is_callable(array('core\filter',$filter)))
-			{
-				return filter::$filter($data);
+				$filters = explode('|', $filter);
+				foreach ($filters as $filter_t)
+				{
+					
+					if (is_callable($filter_t))
+					{
+						$data = call_user_func($filter_t, $data);
+					}
+					else 
+					{
+						$filterClass = application::load('filter');
+						if (is_callable(array($filterClass,$filter_t)))
+						{
+							$data = filter::$filter_t($data);
+						}
+					}
+				}
+				return $data;
 			}
 			else
 			{
+				if (is_callable($filter))
+				{
+					return call_user_func($filter, $data);
+				}
 				return $data;
 			}
 		}
@@ -119,17 +153,34 @@ class request extends base
 		if (isset($_REQUEST[$name]))
 		{
 			$data = self::setVariableType($_REQUEST[$name],$type);
-		
-			if (is_callable($filter))
+			
+			if (is_string($filter))
 			{
-				return call_user_func_array($filter, array($data));
-			}
-			else if (is_callable(array('core\filter',$filter)))
-			{
-				return filter::$filter($data);
+				$filters = explode('|', $filter);
+				foreach ($filters as $filter_t)
+				{
+					
+					if (is_callable($filter_t))
+					{
+						$data = call_user_func($filter_t, $data);
+					}
+					else 
+					{
+						$filterClass = application::load('filter');
+						if (is_callable(array($filterClass,$filter_t)))
+						{
+							$data = filter::$filter_t($data);
+						}
+					}
+				}
+				return $data;
 			}
 			else
 			{
+				if (is_callable($filter))
+				{
+					return call_user_func($filter, $data);
+				}
 				return $data;
 			}
 		}

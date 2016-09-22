@@ -1,4 +1,5 @@
 <?php
+include './xhprof.php';
 
 //定义根目录
 !defined('ROOT') & define('ROOT', __DIR__);
@@ -12,6 +13,7 @@
 
 //载入框架
 include SYSTEM_ROOT.'/framework.php';
+
 
 $framework = new framework();
 $app = $framework->createApplication(APP_NAME,APP_ROOT);

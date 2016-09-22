@@ -6,6 +6,12 @@ use framework\core\database\driver\mysql;
 
 class model extends component
 {
+	/**
+	 * 1对多
+	 * @var integer
+	 */
+	const RELATION_ONE_MANY = 1;
+	
 	private $_table;
 	
 	private $_sql;
@@ -42,7 +48,20 @@ class model extends component
 		else
 		{
 			$db = $this->getConfig('db');
+			
+			if (!isset($db['db_type']))
+			{
+				foreach ($db as $d)
+				{
+					if (isset($d['default']) && $d['default'])
+					{
+						$db = $d;
+						break;
+					}
+				}
+			}
 		}
+		
 		$this->_db = mysql::getInstance($db);
 		
 		if (method_exists($this, '__tableName'))
@@ -100,7 +119,8 @@ class model extends component
 	{
 		$this->_sql->from($this->_table);
 		$sql = $this->_sql->select($fields);
-		return $this->query($sql);
+		$result = $this->query($sql);
+		return $result;
 	}
 	
 	/**
@@ -118,6 +138,7 @@ class model extends component
 	function scalar($field = '*')
 	{
 		$result = $this->find($field);
+		
 		if (is_array($result))
 		{
 			return array_shift($result);
@@ -258,5 +279,38 @@ class model extends component
 			self::$_history[] = $this->_sql->getSql($sql,$array);
 		}
 		return $this->_db->query($sql,$array);
+	}
+	
+	/**
+	 * 事务开始
+	 */
+	function transaction()
+	{
+		return $this->_db->transaction();
+	}
+	
+	/**
+	 * 事务提交
+	 */
+	function commit()
+	{
+		return $this->_db->commit();
+	}
+	
+	/**
+	 * 事务回滚
+	 */
+	function rollback()
+	{
+		return $this->_db->rollback();
+	}
+	
+	/**
+	 * 上一个插入的ID
+	 * @param unknown $name
+	 */
+	function lastInsertId($name = NULL)
+	{
+		return $this->_db->lastInsert($name);
 	}
 }

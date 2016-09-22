@@ -56,19 +56,33 @@ class base
 	{
 		static $instance = array();
 		if (!isset($instance[$name])) {
-			$path = ROOT . '/'.self::$APP_NAME.'/model/' . $name . '.php';
-			if (file_exists($path)) {
-				include $path;
+			if (!class_exists(self::$APP_NAME.'\\model\\' . $name))
+			{
+				$path = ROOT . '/'.self::$APP_NAME.'/model/' . $name . '.php';
+				if (file_exists($path)) {
+					include $path;
+					$model = self::$APP_NAME.'\\model\\' . $name;
+					$instance[$name] = new $model($name);
+				} else {
+					$instance[$name] = new model($name);
+				}
+				if (method_exists($instance[$name], 'initlize'))
+				{
+					$instance[$name]->initlize();
+				}
+			}
+			else
+			{
 				$model = self::$APP_NAME.'\\model\\' . $name;
 				$instance[$name] = new $model($name);
-			} else {
-				$instance[$name] = new model($name);
-			}
-			if (method_exists($instance[$name], 'initlize'))
-			{
-				$instance[$name]->initlize();
+				if (method_exists($instance[$name], 'initlize'))
+				{
+					$instance[$name]->initlize();
+				}
 			}
 		}
 		return $instance[$name];
 	}
+	
+	
 }

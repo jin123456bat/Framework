@@ -534,14 +534,14 @@ class sql extends base
 					{
 						if(!is_int($as))
 						{
-							$fields .= $field.' as '.$as.' ';
+							$fields .= $field.' as '.$as.',';
 						}
 						else
 						{
-							$fields .= $field;
+							$fields .= $field.',';
 						}
 					}
-					$fields = implode(',', $this->_temp['fields']);
+					$fields = rtrim($fields,',');
 				}
 				
 				$table = '';
@@ -633,6 +633,10 @@ class sql extends base
 		{
 			$sql = $this->__toString();
 		}
+		
+		//去掉sql中的百分号
+		$sql = str_replace('%', '#', $sql);
+		
 		$sql_s = str_replace('?', '%s', $sql);
 		if (empty($params))
 		{
@@ -644,14 +648,17 @@ class sql extends base
 		{
 			if (is_int($index))
 			{
-				$num_params[] = $value;
+				$num_params[] = '\''.$value.'\'';
 			}
 			else
 			{
-				$word_params[$index] = $value;
+				$word_params[$index] = '\''.$value.'\'';
 			}
 		}
+		
 		$sql_w = vsprintf($sql_s,$num_params);
+		//把#替换为% 恢复sql
+		$sql_w = str_replace('#', '%', $sql_w);
 		
 		foreach ($word_params as $index => $value)
 		{

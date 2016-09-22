@@ -3,11 +3,14 @@ namespace framework\lib;
 
 use framework\lib\error;
 
-abstract class data extends error implements \ArrayAccess
+class data extends error implements \ArrayAccess
 {
-	function __construct()
+	function __construct($data = array())
 	{
-		
+		foreach ($data as $name => $value)
+		{
+			$this->$name = $value;
+		}
 	}
 	
 	function initlize()
@@ -20,11 +23,11 @@ abstract class data extends error implements \ArrayAccess
 	 */
 	function validate()
 	{
-		$rules = $this->rules();
+		$rules = $this->__rules();
 		foreach ($rules as $rule)
 		{
 			$do = '';
-			$fields = [];
+			$fields = array();
 			$message = '';
 			
 			if (isset($rule['required']) && !empty($rule['required']))
@@ -40,19 +43,85 @@ abstract class data extends error implements \ArrayAccess
 				$do = 'required';
 			}
 			
+			if (isset($rule['unique']) && !empty($rule['unique']))
+			{
+				if (is_string($rule['unique']))
+				{
+					$fields = explode(',', $rule['unique']);
+				}
+				else if (is_array($rule['unique']))
+				{
+					$fields = $rule['unique'];
+				}
+				$do = 'unique';
+			}
+			
+			$rule['message'] = isset($rule['message'])?$rule['message']:'';
+			
 			switch ($do)
 			{
 				case 'required':
 					foreach ($fields as $index => $value)
 					{
-						if (!isset($this->$value))
+						if (!isset($this->$value) || $this->isEmpty($this->$value))
 						{
 							$message = str_replace('{field}', $value, $rule['message']);
 							$this->addError('000100', $message);
 						}
 					}
+					break;
+				case 'unique':
+					$model = $this->model($this->__model());
+					foreach ($fields as $index => $value)
+					{
+						$result = $model->where($value.'=?',array($this->$value))->find();
+						if(!empty($result))
+						{
+							$message = str_replace('{field}', $value, $rule['message']);
+							$this->addError('000100', $message);
+						}
+					}
+					break;
+					
 			}
 		}
+		if ($this->hasError())
+		{
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 判断变量是否为空
+	 * @param unknown $value
+	 */
+	private function isEmpty($value)
+	{
+		if (is_array($value))
+		{
+			foreach ($value as $val)
+			{
+				if (!$this->isEmpty($val))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		else if (is_string($value) && strlen($value)!==0)
+		{
+			return false;
+		}
+		else if (is_int($value) && $value!==0)
+		{
+			return false;
+		}
+		else if (is_float($value) && $value!=0)
+		{
+			return false;
+		}
+		return true;
 	}
 	
 	/**
@@ -80,9 +149,9 @@ abstract class data extends error implements \ArrayAccess
 	 * 		]
 	 * ]
 	 */
-	function rules()
+	function __rules()
 	{
-		return [];
+		return array();
 	}
 	
 	/**

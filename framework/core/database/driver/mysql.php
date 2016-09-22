@@ -14,7 +14,7 @@ class mysql
 
 	private $config;
 
-	private static $mysql;
+	private static $mysql = array();
 
 	private $pdo;
 	
@@ -31,9 +31,10 @@ class mysql
 	 */
 	public static function getInstance($config = NULL)
 	{
-		if (empty(self::$mysql))
-			self::$mysql = new mysql($config);
-		return self::$mysql;
+		$configKey = md5(implode('',$config));
+		if (!isset(self::$mysql[$configKey]) || empty(self::$mysql[$configKey]))
+			self::$mysql[$configKey] = new mysql($config);
+		return self::$mysql[$configKey];
 	}
 
 	/**

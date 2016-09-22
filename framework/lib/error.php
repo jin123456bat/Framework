@@ -4,7 +4,7 @@ use framework\core\base;
 
 class error extends base
 {
-	private $_error = [];
+	private $_error = array();
 	
 	private $_has_error = false;
 	
@@ -25,10 +25,10 @@ class error extends base
 	function addError($code,$message)
 	{
 		$this->_has_error = true;
-		$this->_error[] = [
+		$this->_error[] = array(
 			'code' => $code,
 			'message' => $message,
-		];
+		);
 	}
 	
 	/**
@@ -56,7 +56,7 @@ class error extends base
 	 */
 	function clearError()
 	{
-		$this->_error = [];
+		$this->_error = array();
 		$this->_has_error = false;
 	}
 	

@@ -60,13 +60,6 @@ class application extends component
 		
 		$controller = self::control(base::$APP_NAME,$control);
 		
-		//control的初始化返回内容
-		if (method_exists($controller, 'initlize') && is_callable(array($controller,'initlize')))
-		{
-			$response = call_user_func(array($controller,'initlize'));
-			$this->doResponse($response);
-		}
-		
 		$filter = $this->load('actionFilter');
 		$filter->load($controller,$action);
 		if (!$filter->allow())
@@ -75,6 +68,13 @@ class application extends component
 		}
 		else
 		{
+			//control的初始化返回内容
+			if (method_exists($controller, 'initlize') && is_callable(array($controller,'initlize')))
+			{
+				$response = call_user_func(array($controller,'initlize'));
+				$this->doResponse($response);
+			}
+			
 			$response = call_user_func(array($controller,$action));
 			$this->doResponse($response);
 		}
@@ -86,11 +86,14 @@ class application extends component
 	 */
 	protected function doResponse($response)
 	{
+		xhprof_stop();
+		
 		if ($response !== NULL)
 		{
 			if (is_string($response))
 			{
 				echo $response;
+				exit();
 			}
 			else if ($response instanceof response)
 			{
@@ -105,6 +108,7 @@ class application extends component
 				}
 				$response->getHeader()->sendAll();
 				echo $response->getBody();
+				exit();
 			}
 		}
 	}
@@ -123,7 +127,12 @@ class application extends component
 	}
 	
 	
-	function load($classname)
+	/**
+	 * 载入系统类
+	 * @param unknown $classname
+	 * @return unknown
+	 */
+	public static function load($classname)
 	{
 		$classnames = explode('\\', $classname);
 		if (count($classnames) == 1)
@@ -144,9 +153,9 @@ class application extends component
 				implode('\\',$classnames),
 			);
 		}
-		
+	
 		static $instance;
-		
+	
 		foreach ($namespaces as $namespace)
 		{
 			$class = $namespace.'\\'.$classname;
