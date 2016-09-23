@@ -43,10 +43,25 @@ class cds_group extends model
 		{
 			return false;
 		}
-		if($this->where('id=?',array($id))->delete())
+		$result = $this->where('cds_group.id=?',array($id))->delete();
+		if($result)
 		{
-			return $this->model('cds_group_sn')->where('cds_group_id=?',array($id))->delete();
+			$this->model('cds_group_sn')->where('cds_group_id=?',array($id))->delete();
+			return true;
 		}
 		return false;
+	}
+	
+	function save($id,$name,$sns)
+	{
+		$this->transaction();
+		$this->where('id=?',array($id))->update('name',$name);
+		$this->model('cds_group_sn')->where('cds_group_id=?',array($id))->delete();
+		foreach ($sns as $sn)
+		{
+			$this->model('cds_group_sn')->insert(array($id,$sn));
+		}
+		$this->commit();
+		return true;
 	}
 }

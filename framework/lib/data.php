@@ -5,8 +5,13 @@ use framework\lib\error;
 
 class data extends error implements \ArrayAccess
 {
-	function __construct($data = array())
+	protected $_scene = '';
+	
+	private $_safe_fileds = array();
+	
+	function __construct($data = array(),$scene = '')
 	{
+		$this->_scene = $scene;
 		foreach ($data as $name => $value)
 		{
 			$this->$name = $value;
@@ -19,11 +24,62 @@ class data extends error implements \ArrayAccess
 	}
 	
 	/**
+	 * 默认的delete
+	 */
+	function remove()
+	{
+		$pk = $this->__primaryKey();
+		$model = $this->__model();
+		return $this->model($model)->where($pk.'=?',array($this->$pk))->delete();
+	}
+	
+	/**
+	 * 默认的save
+	 */
+	function save()
+	{
+		$pk = $this->__primaryKey();
+		$model = $this->__model();
+		$data = array();
+		foreach ($this as $index => $value)
+		{
+			if ($index !== $pk)
+			{
+				$data[$index] = $value;
+			}
+		}
+		if (!empty($pk) && !empty($this->$pk))
+		{
+			$this->model($model)->where($pk.'=?',array($this->$pk))->update($data);
+		}
+		else
+		{
+			$this->model($model)->insert($data);
+		}
+	}
+	
+	/**
 	 * 验证数据集合是否符合规则
 	 */
 	function validate()
 	{
 		$rules = $this->__rules();
+		
+		foreach ($rules as $index => $rule)
+		{
+			if (!isset($rule['on']) || (!empty($this->_scene) && $this->_scene == $rule['on']))
+			{
+				if (isset($rule['safe']) && !empty($rule['safe']))
+				{
+					$this->_safe_fileds = $this->parseFileds($rule['safe']);
+				}
+			}
+			else
+			{
+				unset($rules[$index]);
+			}
+		}
+		
 		foreach ($rules as $rule)
 		{
 			$do = '';
@@ -32,27 +88,13 @@ class data extends error implements \ArrayAccess
 			
 			if (isset($rule['required']) && !empty($rule['required']))
 			{
-				if (is_string($rule['required']))
-				{
-					$fields = explode(',', $rule['required']);
-				}
-				else if (is_array($rule['required']))
-				{
-					$fields = $rule['required'];
-				}
+				$fields = $this->parseFileds($rule['required']);
 				$do = 'required';
 			}
 			
 			if (isset($rule['unique']) && !empty($rule['unique']))
 			{
-				if (is_string($rule['unique']))
-				{
-					$fields = explode(',', $rule['unique']);
-				}
-				else if (is_array($rule['unique']))
-				{
-					$fields = $rule['unique'];
-				}
+				$fields = $this->parseFileds($rule['unique']);
 				$do = 'unique';
 			}
 			
@@ -63,7 +105,7 @@ class data extends error implements \ArrayAccess
 				case 'required':
 					foreach ($fields as $index => $value)
 					{
-						if (!isset($this->$value) || $this->isEmpty($this->$value))
+						if (!in_array($value, $this->_safe_fileds) && (!isset($this->$value) || $this->isEmpty($this->$value)))
 						{
 							$message = str_replace('{field}', $value, $rule['message']);
 							$this->addError('000100', $message);
@@ -74,16 +116,20 @@ class data extends error implements \ArrayAccess
 					$model = $this->model($this->__model());
 					foreach ($fields as $index => $value)
 					{
-						$result = $model->where($value.'=?',array($this->$value))->find();
-						if(!empty($result))
+						if(!in_array($value, $this->_safe_fileds))
 						{
-							$message = str_replace('{field}', $value, $rule['message']);
-							$this->addError('000100', $message);
+							$result = $model->where($value.'=?',array($this->$value))->find();
+							if(!empty($result))
+							{
+								$message = str_replace('{field}', $value, $rule['message']);
+								$this->addError('000100', $message);
+							}
 						}
 					}
 					break;
 					
 			}
+			
 		}
 		if ($this->hasError())
 		{
@@ -122,6 +168,18 @@ class data extends error implements \ArrayAccess
 			return false;
 		}
 		return true;
+	}
+	
+	private function parseFileds($string)
+	{
+		if (is_string($string))
+		{
+			return explode(',', $string);
+		}
+		if (is_array($string))
+		{
+			return $string;
+		}
 	}
 	
 	/**

@@ -67,11 +67,7 @@ class sql extends base
 		{
 			foreach ($key as $index=>$value)
 			{
-				if (is_int($index))
-				{
-					$this->_temp['update'][] = $value;
-				}
-				else
+				if (is_string($index))
 				{
 					$this->_temp['update'][$index] = $value;
 				}
@@ -591,7 +587,7 @@ class sql extends base
 						}
 						else
 						{
-							$set .= self::fieldFormat($index).'='.$value.',';
+							$set .= self::fieldFormat($index).'=\''.addslashes($value).'\',';
 						}
 					}
 					$set = rtrim($set,',');
@@ -609,7 +605,19 @@ class sql extends base
 				
 				return $sql;
 			case 'delete':
-				$sql = 'DELETE ';
+				$table = '';
+				if (isset($this->_temp['from']) && !empty($this->_temp['from']))
+				{
+					$table = '`'.implode('`,`',$this->_temp['from']).'`';
+				}
+				
+				$this->_temp['where'] = isset($this->_temp['where'])?$this->_temp['where']:'';
+				
+				$this->_temp['order'] = isset($this->_temp['order'])?$this->_temp['order']:'';
+				
+				$this->_temp['limit'] = isset($this->_temp['limit'])?$this->_temp['limit']:'';
+				
+				$sql = 'DELETE FROM '.$table.$this->_temp['where'].$this->_temp['order'].$this->_temp['limit'];
 				return $sql;
 		}
 		return '';

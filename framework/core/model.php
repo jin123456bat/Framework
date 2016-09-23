@@ -253,7 +253,6 @@ class model extends component
 	function delete()
 	{
 		$this->_sql->from($this->_table);
-		self::$_history[] = $this->_sql->getSql();
 		$sql = $this->_sql->delete();
 		return $this->query($sql);
 	}

@@ -21,6 +21,7 @@ class application extends component
 		$this->setConfig(base::$APP_NAME);
 		//载入环境变量
 		$this->env();
+		
 		parent::initlize();
 	}
 	
@@ -168,7 +169,10 @@ class application extends component
 				if(class_exists($class,true))
 				{
 					$instance[$class] = new $class();
-					$instance[$class]->initlize();
+					if (method_exists($instance[$class], 'initlize'))
+					{
+						$instance[$class]->initlize();
+					}
 					return $instance[$class];
 				}
 			}

@@ -195,7 +195,7 @@ class request extends base
 	 * @param unknown $name
 	 * @return NULL|unknown
 	 */
-	function header($name)
+	public static function header($name)
 	{
 		return isset($_SERVER[$name]) ? $_SERVER[$name] : NULL;
 	}
