@@ -417,6 +417,13 @@ class sql extends base
 		return $this;
 	}
 	
+	function notIn($field,array $data = array(),$combine = 'and')
+	{
+		$sql = self::fieldFormat($field).' NOT IN ('.implode(',', array_fill(0, count($data), '?')).')';
+		$this->where($sql,$data,$combine);
+		return $this;
+	}
+	
 	function isNULL($fields,$combine = 'and')
 	{
 		if (is_array($fields))

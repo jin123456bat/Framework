@@ -196,8 +196,6 @@ class node extends BaseControl
 			'service' => array(),
 			'cache' => array(),
 			'monitor' => array(),
-			'cpu' => array(),
-			'mem' => array(),
 			'sys_disk_used' => array(),
 			'data_disk_used' => array(),
 		);

@@ -2,6 +2,7 @@
 namespace application\control;
 use application\extend\BaseControl;
 use framework\core\response\json;
+use framework\core\model;
 
 /**
  * 内容交付相关接口
@@ -47,6 +48,15 @@ class content extends BaseControl
 				'category',
 			));
 			
+			$category_cache['http'][$t_time] = 0;
+			$category_cache['mobile'][$t_time] = 0;
+			$category_cache['videoLive'][$t_time] = 0;
+			$category_cache['videoDemand'][$t_time] = 0;
+			$category_service['http'][$t_time] = 0;
+			$category_service['mobile'][$t_time] = 0;
+			$category_service['videoLive'][$t_time] = 0;
+			$category_service['videoDemand'][$t_time] = 0;
+				
 			foreach ($result as $r)
 			{
 				switch ($r['class'])
@@ -65,23 +75,8 @@ class content extends BaseControl
 					break;
 				}
 				
-				if (isset($category_service[$classname][$t_time]))
-				{
-					$category_service[$classname][$t_time] += $r['service_size'] * 1;
-				}
-				else
-				{
-					$category_service[$classname][$t_time] = 0;
-				}
-				
-				if (isset($category_cache[$classname][$t_time]))
-				{	
-					$category_cache[$classname][$t_time] += $r['cache_size'] * 1;
-				}
-				else
-				{
-					$category_cache[$classname][$t_time] = 0;
-				}
+				$category_service[$classname][$t_time] += $r['service_size'] * 1;
+				$category_cache[$classname][$t_time] += $r['cache_size'] * 1;
 				
 				$flow[$classname]['service'] += $r['service_size'] * 1;
 				$flow[$classname]['cache'] += $r['cache_size']*1;
@@ -179,6 +174,7 @@ class content extends BaseControl
 		
 		$category = $this->getConfig('category');
 		
+		//变量声明
 		$cp_service_flow = array();
 		$cp_cache_flow = array();
 		$cp_cache_service_sum = array(
@@ -187,10 +183,12 @@ class content extends BaseControl
 				'cache' => 0,
 			)
 		);
-		
-		foreach ($category['videoDemand'] as $key => $name)
+		foreach ($category['videoDemand'] as $key=>$name)
 		{
-			$cp_cache_service_sum[$name] = array('service'=>0,'cache'=>0);
+			$cp_cache_service_sum[$name]=array(
+				'service' => 0,
+				'cache' => 0,
+			);
 		}
 		
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
@@ -207,28 +205,26 @@ class content extends BaseControl
 				'cache_size'
 			));
 			
+			foreach ($category['videoDemand'] as $key=>$name)
+			{
+				$cp_service_flow[$name][$t_time] = 0;
+				$cp_cache_flow[$name][$t_time] = 0;
+			}
+			
 			foreach ($result as $r)
 			{
-				$categoryname = $category['videoDemand'][$r['category']];
+				if(isset($category['videoDemand'][$r['category']]))
+				{
+					$categoryname = $category['videoDemand'][$r['category']];
+				}
+				else
+				{
+					$categoryname = '其他';
+				}
 				
-				if (isset($cp_service_flow[$categoryname][$t_time]))
-				{
-					$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
-				}
-				else
-				{
-					$cp_service_flow[$categoryname][$t_time] = 0;
-				}
-		
-				if (isset($cp_cache_flow[$categoryname][$t_time]))
-				{
-					$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
-				}
-				else
-				{
-					$cp_cache_flow[$categoryname][$t_time] = 0;
-				}
-		
+				$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
+				$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
+				
 				$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
 				$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
 				$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
@@ -236,26 +232,121 @@ class content extends BaseControl
 			}
 		}
 		
+		uasort($cp_cache_service_sum, function($a,$b){
+			if ($a['service'] + $a['cache'] > $b['service'] + $b['cache'])
+			{
+				return -1;
+			}
+			else if ($a['service'] + $a['cache'] < $b['service'] + $b['cache'])
+			{
+				return 1;
+			}
+			return 0;
+		});
+		
+		$i = 0;
+		$cp_cache_service_sum['其他'] = array(
+			'service' => 0,
+			'cache' => 0,
+		);
+		
+		$top5_category = array();
+		foreach ($cp_cache_service_sum as $categoryname =>$service_cache)
+		{
+			if ($i>5 && $categoryname !== '其他')
+			{
+				
+				$cp_cache_service_sum['其他']['service'] += $service_cache['service'];
+				$cp_cache_service_sum['其他']['cache'] += $service_cache['cache'];
+				unset($cp_cache_service_sum[$categoryname]);
+			}
+			else if ($categoryname !=='其他' && $categoryname!=='总流量')
+			{
+				$top5_category[] = $categoryname;
+			}
+			$i++;
+		}
+		
+		foreach ($cp_service_flow as $cate => $v)
+		{
+			if (!in_array($cate, $top5_category,true))
+			{
+				foreach ($v as $timenode=>$value)
+				{
+					if (isset($cp_service_flow['其他'][$timenode]))
+					{
+						$cp_service_flow['其他'][$timenode] += $value;
+					}
+					else
+					{
+						$cp_service_flow['其他'][$timenode] = 0;
+					}
+				}
+				unset($cp_service_flow[$cate]);
+			}
+		}
+		
+		
+		foreach ($cp_cache_flow as $cate => $v)
+		{
+			if (!in_array($cate, $top5_category,true))
+			{
+				foreach ($v as $timenode=>$value)
+				{
+					if (isset($cp_cache_flow['其他'][$timenode]))
+					{
+						$cp_cache_flow['其他'][$timenode] += $value;
+					}
+					else
+					{
+						$cp_cache_flow['其他'][$timenode] = 0;
+					}
+				}
+				unset($cp_cache_flow[$cate]);
+			}
+		}
 		
 		$topfile = array();
+		$other_key = array();
 		foreach ($category['videoDemand'] as $key=>$name)
 		{
-			$topfile[$name] = $this->model('top_stat')
-			->where('create_time>=? and create_time<?',array(
-				$start_time,
-				$end_time,
-			))
-			->where('class=? and category=?',array(2,$key))
-			->group('hash')
-			->order('sum_service','desc')
-			->limit(10)
-			->select(array(
-				'host',
-				'filename',
-				'cache_size as sum_cache',
-				'sum(service_size) as sum_service',
-			));
+			if (in_array($name, $top5_category))
+			{
+				$topfile[$name] = $this->model('top_stat')
+				->where('create_time>=? and create_time<?',array(
+					$start_time,
+					$end_time,
+				))
+				->where('class=? and category=?',array(2,$key))
+				->group('hash')
+				->order('sum_service','desc')
+				->limit(10)
+				->select(array(
+					'host',
+					'filename',
+					'cache_size as sum_cache',
+					'sum(service_size) as sum_service',
+				));
+				$other_key[] = $key;
+			}
 		}
+		
+		$topfile['其他'] = $this->model('top_stat')
+		->where('create_time>=? and create_time<?',array(
+			$start_time,
+			$end_time,
+		))
+		->where('class=?',array(2))
+		->notIn('category',$other_key)
+		->group('hash')
+		->order('sum_service','desc')
+		->limit(10)
+		->select(array(
+			'host',
+			'filename',
+			'cache_size as sum_cache',
+			'sum(service_size) as sum_service',
+		));
 		
 		$data = array(
 			//分CP服务流速堆叠
@@ -280,18 +371,25 @@ class content extends BaseControl
 		
 		$category = $this->getConfig('category');
 		
+		//变量声明
 		$cp_service_flow = array();
 		$cp_cache_flow = array();
 		$cp_cache_service_sum = array(
 			'总流量'=>array(
 				'service' => 0,
 				'cache' => 0,
+			),
+			'其他'=>array(
+				'service' => 0,
+				'cache' => 0,
 			)
 		);
-		
 		foreach ($category['videoLive'] as $key => $name)
 		{
-			$cp_cache_service_sum[$name] = array('service'=>0,'cache'=>0);
+			$cp_cache_service_sum[$name] = array(
+				'service' => 0,
+				'cache' => 0,
+			);
 		}
 		
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
@@ -307,31 +405,36 @@ class content extends BaseControl
 				'service_size',
 				'cache_size'
 			));
-	
+			
+			
+			//变量初始化
+			$cp_service_flow['其他'][$t_time] = 0;
+			$cp_cache_flow['其他'][$t_time] = 0;
+			foreach ($category['videoLive'] as $key => $name)
+			{
+				$cp_service_flow[$name][$t_time] = 0;
+				$cp_cache_flow[$name][$t_time] = 0;
+			}
+			
+			
 			foreach ($result as $r)
 			{
-				$categoryname = $category['videoLive'][$r['category']];
-		
-				if (isset($cp_service_flow[$categoryname][$t_time]))
+				if (isset($category['videoLive'][$r['category']]))
 				{
-					$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
+					$categoryname = $category['videoLive'][$r['category']];
 				}
 				else
 				{
-					$cp_service_flow[$categoryname][$t_time] = 0;
+					$categoryname = '其他';
 				}
-		
-				if (isset($cp_cache_flow[$categoryname][$t_time]))
-				{
-					$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
-				}
-				else
-				{
-					$cp_cache_flow[$categoryname][$t_time] = 0;
-				}
-		
+				
+				
+				$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
+				$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
+				
 				$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
 				$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
+				
 				$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
 				$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
 			}
@@ -339,6 +442,7 @@ class content extends BaseControl
 		
 
 		$topfile = array();
+		$selected_key = array();
 		foreach ($category['videoLive'] as $key=>$name)
 		{
 			$topfile[$name] = $this->model('top_stat')
@@ -356,8 +460,26 @@ class content extends BaseControl
 				'sum(cache_size) as sum_cache',
 				'sum(service_size) as sum_service',
 			));
+			
+			$selected_key[] = $key+128;
 		}
 		
+		$topfile['其他'] = $this->model('top_stat')
+		->where('create_time>=? and create_time<?',array(
+			$start_time,
+			$end_time,
+		))
+		->where('class=? and category>?',array(2,128))
+		->notIn('category',$selected_key)
+		->group('hash')
+		->order('sum_service','desc')
+		->limit(10)
+		->select(array(
+			'host',
+			'filename',
+			'sum(cache_size) as sum_cache',
+			'sum(service_size) as sum_service',
+		));
 		
 		$data = array(
 			//分CP服务流速堆叠
@@ -540,7 +662,7 @@ class content extends BaseControl
 				}
 				else
 				{
-					$cp_service_flow[$categoryname][$t_time] = 0;
+					$cp_service_flow[$categoryname][$t_time] = $r['service_size'] * 1;
 				}
 				
 				if (isset($cp_cache_flow[$categoryname][$t_time]))
@@ -549,7 +671,7 @@ class content extends BaseControl
 				}
 				else
 				{
-					$cp_cache_flow[$categoryname][$t_time] = 0;
+					$cp_cache_flow[$categoryname][$t_time] = $r['service_size'] * 1;
 				}
 				
 				$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
@@ -592,4 +714,6 @@ class content extends BaseControl
 		);
 		return new json(json::OK,'ok',$data);
 	}
+	
+	
 }
