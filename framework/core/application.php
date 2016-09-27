@@ -22,7 +22,34 @@ class application extends component
 		//载入环境变量
 		$this->env();
 		
+		$this->import('app');
+		
 		parent::initlize();
+	}
+	
+	private function import($name)
+	{
+		$config = $this->getConfig($name);
+		if (isset($config['import']))
+		{
+			if (is_array($config['import']))
+			{
+				foreach ($config['import'] as $import)
+				{
+					if (is_file($import))
+					{
+						include $import;
+					}
+				}
+			}
+			else
+			{
+				if (is_file($config['import']))
+				{
+					include $config['import'];
+				}
+			}
+		}
 	}
 	
 	/**

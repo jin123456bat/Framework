@@ -50,11 +50,11 @@ class data extends error implements \ArrayAccess
 		}
 		if (!empty($pk) && !empty($this->$pk))
 		{
-			$this->model($model)->where($pk.'=?',array($this->$pk))->update($data);
+			return $this->model($model)->where($pk.'=?',array($this->$pk))->update($data);
 		}
 		else
 		{
-			$this->model($model)->insert($data);
+			return $this->model($model)->insert($data);
 		}
 	}
 	

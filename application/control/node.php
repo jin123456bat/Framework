@@ -6,6 +6,7 @@ use framework\core\response\json;
 use framework\core\request;
 use framework\core\database\sql;
 use framework\core\model;
+use application\entity\user;
 
 /**
  * 节点管理相关接口
@@ -75,6 +76,7 @@ class node extends BaseControl
 			'feedback.network_detail',//网卡详情
 		));
 		
+		
 		//查找24小时内的最大值
 		$start_time = date('Y-m-d H:00:00',strtotime('-24 hour'));
 		$end_time = date('Y-m-d H:00:00',strtotime('-24 hour'));
@@ -123,10 +125,10 @@ class node extends BaseControl
 					'mem',//mem使用
 				));
 				
-				$vpe['cache'] = $t['cache'];
-				$vpe['service'] = $t['service'];
-				$vpe['cpu'] = $t['cpu'];
-				$vpe['mem'] = $t['mem'];
+				$vpe['cache'] = $t['cache'] * 1;
+				$vpe['service'] = $t['service'] * 1;
+				$vpe['cpu'] = $t['cpu'] * 1;
+				$vpe['mem'] = $t['mem'] * 1;
 			}
 			$r['sub_vpe'] = $sub_vpe;
 		}
@@ -211,12 +213,20 @@ class node extends BaseControl
 				'max(concat(lpad(service,20,0),"-",lpad(cache,20,0),"-",lpad(monitor,20,0)))',
 			));
 			
-			list($service,$cache,$monitor) = explode('-', $result);
-			
-			$speed['service'][$t_time] = $service *1;
-			$speed['cache'][$t_time] = $cache*1;
-			$speed['monitor'][$t_time] = $monitor*1;
-			
+			if (!empty($result))
+			{
+				list($service,$cache,$monitor) = explode('-', $result);
+				
+				$speed['service'][$t_time] = $service *1;
+				$speed['cache'][$t_time] = $cache*1;
+				$speed['monitor'][$t_time] = $monitor*1;
+			}
+			else
+			{
+				$speed['service'][$t_time] = 0;
+				$speed['cache'][$t_time] = 0;
+				$speed['monitor'][$t_time] = 0;
+			}
 			
 			$result = $this->model('feedbackHistory')
 			->where('sn=?',array($sn))
@@ -255,20 +265,23 @@ class node extends BaseControl
 		$run_report = array();
 		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
 		{
-			$result = $this->model('traffic_stat_hour')
+			$result = $this->model('traffic_stat')
 			->where('create_time>=? and create_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
 			))
 			->where('sn=?',array($sn))
 			->find(array(
-				'max_service'=>'max(max_service)',
-				'max_cache'=>'max(max_cache)',
+				'max_service'=>'max(service)',
+				'max_cache'=>'max(cache)',
 				'sum_service'=>'sum(service)',
 				'sum_cache'=>'sum(cache)',
 				'hit_user'=>'max(hit_user)',//服务用户
 				'online_user'=>'max(online_user)',//活跃用户
 			));
+			
+			var_dump($result);
+			
 			$result['max_service'] *= 1;
 			$result['max_cache'] *= 1;
 			$result['hit_user'] *= 1;
@@ -276,9 +289,9 @@ class node extends BaseControl
 			$result['sum_service'] *= 1;
 			$result['sum_cache'] *= 1;
 			
-			$result['user_percent'] = 100*number_format($result['hit_user']/$result['online_user'],4,'.','');
-			$result['max_service_user'] = 100*number_format($result['max_service']/$result['hit_user'],4,'.','');
-			$result['service_cache'] = 100*number_format($result['sum_service']/$result['sum_cache'],4,'.','');
+			$result['user_percent'] = 100*number_format(division($result['hit_user'],$result['online_user']),4,'.','');
+			$result['max_service_user'] = 100*number_format(division($result['max_service'],$result['hit_user']),4,'.','');
+			$result['service_cache'] = 100*number_format(division($result['sum_service'],$result['sum_cache']),4,'.','');
 			
 			
 			$avg = $this->model('report_jxreport')->where('day=? and sn=?',array($t_time,$sn))->find(array(
@@ -300,5 +313,17 @@ class node extends BaseControl
 		);
 		
 		return new json(json::OK,'ok',$data);
+	}
+	
+	function __access()
+	{
+		return array(
+			array(
+				'deny',
+				'express' => user::getLoginUserId()===NULL,
+				'actions' => '*',
+				'message' => new json(array('code'=>2,'result'=>'尚未登陆'))
+			)
+		);
 	}
 }

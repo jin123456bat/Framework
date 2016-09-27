@@ -3,6 +3,7 @@ namespace application\control;
 use framework\core\response\json;
 use application\extend\BaseControl;
 use framework\core\model;
+use application\entity\user;
 
 /**
  * 首页相关接口
@@ -152,24 +153,24 @@ class main extends BaseControl
 			'cds' => array(
 				'max' => array(
 					'current' => $cds_max,
-					'linkRatio' => '0.2',//环比
-					'sameRatio' => '-0.2'//同比
+					'linkRatio' => 0.2,//环比
+					'sameRatio' => 0.2//同比
 				),//CDS在线节点数
 				'detail' => $cds_detail,
 			),
 			'user' => array(
 				'max' => array(
 					'current' => $user_max,
-					'linkRatio' => '0.2',//环比
-					'sameRatio' => '-0.2'//同比
+					'linkRatio' => 0.2,//环比
+					'sameRatio' => 0.2//同比
 				),//用户数
 				'detail' => $user_detail,
 			),
 			'service_max' => array(
 				'max' => array(
 					'current' => $service_max_max,
-					'linkRatio' => '0.2',//环比
-					'sameRatio' => '-0.2'//同比
+					'linkRatio' => 0.2,//环比
+					'sameRatio' => 0.2//同比
 				),//服务流速峰值（时间点内的最大值）
 				'detail' => $service_max_detail,//服务流速按照时间节点的详情
 				'linkRatio' => '环比',
@@ -181,22 +182,22 @@ class main extends BaseControl
 			'service_sum' => array(
 				'max' => array(
 					'current' => $service_sum_sum,
-					'linkRatio' => '0.2',//环比
-					'sameRatio' => '-0.2'//同比
+					'linkRatio' => 0.2,//环比
+					'sameRatio' => 0.2//同比
 				),//服务流量(时间点内的累加值)
 				//'detail' => $service_sum_detail,//服务流量
 			),
 			'accessContent' => array(
 				'max' => array(
 					'current' => $accessContent_max,//授权内容交付峰值
-					'linkRatio' => '0.2',//环比
-					'sameRatio' => '-0.2'//同比
+					'linkRatio' => 0.2,//环比
+					'sameRatio' => 0.2//同比
 				),//峰值
 				'detail' => $accessContent_detail,//授权内容交付流速
 				'sum' => array(
 					'current' => $accessContent_sum,//授权内容交付流量
-					'linkRatio' => '0.2',//环比
-					'sameRatio' => '-0.2'//同比
+					'linkRatio' => 0.2,//环比
+					'sameRatio' => 0.2//同比
 				),
 			),
 			//分合作方流速堆叠
@@ -215,16 +216,10 @@ class main extends BaseControl
 	{
 		return array(
 			array(
-				'allow',//deny  允许访问
-				'actions' => array('overview'),
-				'express' => true,//改规则是否有效
-				'message' => 'oh no',
-			),
-			array(
 				'allow',
 				'actions' => '*',
-				'express' => true,
-				'message' => new json(array('code'=>0,'result'=>'没有权限')),
+				'express' => user::getLoginUserId()===NULL,
+				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
 			)
 		);
 	}

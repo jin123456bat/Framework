@@ -15,20 +15,22 @@ return array(
 		'db_user' => 'root',
 		'db_password' => '',
 		'db_charset' => 'utf8',
+		'default' => true,
 	),
 	'cds_v2' => array(
 		'db_type' => 'mysql',
-		/* 'db_server' => 'localhost',
+		'db_server' => 'localhost',
 		'db_dbname' => 'cds_v2',
 		'db_user' => 'root',
-		'db_password' => '', */
+		'db_password' => '',
 		'db_charset' => 'utf8',
 		
-		'db_server' => '192.168.1.225',
+		/* 'db_server' => '192.168.1.225',
 		'db_dbname' => 'ordoac',
 		'db_user' => 'admin',
 		'db_password' => 'fxdata2000',
-		'default' => true,//默认的数据库连接方式
+		 */
+		//'default' => true,//默认的数据库连接方式
 	),
 	'django' => array(
 		'db_type' => 'mysql',
