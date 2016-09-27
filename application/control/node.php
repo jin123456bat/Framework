@@ -280,8 +280,6 @@ class node extends BaseControl
 				'online_user'=>'max(online_user)',//活跃用户
 			));
 			
-			var_dump($result);
-			
 			$result['max_service'] *= 1;
 			$result['max_cache'] *= 1;
 			$result['hit_user'] *= 1;
