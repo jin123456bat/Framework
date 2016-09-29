@@ -88,7 +88,7 @@ class user extends control
 			array(
 				'deny',
 				'actions' => array('register'),
-				'express' => user::getLoginUserId()===NULL,
+				'express' => \application\entity\user::getLoginUserId()===NULL,
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
 			)
 		);

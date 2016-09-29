@@ -1,11 +1,13 @@
 <?php
+$dbpass = '';
+
 return array(
 	'cloud_web_v2' => array(
 		'db_type' => 'mysql',
 		'db_server' => 'localhost',
 		'db_dbname' => 'cloud_web_v2',
 		'db_user' => 'root',
-		'db_password' => '',
+		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
 	),
 	'ordoac' => array(
@@ -13,7 +15,7 @@ return array(
 		'db_server' => 'localhost',
 		'db_dbname' => 'ordoac',
 		'db_user' => 'root',
-		'db_password' => '',
+		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
 		'default' => true,
 	),
@@ -22,7 +24,7 @@ return array(
 		'db_server' => 'localhost',
 		'db_dbname' => 'cds_v2',
 		'db_user' => 'root',
-		'db_password' => '',
+		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
 		
 		/* 'db_server' => '192.168.1.225',
