@@ -316,7 +316,7 @@ class node extends BaseControl
 		return array(
 			array(
 				'deny',
-				'express' => user::getLoginUserId()===NULL,
+				'express' => \application\entity\user::getLoginUserId()===NULL,
 				'actions' => '*',
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆'))
 			)

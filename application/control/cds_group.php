@@ -3,7 +3,6 @@ namespace application\control;
 use framework\core\control;
 use framework\core\request;
 use framework\core\response\json;
-use application\entity\user;
 
 class cds_group extends control
 {
@@ -27,7 +26,7 @@ class cds_group extends control
 		if($cds_groupData->save())
 		{
 			$pk = $cds_groupData->__primaryKey();
-			$this->model('log')->add(user::getLoginUserId(),"创建了CDS分组:".$name);
+			$this->model('log')->add(\application\entity\user::getLoginUserId(),"创建了CDS分组:".$name);
 			return new json(json::OK,NULL,$cds_groupData->$pk);
 		}
 		return new json(json::FAILED,'添加失败');
@@ -41,7 +40,7 @@ class cds_group extends control
 		$id = request::param('id',0,'int|abs');
 		if($this->model('cds_group')->remove($id))
 		{
-			$this->model('log')->add(user::getLoginUserId(),"删除了CDS分组:".$id);
+			$this->model('log')->add(\application\entity\user::getLoginUserId(),"删除了CDS分组:".$id);
 			return new json(json::OK);
 		}
 		return new json(json::FAILED,'CDS组不存在');
@@ -67,7 +66,7 @@ class cds_group extends control
 		}
 		if($cds_groupData->save())
 		{
-			$this->model('log')->add(user::getLoginUserId(),"修改了CDS分组:".$id);
+			$this->model('log')->add(\application\entity\user::getLoginUserId(),"修改了CDS分组:".$id);
 			return new json(json::OK);
 		}
 		return new json(json::FAILED,'保存失败');
@@ -98,7 +97,7 @@ class cds_group extends control
 			array(
 				'deny',
 				'actions' => '*',
-				'express' => user::getLoginUserId()===NULL,
+				'express' => \application\entity\user::getLoginUserId()===NULL,
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
 			)
 		);

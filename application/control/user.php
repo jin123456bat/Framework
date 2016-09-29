@@ -5,7 +5,7 @@ use framework\core\control;
 use framework\core\request;
 use framework\core\response\json;
 use framework\core\session;
-use application\entity\user;
+use application;
 
 class user extends control
 {
@@ -28,7 +28,7 @@ class user extends control
 			if($user->auth())
 			{
 				$user->saveUserSession();
-				$this->model('log')->add(user::getLoginUserId(),"登陆了系统");
+				$this->model('log')->add(\application\entity\user::getLoginUserId(),"登陆了系统");
 				return new json(json::OK,NULL,$user);
 			}
 			else

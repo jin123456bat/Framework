@@ -758,7 +758,7 @@ class content extends BaseControl
 			array(
 				'deny',
 				'actions' => '*',
-				'express' => user::getLoginUserId()===NULL,
+				'express' => \application\entity\user::getLoginUserId()===NULL,
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
 			)
 		);
