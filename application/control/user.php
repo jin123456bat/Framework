@@ -5,6 +5,7 @@ use framework\core\control;
 use framework\core\request;
 use framework\core\response\json;
 use framework\core\session;
+use application\entity\user;
 
 class user extends control
 {
@@ -27,6 +28,7 @@ class user extends control
 			if($user->auth())
 			{
 				$user->saveUserSession();
+				$this->model('log')->add(user::getLoginUserId(),"登陆了系统");
 				return new json(json::OK,NULL,$user);
 			}
 			else
@@ -66,6 +68,7 @@ class user extends control
 		{
 			if($user->save())
 			{
+				$this->model('log')->add(user::getLoginUserId(),"添加了用户".$username);
 				return new json(json::OK);
 			}
 			else
@@ -74,5 +77,20 @@ class user extends control
 			}
 		}
 		return new json(json::FAILED,$user->getError());
+	}
+	
+	/**
+	 * 配置访问权限
+	 */
+	function __access()
+	{
+		return array(
+			array(
+				'deny',
+				'actions' => array('register'),
+				'express' => user::getLoginUserId()===NULL,
+				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
+			)
+		);
 	}
 }

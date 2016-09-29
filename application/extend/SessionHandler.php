@@ -54,17 +54,23 @@ class SessionHandler extends base
 		$result = $this->_db->where('session_id=?',array($session_id))->find();
 		if(empty($result))
 		{
-			$result = $this->_db->insert(array(
+			if($this->_db->insert(array(
 				'session_id'=>$session_id,
 				'content'=>$session_data
-			));
-			return $result;
+			)))
+			{
+				return true;
+			}
 		}
 		else
 		{
-			$result = $this->_db->where('session_id=?',array($session_id))->update('content',$session_data);
-			return $result;
+			$this->_db->where('session_id=?',array($session_id))->update(array(
+				'content' => $session_data,
+				'createtime' => date('Y-m-d H:i:s'),
+			));
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -74,7 +80,8 @@ class SessionHandler extends base
 	public function destroy($session_id)
 	{
 		// TODO Auto-generated method stub
-		return $this->_db->where('session_id=?',array($session_id))->delete();
+		$this->_db->where('session_id=?',array($session_id))->delete();
+		return true;
 	}
 
 	/**

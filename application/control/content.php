@@ -29,10 +29,10 @@ class content extends BaseControl
 		$category_cache = array();
 		$flow = array(
 			'total' => array('service'=>0,'cache'=>0),
-			'http' => array('service'=>0,'cache'=>0),
-			'mobile' => array('service'=>0,'cache'=>0),
 			'videoDemand' => array('service'=>0,'cache'=>0),
 			'videoLive' => array('service'=>0,'cache'=>0),
+			'mobile' => array('service'=>0,'cache'=>0),
+			'http' => array('service'=>0,'cache'=>0),
 		);
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
 		{
@@ -86,7 +86,16 @@ class content extends BaseControl
 		}
 		
 		$topfile = array();
-		$topfile['http'] = $this->model('top_stat')
+		if ($this->_duration_second >= 3600)
+		{
+			$topModel = $this->model('top_stat_hour');
+		}
+		else
+		{
+			$topModel = $this->model('top_stat');
+		}
+		
+		$topfile['http'] = $topModel
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -100,9 +109,15 @@ class content extends BaseControl
 			'sum(service_size) as sum_service',
 			'host',
 			'filename',
+			'category',
 		));
+		$category = $this->getConfig('category');
+		foreach ($topfile['http'] as &$file)
+		{
+			$file['category'] = isset($category['http'][$file['category']])?$category['http'][$file['category']]:'其他';
+		}
 		
-		$topfile['mobile'] = $this->model('top_stat')
+		$topfile['mobile'] = $topModel
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -116,9 +131,14 @@ class content extends BaseControl
 			'sum(service_size) as sum_service',
 			'host',
 			'filename',
+			'category'
 		));
+		foreach ($topfile['mobile'] as &$file)
+		{
+			$file['category'] = isset($category['mobile'][$file['category']])?$category['mobile'][$file['category']]:'其他';
+		}
 		
-		$topfile['videoDemand'] = $this->model('top_stat')
+		$topfile['videoDemand'] = $topModel
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -135,7 +155,7 @@ class content extends BaseControl
 		));
 		
 		//直播的话文件大小按照累加的cache_size ,其他资源全部取max(cache_size)
-		$topfile['videoLive'] = $this->model('top_stat')
+		$topfile['videoLive'] = $topModel
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -253,18 +273,18 @@ class content extends BaseControl
 		$top5_category = array();
 		foreach ($cp_cache_service_sum as $categoryname =>$service_cache)
 		{
-			if ($i>5 && $categoryname !== '其他')
+			if ($i>=5 && $categoryname !== '其他' && $categoryname!=='总流量')
 			{
-				
 				$cp_cache_service_sum['其他']['service'] += $service_cache['service'];
 				$cp_cache_service_sum['其他']['cache'] += $service_cache['cache'];
 				unset($cp_cache_service_sum[$categoryname]);
+				
 			}
 			else if ($categoryname !=='其他' && $categoryname!=='总流量')
 			{
 				$top5_category[] = $categoryname;
+				$i++;
 			}
-			$i++;
 		}
 		
 		foreach ($cp_service_flow as $cate => $v)
@@ -279,7 +299,7 @@ class content extends BaseControl
 					}
 					else
 					{
-						$cp_service_flow['其他'][$timenode] = 0;
+						$cp_service_flow['其他'][$timenode] = $value;
 					}
 				}
 				unset($cp_service_flow[$cate]);
@@ -308,11 +328,20 @@ class content extends BaseControl
 		
 		$topfile = array();
 		$other_key = array();
+		if ($this->_duration_second >= 3600)
+		{
+			$topModel = $this->model('top_stat_hour');
+		}
+		else
+		{
+			$topModel = $this->model('top_stat');
+		}
+		
 		foreach ($category['videoDemand'] as $key=>$name)
 		{
 			if (in_array($name, $top5_category))
 			{
-				$topfile[$name] = $this->model('top_stat')
+				$topfile[$name] = $topModel
 				->where('create_time>=? and create_time<?',array(
 					$start_time,
 					$end_time,
@@ -331,7 +360,7 @@ class content extends BaseControl
 			}
 		}
 		
-		$topfile['其他'] = $this->model('top_stat')
+		$topfile['其他'] = $topModel
 		->where('create_time>=? and create_time<?',array(
 			$start_time,
 			$end_time,
@@ -442,10 +471,18 @@ class content extends BaseControl
 		
 
 		$topfile = array();
+		if ($this->_duration_second >= 3600)
+		{
+			$topModel = $this->model('top_stat_hour');
+		}
+		else
+		{
+			$topModel = $this->model('top_stat');
+		}
 		$selected_key = array();
 		foreach ($category['videoLive'] as $key=>$name)
 		{
-			$topfile[$name] = $this->model('top_stat')
+			$topfile[$name] = $topModel
 			->where('create_time>=? and create_time<?',array(
 				$start_time,
 				$end_time,
@@ -464,7 +501,7 @@ class content extends BaseControl
 			$selected_key[] = $key+128;
 		}
 		
-		$topfile['其他'] = $this->model('top_stat')
+		$topfile['其他'] = $topModel
 		->where('create_time>=? and create_time<?',array(
 			$start_time,
 			$end_time,
@@ -548,7 +585,7 @@ class content extends BaseControl
 				}
 				else
 				{
-					$cp_service_flow[$categoryname][$t_time] = 0;
+					$cp_service_flow[$categoryname][$t_time] = $r['service_size'] * 1;
 				}
 		
 				if (isset($cp_cache_flow[$categoryname][$t_time]))
@@ -557,7 +594,7 @@ class content extends BaseControl
 				}
 				else
 				{
-					$cp_cache_flow[$categoryname][$t_time] = 0;
+					$cp_cache_flow[$categoryname][$t_time] = $r['service_size'] * 1;
 				}
 		
 				$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
@@ -715,5 +752,15 @@ class content extends BaseControl
 		return new json(json::OK,'ok',$data);
 	}
 	
-	
+	function __access()
+	{
+		return array(
+			array(
+				'deny',
+				'actions' => '*',
+				'express' => user::getLoginUserId()===NULL,
+				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
+			)
+		);
+	}
 }

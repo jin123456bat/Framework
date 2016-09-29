@@ -54,10 +54,13 @@ class framework
 	{
 		$classname = ltrim($classname);
 		$class = explode('\\', $classname);
-		$path = trim(ROOT,'/').'/'.str_replace('\\', '/', $classname).'.php';
+		$path = rtrim(ROOT,'/').'/'.str_replace('\\', '/', $classname).'.php';
 		if (file_exists($path))
 		{
-			include $path;
+			if((include $path) !== 1)
+			{
+				echo "include failed";
+			}
 		}
 	}
 }

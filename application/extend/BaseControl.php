@@ -71,6 +71,6 @@ abstract class BaseControl extends control
 		{
 			return new json(json::FAILED,'duration参数错误');
 		}
-		$this->_duration_second = $this->_duration == 'hourly'?60*60:($this->_duration=='minutely'?60:60*60*24);
+		$this->_duration_second = $this->_duration == 'hourly'?60*60:($this->_duration=='minutely'?60*5:60*60*24);
 	}
 }

@@ -7,7 +7,7 @@ class index extends control
 	{
 		//ini_set('max_execution_time', 0);
 		
-		//$this->createOperationStatData();
+		$this->createOperationStatData();
 	}
 	
 	/**
@@ -15,8 +15,8 @@ class index extends control
 	 */
 	function createOperationStatData()
 	{
-		$start_time = '2016-08-01';
-		$end_time = '2016-10-01';
+		$start_time = '2016-08-01 00:00:00';
+		$end_time = '2016-10-01 00:00:00';
 	
 		$sn = array(
 			'CAS0530000002',
@@ -29,52 +29,54 @@ class index extends control
 			'CAS0530000009',
 		);
 	
-	
-		for($i=0;$i<100000;$i++)
+		foreach ($sn as $sns)
 		{
-			$random_time = date('Y-m-d H:i:s',rand(strtotime($start_time),strtotime($end_time)));
-				
-			$class = rand(0,2);
-			if ($class==2)
+			for($i=$start_time;strtotime($i)<strtotime($end_time);$i = date("Y-m-d H:i:s",strtotime($i) + 5*60))
 			{
-				$live = rand(0,1) * 128;
-				if ($live)
+				$random_time = $i;
+					
+				$class = rand(0,2);
+				if ($class==2)
 				{
-					$category = $live + rand(0,28);
+					$live = rand(0,1) * 128;
+					if ($live)
+					{
+						$category = $live + rand(0,28);
+					}
+					else
+					{
+						$category = rand(0,22);
+					}
 				}
-				else
+				else if ($class==1)
 				{
-					$category = rand(0,22);
+					$category = rand(0,2);
 				}
-			}
-			else if ($class==1)
-			{
-				$category = rand(0,2);
-			}
-			else if ($class == 0)
-			{
-				$category = rand(0,4);
-			}
-				
-			if($this->model('operation_stat')->insert(array(
-				'create_time' => $random_time,
-				'sn' => $sn[array_rand($sn,1)],
-				'class' => $class,
-				'category' => $category,
-				'mode' => rand(0,3),
-				'cache_size' => rand(0,100000),
-				'proxy_cache_size' => rand(0,100000),
-				'cache_hit_size' => rand(0,100000),
-				'service_size' => rand(0,100000),
-				'service_time' => rand(0,100000),
-				'task_size' => rand(0,100000),
-				'play_cnt' => rand(10,30),
-				'hit_cnt' => rand(10,3000),
-				'service_cnt' => rand(100,200),
-				'make_time' => $random_time
-			)))
-			{
-				echo "ok<br>";
+				else if ($class == 0)
+				{
+					$category = rand(0,4);
+				}
+					
+				if($this->model('operation_stat')->insert(array(
+					'create_time' => $random_time,
+					'sn' => $sns,
+					'class' => $class,
+					'category' => $category,
+					'mode' => rand(0,3),
+					'cache_size' => rand(0,100000),
+					'proxy_cache_size' => rand(0,100000),
+					'cache_hit_size' => rand(0,100000),
+					'service_size' => rand(0,100000),
+					'service_time' => rand(0,100000),
+					'task_size' => rand(0,100000),
+					'play_cnt' => rand(10,30),
+					'hit_cnt' => rand(10,3000),
+					'service_cnt' => rand(100,200),
+					'make_time' => $random_time
+				)))
+				{
+					echo "ok<br>";
+				}
 			}
 		}
 	}

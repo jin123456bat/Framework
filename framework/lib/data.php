@@ -54,7 +54,12 @@ class data extends error implements \ArrayAccess
 		}
 		else
 		{
-			return $this->model($model)->insert($data);
+			if($this->model($model)->insert($data))
+			{
+				$this->$pk = $this->model($model)->lastInsertId();
+				return true;
+			}
+			return false;
 		}
 	}
 	

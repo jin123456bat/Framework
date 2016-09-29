@@ -216,7 +216,7 @@ class main extends BaseControl
 	{
 		return array(
 			array(
-				'allow',
+				'deny',
 				'actions' => '*',
 				'express' => user::getLoginUserId()===NULL,
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),

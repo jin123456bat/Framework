@@ -115,7 +115,6 @@ class application extends component
 	protected function doResponse($response)
 	{
 		xhprof_stop();
-		
 		if ($response !== NULL)
 		{
 			if (is_string($response))

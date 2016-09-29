@@ -33,7 +33,7 @@ class cds_group extends model
 			}
 		}
 		$this->commit();
-		return true;
+		return $id;
 	}
 	
 	function remove($id)

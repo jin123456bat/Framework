@@ -39,7 +39,8 @@ class cds_group extends data
 		$pk = $this->__primaryKey();
 		if (empty($this->$pk))
 		{
-			return $this->model('cds_group')->add($this->name,$this->sn);
+			$this->$pk = $this->model('cds_group')->add($this->name,$this->sn);
+			return true;
 		}
 		else
 		{
