@@ -1,4 +1,7 @@
 <?php
 return array(
-	'import' => 'application/functions/index.php'
+	'import' => array(
+		'application/functions/index.php',
+		//'application/algorithm/*',
+	)
 );

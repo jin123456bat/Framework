@@ -3,11 +3,52 @@ namespace application\control;
 use framework\core\control;
 class index extends control
 {
+	private $_start_time = '2016-08-01 00:00:00';
+	
+	private $_end_time = '2016-10-01 00:00:00';
+	
+	private $_sn = array(
+		'CAS0530000002',
+		'CAS0530000003',
+		'CAS0530000004',
+		'CAS0530000005',
+		'CAS0530000006',
+		'CAS0530000007',
+		'CAS0530000008',
+		'CAS0530000009',
+	);
+	
 	function index()
 	{
-		//ini_set('max_execution_time', 0);
+		ini_set('max_execution_time', 0);
 		
-		$this->createOperationStatData();
+		//$this->createOperationStatData();
+		
+		//$this->createCdnTrafficStatData();
+	}
+	
+	function createCdnTrafficStatData()
+	{
+		$start_time = $this->_start_time;
+		$end_time = $this->_end_time;
+		
+		$sn = $this->_sn;
+		foreach ($sn as $sns)
+		{
+			for($i=$start_time;strtotime($i)<strtotime($end_time);$i = date("Y-m-d H:i:s",strtotime($i) + 5*60))
+			{
+				$this->model('cdn_traffic_stat')->insert(array(
+					'create_time' => $i,
+					'sn' => $sns,
+					'cache' => rand(0,100000),
+					'service' => rand(0,100000),
+					'monitor' => rand(0,10000),
+					'cpu' => rand(0,100),
+					'mem' => rand(0,100),
+					'make_time' =>$i
+				));
+			}
+		}
 	}
 	
 	/**
@@ -15,19 +56,10 @@ class index extends control
 	 */
 	function createOperationStatData()
 	{
-		$start_time = '2016-08-01 00:00:00';
-		$end_time = '2016-10-01 00:00:00';
+		$start_time = $this->_start_time;
+		$end_time = $this->_end_time;
 	
-		$sn = array(
-			'CAS0530000002',
-			'CAS0530000003',
-			'CAS0530000004',
-			'CAS0530000005',
-			'CAS0530000006',
-			'CAS0530000007',
-			'CAS0530000008',
-			'CAS0530000009',
-		);
+		$sn = $this->_sn;
 	
 		foreach ($sn as $sns)
 		{
