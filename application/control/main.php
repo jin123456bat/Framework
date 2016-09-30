@@ -32,7 +32,6 @@ class main extends BaseControl
 		//所有节点的在线人数累加
 		$user = $algorithm->USEROnlineNum();
 		
-		
 		//operation_stat  每小时的颗粒度
 		//service_max
 		//服务流速 同一个时间点的operation中service_size的最大值
@@ -44,15 +43,6 @@ class main extends BaseControl
 		
 		//cp_service
 		$cp_service = $algorithm->CPService();
-		
-		//accessContent
-		//授权内容交付
-		$accessContent_max = 0;//授权内容交付峰值
-		$accessContent_detail = array();
-		$accessContent_sum = 0;//授权内容交付流量
-		
-		//合作方
-		$cooperation = array();
 		
 		$ratio = new ratio($this->_timemode);
 		$ratio->setDuration($this->_duration_second);
