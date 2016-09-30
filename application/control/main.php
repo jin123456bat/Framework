@@ -21,7 +21,7 @@ class main extends BaseControl
 	}
 	
 	function overview()
-	{
+	{	
 		$start_time = date('Y-m-d H:00:00',strtotime($this->_startTime));
 		$end_time = date('Y-m-d H:00:00',strtotime($this->_endTime));
 		

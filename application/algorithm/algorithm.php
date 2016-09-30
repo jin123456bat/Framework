@@ -128,7 +128,7 @@ class algorithm extends component
 			
 			if ($service_max_detail[$t_time] > $service_max_max)
 			{
-				$service_max_max = $result;
+				$service_max_max = $service_max_detail[$t_time];
 			}
 		}
 		return array(
@@ -242,6 +242,57 @@ class algorithm extends component
 		return array(
 			'max' => NULL,
 			'detail' => $cp_service
+		);
+	}
+	
+	
+	
+	/**
+	 * 网卡流速
+	 * @return number[][]|number[]|boolean[]
+	 */
+	public function traffic_stat()
+	{
+		$cache_max_detail = array();
+		$service_max_detail = array();
+		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+		{
+			//先把所有的sn的service都累加起来  然后计算其中最大的 那个
+			$sql = 'select max(concat(lpad(sum_service,20,0),"-",lpad(sum_cache,20,0))) as l from (select sum(service) as sum_service,sum(cache) as sum_cache from traffic_stat where create_time >=? and create_time<? group by create_time) as t';
+			$result = $this->model('traffic_stat')
+			->query($sql,array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
+			));
+			
+			if(isset($result[0]['l']))
+			{
+				list($service,$cache) = explode('-', $result[0]['l']);
+				$service_max_detail[$t_time] = $service*1;
+				$cache_max_detail[$t_time] = $cache*1;
+			}
+			else
+			{
+				$service_max_detail[$t_time] = 0;
+				$cache_max_detail[$t_time] = 0;
+			}
+			
+			$sql = 'select max(concat(lpad(sum_service,20,0),"-",lpad(sum_cache,20,0))) as l from (select sum(service) as sum_service,sum(cache) as sum_cache from cdn_traffic_stat where make_time>=? and make_time<? GROUP by make_time) as t';
+			$result = $this->model('cdn_traffic_stat')->query($sql,array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
+			));
+			
+			if (isset($result[0]['l']))
+			{
+				list($service,$cache) = explode('-', $result[0]['l']);
+				$service_max_detail[$t_time] += $service*1;
+				$cache_max_detail[$t_time] += $cache*1;
+			}
+		}
+		return array(
+			'service' => $service_max_detail,
+			'cache' => $cache_max_detail,
 		);
 	}
 }
