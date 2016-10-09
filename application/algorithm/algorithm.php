@@ -2,6 +2,7 @@
 namespace application\algorithm;
 
 use framework\core\component;
+use framework\core\model;
 
 class algorithm extends component
 {
@@ -106,31 +107,60 @@ class algorithm extends component
 	{
 		$service_max_max = 0;
 		$service_max_detail = array();
+		
 		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
 		{
-			//先把所有的sn的service都累加起来  然后计算其中最大的 那个
-			$sql = 'select max(sum_service) as max_service from (select create_time,sum(service) as sum_service from traffic_stat where create_time >=? and create_time<? group by create_time) as t';
-			$result = $this->model('traffic_stat')
-			->query($sql,array(
+			$service_max_detail[$t_time] = 0;
+			
+			$traffic_stat = $this->model('traffic_stat')->where('create_time>=? and create_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
+			))
+			->group('create_time')
+			->select(array(
+				'create_time',
+				'sum_service'=>'sum(service)',
 			));
-				
-			$service_max_detail[$t_time] = isset($result[0]['max_service'])?$result[0]['max_service']*1:0;
 			
-			$sql = 'select max(sum_service) as max_service from (select sum(service) as sum_service from cdn_traffic_stat where make_time>=? and make_time<? GROUP by make_time) as t';
-			$result = $this->model('cdn_traffic_stat')->query($sql,array(
+			$cdn_traffic_stat = $this->model('cdn_traffic_stat')->where('make_time>=? and make_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
+			))
+			->group('make_time')
+			->select(array(
+				'make_time',
+				'sum_service'=>'sum(service)'
 			));
 			
-			$service_max_detail[$t_time] += isset($result[0]['max_service'])?$result[0]['max_service']*1:0;
+			$the_max = array();
 			
-			if ($service_max_detail[$t_time] > $service_max_max)
+			foreach ($traffic_stat as $stat)
 			{
-				$service_max_max = $service_max_detail[$t_time];
+				$time = $stat['create_time'];
+				$the_max[$time] = $stat;
+			}
+			foreach ($cdn_traffic_stat as $stat)
+			{
+				$time = $stat['make_time'];
+				if (isset($the_max[$time]))
+				{
+					$the_max[$time] += $stat;
+				}
+				else
+				{
+					$the_max[$time] = $stat;
+				}
+			}
+			if (!empty($the_max))
+			{
+				$service_max_detail[$t_time] = max($the_max);
+				if ($service_max_detail[$t_time] > $service_max_max)
+				{
+					$service_max_max = $service_max_detail[$t_time];
+				}
 			}
 		}
+		
 		return array(
 			'max' => $service_max_max,
 			'detail' => $service_max_detail,
@@ -199,6 +229,7 @@ class algorithm extends component
 			);
 		}
 	
+		$total_operation_stat = array();
 		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
 		{
 			//var_dump(date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration));
@@ -220,6 +251,7 @@ class algorithm extends component
 			}
 			$cp_service['其他'][$t_time] = 0;
 			
+			$total_operation_stat[$t_time] = 0;
 			foreach ($result as $r)
 			{
 				if (in_array(array(
@@ -234,10 +266,21 @@ class algorithm extends component
 					$classname = '其他';
 				}
 				
+				$total_operation_stat[$t_time] += $r['service_size'];
 				$cp_service[$classname][$t_time] += $r['service_size'];
 			}
 		}
 		
+		$service = $this->ServiceMax();
+		$service = $service['detail'];
+		
+		foreach ($cp_service as $classname => &$v)
+		{
+			foreach ($v as $time => &$value)
+			{
+				$value = $service[$time] * division($value,$total_operation_stat[$time]);
+			}
+		}
 		
 		return array(
 			'max' => NULL,

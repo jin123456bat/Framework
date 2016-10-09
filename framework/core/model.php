@@ -109,7 +109,7 @@ class model extends component
 	 */
 	private function parse()
 	{
-		$this->_desc = $this->query('desc '.$this->_table);
+		$this->_desc = $this->query('DESC `'.$this->_table.'`');
 	}
 	
 	/**

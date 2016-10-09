@@ -2,6 +2,7 @@
 namespace application\algorithm;
 
 use framework\core\base;
+use framework\lib\data;
 
 /**
  * @author fx
@@ -24,12 +25,12 @@ class ratio extends base
 		//最近24小时
 		//昨天
 		//上周
-		if (in_array($timenode, array(1,2,3)))
-		{
-			$this->_timenode = $timenode;
-			$this->_parseTime();
-			$this->_algorithm = new algorithm();
-		}
+		//近7天
+		//近30天
+		//上个月
+		$this->_timenode = $timenode;
+		$this->_parseTime();
+		$this->_algorithm = new algorithm();
 	}
 	
 	private function _parseTime()
@@ -68,6 +69,39 @@ class ratio extends base
 				$this->_link = array(
 					'starttime' => date('Y-m-d 00:00:00',strtotime('last week last week')),
 					'endtime' => date('Y-m-d 00:00:00',strtotime('last week')),
+				);
+				break;
+				//近7天的同比 跟上个月的同样的7天
+			case 4:
+				$this->_same = array(
+					'starttime' => date('Y-m-d 00:00:00',strtotime('-1 month -7day')),
+					'endtime' => date('Y-m-d 00:00:00',strtotime('-1 month'))
+				);
+				$this->_link = array(
+					'starttime' => date('Y-m-d 00:00:00',strtotime('-14 day')),
+					'endtime' => date('Y-m-d 00:00:00',strtotime('-7 day')),
+				);
+				break;
+			case 5:
+				//近30天
+				$this->_same = array(
+					'starttime' => date('Y-m-d 00:00:00',strtotime('-1 year -30 day')),
+					'endtime' => date('Y-m-d 00:00:00',strtotime('-1 year')),
+				);
+				$this->_link = array(
+					'starttime' => date('Y-m-d 00:00:00',strtotime('-60 day')),
+					'endtime' => date('Y-m-d 00:00:00',strtotime('-30 day')),
+				);
+				break;
+			case 6:
+				//上个月
+				$this->_same = array(
+					'starttime' => date('Y-m-1 00:00:00',strtotime('-1 year -1 month')),
+					'endtime' => date('Y-m-1 00:00:00',strtotime('-1 year')),
+				);
+				$this->_link = array(
+					'starttime' => date('Y-m-1 00:00:00',strtotime('-2 month')),
+					'endtime' => date('Y-m-1 00:00:00',strtotime('-1 month')),
 				);
 				break;
 		}

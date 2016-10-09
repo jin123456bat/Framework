@@ -74,6 +74,9 @@ class node extends BaseControl
 			'feedback.version',//系统版本号
 			'feedback.disk_detail',//硬盘详情
 			'feedback.network_detail',//网卡详情
+			
+			'feedback.rhelp',//登陆信息
+			'feedback.update_time',//更新时间
 		));
 		
 		
@@ -84,6 +87,10 @@ class node extends BaseControl
 		{
 			$r['disk_detail'] = json_decode($r['disk_detail'],true);
 			$r['network_detail'] = json_decode($r['network_detail'],true);
+			if (!empty($r['rhelp']))
+			{
+				$r['rhelp'] = explode(':', $r['rhelp']);
+			}
 			
 			//最大值
 			$max = $this->model('feedbackHistory')
@@ -177,7 +184,7 @@ class node extends BaseControl
 		//最近24小时用户数量
 		$start_time = date('Y-m-d H:00:00',strtotime('-1 day'));
 		$end_time = date('Y-m-d H:00:00');
-		$duration = 3600;//一个小时为单位
+		$duration = 30*60;//半个小时
 		$online_user = array();
 		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
 		{
@@ -199,6 +206,7 @@ class node extends BaseControl
 			'sys_disk_used' => array(),
 			'data_disk_used' => array(),
 		);
+		$duration = 5*60;//5分钟
 		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
 		{
 			$result = $this->model('traffic_stat')
@@ -225,7 +233,11 @@ class node extends BaseControl
 				$speed['cache'][$t_time] = 0;
 				$speed['monitor'][$t_time] = 0;
 			}
-			
+		}
+		
+		$duration = 10*60;//10分钟
+		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
+		{
 			$result = $this->model('feedbackHistory')
 			->where('sn=?',array($sn))
 			->where('update_time>? and update_time<?',array(
@@ -233,12 +245,12 @@ class node extends BaseControl
 				$t_time
 			))
 			->find(array(
-				'sys_disk_used'=>'avg(sys_disk_used)',
-				'data_disk_used' => 'avg(data_disk_used)',
-				'mem_used' => 'avg(mem_used)',
-				'cpu_used' => 'avg(cpu_used)',
+				'sys_disk_used'=>'max(sys_disk_used)',
+				'data_disk_used' => 'max(data_disk_used)',
+				'mem_used' => 'max(mem_used)',
+				'cpu_used' => 'max(cpu_used)',
 			));
-			
+				
 			if (!empty($result))
 			{
 				$speed['sys_disk_used'][$t_time] = $result['sys_disk_used']*1;

@@ -37,12 +37,17 @@ abstract class BaseControl extends control
 				$this->_startTime = date('Y-m-d 00:00:00', strtotime('last week'));
 				$this->_endTime = date('Y-m-d 00:00:00',strtotime('this week'));
 				break;
+				//近7天
 			case '4':
+				$this->_startTime = date('Y-m-d 00:00:00',strtotime('-7 day'));
+				$this->_endTime = date('Y-m-d 00:00:00');
+				break;
+			case '5':
 				//最近30天
 				$this->_endTime = date('Y-m-d 00:00:00');
 				$this->_startTime = date('Y-m-d 00:00:00',strtotime('-30 day'));
 				break;
-			case '5':
+			case '6':
 				//上月
 				$this->_endTime = date('Y-m-1 00:00:00');
 				$this->_startTime = date('Y-m-1 00:00:00',strtotime('last month'));
@@ -67,10 +72,13 @@ abstract class BaseControl extends control
 			return new json(json::FAILED,'开始时间不能大于等于结束时间');
 		}
 		$this->_duration = request::param('duration');
-		if (!in_array($this->_duration,array('minutely','hourly','daily')))
+		switch ($this->_duration)
 		{
-			return new json(json::FAILED,'duration参数错误');
+			case 'minutely':$this->_duration_second = 60*5;break;
+			case 'hourly':$this->_duration_second = 60*60;break;
+			case 'daily':$this->_duration_second = 60*60*24;break;
+			default:
+				return new json(json::FAILED,'duration参数错误');
 		}
-		$this->_duration_second = $this->_duration == 'hourly'?60*60:($this->_duration=='minutely'?60*5:60*60*24);
 	}
 }

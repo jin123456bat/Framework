@@ -2,7 +2,6 @@
 namespace application\control;
 use framework\core\response\json;
 use application\extend\BaseControl;
-use framework\core\model;
 use application\entity\user;
 use application\algorithm\ratio;
 use application\algorithm\algorithm;
@@ -21,11 +20,19 @@ class main extends BaseControl
 	}
 	
 	function overview()
-	{	
+	{
 		$start_time = date('Y-m-d H:00:00',strtotime($this->_startTime));
 		$end_time = date('Y-m-d H:00:00',strtotime($this->_endTime));
 		
 		$algorithm = new algorithm($start_time, $end_time, $this->_duration_second);
+		
+		switch ($this->_duration)
+		{
+			case 'minutely':$algorithm->setDuration(30*60);break;
+			case 'hourly':$algorithm->setDuration(2*60*60);break;
+			case 'daily':$algorithm->setDuration(24*60*60);break;
+		}
+		
 		$cds = $algorithm->CDSOnlineNum();
 		
 		//user
@@ -35,6 +42,12 @@ class main extends BaseControl
 		//operation_stat  每小时的颗粒度
 		//service_max
 		//服务流速 同一个时间点的operation中service_size的最大值
+		switch ($this->_duration)
+		{
+			case 'minutely':$algorithm->setDuration(5*60);break;
+			case 'hourly':$algorithm->setDuration(2*60*60);break;
+			case 'daily':$algorithm->setDuration(24*60*60);break;
+		}
 		$service_max = $algorithm->ServiceMax();
 		
 		//service_sum
@@ -42,10 +55,22 @@ class main extends BaseControl
 		$service_sum = $algorithm->ServiceSum();
 		
 		//cp_service
+		switch ($this->_duration)
+		{
+			case 'minutely':$algorithm->setDuration(30*60);break;
+			case 'hourly':$algorithm->setDuration(2*60*60);break;
+			case 'daily':$algorithm->setDuration(24*60*60);break;
+		}
 		$cp_service = $algorithm->CPService();
 		
 		$ratio = new ratio($this->_timemode);
-		$ratio->setDuration($this->_duration_second);
+		
+		switch ($this->_duration)
+		{
+			case 'minutely':$ratio->setDuration(5*60);break;
+			case 'hourly':$ratio->setDuration(2*60*60);break;
+			case 'daily':$ratio->setDuration(24*60*60);break;
+		}
 		$cds_ratio = $ratio->cds();
 		$user_ratio = $ratio->user();
 		$service_max_ratio = $ratio->service_max();

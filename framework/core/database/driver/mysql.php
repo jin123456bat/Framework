@@ -42,13 +42,19 @@ class mysql
 	 */
 	private function connect()
 	{
+		$sql_mode = isset($this->config['sql_mode'])?$this->config['sql_mode']:'';
+		$charset = isset($this->config['db_charset'])?$this->config['db_charset']:'utf8';
+		$init_command = array(
+			'SET NAMES '.$charset,
+			//'SET sql_mode = "'.$sql_mode.'"'
+		);
 		$this->pdo = new PDO(
 			$this->config['db_type'] . ':host=' . $this->config['db_server'] . ';dbname=' . $this->config['db_dbname'], 
 			$this->config['db_user'], 
 			$this->config['db_password'], 
 			array(
 				PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION,//抛出异常模式
-				PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '.$this->config['db_charset'],//设置字符集
+				PDO::MYSQL_ATTR_INIT_COMMAND => implode(';', $init_command).';',//设置字符集
 			)
 		);
 	}
@@ -62,16 +68,14 @@ class mysql
 		$statement = $this->pdo->prepare($sql);
 		if ($statement) {
 			$result = $statement->execute($array);
-			if ($result) {
-				if (in_array(strtolower(substr($statement->queryString, 0, 6)), array('select'))) {
-					return $statement->fetchAll(PDO::FETCH_ASSOC);
-				}
-				else if (in_array(strtolower(substr($statement->queryString, 0, 6)), array('insert','delete','update')))
-				{
-					return $statement->rowCount();
-				}
+			if (in_array(strtolower(substr($statement->queryString, 0, 6)), array('select'))) {
 				return $statement->fetchAll(PDO::FETCH_ASSOC);
 			}
+			else if (in_array(strtolower(substr($statement->queryString, 0, 6)), array('insert','delete','update')))
+			{
+				return $statement->rowCount();
+			}
+			return $statement->fetchAll(PDO::FETCH_ASSOC);
 		}
 		return false;
 	}
