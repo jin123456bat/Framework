@@ -1,7 +1,7 @@
 <?php
 return array(
 	'http' => array('未归类', '软件升级', '压缩文档', '文档管理', '图片'),
-	'mobile' => array('android', 'ios', 'winphone'),
+	'mobile' => array('Android', 'IOS', 'WP'),
 	'videoDemand' => array(
 		0 => '未归类',
 		1 => '优酷',

@@ -338,4 +338,24 @@ class algorithm extends component
 			'cache' => $cache_max_detail,
 		);
 	}
+	
+	function operation_stat()
+	{
+		$operation_stat = array();
+		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+		{
+			$result = $this->model('operation_stat')
+			->where('make_time>=? and make_time<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration),
+			))
+			->find(array(
+				'sum_service'=>'sum(service_size)',
+				'sum_cache'=>'sum(cache_size)'
+			));
+			$operation_stat['service'][$t_time] = $result['sum_service'];
+			$operation_stat['cache'][$t_time] = $result['sum_cache'];
+		}
+		return $operation_stat;
+	}
 }

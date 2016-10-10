@@ -198,7 +198,7 @@ class node extends BaseControl
 		}
 		
 		
-		//最近24小时的服务，回源，镜像速率,分别取时间之内的最大值，
+		//最近24小时的服务，回源，镜像速率
 		$speed = array(
 			'service' => array(),
 			'cache' => array(),
@@ -209,7 +209,7 @@ class node extends BaseControl
 		$duration = 5*60;//5分钟
 		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
 		{
-			$result = $this->model('traffic_stat')
+			$result1 = $this->model('traffic_stat')
 			->where('sn=?',array($sn))
 			->where('create_time>=? and create_time<?',array(
 				$t_time,
@@ -219,9 +219,19 @@ class node extends BaseControl
 				'max(concat(lpad(service,20,0),"-",lpad(cache,20,0),"-",lpad(monitor,20,0)))',
 			));
 			
-			if (!empty($result))
+			$result2 = $this->model('cdn_traffic_stat')
+			->where('sn like ?',array('%'.substr($sn, 3)))
+			->where('make_time >=? and make_time<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
+			))
+			->scalar(array(
+				'max(concat(lpad(service,20,0),"-",lpad(cache,20,0),"-",lpad(monitor,20,0)))',
+			));
+			
+			if (!empty($result1))
 			{
-				list($service,$cache,$monitor) = explode('-', $result);
+				list($service,$cache,$monitor) = explode('-', $result1);
 				
 				$speed['service'][$t_time] = $service *1;
 				$speed['cache'][$t_time] = $cache*1;
@@ -233,6 +243,14 @@ class node extends BaseControl
 				$speed['cache'][$t_time] = 0;
 				$speed['monitor'][$t_time] = 0;
 			}
+			
+			if (!empty($result2))
+			{
+				list($service,$cache,$monitor) = explode('-', $result2);
+				$speed['service'][$t_time] += $service;
+				$speed['cache'][$t_time] += $cache;
+				$speed['monitor'][$t_time] += $monitor;
+			}
 		}
 		
 		$duration = 10*60;//10分钟
@@ -240,30 +258,61 @@ class node extends BaseControl
 		{
 			$result = $this->model('feedbackHistory')
 			->where('sn=?',array($sn))
-			->where('update_time>? and update_time<?',array(
+			->where('ctime>=? and ctime<?',array(
 				date('Y-m-d H:i:s',strtotime($t_time) - 30*60),
 				$t_time
 			))
 			->find(array(
 				'sys_disk_used'=>'max(sys_disk_used)',
 				'data_disk_used' => 'max(data_disk_used)',
-				'mem_used' => 'max(mem_used)',
-				'cpu_used' => 'max(cpu_used)',
 			));
-				
+			
 			if (!empty($result))
 			{
 				$speed['sys_disk_used'][$t_time] = $result['sys_disk_used']*1;
 				$speed['data_disk_used'][$t_time] = $result['data_disk_used']*1;
-				$speed['mem_used'][$t_time] = $result['mem_used']*1;
-				$speed['cpu_used'][$t_time] = $result['cpu_used']*1;
 			}
 			else
 			{
 				$speed['sys_disk_used'][$t_time] = 0;
 				$speed['data_disk_used'][$t_time] = 0;
+			}
+			
+			$result = $this->model('traffic_stat')
+			->where('sn=?',array($sn))
+			->where('create_time >=? and create_time <?',array(
+				date('Y-m-d H:i:s',strtotime($t_time) - 30*60),
+				$t_time
+			))
+			->find(array(
+				'cpu_used' => 'max(cpu)',
+				'mem_used' => 'max(mem)',
+			));
+			if (!empty($result))
+			{
+				$speed['mem_used'][$t_time] = $result['mem_used']*1;
+				$speed['cpu_used'][$t_time] = $result['cpu_used']*1;
+			}
+			else
+			{
 				$speed['mem_used'][$t_time] = 0;
 				$speed['cpu_used'][$t_time] = 0;
+			}
+			
+			$result = $this->model('cdn_traffic_stat')
+			->where('sn like ?',array('%'.substr($sn, 3)))
+			->where('make_time >=? and make_time<?',array(
+				date('Y-m-d H:i:s',strtotime($t_time) - 30*60),
+				$t_time
+			))
+			->find(array(
+				'cpu_used' => 'max(cpu)',
+				'mem_used' => 'max(mem)',
+			));
+			if (!empty($result))
+			{
+				$speed['mem_used'][$t_time] = $speed['mem_used'][$t_time]>$result['mem_used']?$speed['mem_used'][$t_time]:$result['mem_used']*1;
+				$speed['cpu_used'][$t_time] = $speed['cpu_used'][$t_time]>$result['cpu_used']?$speed['cpu_used'][$t_time]:$result['cpu_used']*1;
 			}
 		}
 		
@@ -290,17 +339,31 @@ class node extends BaseControl
 				'online_user'=>'max(online_user)',//活跃用户
 			));
 			
-			$result['max_service'] *= 1;
-			$result['max_cache'] *= 1;
-			$result['hit_user'] *= 1;
-			$result['online_user'] *= 1;
-			$result['sum_service'] *= 1;
-			$result['sum_cache'] *= 1;
+			//累加上cdn的service和cache
+			$cdn_traffic_stat = $this->model('cdn_traffic_stat')
+			->where('make_time >=? and make_time<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
+			))
+			->where('sn=?',array($sn))
+			->find(array(
+				'max_service' => 'max(service)',
+				'max_cache' => 'max(cache)',
+				'sum_service' => 'sum(service)',
+				'sum_cache' => 'sum(cache)',
+			));
+			
+			if (!empty($cdn_traffic_stat))
+			{
+				$result['max_service'] += $cdn_traffic_stat['max_service'];
+				$result['max_cache'] += $cdn_traffic_stat['max_cache'];
+				$result['sum_service'] += $cdn_traffic_stat['sum_service'];
+				$result['sum_cache'] += $cdn_traffic_stat['sum_cache'];
+			}
 			
 			$result['user_percent'] = 100*number_format(division($result['hit_user'],$result['online_user']),4,'.','');
 			$result['max_service_user'] = 100*number_format(division($result['max_service'],$result['hit_user']),4,'.','');
 			$result['service_cache'] = 100*number_format(division($result['sum_service'],$result['sum_cache']),4,'.','');
-			
 			
 			$avg = $this->model('report_jxreport')->where('day=? and sn=?',array($t_time,$sn))->find(array(
 				'capture_avg',
@@ -308,6 +371,9 @@ class node extends BaseControl
 			));
 			$result['capture_avg'] = $avg['capture_avg'] * 1;
 			$result['redirect_avg'] = $avg['redirect_avg'] * 1;
+			
+			$result['hit_user'] *= 1;
+			$result['online_user'] *= 1;
 			
 			$run_report[$t_time] = $result;
 		}

@@ -30,13 +30,20 @@ class content extends BaseControl
 		$category_cache = array();
 		$flow = array(
 			'total' => array('service'=>0,'cache'=>0),
-			'videoDemand' => array('service'=>0,'cache'=>0),
-			'videoLive' => array('service'=>0,'cache'=>0),
-			'mobile' => array('service'=>0,'cache'=>0),
 			'http' => array('service'=>0,'cache'=>0),
+			'mobile' => array('service'=>0,'cache'=>0),
+			'videoLive' => array('service'=>0,'cache'=>0),
+			'videoDemand' => array('service'=>0,'cache'=>0),
 		);
+		
+		$total_operation_stat_service = array();
+		$total_operation_stat_cache = array();
+		
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
 		{
+			$total_operation_stat_cache[$t_time] = 0;
+			$total_operation_stat_service[$t_time] = 0;
+			
 			$result = $this->model('operation_stat')
 			->where('make_time >=? and make_time<?',array(
 				$t_time,
@@ -57,7 +64,7 @@ class content extends BaseControl
 			$category_service['mobile'][$t_time] = 0;
 			$category_service['videoLive'][$t_time] = 0;
 			$category_service['videoDemand'][$t_time] = 0;
-				
+			
 			foreach ($result as $r)
 			{
 				switch ($r['class'])
@@ -76,6 +83,9 @@ class content extends BaseControl
 					break;
 				}
 				
+				$total_operation_stat_cache[$t_time] += $r['cache_size'];
+				$total_operation_stat_service[$t_time] += $r['service_size'];
+				
 				$category_service[$classname][$t_time] += $r['service_size'] * 1;
 				$category_cache[$classname][$t_time] += $r['cache_size'] * 1;
 				
@@ -83,6 +93,28 @@ class content extends BaseControl
 				$flow[$classname]['cache'] += $r['cache_size']*1;
 				$flow['total']['service'] += $r['service_size']*1;
 				$flow['total']['cache'] += $r['cache_size']*1;
+			}
+		}
+		
+		//获取traffic_stat  做占比
+		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
+		$traffic_stat = $algorithm->traffic_stat();
+		$service = $traffic_stat['service'];
+		$cache = $traffic_stat['cache'];
+		
+		foreach ($category_service as $classname => &$v)
+		{
+			foreach ($v as $time => &$value)
+			{
+				$value = $service[$time] * division($value, $total_operation_stat_service[$time]);
+			}
+		}
+		
+		foreach ($category_cache as $classname => &$v)
+		{
+			foreach ($v as $time => &$value)
+			{
+				$value = $cache[$time] * division($value, $total_operation_stat_cache[$time]);
 			}
 		}
 		
@@ -202,6 +234,10 @@ class content extends BaseControl
 			'总流量'=>array(
 				'service' => 0,
 				'cache' => 0,
+			),
+			'其他' => array(
+				'service' => 0,
+				'cache' => 0,
 			)
 		);
 		foreach ($category['videoDemand'] as $key=>$name)
@@ -266,10 +302,6 @@ class content extends BaseControl
 		});
 		
 		$i = 0;
-		$cp_cache_service_sum['其他'] = array(
-			'service' => 0,
-			'cache' => 0,
-		);
 		
 		$top5_category = array();
 		foreach ($cp_cache_service_sum as $categoryname =>$service_cache)
@@ -279,7 +311,6 @@ class content extends BaseControl
 				$cp_cache_service_sum['其他']['service'] += $service_cache['service'];
 				$cp_cache_service_sum['其他']['cache'] += $service_cache['cache'];
 				unset($cp_cache_service_sum[$categoryname]);
-				
 			}
 			else if ($categoryname !=='其他' && $categoryname!=='总流量')
 			{
@@ -288,9 +319,10 @@ class content extends BaseControl
 			}
 		}
 		
+		//去掉不是top5的分类，并把他们聚合为其他分类
 		foreach ($cp_service_flow as $cate => $v)
 		{
-			if (!in_array($cate, $top5_category,true))
+			if (!in_array($cate, $top5_category,true) && $cate!=='其他')
 			{
 				foreach ($v as $timenode=>$value)
 				{
@@ -307,10 +339,10 @@ class content extends BaseControl
 			}
 		}
 		
-		
+		//去掉不是top5的分类，并把它们聚合为其他分类
 		foreach ($cp_cache_flow as $cate => $v)
 		{
-			if (!in_array($cate, $top5_category,true))
+			if (!in_array($cate, $top5_category,true) && $cate!=='其他')
 			{
 				foreach ($v as $timenode=>$value)
 				{
@@ -324,6 +356,25 @@ class content extends BaseControl
 					}
 				}
 				unset($cp_cache_flow[$cate]);
+			}
+		}
+		
+		//进行占比计算
+		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
+		$traffic_stat = $algorithm->traffic_stat();
+		$operation_stat = $algorithm->operation_stat();	
+		foreach ($cp_cache_flow as $classname => &$v)
+		{
+			foreach ($v as $time=>&$value)
+			{
+				$value = division($value, $operation_stat['cache'][$time]) * $traffic_stat['cache'][$time];
+			}
+		}
+		foreach ($cp_service_flow as $classname => &$v)
+		{
+			foreach ($v as $time=>&$value)
+			{
+				$value = division($value, $operation_stat['service'][$time]) * $traffic_stat['service'][$time];
 			}
 		}
 		
@@ -414,6 +465,7 @@ class content extends BaseControl
 				'cache' => 0,
 			)
 		);
+		
 		foreach ($category['videoLive'] as $key => $name)
 		{
 			$cp_cache_service_sum[$name] = array(
@@ -467,6 +519,81 @@ class content extends BaseControl
 				
 				$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
 				$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
+			}
+		}
+		
+		//排序
+		uasort($cp_cache_service_sum, function($a,$b){
+			if ($a['service'] + $a['cache'] > $b['service'] + $b['cache'])
+			{
+				return -1;
+			}
+			else if ($a['service'] + $a['cache'] < $b['service'] + $b['cache'])
+			{
+				return 1;
+			}
+			return 0;
+		});
+		
+		//聚合分类 保留前5
+		$i = 0;
+		$top5_category = array();
+		foreach ($cp_cache_service_sum as $categoryname => $service_cache)
+		{
+			if ($categoryname !== '总流量' && $categoryname!=='其他' && $i>=5)
+			{
+				$cp_cache_service_sum['其他']['service'] += $cp_cache_service_sum[$categoryname]['service'];
+				$cp_cache_service_sum['其他']['cache'] += $cp_cache_service_sum[$categoryname]['cache'];
+				unset($cp_cache_service_sum[$categoryname]);
+			}
+			else if ($categoryname !=='其他' && $categoryname!=='总流量')
+			{
+				$top5_category[] = $categoryname;
+				$i++;
+			}
+		}
+		
+		foreach ($cp_cache_flow as $cate => $v)
+		{
+			if (!in_array($cate, $top5_category,true) && $cate !== '其他')
+			{
+				foreach ($v as $timenode=>$value)
+				{
+					$cp_cache_flow['其他'][$timenode] += $value;
+				}
+				unset($cp_cache_flow[$cate]);
+			}
+		}
+		
+		foreach ($cp_service_flow as $cate => $v)
+		{
+			if (!in_array($cate, $top5_category,true) && $cate !== '其他')
+			{
+				foreach ($v as $timenode=>$value)
+				{
+					$cp_service_flow['其他'][$timenode] += $value;
+				}
+				unset($cp_service_flow[$cate]);
+			}
+		}
+		
+		
+		//占比计算
+		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
+		$traffic_stat = $algorithm->traffic_stat();
+		$operation_stat = $algorithm->operation_stat();
+		foreach ($cp_cache_flow as $classname=>&$v)
+		{
+			foreach ($v as $time => &$value)
+			{
+				$value = division($value, $operation_stat['cache'][$time]) * $traffic_stat['cache'][$time];
+			}
+		}
+		foreach ($cp_service_flow as $classname=>&$v)
+		{
+			foreach ($v as $time => &$value)
+			{
+				$value = division($value, $operation_stat['service'][$time]) * $traffic_stat['service'][$time];
 			}
 		}
 		
@@ -543,15 +670,15 @@ class content extends BaseControl
 		$cp_service_flow = array();
 		$cp_cache_flow = array();
 		$cp_cache_service_sum = array(
-			'android' => array(
+			'Android' => array(
 				'service' => 0,
 				'cache' => 0,
 			),
-			'ios' => array(
+			'IOS' => array(
 				'service' => 0,
 				'cache' => 0,
 			),
-			'winphone' => array(
+			'WP' => array(
 				'service' => 0,
 				'cache' => 0,
 			),
@@ -602,6 +729,25 @@ class content extends BaseControl
 				$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
 				$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
 				$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
+			}
+		}
+		
+		//占比计算
+		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
+		$traffic_stat = $algorithm->traffic_stat();
+		$operation_stat = $algorithm->operation_stat();
+		foreach ($cp_cache_flow as $classname=>&$v)
+		{
+			foreach ($v as $time => &$value)
+			{
+				$value = division($value, $operation_stat['cache'][$time]) * $traffic_stat['cache'][$time];
+			}
+		}
+		foreach ($cp_service_flow as $classname=>&$v)
+		{
+			foreach ($v as $time => &$value)
+			{
+				$value = division($value, $operation_stat['service'][$time]) * $traffic_stat['service'][$time];
 			}
 		}
 		
@@ -751,6 +897,24 @@ class content extends BaseControl
 			}
 		}
 		
+		//占比计算
+		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
+		$traffic_stat = $algorithm->traffic_stat();
+		$operation_stat = $algorithm->operation_stat();
+		foreach ($cp_cache_flow as $classname=>&$v)
+		{
+			foreach ($v as $time => &$value)
+			{
+				$value = division($value, $operation_stat['cache'][$time]) * $traffic_stat['cache'][$time];
+			}
+		}
+		foreach ($cp_service_flow as $classname=>&$v)
+		{
+			foreach ($v as $time => &$value)
+			{
+				$value = division($value, $operation_stat['service'][$time]) * $traffic_stat['service'][$time];
+			}
+		}
 		
 		$topfile = array();
 		foreach ($category['http'] as $key=>$name)
