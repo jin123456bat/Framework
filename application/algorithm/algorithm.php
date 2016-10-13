@@ -250,7 +250,7 @@ class algorithm extends component
 				'service_size',
 			));
 			
-			foreach ($categoryTop as $r)
+			foreach ($top as $r)
 			{
 				$classname = $this->getCategoryName($r);
 				$cp_service[$classname][$t_time] = 0;
@@ -284,7 +284,7 @@ class algorithm extends component
 		{
 			foreach ($v as $time => &$value)
 			{
-				//$value = $service[$time] * division($value,$total_operation_stat[$time]);
+				$value = $service[$time] * division($value,$total_operation_stat[$time]);
 			}
 		}
 		

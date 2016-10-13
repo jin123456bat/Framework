@@ -16,6 +16,10 @@ class model extends component
 	
 	private $_desc;
 	
+	private $_compress = false;
+	
+	private $_compress_sql = array();
+	
 	function __construct($table = NULL)
 	{
 		$this->_table = $table;
@@ -244,6 +248,19 @@ class model extends component
 			}
 		}
 		$this->_sql->from($this->_table);
+		if ($this->_compress)
+		{
+			if (!isset($this->_compress_sql['insert']))
+			{
+				$keys = array_keys($data);
+				$this->_compress_sql['insert'] = 'INSERT INTO '.$this->_table.' (`'.implode('`,`', $keys).'`) values (\''.implode('\',\'', $data).'\')';
+			}
+			else
+			{
+				$this->_compress_sql['insert'] .= ',(\''.implode('\',\'', $data).'\')';
+			}
+			return true;
+		}
 		$sql = $this->_sql->insert($data);
 		return $this->query($sql);
 	}
@@ -269,7 +286,8 @@ class model extends component
 	{
 		if ($sql instanceof sql)
 		{
-			self::$_history[] = $sql->getSql();
+			$complete_sql = $sql->getSql();
+			self::$_history[] = $complete_sql;
 			$array = $sql->getParams();
 			$sql_string = $sql->__toString();
 			$sql->clear();
@@ -277,7 +295,13 @@ class model extends component
 		}
 		else
 		{
-			self::$_history[] = $this->_sql->getSql($sql,$array);
+			$complete_sql = $this->_sql->getSql($sql,$array);
+			self::$_history[] = $complete_sql;
+		}
+		if ($this->_compress)
+		{
+			$this->_compress_sql[] = $complete_sql;
+			return true;
 		}
 		return $this->_db->query($sql,$array);
 	}
@@ -322,5 +346,26 @@ class model extends component
 	function truncate()
 	{
 		return $this->_db->exec('TRUNCATE `'.$this->_table.'`');
+	}
+	
+	/**
+	 * 开启sql压缩
+	 * 所谓的sql压缩是指当需要一次性执行非常多的sql的时候，自动把所有的sql语句都拼接起来，当作一条sql执行
+	 * 当开启sql压缩后query函数始终返回true
+	 */
+	function startCompress()
+	{
+		$this->_compress = true;
+	}
+	
+	/**
+	 * 提交压缩后的sql
+	 */
+	function commitCompress()
+	{
+		$sql = implode(';', $this->_compress_sql).';';
+		$result = $this->_db->exec($sql);
+		$this->_compress = false;
+		return $result;
 	}
 }
