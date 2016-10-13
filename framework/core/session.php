@@ -1,9 +1,15 @@
 <?php
 namespace framework\core;
 
+/**
+ * @author fx
+ *
+ */
 class session extends component
 {
 	static private $_session;
+	
+	static public $_data = array();
 	
 	function initlize()
 	{
@@ -28,33 +34,46 @@ class session extends component
 		parent::initlize();
 	}
 	
-	public static function set($name,$value)
+	public static function getInstance()
 	{
 		if (empty(self::$_session))
 		{
-			self::$_session = new session();
-			self::$_session->initlize();
+			self::$_session = new self();
+			if (method_exists(self::$_session,'initlize'))
+			{
+				self::$_session->initlize();
+			}
 		}
+		return self::$_session;
+	}
+	
+	public static function set($name,$value)
+	{
+		self::getInstance();
 		$_SESSION[$name] = $value;
 	}
 	
+	/**
+	 * 获取SESSION信息
+	 * @param unknown $name
+	 * @return NULL|mixed
+	 */
 	public static function get($name)
 	{
-		if (empty(self::$_session))
+		self::getInstance();
+		if (isset($_SESSION[$name]))
 		{
-			self::$_session = new session();
-			self::$_session->initlize();
+			return $_SESSION[$name];
 		}
-		return isset($_SESSION[$name])?$_SESSION[$name]:NULL;
+		return NULL;
 	}
 	
+	/**
+	 * 删除所有session
+	 * @return boolean
+	 */
 	public static function destory()
 	{
-		if (empty(self::$_session))
-		{
-			self::$_session = new session();
-			self::$_session->initlize();
-		}
-		return session_destroy();
+		session_destroy();
 	}
 }

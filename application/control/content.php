@@ -610,23 +610,26 @@ class content extends BaseControl
 		$selected_key = array();
 		foreach ($category['videoLive'] as $key=>$name)
 		{
-			$topfile[$name] = $topModel
-			->where('create_time>=? and create_time<?',array(
-				$start_time,
-				$end_time,
-			))
-			->where('class=? and category=?',array(2,$key + 128))
-			->group('hash')
-			->order('sum_service','desc')
-			->limit(10)
-			->select(array(
-				'host',
-				'filename',
-				'sum(cache_size) as sum_cache',
-				'sum(service_size) as sum_service',
-			));
-			
-			$selected_key[] = $key+128;
+			if (in_array($name, $top5_category))
+			{
+				$topfile[$name] = $topModel
+				->where('create_time>=? and create_time<?',array(
+					$start_time,
+					$end_time,
+				))
+				->where('class=? and category=?',array(2,$key + 128))
+				->group('hash')
+				->order('sum_service','desc')
+				->limit(10)
+				->select(array(
+					'host',
+					'filename',
+					'sum(cache_size) as sum_cache',
+					'sum(service_size) as sum_service',
+				));
+				
+				$selected_key[] = $key+128;
+			}
 		}
 		
 		$topfile['其他'] = $topModel
@@ -691,6 +694,13 @@ class content extends BaseControl
 		$category = $this->getConfig('category');
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
 		{
+			$cp_cache_flow['Android'][$t_time] = 0;
+			$cp_cache_flow['IOS'][$t_time] = 0;
+			$cp_cache_flow['WP'][$t_time] = 0;
+			$cp_service_flow['Android'][$t_time] = 0;
+			$cp_service_flow['IOS'][$t_time] = 0;
+			$cp_service_flow['WP'][$t_time] = 0;
+			
 			$result = $this->model('operation_stat')
 			->where('make_time >=? and make_time<?',array(
 				$t_time,
@@ -707,24 +717,9 @@ class content extends BaseControl
 			{
 				$categoryname = $category['mobile'][$r['category']];
 		
-				if (isset($cp_service_flow[$categoryname][$t_time]))
-				{
-					$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
-				}
-				else
-				{
-					$cp_service_flow[$categoryname][$t_time] = $r['service_size'] * 1;
-				}
-		
-				if (isset($cp_cache_flow[$categoryname][$t_time]))
-				{
-					$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
-				}
-				else
-				{
-					$cp_cache_flow[$categoryname][$t_time] = $r['service_size'] * 1;
-				}
-		
+				$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
+				$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
+				
 				$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
 				$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
 				$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
@@ -736,6 +731,7 @@ class content extends BaseControl
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
 		$traffic_stat = $algorithm->traffic_stat();
 		$operation_stat = $algorithm->operation_stat();
+	
 		foreach ($cp_cache_flow as $classname=>&$v)
 		{
 			foreach ($v as $time => &$value)
@@ -821,24 +817,9 @@ class content extends BaseControl
 			)
 		);
 		
-		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		//计算网卡总流速
-		$traffic_stat = $algorithm->traffic_stat();
-		
 		$category = $this->getConfig('category');
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
 		{
-			//当前时间段的业务总流量
-			$operation_stat = $this->model('operation_stat')
-			->where('make_time >=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
-			))
-			->find(array(
-				'sum_service'=>'sum(service_size)',
-				'sum_cache'=>'sum(cache_size)'
-			));
-			
 			//计算当前时间段内各个类型的业务流量
 			$result = $this->model('operation_stat')
 			->where('make_time >=? and make_time<?',array(
@@ -878,22 +859,6 @@ class content extends BaseControl
 				$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
 				$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
 				$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
-			}
-			
-			foreach ($cp_service_flow as $categoryname => &$v)
-			{
-				foreach ($v as $time => &$flow)
-				{
-					$flow = division($flow, $operation_stat['sum_service']) * $traffic_stat['service'][$t_time];
-				}
-			}
-			
-			foreach ($cp_cache_flow as $categoryname => &$v)
-			{
-				foreach ($v as $time => &$flow)
-				{
-					$flow = division($flow, $operation_stat['sum_cache']) * $traffic_stat['cache'][$t_time];
-				}
 			}
 		}
 		

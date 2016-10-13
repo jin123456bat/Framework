@@ -6,12 +6,6 @@ use framework\core\database\driver\mysql;
 
 class model extends component
 {
-	/**
-	 * 1对多
-	 * @var integer
-	 */
-	const RELATION_ONE_MANY = 1;
-	
 	private $_table;
 	
 	private $_sql;
@@ -138,7 +132,6 @@ class model extends component
 	function scalar($field = '*')
 	{
 		$result = $this->find($field);
-		
 		if (is_array($result))
 		{
 			return array_shift($result);
@@ -208,9 +201,9 @@ class model extends component
 		//是否是数字下标
 		$is_num_index = array_keys($data) == range(0, count($data)-1,1);
 		//补充默认值
-		foreach ($this->_desc as $index=>$value)
+		if (!$is_num_index)
 		{
-			if (!$is_num_index)
+			foreach ($this->_desc as $index=>$value)
 			{
 				if (!isset($data[$value['Field']]))
 				{
@@ -220,19 +213,30 @@ class model extends component
 					}
 					else
 					{
-						if ($value['Default'] == 'CURRENT_TIMESTAMP')
+						if ($value['Default'] === NULL)
 						{
-							$data[$value['Field']] = date('Y-m-d H:i:s');
-						}
-						else
-						{
-							if ($value['Default'] === NULL)
+							switch ($value['Type'])
 							{
-								$data[$value['Field']] = 0;
-							}
-							else
-							{
-								$data[$value['Field']] = $value['Default'];
+								case 'datetime':
+									$data[$value['Field']] = date('Y-m-d H:i:s');
+									break;
+								case 'timestamp':
+									$data[$value['Field']] = date('Y-m-d H:i:s');
+									break;
+								case 'date':
+									$data[$value['Field']] = date('Y-m-d');
+									break;
+								default:
+									$zero = '$int\(\d+\)$';
+									$empty_string = '$(char)?(text)?$';
+									if (preg_match($zero, $value['Type']))
+									{
+										$data[$value['Field']] = 0;
+									}
+									else if (preg_match($empty_string, $value['Type']))
+									{
+										$data[$value['Field']] = '';
+									}
 							}
 						}
 					}
@@ -242,8 +246,6 @@ class model extends component
 		$this->_sql->from($this->_table);
 		$sql = $this->_sql->insert($data);
 		return $this->query($sql);
-		
-		
 	}
 	
 	/**
@@ -311,5 +313,14 @@ class model extends component
 	function lastInsertId($name = NULL)
 	{
 		return $this->_db->lastInsert($name);
+	}
+	
+	/**
+	 * 清空表
+	 * @return boolean
+	 */
+	function truncate()
+	{
+		return $this->_db->exec('TRUNCATE `'.$this->_table.'`');
 	}
 }

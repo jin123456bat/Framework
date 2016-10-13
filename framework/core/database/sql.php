@@ -524,7 +524,6 @@ class sql extends base
 						$this->_temp['params'] = $this->_temp['insert']->getParams();
 					}
 				}
-				
 				return $sql;
 			case 'select':
 				$distinct = isset($this->_temp['distinct']) && $this->_temp['distinct']===true?'DISTINCT ':'';

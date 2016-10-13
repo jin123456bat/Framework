@@ -53,7 +53,7 @@ class mysql
 			$this->config['db_user'], 
 			$this->config['db_password'], 
 			array(
-				PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION,//抛出异常模式
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,//抛出异常模式
 				PDO::MYSQL_ATTR_INIT_COMMAND => implode(';', $init_command).';',//设置字符集
 			)
 		);
@@ -68,10 +68,10 @@ class mysql
 		$statement = $this->pdo->prepare($sql);
 		if ($statement) {
 			$result = $statement->execute($array);
-			if (in_array(strtolower(substr($statement->queryString, 0, 6)), array('select'))) {
+			if (in_array(strtolower(substr(trim($statement->queryString), 0, 6)), array('select'),true)) {
 				return $statement->fetchAll(PDO::FETCH_ASSOC);
 			}
-			else if (in_array(strtolower(substr($statement->queryString, 0, 6)), array('insert','delete','update')))
+			else if (in_array(strtolower(substr(trim($statement->queryString), 0, 6)), array('insert','delete','update'),true))
 			{
 				return $statement->rowCount();
 			}

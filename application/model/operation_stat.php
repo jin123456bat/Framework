@@ -1,6 +1,6 @@
 <?php
 namespace application\model;
-use framework\core\model;
+use \application\extend\model;
 
 class operation_stat extends model
 {

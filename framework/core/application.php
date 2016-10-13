@@ -3,6 +3,8 @@ namespace framework\core;
 
 class application extends component
 {
+	private $_session = NULL;
+	
 	function __construct($name,$path)
 	{
 		base::$APP_NAME = $name;
@@ -23,7 +25,7 @@ class application extends component
 		$this->env();
 		
 		$this->import('app');
-		
+
 		parent::initlize();
 	}
 	
@@ -114,7 +116,6 @@ class application extends component
 	 */
 	protected function doResponse($response)
 	{
-		xhprof_stop();
 		if ($response !== NULL)
 		{
 			if (is_string($response))

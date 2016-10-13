@@ -122,21 +122,30 @@ class ratio extends base
 	 */
 	function cds()
 	{
-		if (empty($this->_timenode))
+		if (!empty($this->_same))
 		{
-			return array(
-				'link' => NULL,
-				'same' => NULL,
+			$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
+			$same = $this->_algorithm->CDSOnlineNum();
+		}
+		else
+		{
+			$same = array(
+				'max' => NULL,
 			);
 		}
 		
+		if (!empty($this->_link))
+		{
+			$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
+			$link = $this->_algorithm->CDSOnlineNum();
+		}
+		else
+		{
+			$link = array(
+				'max' => NULL,
+			);
+		}
 		
-		$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
-		$same = $this->_algorithm->CDSOnlineNum();
-		
-		$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
-		$link = $this->_algorithm->CDSOnlineNum();
-
 		return array(
 			'same' => $same['max'],
 			'link' => $link['max'],
@@ -145,19 +154,29 @@ class ratio extends base
 	
 	function user()
 	{
-		if (empty($this->_timenode))
+		if (!empty($this->_same))
 		{
-			return array(
-				'link' => NULL,
-				'same' => NULL,
+			$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
+			$same = $this->_algorithm->USEROnlineNum();
+		}
+		else
+		{
+			$same = array(
+				'max' => NULL,
 			);
 		}
 		
-		$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
-		$same = $this->_algorithm->USEROnlineNum();
-		
-		$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
-		$link = $this->_algorithm->USEROnlineNum();
+		if (!empty($this->_link))
+		{
+			$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
+			$link = $this->_algorithm->USEROnlineNum();
+		}
+		else
+		{
+			$link = array(
+				'max' => NULL,
+			);
+		}
 		
 		return array(
 			'link' => $link['max'],
@@ -167,19 +186,29 @@ class ratio extends base
 	
 	function service_max()
 	{
-		if (empty($this->_timenode))
+		if (!empty($this->_same))
 		{
-			return array(
-				'link' => NULL,
-				'same' => NULL,
+			$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
+			$same = $this->_algorithm->ServiceMax();
+		}
+		else
+		{
+			$same = array(
+				'max' => NULL,
 			);
 		}
 		
-		$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
-		$same = $this->_algorithm->ServiceMax();
-		
-		$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
-		$link = $this->_algorithm->ServiceMax();
+		if (!empty($this->_link))
+		{
+			$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
+			$link = $this->_algorithm->ServiceMax();
+		}
+		else
+		{
+			$link = array(
+				'max' => NULL,
+			);
+		}
 		
 		return array(
 			'link' => $link['max'],
@@ -189,19 +218,29 @@ class ratio extends base
 	
 	function service_sum()
 	{
-		if (empty($this->_timenode))
+		if (!empty($this->_same))
 		{
-			return array(
-				'link' => NULL,
-				'same' => NULL,
+			$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
+			$same = $this->_algorithm->ServiceSum();
+		}
+		else
+		{
+			$same = array(
+				'max' => NULL,
 			);
 		}
 		
-		$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
-		$same = $this->_algorithm->ServiceSum();
-		
-		$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
-		$link = $this->_algorithm->ServiceSum();
+		if (!empty($this->_link))
+		{
+			$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
+			$link = $this->_algorithm->ServiceSum();
+		}
+		else
+		{
+			$link = array(
+				'max' => NULL,
+			);
+		}
 		
 		return array(
 			'link' => $link['max'],

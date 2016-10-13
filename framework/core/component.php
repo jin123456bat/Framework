@@ -20,6 +20,26 @@ class component extends base
 	}
 	
 	/**
+	 * 添加临时配置全局配置变量，这个变量当程序运行完毕后自动注销
+	 * @param unknown $key
+	 * @param unknown $value
+	 */
+	function addTemporaryConfig($key,$value)
+	{
+		self::$_config['framework_core_temporary'][$key] = $value;
+	}
+	
+	/**
+	 * 获取临时配置变量
+	 * @param unknown $key
+	 * @return mixed
+	 */
+	function getTemporaryConfig($key)
+	{
+		return self::$_config['framework_core_temporary'][$key];
+	}
+	
+	/**
 	 * 载入组件配置
 	 */
 	function setConfig($app)

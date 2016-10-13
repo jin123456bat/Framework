@@ -3,7 +3,7 @@ namespace framework\core;
 
 use framework\vendor\file;
 
-class response extends base
+class response extends component
 {
 	/**
 	 * http code

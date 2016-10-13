@@ -1,8 +1,7 @@
 <?php
 namespace application\model;
-use framework\core\model;
 
-class cdn_traffic_stat extends model
+class cdn_traffic_stat extends \application\extend\model
 {
 	function __config()
 	{

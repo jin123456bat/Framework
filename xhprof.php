@@ -11,9 +11,11 @@ class  VsmedProf {
 	static $started = false;
 	static $stopped = false;
 	public static function start() {
+		
 		if (!extension_loaded('xhprof') || self::$started === true) {
 			return;
 		}
+		
 		xhprof_enable(XHPROF_FLAGS_CPU + XHPROF_FLAGS_MEMORY);
 		xhprof_enable(XHPROF_FLAGS_NO_BUILTINS);
 		self::$started = true;
@@ -24,6 +26,18 @@ class  VsmedProf {
 			return;
 		}
 		$xhprofData = xhprof_disable();
+		
+		$XHPROF_ROOT = __DIR__.'/xhprof';
+		
+		include_once $XHPROF_ROOT . "/xhprof_lib/utils/xhprof_lib.php";
+		include_once $XHPROF_ROOT . "/xhprof_lib/utils/xhprof_runs.php";
+		// save raw data for this profiler run using default
+		// implementation of iXHProfRuns.
+		$xhprof_runs = new XHProfRuns_Default();
+		// save the run under a namespace "xhprof_foo"
+		$run_id = $xhprof_runs->save_run($xhprofData, "xhprof_foo");
+		//echo "<a href='http://www.pztai.com/xhprof/xhprof_html/?run=$run_id&source=xhprof_foo'>分析</a>";//
+		
 		$send_arr = array(
 			'username' => 'jin123456bat',
 			'password' => 'b99f1a1c875c4f200449dc55eb4b77a6',
@@ -44,7 +58,11 @@ class  VsmedProf {
 		} else {
 			// send use udp
 			$sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-			socket_sendto($sock, $sendData, $len, 0, 'api.xhprof.com', 80);
+			if(!socket_sendto($sock, $sendData, $len, 0, 'api.xhprof.com', 80))
+			{
+				echo "发送失败";
+				exit();
+			}
 			socket_close($sock);
 		}
 		self::$stopped = true;

@@ -18,7 +18,7 @@ class algorithm extends component
 	 * @param unknown $endtime 结束时间点
 	 * @param unknown $duration 时间间隔，默认5分钟
 	 */
-	function __construct($starttime = '',$endtime = '',$duration = 5*60)
+	function __construct($starttime = '',$endtime = '',$duration = 300)
 	{
 		$this->_starttime = $starttime;
 		$this->_endtime = $endtime;
@@ -54,12 +54,18 @@ class algorithm extends component
 		$cds_detail = array();
 		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
 		{
-			$cds_detail[$t_time] = 1 * $this->model('feedbackHistory')->where('ctime >= ? and ctime < ?',array(date('Y-m-d H:i:s',strtotime($t_time)-30*60),$t_time))->scalar('count(distinct(sn))');
+			$cds_detail[$t_time] = 1 * $this->model('feedbackHistory')
+			->where('ctime >= ? and ctime < ?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
+			))
+			->scalar('count(distinct(sn))');
 			if ($cds_detail[$t_time] > $cds_max)
 			{
 				$cds_max = $cds_detail[$t_time];
 			}
 		}
+		
 		return array(
 			'max' => $cds_max,
 			'detail' => $cds_detail,
@@ -78,8 +84,8 @@ class algorithm extends component
 			$max_online_gourp_sn = $this->model('feedbackHistory')
 			->group('sn')
 			->where('ctime >= ? and ctime<?',array(
-				date('Y-m-d H:i:s',strtotime($t_time)-30*60),
-				$t_time
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration),
 			))
 			->select('max(online) as online');
 				
@@ -137,18 +143,18 @@ class algorithm extends component
 			foreach ($traffic_stat as $stat)
 			{
 				$time = $stat['create_time'];
-				$the_max[$time] = $stat;
+				$the_max[$time] = $stat['sum_service']*1;
 			}
 			foreach ($cdn_traffic_stat as $stat)
 			{
 				$time = $stat['make_time'];
 				if (isset($the_max[$time]))
 				{
-					$the_max[$time] += $stat;
+					$the_max[$time] += $stat['sum_service'];
 				}
 				else
 				{
-					$the_max[$time] = $stat;
+					$the_max[$time] = $stat['sum_service'];
 				}
 			}
 			if (!empty($the_max))
@@ -211,7 +217,7 @@ class algorithm extends component
 			$this->_starttime,
 			$this->_endtime
 		))
-		->group('category')
+		->group(array('class','category'))
 		->order('service_sum','desc')
 		->limit(9)
 		->select(array(
@@ -278,7 +284,7 @@ class algorithm extends component
 		{
 			foreach ($v as $time => &$value)
 			{
-				$value = $service[$time] * division($value,$total_operation_stat[$time]);
+				//$value = $service[$time] * division($value,$total_operation_stat[$time]);
 			}
 		}
 		
@@ -353,8 +359,8 @@ class algorithm extends component
 				'sum_service'=>'sum(service_size)',
 				'sum_cache'=>'sum(cache_size)'
 			));
-			$operation_stat['service'][$t_time] = $result['sum_service'];
-			$operation_stat['cache'][$t_time] = $result['sum_cache'];
+			$operation_stat['service'][$t_time] = $result['sum_service']*1;
+			$operation_stat['cache'][$t_time] = $result['sum_cache']*1;
 		}
 		return $operation_stat;
 	}
