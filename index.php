@@ -14,7 +14,10 @@ include './xhprof.php';
 //载入框架
 include SYSTEM_ROOT.'/framework.php';
 
+//增加对cli模式的支持
+$argc = isset($argc)?$argc:0;
+$argv = isset($argv)?$argv:array();
 
-$framework = new framework();
+$framework = new framework($argc,$argv);
 $app = $framework->createApplication(APP_NAME,APP_ROOT);
 $app->run();

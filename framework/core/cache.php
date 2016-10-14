@@ -21,11 +21,17 @@ class cache extends component
 		return self::$_instance[$type];
 	}
 	
-	static function set($name,$value)
+	static function setExpires($expires)
+	{
+		self::$_expires = $expires;
+	}
+	
+	static function set($name,$value,$cache = 0)
 	{
 		$cache = self::init();
 		$config = self::getConfig('cache');
-		return $cache->set($name,$value,self::$_expires);
+		$cache = empty($cache)?self::$_expires:$cache;
+		return $cache->set($name,$value,$cache);
 	}
 	
 	static function get($name)

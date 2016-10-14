@@ -2,6 +2,11 @@
 namespace framework\core;
 class request extends base
 {
+	static function php_sapi_name()
+	{
+		return php_sapi_name();
+	}
+	
 	/**
 	 * 当前请求方式
 	 * @return unknown

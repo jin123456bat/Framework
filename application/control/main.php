@@ -6,6 +6,7 @@ use application\entity\user;
 use application\algorithm\ratio;
 use application\algorithm\algorithm;
 use framework\core\model;
+use framework\core\request;
 
 /**
  * 首页相关接口
@@ -22,6 +23,9 @@ class main extends BaseControl
 	
 	function overview()
 	{
+		var_dump(request::php_sapi_name());
+		exit();
+		
 		$start_time = date('Y-m-d H:00:00',strtotime($this->_startTime));
 		$end_time = date('Y-m-d H:00:00',strtotime($this->_endTime));
 		

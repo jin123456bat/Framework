@@ -11,7 +11,7 @@ class framework
 	 */
 	private $_application;
 	
-	function __construct()
+	function __construct($argc = 0,$argv = array())
 	{
 		spl_autoload_register(array($this,'autoload'),true);
 	}
