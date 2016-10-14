@@ -3,6 +3,8 @@ namespace framework\core;
 
 class base
 {
+	static private $_model_instance = array();
+	
 	static $APP_NAME;
 	
 	static $APP_PATH;
@@ -54,34 +56,33 @@ class base
 	 */
 	protected function model($name)
 	{
-		static $instance = array();
-		if (!isset($instance[$name])) {
+		if (!isset($this->_model_instance[$name])) {
 			if (!class_exists(self::$APP_NAME.'\\model\\' . $name))
 			{
 				$path = ROOT . '/'.self::$APP_NAME.'/model/' . $name . '.php';
 				if (file_exists($path)) {
 					include $path;
 					$model = self::$APP_NAME.'\\model\\' . $name;
-					$instance[$name] = new $model($name);
+					$this->_model_instance[$name] = new $model($name);
 				} else {
-					$instance[$name] = new model($name);
+					$this->_model_instance[$name] = new model($name);
 				}
-				if (method_exists($instance[$name], 'initlize'))
+				if (method_exists($this->_model_instance[$name], 'initlize'))
 				{
-					$instance[$name]->initlize();
+					$this->_model_instance[$name]->initlize();
 				}
 			}
 			else
 			{
 				$model = self::$APP_NAME.'\\model\\' . $name;
-				$instance[$name] = new $model($name);
-				if (method_exists($instance[$name], 'initlize'))
+				$this->_model_instance[$name] = new $model($name);
+				if (method_exists($this->_model_instance[$name], 'initlize'))
 				{
-					$instance[$name]->initlize();
+					$this->_model_instance[$name]->initlize();
 				}
 			}
 		}
-		return $instance[$name];
+		return $this->_model_instance[$name];
 	}
 	
 	

@@ -1,6 +1,7 @@
 <?php
 namespace application\control;
 use framework\core\control;
+use framework\data\collection;
 class index extends control
 {
 	private $_start_time = '2016-08-01 00:00:00';
@@ -20,96 +21,39 @@ class index extends control
 	
 	function index()
 	{
-		ini_set('max_execution_time', 0);
 		
-		//$this->createOperationStatData();
+		$data = array(
+			'A',
+			'B',
+			'C',
+			'D',
+			'B',
+		);
+		$collection = new collection($data);
+		$collection->unique();
 		
-		//$this->createCdnTrafficStatData();
-	}
-	
-	function createCdnTrafficStatData()
-	{
-		$start_time = $this->_start_time;
-		$end_time = $this->_end_time;
+		//ok
+		/* $collection['a'] = 'asdasf';
+		var_dump($collection['a']);
+		 */
 		
-		$sn = $this->_sn;
-		foreach ($sn as $sns)
+		//ok
+		//var_dump($collection['a']);
+		
+		//failed
+		/* if (is_array($collection))
 		{
-			for($i=$start_time;strtotime($i)<strtotime($end_time);$i = date("Y-m-d H:i:s",strtotime($i) + 5*60))
-			{
-				$this->model('cdn_traffic_stat')->insert(array(
-					'create_time' => $i,
-					'sn' => $sns,
-					'cache' => rand(0,100000),
-					'service' => rand(0,100000),
-					'monitor' => rand(0,10000),
-					'cpu' => rand(0,100),
-					'mem' => rand(0,100),
-					'make_time' =>$i
-				));
-			}
+			echo "ok";
 		}
-	}
-	
-	/**
-	 * 创建operation_stat表的数据
-	 */
-	function createOperationStatData()
-	{
-		$start_time = $this->_start_time;
-		$end_time = $this->_end_time;
-	
-		$sn = $this->_sn;
-	
-		foreach ($sn as $sns)
+		else
 		{
-			for($i=$start_time;strtotime($i)<strtotime($end_time);$i = date("Y-m-d H:i:s",strtotime($i) + 5*60))
-			{
-				$random_time = $i;
-					
-				$class = rand(0,2);
-				if ($class==2)
-				{
-					$live = rand(0,1) * 128;
-					if ($live)
-					{
-						$category = $live + rand(0,28);
-					}
-					else
-					{
-						$category = rand(0,22);
-					}
-				}
-				else if ($class==1)
-				{
-					$category = rand(0,2);
-				}
-				else if ($class == 0)
-				{
-					$category = rand(0,4);
-				}
-					
-				if($this->model('operation_stat')->insert(array(
-					'create_time' => $random_time,
-					'sn' => $sns,
-					'class' => $class,
-					'category' => $category,
-					'mode' => rand(0,3),
-					'cache_size' => rand(0,100000),
-					'proxy_cache_size' => rand(0,100000),
-					'cache_hit_size' => rand(0,100000),
-					'service_size' => rand(0,100000),
-					'service_time' => rand(0,100000),
-					'task_size' => rand(0,100000),
-					'play_cnt' => rand(10,30),
-					'hit_cnt' => rand(10,3000),
-					'service_cnt' => rand(100,200),
-					'make_time' => $random_time
-				)))
-				{
-					echo "ok<br>";
-				}
-			}
+			echo "failed";
+		} */
+		
+		//ok
+		foreach ($collection as $key => $value)
+		{
+			echo $key.'=>'.$value.'<br>';
 		}
 	}
 }

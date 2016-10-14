@@ -2,6 +2,10 @@
 $dbpass = '';
 $sql_mode = 'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
 
+$init_command = array(
+	//'set max_allowed_packet = '.(2*1024*1024*10*100),
+	//'set sql_mode = '.$sql_mode,
+);
 return array(
 	'cloud_web_v2' => array(
 		'db_type' => 'mysql',
@@ -10,7 +14,7 @@ return array(
 		'db_user' => 'root',
 		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
-		'sql_mode' => $sql_mode
+		'init_command' => $init_command,
 	),
 	'ordoac' => array(
 		'db_type' => 'mysql',
@@ -20,7 +24,7 @@ return array(
 		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
 		'default' => true,
-		'sql_mode' => $sql_mode
+		'init_command' => $init_command,
 	),
 	'cds_v2' => array(
 		'db_type' => 'mysql',
@@ -29,7 +33,7 @@ return array(
 		'db_user' => 'root',
 		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
-		'sql_mode' => $sql_mode
+		'init_command' => $init_command,
 		
 		/* 'db_server' => '192.168.1.225',
 		'db_dbname' => 'ordoac',
@@ -45,6 +49,6 @@ return array(
 		'db_user' => 'admin',
 		'db_password' => 'fxdata2000',
 		'db_charset' => 'utf8',
-		'sql_mode' => $sql_mode
+		'init_command' => $init_command,
 	)
 );

@@ -109,6 +109,25 @@
 				</select>
 			</td>
 		</tr>
+		<tr data-a="node_detail">
+			<td>节点详情（CAS0530000150）</td>
+			<td><input type="checkbox" data-duration="minutely" data-time="1"></td>
+			<td><input type="checkbox" data-duration="minutely" data-time="2"></td>
+			<td><input type="checkbox" data-duration="hourly" data-time="3"></td>
+			<td><input type="checkbox" data-duration="hourly" data-time="4"></td>
+			<td><input type="checkbox" data-duration="daily" data-time="5"></td>
+			<td><input type="checkbox" data-duration="daily" data-time="6"></td>
+			<td>
+				<input type="text" name="starttime" data-time="7" placeholder="开始时间">
+				<input type="text" name="endtime" data-time="7" placeholder="结束时间">
+				<select name="duration">
+					<option selected="selected" disabled="disabled">时间颗粒度</option>
+					<option value="minutely">分钟</option>
+					<option value="hourly">小时</option>
+					<option value="daily">天</option>
+				</select>
+			</td>
+		</tr>
 	</tbody>
 	<tfoot align="center">
 		<tr><td>模式</td><td colspan="3"><input class="mode" type="radio" name="mode" value="1">直线</td><td colspan="4"><input type="radio" class="mode" name="mode" checked="checked" value="0">随机</td></tr>

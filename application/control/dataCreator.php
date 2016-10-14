@@ -324,6 +324,88 @@ class dataCreator extends BaseControl
 		return new json(json::OK,NULL,$num);
 	}
 	
+	/**
+	 * 生成节点详情数据
+	 */
+	function node_detail()
+	{
+		$response = $this->setTime();
+		if ($response!==NULL)
+		{
+			return $response;
+		}
+		
+		$sn = 'CAS0530000150';
+		
+		$this->model('feedback')->insert(array(
+			'sn' => $sn,
+			'version' => '8.0',
+			'cpu_type' => 'cpu_type',
+			'mem_size' => 100 *1024,
+			'sys_disk_size' => 100 * 1024*1024*1024,
+			'data_disk_size' => 100* 1024*1024*1024*1024,
+		));
+		
+		$this->model('user_info')->insert(array(
+			'sn' => $sn,
+			'company' => '测试用数据'
+		));
+		
+		$num = 0;
+		
+		$mode = request::param('mode');
+		
+		$this->_startTime = date('Y-m-d H:00:00',strtotime('-30 day'));
+		$this->_endTime = date('Y-m-d H:00:00');
+		
+		$this->model('feedbackHistory')->startCompress();
+		//最近24小时的在线用户数据和磁盘数据
+		$duration = 30*60;
+		for ($t_time = $this->_startTime;strtotime($t_time)<strtotime($this->_endTime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
+		{
+			$num += $this->model('feedbackHistory')->insert(array(
+				'ctime' => $t_time,
+				'sn' => $sn,
+				'online' => $mode==0?rand(0,1000):1000,
+				'sys_disk_used' => $mode==0?rand(0,100):50,
+				'data_disk_used' => $mode==0?rand(0,100):50,
+			));
+		}
+		$this->model('feedbackHistory')->commitCompress();
+		
+		
+		$this->model('cdn_traffic_stat')->startCompress();
+		$this->model('traffic_stat')->startCompress();
+		$duration =5*60;
+		for ($t_time = $this->_startTime;strtotime($t_time)<strtotime($this->_endTime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
+		{
+			$num += $this->model('cdn_traffic_stat')->insert(array(
+				'make_time' => $t_time,
+				'sn' => $sn,
+				'service' => $mode==0?rand(0,100000):50000,
+				'cache' => $mode==0?rand(0,100000):50000,
+				'monitor' => $mode==0?rand(0,100000):50000,
+				'cpu' => $mode==0?rand(0,100):50,
+				'mem' => $mode==0?rand(0,100):50,
+			));
+			$num += $this->model('traffic_stat')->insert(array(
+				'create_time' => $t_time,
+				'sn' => $sn,
+				'service' => $mode==0?rand(0,100000):50000,
+				'cache' => $mode==0?rand(0,100000):50000,
+				'monitor' => $mode==0?rand(0,100000):50000,
+				'cpu' => $mode==0?rand(0,100):50,
+				'mem' => $mode==0?rand(0,100):50,
+				'hit_user' => $mode==0?rand(0,10000):5000,
+				'online_user' => $mode==0?rand(0,10000):10000,
+			));
+		}
+		$this->model('cdn_traffic_stat')->commitCompress();
+		$this->model('traffic_stat')->commitCompress();
+		
+		return new json(json::OK,NULL,$num);
+	}
+	
 	function clean()
 	{
 		$data = array(
@@ -331,6 +413,8 @@ class dataCreator extends BaseControl
 			$this->model('cdn_traffic_stat')->truncate(),
 			$this->model('traffic_stat')->truncate(),
 			$this->model('operation_stat')->truncate(),
+			$this->model('feedback')->truncate(),
+			$this->model('user_info')->truncate(),
 		);
 		return new json(json::OK,NULL,array_sum($data));
 	}

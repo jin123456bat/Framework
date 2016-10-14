@@ -90,6 +90,12 @@ class application extends component
 		
 		$controller = self::control(base::$APP_NAME,$control);
 		
+		if (method_exists($this, 'onRequestStart'))
+		{
+			$response = call_user_func(array($this,'onRequestStart'),$controller,$action);
+			$this->doResponse($response);
+		}
+		
 		$filter = $this->load('actionFilter');
 		$filter->load($controller,$action);
 		if (!$filter->allow())
@@ -116,6 +122,10 @@ class application extends component
 	 */
 	protected function doResponse($response)
 	{
+		if (method_exists($this, 'onRequestEnd'))
+		{
+			call_user_func(array($this,'onRequestEnd'),$response);
+		}
 		if ($response !== NULL)
 		{
 			if (is_string($response))

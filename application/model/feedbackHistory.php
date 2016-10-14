@@ -4,11 +4,6 @@ use \application\extend\model;
 
 class feedbackHistory extends model
 {
-	function __construct($table)
-	{
-		parent::__construct($table);
-	}
-	
 	function __config()
 	{
 		$db = $this->getConfig('db');

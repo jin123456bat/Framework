@@ -31,7 +31,7 @@ class mysql
 	 */
 	public static function getInstance($config = NULL)
 	{
-		$configKey = md5(implode('',$config));
+		$configKey = md5(json_encode($config));
 		if (!isset(self::$mysql[$configKey]) || empty(self::$mysql[$configKey]))
 			self::$mysql[$configKey] = new mysql($config);
 		return self::$mysql[$configKey];
@@ -42,12 +42,21 @@ class mysql
 	 */
 	private function connect()
 	{
-		$sql_mode = isset($this->config['sql_mode'])?$this->config['sql_mode']:'';
 		$charset = isset($this->config['db_charset'])?$this->config['db_charset']:'utf8';
 		$init_command = array(
 			'SET NAMES '.$charset,
-			//'SET sql_mode = "'.$sql_mode.'"'
 		);
+		if (isset($this->config['init_command']))
+		{
+			if (is_array($this->config['init_command']))
+			{
+				$init_command = array_merge($init_command,$this->config['init_command']);
+			}
+			else if (is_string($this->config['init_command']))
+			{
+				$init_command[] = $this->config['init_command'];
+			}
+		}
 		$this->pdo = new PDO(
 			$this->config['db_type'] . ':host=' . $this->config['db_server'] . ';dbname=' . $this->config['db_dbname'], 
 			$this->config['db_user'], 

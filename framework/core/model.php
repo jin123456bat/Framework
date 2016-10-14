@@ -203,7 +203,11 @@ class model extends component
 		}
 		
 		//是否是数字下标
-		$is_num_index = array_keys($data) == range(0, count($data)-1,1);
+		$source_keys = array_keys($data);
+		$des_keys = range(0, count($data)-1,1);
+		$diff = array_diff($source_keys,$des_keys);
+		$is_num_index = empty($diff);
+		
 		//补充默认值
 		if (!$is_num_index)
 		{
@@ -247,6 +251,7 @@ class model extends component
 				}
 			}
 		}
+		
 		$this->_sql->from($this->_table);
 		if ($this->_compress)
 		{
@@ -363,9 +368,13 @@ class model extends component
 	 */
 	function commitCompress()
 	{
-		$sql = implode(';', $this->_compress_sql).';';
-		$result = $this->_db->exec($sql);
-		$this->_compress = false;
-		return $result;
+		if ($this->_compress && !empty($this->_compress_sql))
+		{
+			$sql = implode(';', $this->_compress_sql).';';
+			$result = $this->_db->exec($sql);
+			$this->_compress = false;
+			return $result;
+		}
+		return false;
 	}
 }

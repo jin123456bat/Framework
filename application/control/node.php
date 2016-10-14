@@ -189,9 +189,9 @@ class node extends BaseControl
 		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
 		{
 			$online_user[$t_time] = $this->model('feedbackHistory')
-			->where('update_time>? and update_time<?',array(
-				date('Y-m-d H:i:s',strtotime($t_time) - 30*60),
-				$t_time
+			->where('ctime>=? and ctime<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time) + $duration),
 			))
 			->where('sn=?',array($sn))
 			->max('online') * 1;
@@ -253,14 +253,14 @@ class node extends BaseControl
 			}
 		}
 		
-		$duration = 10*60;//10分钟
+		$duration = 30*60;//30分钟
 		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
 		{
 			$result = $this->model('feedbackHistory')
 			->where('sn=?',array($sn))
 			->where('ctime>=? and ctime<?',array(
-				date('Y-m-d H:i:s',strtotime($t_time) - 30*60),
-				$t_time
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time) + $duration)
 			))
 			->find(array(
 				'sys_disk_used'=>'max(sys_disk_used)',
@@ -281,8 +281,8 @@ class node extends BaseControl
 			$result = $this->model('traffic_stat')
 			->where('sn=?',array($sn))
 			->where('create_time >=? and create_time <?',array(
-				date('Y-m-d H:i:s',strtotime($t_time) - 30*60),
-				$t_time
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time) + $duration),
 			))
 			->find(array(
 				'cpu_used' => 'max(cpu)',
@@ -302,8 +302,8 @@ class node extends BaseControl
 			$result = $this->model('cdn_traffic_stat')
 			->where('sn like ?',array('%'.substr($sn, 3)))
 			->where('make_time >=? and make_time<?',array(
-				date('Y-m-d H:i:s',strtotime($t_time) - 30*60),
-				$t_time
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time) + $duration),
 			))
 			->find(array(
 				'cpu_used' => 'max(cpu)',
@@ -315,7 +315,6 @@ class node extends BaseControl
 				$speed['cpu_used'][$t_time] = $speed['cpu_used'][$t_time]>$result['cpu_used']?$speed['cpu_used'][$t_time]:$result['cpu_used']*1;
 			}
 		}
-		
 		
 		//运行报表  最近30天的
 		$start_time = date('Y-m-d 00:00:00',strtotime('-30 day'));
