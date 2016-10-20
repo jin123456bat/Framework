@@ -3,6 +3,7 @@ namespace application\entity;
 
 use framework\lib\data;
 use framework\core\session;
+use framework\core\request;
 
 class user extends data
 {
@@ -50,7 +51,7 @@ class user extends data
 				{
 					$this->model($this->__model())->where('username=?',array($this->username))->limit(1)->update(array(
 						'last_login_time' => date('Y-m-d H:i:s'),
-						'last_login_ip' => $_SERVER['REMOTE_ADDR'],
+						'last_login_ip' => request::php_sapi_name()=='web'?$_SERVER['REMOTE_ADDR']:'cli',
 						'password_error_num'=>0,
 					));
 					return true;

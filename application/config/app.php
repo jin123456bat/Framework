@@ -8,4 +8,6 @@ return array(
 	'query_cache' => false,
 	
 	'layout' => 'layout',
+	
+	'cache' => false,
 );

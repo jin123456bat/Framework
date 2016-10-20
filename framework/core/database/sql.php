@@ -23,6 +23,23 @@ class sql extends base
 	}
 	
 	/**
+	 * 强制索引
+	 * force index
+	 * @param unknown $index
+	 */
+	function forceIndex($index)
+	{
+		if (is_array($index))
+		{
+			$this->_temp['forceIndex'] = $index;
+		}
+		else if (is_string($index))
+		{
+			$this->_temp['forceIndex'] = explode(',',$index);
+		}
+	}
+	
+	/**
 	 * do select
 	 * @param unknown $field
 	 */
@@ -157,19 +174,28 @@ class sql extends base
 	 */
 	function duplicate($name,$value = NULL)
 	{
-		$this->_temp['duplicate'] = ' ON DUPLICATE KEY UPDATE';
+		if (!isset($this->_temp['duplicate']))
+		{
+			$this->_temp['duplicate'] = ' ON DUPLICATE KEY UPDATE ';
+		}
+		else
+		{
+			$this->_temp['duplicate'] .= ',';
+		}
 		if (is_array($name))
 		{
 			foreach ($name as $index => $val)
 			{
-				$this->_duplicate_name[] = $index;
-				$this->_duplicate_value[] = $val;
+				$this->_temp['duplicate'] .= $index.'=:'.$index.'_duplicate,';
+				$this->_temp['duplicate_params'][$index.'_duplicate'] = $val;
 			}
 		}
 		else if (is_string($name))
 		{
-			$this->_temp['duplicate'] .= $name = $value;
+			$this->_temp['duplicate'] .= $name.'=:'.$name.'_duplicate,';
+			$this->_temp['duplicate_params'][$name.'_duplicate'] = $value;
 		}
+		$this->_temp['duplicate'] = rtrim($this->_temp['duplicate'],',');
 		return $this;
 	}
 	
@@ -500,6 +526,7 @@ class sql extends base
 				
 				if (isset($this->_temp['insert']))
 				{
+					$this->_temp['duplicate'] = isset($this->_temp['duplicate'])?$this->_temp['duplicate']:'';
 					if (is_array($this->_temp['insert']))
 					{
 						//数字下标
@@ -516,11 +543,11 @@ class sql extends base
 							$this->_temp['params'] = $this->_temp['insert'];
 							$values = array_map(function($value){return ':'.$value;}, array_keys($this->_temp['insert']));
 						}
-						$sql = 'INSERT'.$this->_temp['ignore'].' INTO '.$table.' '.$fields.' VALUES ('.implode(',', $values).')';
+						$sql = 'INSERT'.$this->_temp['ignore'].' INTO '.$table.' '.$fields.' VALUES ('.implode(',', $values).') '.$this->_temp['duplicate'];
 					}
 					else if ($this->_temp['insert'] instanceof sql)
 					{
-						$sql = 'INSERT'.$this->_temp['ignore'].' INTO '.$table.' '.$this->_temp['insert']->__toString();
+						$sql = 'INSERT'.$this->_temp['ignore'].' INTO '.$table.' '.$this->_temp['insert']->__toString().' '.$this->_temp['duplicate'];
 						$this->_temp['params'] = $this->_temp['insert']->getParams();
 					}
 				}
@@ -564,10 +591,11 @@ class sql extends base
 				
 				$this->_temp['limit'] = isset($this->_temp['limit'])?$this->_temp['limit']:'';
 				
+				$this->_temp['forceIndex'] = isset($this->_temp['forceIndex']) && is_array($this->_temp['forceIndex'])?' FORCE INDEX('.implode(',', $this->_temp['forceIndex']).') ':'';
 				//for update
 				$forUpdate = (isset($this->_temp['forUpdate']) && $this->_temp['forUpdate']===true)?' FOR UPDATE':'';
 				
-				$sql = 'SELECT '.$distinct.$fields.' FROM '.$table.$this->_temp['join'].$this->_temp['where'].$this->_temp['group'].$this->_temp['having'].$this->_temp['order'].$this->_temp['limit'].$forUpdate;
+				$sql = 'SELECT '.$distinct.$fields.' FROM '.$table.$this->_temp['forceIndex'].$this->_temp['join'].$this->_temp['where'].$this->_temp['group'].$this->_temp['having'].$this->_temp['order'].$this->_temp['limit'].$forUpdate;
 				return $sql;
 			case 'update':
 				$table = '';
@@ -633,8 +661,9 @@ class sql extends base
 	{
 		$this->_temp['params'] = isset($this->_temp['params'])?$this->_temp['params']:array();
 		$this->_temp['_having_params'] = isset($this->_temp['_having_params'])?$this->_temp['_having_params']:array();
+		$this->_temp['duplicate_params'] = isset($this->_temp['duplicate_params'])?$this->_temp['duplicate_params']:array();
 		
-		$this->_temp['params'] = array_merge($this->_temp['params'],$this->_temp['_having_params']);
+		$this->_temp['params'] = array_merge($this->_temp['params'],$this->_temp['_having_params'],$this->_temp['duplicate_params']);
 		return $this->_temp['params'];
 	}
 	

@@ -4,7 +4,14 @@ class request extends base
 {
 	static function php_sapi_name()
 	{
-		return php_sapi_name();
+		if (stripos(php_sapi_name(), 'cli') !== false)
+		{
+			return 'cli';
+		}
+		else
+		{
+			return 'web';
+		}
 	}
 	
 	/**

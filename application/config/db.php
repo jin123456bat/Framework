@@ -50,5 +50,14 @@ return array(
 		'db_password' => 'fxdata2000',
 		'db_charset' => 'utf8',
 		'init_command' => $init_command,
-	)
+	),
+	'xvirt' => array(
+		'db_type' => 'mysql',
+		'db_server' => 'localhost',
+		'db_dbname' => 'xvirt',
+		'db_user' => 'root',
+		'db_password' => $dbpass,
+		'db_charset' => 'utf8',
+		'init_command' => $init_command,
+	),
 );

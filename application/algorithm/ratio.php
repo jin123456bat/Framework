@@ -39,14 +39,15 @@ class ratio extends base
 		{
 			case 1:
 				//最近24小时的同比，是指跟上周的同一个时间相比
+				$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
 				$this->_same = array(
-					'starttime' => date('Y-m-d H:00:00',strtotime('-8 day')),
-					'endtime' => date('Y-m-d H:00:00',strtotime('-7 day')),
+					'starttime' => date('Y-m-d H:i:s',strtotime('-8 day',$timestamp)),
+					'endtime' => date('Y-m-d H:i:s',strtotime('-7 day',$timestamp)),
 				);
 				//最近24小时的环比,是指
 				$this->_link = array(
-					'starttime' => date('Y-m-d H:00:00',strtotime('-2 day')),
-					'endtime' => date('Y-m-d H:00:00',strtotime('-1 day'))
+					'starttime' => date('Y-m-d H:i:s',strtotime('-2 day',$timestamp)),
+					'endtime' => date('Y-m-d H:i:s',strtotime('-1 day',$timestamp))
 				);
 				break;
 			case 2:

@@ -11,8 +11,22 @@ class framework
 	 */
 	private $_application;
 	
+	/**
+	 * 命令行参数个数
+	 * @var unknown
+	 */
+	private $_argc;
+	
+	/**
+	 * 命令行参数
+	 * @var unknown
+	 */
+	private $_argv;
+	
 	function __construct($argc = 0,$argv = array())
 	{
+		$this->_argc = $argc;
+		$this->_argv = $argv;
 		spl_autoload_register(array($this,'autoload'),true);
 	}
 	
@@ -41,7 +55,7 @@ class framework
 		
 		if (method_exists($this->_application[$appkey], 'initlize'))
 		{
-			$this->_application[$appkey]->initlize();
+			$this->_application[$appkey]->initlize($this->_argc,$this->_argv);
 		}
 		
 		return $this->_application[$appkey];

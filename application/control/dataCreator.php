@@ -138,8 +138,6 @@ class dataCreator extends BaseControl
 	
 		$mode = request::param('mode');
 		
-		
-		
 		$this->model('traffic_stat')->startCompress();
 		$this->model('cdn_traffic_stat')->startCompress();
 		for ($t_time = $this->_startTime;strtotime($t_time)<strtotime($this->_endTime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
@@ -415,6 +413,7 @@ class dataCreator extends BaseControl
 			$this->model('operation_stat')->truncate(),
 			$this->model('feedback')->truncate(),
 			$this->model('user_info')->truncate(),
+			$this->model('cache')->truncate(),
 		);
 		return new json(json::OK,NULL,array_sum($data));
 	}

@@ -2,6 +2,7 @@
 namespace application\model;
 
 use framework\core\model;
+use framework\core\request;
 
 class log extends model
 {
@@ -21,7 +22,7 @@ class log extends model
 		return parent::insert(array(
 			'uid' => $uid,
 			'content' => $message,
-			'ip' => $_SERVER['REMOTE_ADDR'],
+			'ip' => request::php_sapi_name()=='web'?$_SERVER['REMOTE_ADDR']:'cli',
 		));
 	}
 }

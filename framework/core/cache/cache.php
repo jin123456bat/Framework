@@ -1,15 +1,14 @@
 <?php
 namespace framework\core\cache;
 
+/**
+ * cache的接口
+ * @author fx
+ *
+ */
 interface cache
 {
-	function set($name,$value,$expires = 5)
-	{
-		
-	}
+	function set($name,$value,$expires = 0);
 	
-	function get($name)
-	{
-		
-	}
+	function get($name);
 }

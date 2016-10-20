@@ -5,8 +5,8 @@ use application\extend\BaseControl;
 use application\entity\user;
 use application\algorithm\ratio;
 use application\algorithm\algorithm;
-use framework\core\model;
 use framework\core\request;
+use application\extend\cache;
 
 /**
  * 首页相关接口
@@ -23,17 +23,29 @@ class main extends BaseControl
 	
 	function overview()
 	{
-		var_dump(request::php_sapi_name());
-		exit();
 		
-		$start_time = date('Y-m-d H:00:00',strtotime($this->_startTime));
-		$end_time = date('Y-m-d H:00:00',strtotime($this->_endTime));
+		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		{
+			$key = 'main_overview_'.$this->_timemode;
+			$response = cache::get($key);
+			if (!empty($response))
+			{
+				return new json(json::OK,NULL,$response);
+			}
+		}
 		
-		$algorithm = new algorithm($start_time, $end_time, $this->_duration_second);
+		$algorithm = new algorithm($this->_startTime, $this->_endTime, $this->_duration_second);
 		
 		switch ($this->_duration)
 		{
-			case 'minutely':$algorithm->setDuration(30*60);break;
+			case 'minutely':
+				$algorithm->setDuration(30*60);
+				$m = date('i');
+				$m = floor($m/30) * 30;
+				$endtime = date('Y-m-d H:'.$m.':00');
+				$starttime = date('Y-m-d H:i:s',strtotime($endtime) - 24*3600);
+				$algorithm->setTime($starttime, $endtime);
+			break;
 			case 'hourly':$algorithm->setDuration(2*60*60);break;
 			case 'daily':$algorithm->setDuration(24*60*60);break;
 		}
@@ -49,7 +61,10 @@ class main extends BaseControl
 		//服务流速 同一个时间点的operation中service_size的最大值
 		switch ($this->_duration)
 		{
-			case 'minutely':$algorithm->setDuration(5*60);break;
+			case 'minutely':
+				$algorithm->setDuration(5*60);
+				$algorithm->setTime($this->_startTime, $this->_endTime);
+			break;
 			case 'hourly':$algorithm->setDuration(2*60*60);break;
 			case 'daily':$algorithm->setDuration(24*60*60);break;
 		}
@@ -62,22 +77,51 @@ class main extends BaseControl
 		//cp_service
 		switch ($this->_duration)
 		{
-			case 'minutely':$algorithm->setDuration(30*60);break;
+			case 'minutely':
+				$algorithm->setDuration(30*60);
+				$m = date('i');
+				$m = floor($m/30) * 30;
+				$endtime = date('Y-m-d H:'.$m.':00');
+				$starttime = date('Y-m-d H:i:s',strtotime($endtime) - 24*3600);
+				$algorithm->setTime($starttime, $endtime);
+			break;
 			case 'hourly':$algorithm->setDuration(2*60*60);break;
 			case 'daily':$algorithm->setDuration(24*60*60);break;
 		}
 		$cp_service = $algorithm->CPService();
 		
 		$ratio = new ratio($this->_timemode);
-		
 		switch ($this->_duration)
 		{
-			case 'minutely':$ratio->setDuration(5*60);break;
-			case 'hourly':$ratio->setDuration(2*60*60);break;
-			case 'daily':$ratio->setDuration(24*60*60);break;
+			case 'minutely':
+				$ratio->setDuration(30*60);
+			break;
+			case 'hourly':
+				$ratio->setDuration(2*60*60);
+			break;
+			case 'daily':
+				$ratio->setDuration(24*60*60);
+			break;
+			default:
+				$ratio->setDuration($this->_duration_second);
 		}
 		$cds_ratio = $ratio->cds();
 		$user_ratio = $ratio->user();
+		
+		switch ($this->_duration)
+		{
+			case 'minutely':
+				$ratio->setDuration(5*60);
+				break;
+			case 'hourly':
+				$ratio->setDuration(2*60*60);
+				break;
+			case 'daily':
+				$ratio->setDuration(24*60*60);
+				break;
+			default:
+				$ratio->setDuration($this->_duration_second);
+		}
 		$service_max_ratio = $ratio->service_max();
 		$service_sum_ratio = $ratio->service_sum();
 		
@@ -119,6 +163,11 @@ class main extends BaseControl
 			)
 		);
 		
+		if (!empty($this->_timemode))
+		{
+			cache::set($key, $data);
+		}
+		
 		return new json(json::OK,NULL,$data);
 	}
 	
@@ -133,7 +182,7 @@ class main extends BaseControl
 			array(
 				'deny',
 				'actions' => '*',
-				'express' => \application\entity\user::getLoginUserId()===NULL,
+				'express' => request::php_sapi_name()=='web'?\application\entity\user::getLoginUserId()===NULL:false,
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
 			)
 		);

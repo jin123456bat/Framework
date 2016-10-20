@@ -7,6 +7,8 @@ class router extends component
 	
 	private $_action_name;
 	
+	static public $_data = array();
+	
 	function __construct()
 	{
 		parent::__construct();
@@ -14,25 +16,34 @@ class router extends component
 	
 	function initlize()
 	{
-		$this->parse();
+		self::$_data = array_merge(self::$_data,$_GET);
 		parent::initlize();
 	}
 	
-	private function parse()
+	public function parse()
 	{
 		$config = $this->getConfig('router');
 		
 		if ($config['mode'] == 'normal')
 		{
-			$this->_control_name = isset($_GET['c'])?trim($_GET['c']):$config['default']['control'];
-			$this->_action_name = isset($_GET['a'])?trim($_GET['a']):$config['default']['action'];
+			$this->_control_name = isset(self::$_data['c'])?trim(self::$_data['c']):$config['default']['control'];
+			$this->_action_name = isset(self::$_data['a'])?trim(self::$_data['a']):$config['default']['action'];
 			
 			if (!$config['case_sensitive'])
 			{
-				$this->_control_name = strtolower($this->_control_name);
-				$this->_action_name = strtolower($this->_action_name);
+				$this->_control_name = $this->_control_name;
+				$this->_action_name = $this->_action_name;
 			}
 		}
+	}
+	
+	/**
+	 * 对于要分析的数据追加
+	 * @param array $array
+	 */
+	public function appendParameter(array $array)
+	{
+		self::$_data = array_merge(self::$_data,$array);
 	}
 	
 	public function getControlName()

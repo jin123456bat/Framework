@@ -4,6 +4,8 @@ use application\extend\BaseControl;
 use framework\core\response\json;
 use framework\core\model;
 use application\algorithm\algorithm;
+use framework\core\request;
+use application\extend\cache;
 
 /**
  * 内容交付相关接口
@@ -23,8 +25,18 @@ class content extends BaseControl
 	 */
 	function overview()
 	{
-		$start_time = date('Y-m-d H:00:00',strtotime($this->_startTime));
-		$end_time = date('Y-m-d H:00:00',strtotime($this->_endTime));
+		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		{
+			$key = 'content_overview_'.$this->_timemode;
+			$response = cache::get($key);
+			if (!empty($response))
+			{
+				return new json(json::OK,NULL,$response);
+			}
+		}
+		
+		$start_time = $this->_startTime;
+		$end_time = $this->_endTime;
 		
 		$category_service = array();
 		$category_cache = array();
@@ -214,6 +226,12 @@ class content extends BaseControl
 			//资源热榜
 			'topfile' => $topfile
 		);
+		
+		if (!empty($this->_timemode))
+		{
+			cache::set($key, $data);
+		}
+		
 		return new json(json::OK,NULL,$data);
 	}
 	
@@ -222,8 +240,18 @@ class content extends BaseControl
 	 */
 	function videoDemand()
 	{
-		$start_time = date('Y-m-d H:00:00',strtotime($this->_startTime));
-		$end_time = date('Y-m-d H:00:00',strtotime($this->_endTime));
+		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		{
+			$key = 'content_videoDemand_'.$this->_timemode;
+			$response = cache::get($key);
+			if (!empty($response))
+			{
+				return new json(json::OK,NULL,$response);
+			}
+		}
+		
+		$start_time = $this->_startTime;
+		$end_time = $this->_endTime;
 		
 		$category = $this->getConfig('category');
 		
@@ -439,6 +467,11 @@ class content extends BaseControl
 			//资源热榜
 			'topfile' => $topfile,
 		);
+		
+		if (!empty($this->_timemode))
+		{
+			cache::set($key, $data);
+		}
 		return new json(json::OK,'ok',$data);
 	}
 	
@@ -447,8 +480,18 @@ class content extends BaseControl
 	 */
 	function videoLive()
 	{
-		$start_time = date('Y-m-d H:00:00',strtotime($this->_startTime));
-		$end_time = date('Y-m-d H:00:00',strtotime($this->_endTime));
+		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		{
+			$key = 'content_videoLive_'.$this->_timemode;
+			$response = cache::get($key);
+			if (!empty($response))
+			{
+				return new json(json::OK,NULL,$response);
+			}
+		}
+		
+		$start_time = $this->_startTime;
+		$end_time = $this->_endTime;
 		
 		$category = $this->getConfig('category');
 		
@@ -659,6 +702,12 @@ class content extends BaseControl
 			//资源热榜
 			'topfile' => $topfile,
 		);
+		
+		if (!empty($this->_timemode))
+		{
+			cache::set($key, $data);
+		}
+		
 		return new json(json::OK,'ok',$data);
 	}
 	
@@ -667,8 +716,18 @@ class content extends BaseControl
 	 */
 	function mobile()
 	{
-		$start_time = date('Y-m-d H:00:00',strtotime($this->_startTime));
-		$end_time = date('Y-m-d H:00:00',strtotime($this->_endTime));
+		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		{
+			$key = 'content_mobile_'.$this->_timemode;
+			$response = cache::get($key);
+			if (!empty($response))
+			{
+				return new json(json::OK,NULL,$response);
+			}
+		}
+		
+		$start_time = $this->_startTime;
+		$end_time = $this->_endTime;
 		
 		$cp_service_flow = array();
 		$cp_cache_flow = array();
@@ -777,6 +836,10 @@ class content extends BaseControl
 			//资源热榜
 			'topfile' => $topfile
 		);
+		if (!empty($this->_timemode))
+		{
+			cache::set($key, $data);
+		}
 		return new json(json::OK,'ok',$data);
 	}
 	
@@ -785,8 +848,18 @@ class content extends BaseControl
 	 */
 	function http()
 	{
-		$start_time = date('Y-m-d H:00:00',strtotime($this->_startTime));
-		$end_time = date('Y-m-d H:00:00',strtotime($this->_endTime));
+		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		{
+			$key = 'content_http_'.$this->_timemode;
+			$response = cache::get($key);
+			if (!empty($response))
+			{
+				return new json(json::OK,NULL,$response);
+			}
+		}
+		
+		$start_time = $this->_startTime;
+		$end_time = $this->_endTime;
 		
 		$cp_service_flow = array();
 		$cp_cache_flow = array();
@@ -911,6 +984,10 @@ class content extends BaseControl
 			//资源热榜
 			'topfile' => $topfile,
 		);
+		if (!empty($this->_timemode))
+		{
+			cache::set($key, $data);
+		}
 		return new json(json::OK,'ok',$data);
 	}
 	
@@ -920,7 +997,7 @@ class content extends BaseControl
 			array(
 				'deny',
 				'actions' => '*',
-				'express' => \application\entity\user::getLoginUserId()===NULL,
+				'express' => request::php_sapi_name()=='web'?\application\entity\user::getLoginUserId()===NULL:false,
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
 			)
 		);

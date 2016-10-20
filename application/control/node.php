@@ -7,6 +7,7 @@ use framework\core\request;
 use framework\core\database\sql;
 use framework\core\model;
 use application\entity\user;
+use application\algorithm\algorithm;
 
 /**
  * 节点管理相关接口
@@ -81,8 +82,9 @@ class node extends BaseControl
 		
 		
 		//查找24小时内的最大值
-		$start_time = date('Y-m-d H:00:00',strtotime('-24 hour'));
-		$end_time = date('Y-m-d H:00:00',strtotime('-24 hour'));
+		$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
+		$start_time = date('Y-m-d H:i:s',strtotime('-24 hour',$timestamp));
+		$end_time = date('Y-m-d H:i:s',$timestamp);
 		foreach ($result as &$r)
 		{
 			$r['disk_detail'] = json_decode($r['disk_detail'],true);
@@ -182,8 +184,10 @@ class node extends BaseControl
 		
 		
 		//最近24小时用户数量
-		$start_time = date('Y-m-d H:00:00',strtotime('-1 day'));
-		$end_time = date('Y-m-d H:00:00');
+		$m = date('i');
+		$m = floor($m/30) * 30;
+		$end_time = date('Y-m-d H:'.$m.':00');
+		$start_time = date('Y-m-d H:i:s',strtotime($end_time) - 24*3600);
 		$duration = 30*60;//半个小时
 		$online_user = array();
 		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
@@ -197,62 +201,24 @@ class node extends BaseControl
 			->max('online') * 1;
 		}
 		
-		
 		//最近24小时的服务，回源，镜像速率
-		$speed = array(
-			'service' => array(),
-			'cache' => array(),
-			'monitor' => array(),
+		$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
+		$end_time = date('Y-m-d H:i:s',$timestamp);
+		$start_time = date('Y-m-d H:i:s',strtotime('-24 hour',strtotime($end_time)));
+		$duration = 5*60;//5分钟
+		
+		$algorithm = new algorithm($start_time,$end_time,$duration);
+		$speed = $algorithm->traffic_stat($sn);
+		
+		$speed = array_merge($speed,array(
 			'sys_disk_used' => array(),
 			'data_disk_used' => array(),
-		);
-		$duration = 5*60;//5分钟
-		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
-		{
-			$result1 = $this->model('traffic_stat')
-			->where('sn=?',array($sn))
-			->where('create_time>=? and create_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
-			))
-			->scalar(array(
-				'max(concat(lpad(service,20,0),"-",lpad(cache,20,0),"-",lpad(monitor,20,0)))',
-			));
-			
-			$result2 = $this->model('cdn_traffic_stat')
-			->where('sn like ?',array('%'.substr($sn, 3)))
-			->where('make_time >=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
-			))
-			->scalar(array(
-				'max(concat(lpad(service,20,0),"-",lpad(cache,20,0),"-",lpad(monitor,20,0)))',
-			));
-			
-			if (!empty($result1))
-			{
-				list($service,$cache,$monitor) = explode('-', $result1);
-				
-				$speed['service'][$t_time] = $service *1;
-				$speed['cache'][$t_time] = $cache*1;
-				$speed['monitor'][$t_time] = $monitor*1;
-			}
-			else
-			{
-				$speed['service'][$t_time] = 0;
-				$speed['cache'][$t_time] = 0;
-				$speed['monitor'][$t_time] = 0;
-			}
-			
-			if (!empty($result2))
-			{
-				list($service,$cache,$monitor) = explode('-', $result2);
-				$speed['service'][$t_time] += $service;
-				$speed['cache'][$t_time] += $cache;
-				$speed['monitor'][$t_time] += $monitor;
-			}
-		}
+		));
 		
+		$m = date('i');
+		$m = floor($m/30) * 30;
+		$end_time = date('Y-m-d H:'.$m.':00');
+		$start_time = date('Y-m-d H:i:s',strtotime($end_time) - 24*3600);
 		$duration = 30*60;//30分钟
 		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
 		{
@@ -323,42 +289,113 @@ class node extends BaseControl
 		$run_report = array();
 		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
 		{
-			$result = $this->model('traffic_stat')
+			$temp_service = array();
+			$temp_cache = array();
+			$temp_hit_user = array();
+			$temp_online = array();
+			
+			$traffic_stat = $this->model('traffic_stat')
 			->where('create_time>=? and create_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
 			))
 			->where('sn=?',array($sn))
-			->find(array(
-				'max_service'=>'max(service)',
-				'max_cache'=>'max(cache)',
-				'sum_service'=>'sum(service)',
-				'sum_cache'=>'sum(cache)',
-				'hit_user'=>'max(hit_user)',//服务用户
-				'online_user'=>'max(online_user)',//活跃用户
+			->select(array(
+				'create_time',
+				'service',
+				'cache',
+				'hit_user',//服务用户
+				'online_user',//活跃用户
 			));
 			
-			//累加上cdn的service和cache
 			$cdn_traffic_stat = $this->model('cdn_traffic_stat')
-			->where('make_time >=? and make_time<?',array(
+			->where('make_time>=? and make_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
 			))
-			->where('sn=?',array($sn))
-			->find(array(
-				'max_service' => 'max(service)',
-				'max_cache' => 'max(cache)',
-				'sum_service' => 'sum(service)',
-				'sum_cache' => 'sum(cache)',
+			->where('sn like ?',array('%'.substr($sn, 3)))
+			->group('make_time')
+			->select(array(
+				'make_time',
+				'service' => 'sum(service)',
+				'cache' => 'sum(cache)',
 			));
 			
-			if (!empty($cdn_traffic_stat))
+			$xvirt_traffic_stat = $this->model('xvirt_traffic_stat')
+			->where('create_time>=? and create_time<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
+			))
+			->where('sn like ?',array('%'.substr($sn, 3)))
+			->group('create_time')
+			->select(array(
+				'service' => 'sum(service)',
+				'cache' => 'sum(cache)',
+			));
+			
+			foreach ($traffic_stat as $stat)
 			{
-				$result['max_service'] += $cdn_traffic_stat['max_service'];
-				$result['max_cache'] += $cdn_traffic_stat['max_cache'];
-				$result['sum_service'] += $cdn_traffic_stat['sum_service'];
-				$result['sum_cache'] += $cdn_traffic_stat['sum_cache'];
+				$temp_cache[$stat['create_time']] = $stat['cache']*1;
+				$temp_service[$stat['create_time']] = $stat['service']*1;
+				$temp_hit_user[$stat['create_time']] = $stat['hit_user'];
+				$temp_online[$stat['create_time']] = $stat['online_user'];
 			}
+			unset($traffic_stat);
+			
+			foreach ($cdn_traffic_stat as $stat)
+			{
+				if (isset($temp_cache[$stat['make_time']]))
+				{
+					$temp_cache[$stat['make_time']] += $stat['cache'];
+				}
+				else
+				{
+					$temp_cache[$stat['make_time']] = $stat['cache']*1;
+				}
+				
+				if (isset($temp_service[$stat['make_time']]))
+				{
+					$temp_service[$stat['make_time']] += $stat['cache'];
+				}
+				else
+				{
+					$temp_service[$stat['make_time']] = $stat['cache']*1;
+				}
+			}
+			unset($cdn_traffic_stat);
+			
+			foreach ($xvirt_traffic_stat as $stat)
+			{
+				if (isset($temp_cache[$stat['make_time']]) && $temp_cache[$stat['make_time']]>$stat['cache'])
+				{
+					$temp_cache[$stat['make_time']] -= $stat['cache'];
+				}
+				
+				if (isset($temp_service[$stat['make_time']]) && $temp_service[$stat['make_time']]>$stat['service'])
+				{
+					$temp_service[$stat['make_time']] -= $stat['service'];
+				}
+			}
+			unset($xvirt_traffic_stat);
+			
+			$max = 0;
+			$max_time = '';
+			foreach ($temp_service as $time => $value)
+			{
+				if ($value >= $max)
+				{
+					$max = $value;
+					$max_time = $time;
+				}
+			}
+			
+			$result['max_service'] = $max;
+			$result['max_cache'] = isset($temp_cache[$max_time])?$temp_cache[$max_time]:0;
+			$result['sum_service'] = array_sum($temp_service);
+			$result['sum_cache'] = array_sum($temp_cache);
+			$result['hit_user'] = isset($temp_hit_user[$max_time])?$temp_hit_user[$max_time]:0;
+			$result['online_user'] = isset($temp_online[$max_time])?$temp_online[$max_time]:0;
+			
 			
 			$result['user_percent'] = 100*number_format(division($result['hit_user'],$result['online_user']),4,'.','');
 			$result['max_service_user'] = 100*number_format(division($result['max_service'],$result['hit_user']),4,'.','');
@@ -377,7 +414,6 @@ class node extends BaseControl
 			$run_report[$t_time] = $result;
 		}
 		
-		
 		$data = array(
 			'info' => $cds,
 			'online_user' => $online_user,
@@ -386,6 +422,84 @@ class node extends BaseControl
 		);
 		
 		return new json(json::OK,'ok',$data);
+	}
+	
+	/**
+	 * CDS报表
+	 */
+	function cds_report()
+	{
+		$starttime = request::param('starttime');
+		$endtime = request::param('endtime');
+		
+		if (empty($starttime))
+		{
+			return new json(json::FAILED,'开始时间不能为空');
+		}
+		if (empty($endtime))
+		{
+			return new json(json::FAILED,'结束时间不能为空');
+		}
+		if (strtotime($endtime) - strtotime($starttime) != 24*3600)
+		{
+			return new json(json::FAILED,'时间间隔必须为一天');
+		}
+		$starttime = date('Y-m-d',strtotime($starttime));
+		$endtime = date('Y-m-d',strtotime($endtime));
+		if (strtotime($endtime) > strtotime(date('Y-m-d')))
+		{
+			return new json(json::FAILED,'结束时间不能超过今天');
+		}
+		
+		$start = request::param('start',0,'intval');
+		$length = request::param('length',10,'intval');
+		
+		$order = request::param('order','status');
+		$by = request::param('by','asc');
+		
+		if (!in_array($by, array('asc','desc')))
+		{
+			return new json(json::FAILED,'by参数只允许asc或desc,默认为asc');
+		}
+		
+		$nodes = $this->model('feedback')
+		->Join('user_info','user_info.sn=feedback.sn')
+		->select(array(
+			'user_info.sn',//设备SN号
+			'user_info.company',//CDS设备名称
+		));
+		
+		$algorithm = new algorithm($starttime,$endtime,24*3600);
+		foreach ($nodes as &$node)
+		{
+			$result = $this->model('feedbackHistory')->where('ctime>=? and ctime<? and sn=?',array(
+				$starttime,$endtime,$node['sn']
+			))
+			->find(array(
+				'max_online'=>'max(online)',//活跃用户
+				'max_hit' => 'max(hit)',//服务用户
+				'max_hit_online' => 'FORMAT(max(hit/online)*100,1)',//服务用户/活跃用户峰值
+			));
+			
+			$max_service = 0;
+			$max_service_time = '';
+			$traffic_stat = $algorithm->traffic_stat($node['sn']);
+			foreach ($traffic_stat['service'] as $time=>$service)
+			{
+				if ($service>=$max_service)
+				{
+					$max_service = $service;
+					$max_service_time = $time;
+				}
+			}
+			$node['max_service'] = $max_service;
+			$node['max_service_time'] = $max_service_time;
+			
+			
+			$node = array_merge($node,$result);
+		}
+		
+		var_dump($nodes);
 	}
 	
 	function __access()

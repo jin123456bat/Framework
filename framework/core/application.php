@@ -5,6 +5,10 @@ class application extends component
 {
 	private $_session = NULL;
 	
+	private $_argc = 0;
+	
+	private $_argv = array();
+	
 	function __construct($name,$path)
 	{
 		base::$APP_NAME = $name;
@@ -15,8 +19,11 @@ class application extends component
 		parent::__construct();
 	}
 	
-	function initlize()
+	function initlize($argc = 0,$argv = array())
 	{
+		$this->_argc = $argc;
+		$this->_argv = $argv;
+		
 		//载入系统默认配置
 		$this->setConfig('framework');
 		//载入app的配置
@@ -80,11 +87,100 @@ class application extends component
 	}
 	
 	/**
+	 * 对命令行参数经行分析
+	 * @param unknown $argc
+	 * @param unknown $argv
+	 */
+	public function parseArgment($argc,$argv)
+	{
+		array_shift($argv);
+		$argc--;
+		
+		$get = array();
+		$post = array();
+		
+		foreach ($argv as $index => $value)
+		{
+			if(substr($value, 0,2) == '--')
+			{
+				if (isset($argv[$index+1]))
+				{
+					if (isset($post[substr($value, 2)]))
+					{
+						if (is_array($post[substr($value, 2)]))
+						{
+							$post[substr($value, 2)][] = $argv[$index+1];
+						}
+						else if (is_string($post[substr($value, 2)]))
+						{
+							$post[substr($value, 2)] = array(
+								$post[substr($value, 2)],
+								$argv[$index+1]
+							);
+						}
+					}
+					else
+					{
+						$post[substr($value, 2)] = $argv[$index+1];
+					}
+					unset($argv[$index+1]);
+				}
+				else
+				{
+					$post[substr($value, 2)] = true;
+				}
+				unset($argv[$index]);
+			}
+			else if (substr($value, 0,1) == '-')
+			{
+				if (isset($argv[$index+1]))
+				{
+					if (isset($get[substr($value, 1)]))
+					{
+						if (is_array($get[substr($value, 1)]))
+						{
+							$get[substr($value, 1)][] = $argv[$index+1];
+						}
+						else if (is_string($get[substr($value, 1)]))
+						{
+							$get[substr($value, 1)] = array(
+								$get[substr($value, 1)],
+								$argv[$index+1]
+							);
+						}
+					}
+					else
+					{
+						$get[substr($value, 1)] = $argv[$index+1];
+					}
+					unset($argv[$index+1]);
+				}
+				else
+				{
+					$get[substr($value, 2)] = true;
+				}
+				unset($argv[$index]);
+			}
+		}
+		
+		return array(
+			'GET' => $get,
+			'POST' => $post,
+		);
+	}
+	
+	/**
 	 * 运行application
 	 */
 	function run()
 	{
+		$argment = $this->parseArgment($this->_argc, $this->_argv);
+		$_GET = array_merge($_GET,$argment['GET']);
+		$_POST = array_merge($_POST,$argment['POST']);
+		$_REQUEST = array_merge($_REQUEST,$argment['GET'],$argment['POST']);
+		
 		$router = $this->load('router');
+		$router->parse();
 		$control = $router->getControlName();
 		$action = $router->getActionName();
 		
@@ -156,7 +252,7 @@ class application extends component
 	 */
 	public static function control($app,$name)
 	{
-		$namespace = $app.'\\control\\'.$name;
+		$namespace = '\\'.$app.'\\control\\'.$name;
 		if (class_exists($namespace))
 		{
 			return new $namespace();

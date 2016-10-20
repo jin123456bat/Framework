@@ -20,12 +20,14 @@ abstract class BaseControl extends control
 	protected function setTime()
 	{
 		$this->_timemode = request::param('timemode');
+		
 		switch ($this->_timemode)
 		{
 			case '1':
 				//最近24小时
-				$this->_endTime = date('Y-m-d H:00:00');
-				$this->_startTime = date('Y-m-d H:00:00',strtotime('-24 hour'));
+				$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
+				$this->_endTime = date('Y-m-d H:i:s',$timestamp);
+				$this->_startTime = date('Y-m-d H:i:s',strtotime('-24 hour',strtotime($this->_endTime)));
 				break;
 			case '2':
 				//昨天
@@ -54,6 +56,7 @@ abstract class BaseControl extends control
 				break;
 			default:
 				//自定义时间
+				$this->_timemode = NULL;
 				$this->_startTime = request::param('starttime');
 				$this->_endTime = request::param('endtime');
 				break;
