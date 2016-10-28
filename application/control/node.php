@@ -21,7 +21,7 @@ class node extends BaseControl
 	 */
 	function cds()
 	{
-		$group = request::param('group',NULL);
+		$group = request::param('group',NULL,'int','i');
 		$group_sn = array();
 		if (!empty($group))
 		{
@@ -49,12 +49,13 @@ class node extends BaseControl
 		$feedbackModel = $this->model('feedback');
 		if (!empty($group_sn))
 		{
-			$feedbackModel->in('user_info.sn',$group_sn);
+			$feedbackModel->in('feedback.sn',$group_sn);
 		}
 		$result = $feedbackModel
 		->Join('user_info','user_info.sn=feedback.sn')
 		->limit($start,$length)
 		->order($order,$by)
+		->order('user_info.company','asc')
 		->select(array(
 			'user_info.sn',//设备SN号
 			

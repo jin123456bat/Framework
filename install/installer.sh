@@ -11,27 +11,15 @@ git clone git@192.168.1.5:cloud-web-v2
 
 cd cloud-web-v2
 
-git pull
-
-npm i
-
-echo "WebPack 构建⌛️ ⌛️ ⌛️\n\n\n"
-
-rm -rf dist/**
-
-webpack --optimize-minimize --progress
-
-cp -r app/images dist
-
-cp -r app/styles dist
-
-cp app/favicon.ico app/404.html app/index.html dist
+cd build
 
 git clone https://github.com/jin123456bat/Framework3.0.git php
 
 cd php
 
 cp -r ./dat_api ../dat_api
+rm -rf ./dat_api
+
 #删除不需要上传的文件
 rm -rf ./.git
 rm -rf ./.settings
@@ -42,10 +30,10 @@ rm -f ./README
 
 cd ..
 
-cp php dist/ -r
-
 #fxdata@2222CDS
-scp -v -r dist/* root@192.168.1.225:/home/nginx/cm2
+scp -v -r ./* root@192.168.1.225:/home/nginx/cm2
+
+cd ..
 
 cd ..
 

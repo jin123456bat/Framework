@@ -508,7 +508,7 @@ class sql extends base
 		{
 			$string[] = '`'.trim($value,'` ').'`';
 		}
-		return implode(',', $string);
+		return implode('.', $string);
 	}
 	
 	function __toString()

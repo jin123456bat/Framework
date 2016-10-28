@@ -63,10 +63,14 @@ class user extends control
 	{
 		$username = request::post('username','');
 		$password = request::post('password','');
+		$email = request::post('email','');
+		$type = request::post('type',0);
 		
 		$user = new \application\entity\user(array(
 			'username' => $username,
 			'password' => $password,
+			'email' => $email,
+			'type' => $type,
 		),'insert');
 		
 		if($user->validate())
