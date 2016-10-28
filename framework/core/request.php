@@ -73,7 +73,6 @@ class request extends base
 				$filters = explode('|', $filter);
 				foreach ($filters as $filter_t)
 				{
-					
 					if (is_callable($filter_t))
 					{
 						$data = call_user_func($filter_t, $data);

@@ -9,53 +9,89 @@ namespace framework\data;
  * (2) 互异性：同一个集合中的元素是互不相同的.
  * (3) 无序性：任意改变集合中元素的排列次序,它们仍然表示同一个集合.
  */
-class collection implements \Iterator,\ArrayAccess 
+class collection implements \Iterator
 {
-	private $_length = 0;
+	/**
+	 * 头指针
+	 * @var unknown
+	 */
+	private $_top = NULL;
 	
-	private $_data = NULL;
-	
+	/**
+	 * 尾指针
+	 * @var unknown
+	 */
 	private $_tail = NULL;
 	
+	/**
+	 * 长度
+	 * @var integer
+	 */
+	private $_length = 0;
+	
+	/**
+	 * 内部遍历器指针
+	 * @var unknown
+	 */
 	private $_position = NULL;
 	
-	private $_null = NULL;
+	/**
+	 * 内部指针距离top的长度
+	 * @var integer
+	 */
+	private $_position_length = 0;
 	
-	function __construct($array = array())
+	/**
+	 * 一些模式变量
+	 * @var array
+	 */
+	private $_mode = array(
+		self::CASE_INSENSITIVE => true,//区分大小写
+	);
+	
+	const CASE_INSENSITIVE = 1000;
+	
+	function __construct($data = NULL,$option = array())
 	{
-		foreach ($array as $key => $value)
+		foreach ($option as $key => $value)
 		{
-			$this->append($key, $value);
+			$this->_mode[$key] = $value;
+		}
+		
+		if (is_array($data))
+		{
+			foreach ($data as $value)
+			{
+				$this->append($value);
+			}
+		}
+		else
+		{
+			$this->append($data);
 		}
 	}
 	
 	/**
-	 * 集合中元素个数
-	 * @return number
-	 */
-	function count()
-	{
-		return $this->_length;
-	}
-	
-	/**
-	 * 判断集合是否为空
-	 * @return boolean
-	 */
-	function isEmpty()
-	{
-		return $this->count() === 0;
-	}
-	
-	/**
-	 * 按照值判断是否存在
+	 * 设置模式
+	 * @param unknown $name
 	 * @param unknown $value
+	 */
+	function setMode($name,$value)
+	{
+		$this->_mode[$name] = $value;
+	}
+	
+	/**
+	 * 获取元素的位置，不存在返回false
+	 * 注意返回有可能是0，因为是在第一个
+	 * @param unknown $value
+	 * @return unknown|boolean
 	 */
 	function isExist($value)
 	{
-		for($i = &$this->_data;$i !== NULL;$i = $i->getNext())
+		for($temp = $this->_top;$temp!=NULL;$temp = $temp->getNext())
 		{
-			if($i->getValue() == $value)
+			if ($this->_mode[self::CASE_INSENSITIVE]?$temp->getValue() == $value:strtoupper($temp->getValue()) == strtoupper($value))
 			{
 				return true;
 			}
@@ -64,190 +100,29 @@ class collection implements \Iterator,\ArrayAccess
 	}
 	
 	/**
-	 * 去除重复元素，保留最后第一个元素的key
+	 * 在末尾追加一个元素
+	 * @param unknown $value
 	 */
-	function unique()
+	function append($value)
 	{
-		$result = array();
-		for($i = &$this->_data;$i !== NULL;$i = $i->getNext())
+		$temp = new node($value);
+		if (empty($this->_tail))
 		{
-			$value = $i->getValue();
-			if (isset($result[$value]))
-			{
-				$this->remove($i->getKey());
-			}
-			else
-			{
-				$result[$value] = 1;
-			}
-		}
-	}
-	
-	/**
-	 * 在集合的末尾添加一个元素
-	 */
-	function append($name,$value)
-	{
-		if ($this->isEmpty())
-		{
-			$this->_data = new node($name,$value);
-			$this->_tail = &$this->_data;
-			$this->_position = $this->_data;
+			$this->_tail = &$temp;
+			$this->_top = &$temp;
+			$this->_position = &$temp;
 			$this->_length++;
 		}
 		else
 		{
-			if (!isset($this[$name]))
+			if (!$this->isExist($value))
 			{
-				$temp = new node($name,$value);
-				$temp->setPrev($this->_tail);
 				$this->_tail->setNext($temp);
+				$temp->setPrev($this->_tail);
 				$this->_tail = &$temp;
 				$this->_length++;
 			}
 		}
-	}
-	
-	/**
-	 * 在集合的前面增加一个元素
-	 * @param unknown $name
-	 * @param unknown $value
-	 */
-	function prepend($name,$value)
-	{
-		if ($this->isEmpty())
-		{
-			$this->_data = new node($name,$value);
-			$this->_tail = &$this->_data;
-		}
-		else
-		{
-			$temp = new node($name,$value);
-			$temp->setNext($this->_data);
-			$this->_data->setPrev($temp);
-			$this->_data = &$temp;
-		}
-		$this->_position = $this->_data;
-		$this->_length++;
-	}
-	
-	/**
-	 * 清空所有元素
-	 */
-	function clear()
-	{
-		$this->_length = 0;
-	}
-	
-	/**
-	 * 在集合中删除指定元素
-	 * @param unknown $name
-	 */
-	function remove($name)
-	{
-		if ($this->count()>1)
-		{
-			for($i = &$this->_data;$i !== NULL;$i = $i->getNext())
-			{
-				if ($i->getKey() == $name)
-				{
-					$prev = $i->getPrev();
-					$next = $i->getNext();
-					
-					if ($prev === NULL)
-					{
-						$this->_data = $next;
-						$this->_position = $this->_data;
-						$next->setPrev($this->_null);
-					}
-					else if ($next === NULL)
-					{
-						$prev->setNext($this->_null);
-						$this->_tail = $prev;
-					}
-					else
-					{
-						$prev->setNext($next);
-						$next->setPrev($prev);
-					}
-					$this->_length--;
-					break;
-				}
-			}
-		}
-		else if ($this->count()===1)
-		{
-			$this->_length = 0;
-			$this->_data = NULL;
-			$this->_tail = NULL;
-			$this->_position = NULL;
-		}
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @see ArrayAccess::offsetExists()
-	 */
-	public function offsetExists($offset)
-	{
-		for($i = &$this->_data;$i !== NULL;$i = $i->getNext())
-		{
-			if ($i->getKey() == $offset)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * @see ArrayAccess::offsetGet()
-	 */
-	public function offsetGet($offset)
-	{
-		// TODO Auto-generated method stub
-		for($i = &$this->_data;$i !== NULL;$i = $i->getNext())
-		{
-			if ($i->getKey() == $offset)
-			{
-				return $i->getValue();
-			}
-		}
-		return NULL;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * @see ArrayAccess::offsetSet()
-	 */
-	public function offsetSet($offset, $value)
-	{
-		// TODO Auto-generated method stub
-		$flag = false;
-		for($i = &$this->_data;$i !== NULL;$i = $i->getNext())
-		{
-			if ($i->getKey() == $offset)
-			{
-				$i->setValue($value);
-				$flag = true;
-				break;
-			}
-		}
-		if (!$flag)
-		{
-			$this->append($offset, $value);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * @see ArrayAccess::offsetUnset()
-	 */
-	public function offsetUnset($offset)
-	{
-		// TODO Auto-generated method stub
-		$this->remove($offset);
 	}
 	
 	/**
@@ -268,6 +143,7 @@ class collection implements \Iterator,\ArrayAccess
 	{
 		// TODO Auto-generated method stub
 		$this->_position = $this->_position->getNext();
+		$this->_position_length++;
 	}
 
 	/**
@@ -277,7 +153,7 @@ class collection implements \Iterator,\ArrayAccess
 	public function key()
 	{
 		// TODO Auto-generated method stub
-		return $this->_position->getKey();
+		return $this->_position_length;
 	}
 
 	/**
@@ -297,28 +173,26 @@ class collection implements \Iterator,\ArrayAccess
 	public function rewind()
 	{
 		// TODO Auto-generated method stub
-		$this->_position = $this->_data;
+		$this->_position = $this->_top;
+		$this->_position_length = 0;
 	}
 
-
+	
 }
 
 /**
  * 集合中的节点
  * @author fx
- *
  */
 class node
 {
-	private $_key;
 	private $_value;
 	
 	private $_prev;
 	private $_next;
 	
-	function __construct($key,$value)
+	function __construct($value)
 	{
-		$this->_key = $key;
 		$this->_value = $value;
 		
 		$this->_prev = NULL;
@@ -353,15 +227,5 @@ class node
 	function getValue()
 	{
 		return $this->_value;
-	}
-	
-	function getKey()
-	{
-		return $this->_key;
-	}
-	
-	function setKey($key)
-	{
-		$this->_key = $key;
 	}
 }

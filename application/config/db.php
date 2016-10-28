@@ -1,17 +1,22 @@
 <?php
-$dbpass = '';
-$sql_mode = 'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
+$dbuser = 'root';
+switch($_SERVER['HTTP_HOST'])
+{
+	case '192.168.1.225':$dbpass = '';$dbuser = 'root';break;
+	case 'localhost':$dbpass = '';$dbuser = 'root';break;
+	case '192.168.0.73':$dbpass = 'jin2164389';$dbuser = 'root';break;
+}
+$sql_mode = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
 
 $init_command = array(
-	//'set max_allowed_packet = '.(2*1024*1024*10*100),
-	//'set sql_mode = '.$sql_mode,
+	'set sql_mode = "'.$sql_mode.'"',
 );
 return array(
 	'cloud_web_v2' => array(
 		'db_type' => 'mysql',
 		'db_server' => 'localhost',
 		'db_dbname' => 'cloud_web_v2',
-		'db_user' => 'root',
+		'db_user' => $dbuser,
 		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
 		'init_command' => $init_command,
@@ -20,7 +25,7 @@ return array(
 		'db_type' => 'mysql',
 		'db_server' => 'localhost',
 		'db_dbname' => 'ordoac',
-		'db_user' => 'root',
+		'db_user' => $dbuser,
 		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
 		'default' => true,
@@ -30,7 +35,7 @@ return array(
 		'db_type' => 'mysql',
 		'db_server' => 'localhost',
 		'db_dbname' => 'cds_v2',
-		'db_user' => 'root',
+		'db_user' => $dbuser,
 		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
 		'init_command' => $init_command,
@@ -46,8 +51,8 @@ return array(
 		'db_type' => 'mysql',
 		'db_server' => '192.168.1.225',
 		'db_dbname' => 'django',
-		'db_user' => 'admin',
-		'db_password' => 'fxdata2000',
+		'db_user' => $dbuser,
+		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
 		'init_command' => $init_command,
 	),
@@ -55,7 +60,7 @@ return array(
 		'db_type' => 'mysql',
 		'db_server' => 'localhost',
 		'db_dbname' => 'xvirt',
-		'db_user' => 'root',
+		'db_user' => $dbuser,
 		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
 		'init_command' => $init_command,

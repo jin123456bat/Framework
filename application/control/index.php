@@ -2,6 +2,7 @@
 namespace application\control;
 use framework\core\control;
 use framework\data\collection;
+use framework\core\session;
 class index extends control
 {
 	private $_start_time = '2016-08-01 00:00:00';
@@ -21,16 +22,22 @@ class index extends control
 	
 	function index()
 	{
-		
 		$data = array(
 			'A',
 			'B',
 			'C',
 			'D',
 			'B',
+			'C',
+			'e',
+			'E',
 		);
-		$collection = new collection($data);
-		$collection->unique();
+		
+		$collection = new collection($data,array(
+			collection::CASE_INSENSITIVE => false,
+		));
+		
+		//$collection->unique();
 		
 		//ok
 		/* $collection['a'] = 'asdasf';

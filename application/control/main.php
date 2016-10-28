@@ -7,6 +7,7 @@ use application\algorithm\ratio;
 use application\algorithm\algorithm;
 use framework\core\request;
 use application\extend\cache;
+use framework\lib\data;
 
 /**
  * 首页相关接口
@@ -26,8 +27,8 @@ class main extends BaseControl
 		
 		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
 		{
-			$key = 'main_overview_'.$this->_timemode;
-			$response = cache::get($key);
+			$cache_key = 'main_overview_'.$this->_timemode;
+			$response = cache::get($cache_key);
 			if (!empty($response))
 			{
 				return new json(json::OK,NULL,$response);
@@ -40,11 +41,10 @@ class main extends BaseControl
 		{
 			case 'minutely':
 				$algorithm->setDuration(30*60);
-				$m = date('i');
-				$m = floor($m/30) * 30;
-				$endtime = date('Y-m-d H:'.$m.':00');
-				$starttime = date('Y-m-d H:i:s',strtotime($endtime) - 24*3600);
-				$algorithm->setTime($starttime, $endtime);
+				$algorithm->setTime(
+					date('Y-m-d H:i:s',floor(strtotime($this->_startTime)/(30*60))*30*60),
+					date('Y-m-d H:i:s',floor(strtotime($this->_endTime)/(30*60))*30*60)
+				);
 			break;
 			case 'hourly':$algorithm->setDuration(2*60*60);break;
 			case 'daily':$algorithm->setDuration(24*60*60);break;
@@ -79,11 +79,10 @@ class main extends BaseControl
 		{
 			case 'minutely':
 				$algorithm->setDuration(30*60);
-				$m = date('i');
-				$m = floor($m/30) * 30;
-				$endtime = date('Y-m-d H:'.$m.':00');
-				$starttime = date('Y-m-d H:i:s',strtotime($endtime) - 24*3600);
-				$algorithm->setTime($starttime, $endtime);
+				$algorithm->setTime(
+					date('Y-m-d H:i:s',floor(strtotime($this->_startTime)/(30*60))*30*60),
+					date('Y-m-d H:i:s',floor(strtotime($this->_endTime)/(30*60))*30*60)
+				);
 			break;
 			case 'hourly':$algorithm->setDuration(2*60*60);break;
 			case 'daily':$algorithm->setDuration(24*60*60);break;
@@ -145,8 +144,8 @@ class main extends BaseControl
 			'service_max' => array(
 				'max' => array(
 					'current' => $service_max['max'],
-					//'linkRatio' => $service_max_ratio['link']===NULL?NULL:1*number_format(division($service_max['max'] - $service_max_ratio['link'], $service_max['max']),2,'.',''),//环比
-					//'sameRatio' => $service_max_ratio['same']===NULL?NULL:1*number_format(division($service_max['max'] - $service_max_ratio['same'], $service_max['max']),2,'.',''),//同比
+					'linkRatio' => $service_max_ratio['link']===NULL?NULL:1*number_format(division($service_max['max'] - $service_max_ratio['link'], $service_max['max']),2,'.',''),//环比
+					'sameRatio' => $service_max_ratio['same']===NULL?NULL:1*number_format(division($service_max['max'] - $service_max_ratio['same'], $service_max['max']),2,'.',''),//同比
 				),//服务流速峰值（时间点内的最大值）
 				'detail' => $service_max['detail'],//服务流速按照时间节点的详情
 			),
@@ -165,7 +164,7 @@ class main extends BaseControl
 		
 		if (!empty($this->_timemode))
 		{
-			cache::set($key, $data);
+			cache::set($cache_key, $data);
 		}
 		
 		return new json(json::OK,NULL,$data);

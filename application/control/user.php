@@ -7,6 +7,11 @@ use framework\core\response\json;
 use framework\core\session;
 use application;
 
+/**
+ * 用户相关
+ * @author fx
+ *
+ */
 class user extends control
 {
 	/**
@@ -80,6 +85,60 @@ class user extends control
 	}
 	
 	/**
+	 * 用户列表
+	 */
+	function lists()
+	{
+		$user = $this->model('accounts')->select();
+		return new json(json::OK,NULL,$user);
+	}
+	
+	/**
+	 * 删除用户
+	 */
+	function remove()
+	{
+		$id = request::post('id',0,'int','i');
+		if (!empty($id))
+		{
+			if($this->model('accounts')->where('id=?',array($id))->delete())
+			{
+				return new json(json::OK);
+			}
+			else
+			{
+				return new json(json::FAILED,'删除失败');
+			}
+		}
+		else
+		{
+			return new json(json::FAILED,'参数错误');
+		}
+	}
+	
+	/**
+	 * 更改用户密码
+	 */
+	function changePwd()
+	{
+		$id = request::post('id',0,'int','i');
+		if (empty($id))
+		{
+			$id = application\entity\user::getLoginUserId();
+		}
+		$password = request::post('password');
+		
+		if($this->model('user')->where('id=?',array($id))->limit(1)->update(array(
+			'password' => md5($password),
+			'last_changepwd_time' => date('Y-m-d H:i:s')
+		)))
+		{
+			return new json(json::OK);
+		}
+		return new json(json::FAILED,'密码更新太频繁了');
+	}
+	
+	/**
 	 * 配置访问权限
 	 */
 	function __access()
@@ -87,7 +146,7 @@ class user extends control
 		return array(
 			array(
 				'deny',
-				'actions' => array('register'),
+				'actions' => array('register','remove','changePwd','lists'),
 				'express' => \application\entity\user::getLoginUserId()===NULL,
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
 			)

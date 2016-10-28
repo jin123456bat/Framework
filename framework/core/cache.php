@@ -41,12 +41,12 @@ class cache extends component
 	 * @param unknown $value
 	 * @param number $cache
 	 */
-	static function set($name,$value,$cache = 0)
+	static function set($name,$value,$expires = 0)
 	{
 		$cacheInstance = self::init();
 		$config = self::getConfig('cache');
-		$cache = empty($cache)?self::$_expires:$cache;
-		return $cacheInstance->set($name,$value,$cache);
+		$expires = empty($expires)?self::$_expires:$expires;
+		return $cacheInstance->set($name,$value,$expires);
 	}
 	
 	/**

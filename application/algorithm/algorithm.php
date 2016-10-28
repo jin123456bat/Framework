@@ -76,12 +76,16 @@ class algorithm extends component
 	/**
 	 * 在线用户数量
 	 */
-	public function USEROnlineNum()
+	public function USEROnlineNum($sn = NULL)
 	{
 		$user_max = 0;
 		$user_detail = array();
 		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
 		{
+			if (!empty($sn))
+			{
+				$this->model('feedbackHistory')->where('sn=?',array($sn));
+			}
 			$max_online_gourp_sn = $this->model('feedbackHistory')
 			->group('sn')
 			->where('ctime >= ? and ctime<?',array(
@@ -282,7 +286,7 @@ class algorithm extends component
 			))
 			->group('create_time')
 			->select(array(
-				'create_time',
+				'create_time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
 				'sum_service'=>'sum(service)',
 				'sum_cache' => 'sum(cache)',
 				'sum_monitor' => 'sum(monitor)',
@@ -307,7 +311,7 @@ class algorithm extends component
 			))
 			->group('make_time')
 			->select(array(
-				'make_time',
+				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
 				'sum_service' => 'sum(service)',
 				'sum_cache' => 'sum(cache)',
 				'sum_monitor' => 'sum(monitor)',
@@ -349,25 +353,25 @@ class algorithm extends component
 				$xvirt_traffic_stat_model->where('sn like ?',array('%'.substr($sn, 3)));
 			}
 			//traffic_stat + cdn_traffic_stat - xvirt_traffic_stat
-			$xvirt = $xvirt_traffic_stat_model->where('create_time>=? and create_time<?',array(
+			$xvirt = $xvirt_traffic_stat_model->where('make_time>=? and make_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
 			))
-			->group('create_time')
+			->group('make_time')
 			->select(array(
-				'create_time',
+				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
 				'sum_service'=>'sum(service)',
 				'sum_cache'=>'sum(cache)',
 			));
 			foreach ($xvirt as $r)
 			{
-				if (isset($temp_cache[$r['create_time']]) && $temp_cache[$r['create_time']] > $r['sum_cache'])
+				if (isset($temp_cache[$r['make_time']]) && $temp_cache[$r['make_time']] > $r['sum_cache'])
 				{
-					$temp_cache[$r['create_time']] -= $r['sum_cache'];
+					$temp_cache[$r['make_time']] -= $r['sum_cache'];
 				}
-				if (isset($temp_service[$r['create_time']]) && $temp_service[$r['create_time']] > $r['sum_service'])
+				if (isset($temp_service[$r['make_time']]) && $temp_service[$r['make_time']] > $r['sum_service'])
 				{
-					$temp_service[$r['create_time']] -= $r['sum_service'];
+					$temp_service[$r['make_time']] -= $r['sum_service'];
 				}
 			}
 			
@@ -399,6 +403,111 @@ class algorithm extends component
 			'monitor' => $monitor_max_detail
 		);
 		return $data;
+	}
+	
+	/**
+	 * 计算独立的服务流速和缓存流速
+	 */
+	function traffic_stat_alone()
+	{
+		$service = array();
+		$cache = array();
+		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+		{
+			$temp_service = array();
+			$temp_cache = array();
+		
+			$traffic_stat = $this->model('traffic_stat')
+			->where('create_time>=? and create_time<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
+			))
+			->group('create_time')
+			->select(array(
+				'create_time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
+				'sum_service'=>'sum(service)',
+				'sum_cache' => 'sum(cache)',
+			));
+				
+			foreach ($traffic_stat as $stat)
+			{
+				if (isset($temp_service[$stat['create_time']]))
+				{
+					$temp_service[$stat['create_time']] += $stat['sum_service'];
+				}
+				else
+				{
+					$temp_service[$stat['create_time']] = $stat['sum_service'];
+				}
+				if (isset($temp_cache[$stat['create_time']]))
+				{
+					$temp_cache[$stat['create_time']] += $stat['sum_cache'];
+				}
+				else
+				{
+					$temp_cache[$stat['create_time']] = $stat['sum_cache'];
+				}
+			}
+				
+				
+			$cdn_traffic_stat = $this->model('cdn_traffic_stat')
+			->where('make_time>=? and make_time<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration)
+			))
+			->group('make_time')
+			->select(array(
+				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
+				'sum_service' => 'sum(service)',
+				'sum_cache' => 'sum(cache)',
+			));
+			foreach ($cdn_traffic_stat as $stat)
+			{
+				if (isset($temp_service[$stat['make_time']]))
+				{
+					$temp_service[$stat['make_time']] += $stat['sum_service'];
+				}
+				else
+				{
+					$temp_service[$stat['make_time']] = $stat['sum_service'];
+				}
+				if (isset($temp_cache[$stat['make_time']]))
+				{
+					$temp_cache[$stat['make_time']] += $stat['sum_cache'];
+				}
+				else
+				{
+					$temp_cache[$stat['make_time']] = $stat['sum_cache'];
+				}
+			}
+				
+			$xvirt = $this->model('xvirt_traffic_stat')
+			->where('make_time>=? and make_time<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
+			))
+			->group('make_time')
+			->select(array(
+				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
+				'sum_service'=>'sum(service)',
+				'sum_cache'=>'sum(cache)',
+			));
+			foreach ($xvirt as $stat)
+			{
+				if (isset($temp_service[$stat['make_time']]))
+				{
+					$temp_service[$stat['make_time']] -= $stat['sum_service'];
+				}
+				if (isset($temp_cache[$stat['make_time']]))
+				{
+					$temp_cache[$stat['make_time']] -= $stat['sum_cache'];
+				}
+			}
+
+			$service[$t_time] = empty($temp_service)?0:max($temp_service);
+			$cache[$t_time] = empty($temp_cache)?0:max($temp_cache);
+		}
+		return array('service' => $service,'cache' => $cache);
 	}
 	
 	function operation_stat()

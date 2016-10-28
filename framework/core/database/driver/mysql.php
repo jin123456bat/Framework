@@ -43,9 +43,8 @@ class mysql
 	private function connect()
 	{
 		$charset = isset($this->config['db_charset'])?$this->config['db_charset']:'utf8';
-		$init_command = array(
-			'SET NAMES '.$charset,
-		);
+		
+		$init_command = array();
 		if (isset($this->config['init_command']))
 		{
 			if (is_array($this->config['init_command']))
@@ -57,15 +56,23 @@ class mysql
 				$init_command[] = $this->config['init_command'];
 			}
 		}
+		
 		$this->pdo = new PDO(
 			$this->config['db_type'] . ':host=' . $this->config['db_server'] . ';dbname=' . $this->config['db_dbname'], 
 			$this->config['db_user'], 
 			$this->config['db_password'], 
 			array(
+				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,//使用默认的索引模式
+				PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false, //不使用buffer，防止数据量过大导致php内存溢出，但是这个东西貌似需要直接操作pdo效果才会体现
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,//抛出异常模式
-				PDO::MYSQL_ATTR_INIT_COMMAND => implode(';', $init_command).';',//设置字符集
+				PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '.$charset,//设置字符集
 			)
 		);
+		//init_command
+		foreach ($init_command as $command)
+		{
+			$this->pdo->exec($command);
+		}
 	}
 
 	/**
@@ -74,6 +81,7 @@ class mysql
 	 */
 	public function query($sql, array $array = array())
 	{
+		//$this->pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
 		$statement = $this->pdo->prepare($sql);
 		if ($statement) {
 			$result = $statement->execute($array);

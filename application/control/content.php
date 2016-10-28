@@ -27,8 +27,8 @@ class content extends BaseControl
 	{
 		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
 		{
-			$key = 'content_overview_'.$this->_timemode;
-			$response = cache::get($key);
+			$cache_key = 'content_overview_'.$this->_timemode;
+			$response = cache::get($cache_key);
 			if (!empty($response))
 			{
 				return new json(json::OK,NULL,$response);
@@ -110,7 +110,7 @@ class content extends BaseControl
 		
 		//获取traffic_stat  做占比
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat();
+		$traffic_stat = $algorithm->traffic_stat_alone();
 		$service = $traffic_stat['service'];
 		$cache = $traffic_stat['cache'];
 		
@@ -131,15 +131,7 @@ class content extends BaseControl
 		}
 		
 		$topfile = array();
-		if ($this->_duration_second >= 3600)
-		{
-			$topModel = $this->model('top_stat_hour');
-		}
-		else
-		{
-			$topModel = $this->model('top_stat');
-		}
-		
+		$topModel = $this->model('top_stat');
 		$topfile['http'] = $topModel
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
@@ -229,7 +221,7 @@ class content extends BaseControl
 		
 		if (!empty($this->_timemode))
 		{
-			cache::set($key, $data);
+			cache::set($cache_key, $data);
 		}
 		
 		return new json(json::OK,NULL,$data);
@@ -242,8 +234,8 @@ class content extends BaseControl
 	{
 		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
 		{
-			$key = 'content_videoDemand_'.$this->_timemode;
-			$response = cache::get($key);
+			$cache_key = 'content_videoDemand_'.$this->_timemode;
+			$response = cache::get($cache_key);
 			if (!empty($response))
 			{
 				return new json(json::OK,NULL,$response);
@@ -389,7 +381,7 @@ class content extends BaseControl
 		
 		//进行占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat();
+		$traffic_stat = $algorithm->traffic_stat_alone();
 		$operation_stat = $algorithm->operation_stat();	
 		foreach ($cp_cache_flow as $classname => &$v)
 		{
@@ -408,15 +400,7 @@ class content extends BaseControl
 		
 		$topfile = array();
 		$other_key = array();
-		if ($this->_duration_second >= 3600)
-		{
-			$topModel = $this->model('top_stat_hour');
-		}
-		else
-		{
-			$topModel = $this->model('top_stat');
-		}
-		
+		$topModel = $this->model('top_stat');
 		foreach ($category['videoDemand'] as $key=>$name)
 		{
 			if (in_array($name, $top5_category))
@@ -439,7 +423,7 @@ class content extends BaseControl
 				$other_key[] = $key;
 			}
 		}
-		
+	
 		$topfile['其他'] = $topModel
 		->where('create_time>=? and create_time<?',array(
 			$start_time,
@@ -470,7 +454,7 @@ class content extends BaseControl
 		
 		if (!empty($this->_timemode))
 		{
-			cache::set($key, $data);
+			cache::set($cache_key, $data);
 		}
 		return new json(json::OK,'ok',$data);
 	}
@@ -482,8 +466,8 @@ class content extends BaseControl
 	{
 		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
 		{
-			$key = 'content_videoLive_'.$this->_timemode;
-			$response = cache::get($key);
+			$cache_key = 'content_videoLive_'.$this->_timemode;
+			$response = cache::get($cache_key);
 			if (!empty($response))
 			{
 				return new json(json::OK,NULL,$response);
@@ -623,7 +607,7 @@ class content extends BaseControl
 		
 		//占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat();
+		$traffic_stat = $algorithm->traffic_stat_alone();
 		$operation_stat = $algorithm->operation_stat();
 		foreach ($cp_cache_flow as $classname=>&$v)
 		{
@@ -642,14 +626,7 @@ class content extends BaseControl
 		
 
 		$topfile = array();
-		if ($this->_duration_second >= 3600)
-		{
-			$topModel = $this->model('top_stat_hour');
-		}
-		else
-		{
-			$topModel = $this->model('top_stat');
-		}
+		$topModel = $this->model('top_stat');
 		$selected_key = array();
 		foreach ($category['videoLive'] as $key=>$name)
 		{
@@ -705,7 +682,7 @@ class content extends BaseControl
 		
 		if (!empty($this->_timemode))
 		{
-			cache::set($key, $data);
+			cache::set($cache_key, $data);
 		}
 		
 		return new json(json::OK,'ok',$data);
@@ -718,8 +695,8 @@ class content extends BaseControl
 	{
 		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
 		{
-			$key = 'content_mobile_'.$this->_timemode;
-			$response = cache::get($key);
+			$cache_key = 'content_mobile_'.$this->_timemode;
+			$response = cache::get($cache_key);
 			if (!empty($response))
 			{
 				return new json(json::OK,NULL,$response);
@@ -788,7 +765,7 @@ class content extends BaseControl
 		
 		//占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat();
+		$traffic_stat = $algorithm->traffic_stat_alone();
 		$operation_stat = $algorithm->operation_stat();
 	
 		foreach ($cp_cache_flow as $classname=>&$v)
@@ -838,7 +815,7 @@ class content extends BaseControl
 		);
 		if (!empty($this->_timemode))
 		{
-			cache::set($key, $data);
+			cache::set($cache_key, $data);
 		}
 		return new json(json::OK,'ok',$data);
 	}
@@ -850,8 +827,8 @@ class content extends BaseControl
 	{
 		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
 		{
-			$key = 'content_http_'.$this->_timemode;
-			$response = cache::get($key);
+			$cache_key = 'content_http_'.$this->_timemode;
+			$response = cache::get($cache_key);
 			if (!empty($response))
 			{
 				return new json(json::OK,NULL,$response);
@@ -863,36 +840,30 @@ class content extends BaseControl
 		
 		$cp_service_flow = array();
 		$cp_cache_flow = array();
-		$cp_cache_service_sum = array(
-			'未归类' => array(
-				'service' => 0,
-				'cache' => 0,
-			),
-			'软件升级' => array(
-				'service' => 0,
-				'cache' => 0,
-			),
-			'压缩文档' => array(
-				'service' => 0,
-				'cache' => 0,
-			),
-			'文档管理' => array(
-				'service' => 0,
-				'cache' => 0,
-			),
-			'图片' => array(
-				'service' => 0,
-				'cache' => 0,
-			),
-			'总流量'=>array(
-				'service' => 0,
-				'cache' => 0,
-			)
-		);
+		$cp_cache_service_sum = array();
 		
 		$category = $this->getConfig('category');
+		foreach ($category['http'] as $http)
+		{
+			$cp_cache_service_sum[$http] = array(
+				'service' => 0,
+				'cache' => 0,
+			);
+			
+		}
+		$cp_cache_service_sum['总流量'] = array(
+			'service' => 0,
+			'cache' => 0,
+		);
+		
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
 		{
+			foreach ($category['http'] as $http)
+			{
+				$cp_service_flow[$http][$t_time] = 0;
+				$cp_cache_flow[$http][$t_time] = 0;
+			}
+			
 			//计算当前时间段内各个类型的业务流量
 			$result = $this->model('operation_stat')
 			->where('make_time >=? and make_time<?',array(
@@ -910,23 +881,9 @@ class content extends BaseControl
 			{
 				$categoryname = $category['http'][$r['category']];
 				
-				if (isset($cp_service_flow[$categoryname][$t_time]))
-				{
-					$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
-				}
-				else
-				{
-					$cp_service_flow[$categoryname][$t_time] = $r['service_size'] * 1;
-				}
+				$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
 				
-				if (isset($cp_cache_flow[$categoryname][$t_time]))
-				{
-					$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
-				}
-				else
-				{
-					$cp_cache_flow[$categoryname][$t_time] = $r['service_size'] * 1;
-				}
+				$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
 				
 				$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
 				$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
@@ -937,8 +894,9 @@ class content extends BaseControl
 		
 		//占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat();
+		$traffic_stat = $algorithm->traffic_stat_alone();
 		$operation_stat = $algorithm->operation_stat();
+		
 		foreach ($cp_cache_flow as $classname=>&$v)
 		{
 			foreach ($v as $time => &$value)
@@ -986,7 +944,7 @@ class content extends BaseControl
 		);
 		if (!empty($this->_timemode))
 		{
-			cache::set($key, $data);
+			cache::set($cache_key, $data);
 		}
 		return new json(json::OK,'ok',$data);
 	}

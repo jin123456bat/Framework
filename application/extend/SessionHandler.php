@@ -40,7 +40,8 @@ class SessionHandler extends base
 	public function read($session_id)
 	{
 		// TODO Auto-generated method stub
-		$result = $this->_db->where('session_id=?',array($session_id))->scalar('content');
+		$maxtime = ini_get('session.gc_maxlifetime');
+		$result = $this->_db->where('session_id=? and UNIX_TIMESTAMP(now())-UNIX_TIMESTAMP(createtime)<?',array($session_id,$maxtime))->scalar('content');
 		return $result;
 	}
 
@@ -50,27 +51,15 @@ class SessionHandler extends base
 	 */
 	public function write($session_id, $session_data)
 	{
-		// TODO Auto-generated method stub
-		$result = $this->_db->where('session_id=?',array($session_id))->find();
-		if(empty($result))
-		{
-			if($this->_db->insert(array(
-				'session_id'=>$session_id,
-				'content'=>$session_data
-			)))
-			{
-				return true;
-			}
-		}
-		else
-		{
-			$this->_db->where('session_id=?',array($session_id))->update(array(
-				'content' => $session_data,
-				'createtime' => date('Y-m-d H:i:s'),
-			));
-			return true;
-		}
-		return false;
+		$this->_db->duplicate(array(
+			'content' => $session_data,
+			'createtime' => date('Y-m-d H:i:s'),
+		))->insert(array(
+			'session_id' => $session_id,
+			'content' => $session_data,
+			'createtime' => date('Y-m-d H:i:s'),
+		));
+		return true;
 	}
 
 	/**

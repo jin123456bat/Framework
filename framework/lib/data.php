@@ -72,11 +72,22 @@ class data extends error implements \ArrayAccess
 		
 		foreach ($rules as $index => $rule)
 		{
-			if (!isset($rule['on']) || (!empty($this->_scene) && $this->_scene == $rule['on']))
+			if (isset($rule['on']))
+			{
+				if (is_string($rule['on']))
+				{
+					$on = explode(',', $rule['on']);
+				}
+				else 
+				{
+					$on = $rule['on'];
+				}
+			}
+			if (!isset($rule['on']) || (!empty($this->_scene) && in_array($this->_scene,$on,true)))
 			{
 				if (isset($rule['safe']) && !empty($rule['safe']))
 				{
-					$this->_safe_fileds = $this->parseFileds($rule['safe']);
+					$this->_safe_fileds = array_merge($this->_safe_fileds,$this->parseFileds($rule['safe']));
 				}
 			}
 			else
@@ -102,6 +113,29 @@ class data extends error implements \ArrayAccess
 				$fields = $this->parseFileds($rule['unique']);
 				$do = 'unique';
 			}
+			if (isset($rule['lt']) && !empty($rule['lt']))
+			{
+				$fields = $this->parseFileds($rule['lt']);
+				$do = 'compare';
+				$method = '<';
+			}
+			if (isset($rule['gt']) && !empty($rule['gt']))
+			{
+				$fields = $this->parseFileds($rule['gt']);
+				$do = 'compare';
+				$method = '>';
+			}
+			if (isset($rule['ge']) && !empty($rule['ge']))
+			{
+				$fields = $this->parseFileds($rule['ge']);
+				$do = 'compare';
+				$method = '>=';
+			}
+			if (isset($rule['validate']) && !empty($rule['validate']))
+			{
+				$fields = $this->parseFileds($rule['fileds']);
+				$do = 'validate';
+			}
 			
 			$rule['message'] = isset($rule['message'])?$rule['message']:'';
 			
@@ -112,8 +146,7 @@ class data extends error implements \ArrayAccess
 					{
 						if (!in_array($value, $this->_safe_fileds) && (!isset($this->$value) || $this->isEmpty($this->$value)))
 						{
-							$message = str_replace('{field}', $value, $rule['message']);
-							$this->addError('000100', $message);
+							$this->addError('000100', $this->message($rule, $value));
 						}
 					}
 					break;
@@ -123,24 +156,90 @@ class data extends error implements \ArrayAccess
 					{
 						if(!in_array($value, $this->_safe_fileds))
 						{
-							$result = $model->where($value.'=?',array($this->$value))->find();
+							$tempValue = $this->render($rule, $value);
+							$result = $model->where($value.'=?',array($tempValue))->find();
 							if(!empty($result))
 							{
-								$message = str_replace('{field}', $value, $rule['message']);
-								$this->addError('000100', $message);
+								$this->addError('000100', $this->message($rule, $value));
 							}
 						}
 					}
 					break;
-					
+				case 'compare':
+					$firstValue = $fields[0];
+					$secondValue = $fields[1];
+					if (!(in_array($firstValue, $this->_safe_fileds) && in_array($firstValue, $this->_safe_fileds)))
+					{
+						$firstTempValue = is_numeric($firstValue)?$firstValue:$this->render($rule, $firstValue);
+						$secondTempValue = is_numeric($secondValue)?$secondValue:$this->render($rule, $secondValue);
+						switch ($method)
+						{
+							case '<':
+								if ($firstTempValue >= $secondTempValue)
+								{
+									$this->addError('000100', $this->message($rule, $firstValue));
+								}
+							break;
+							case '>':
+								if ($firstTempValue <= $secondTempValue)
+								{
+									$this->addError('000100', $this->message($rule, $firstValue));
+								}
+							break;
+							case '>=':
+								if ($firstTempValue < $secondTempValue)
+								{
+									$this->addError('000100', $this->message($rule, $firstValue));
+								}
+							break;
+						}
+					}
+					break;
+				case 'validate':
+					foreach ($fields as $index => $value)
+					{
+						if (is_callable($rule['validate']))
+						{
+							if(!call_user_func($rule['validate'],$this->render($rule, $value)))
+							{
+								$this->addError('000100', $this->message($rule, $value));
+							}
+						}
+					}
+					break;
 			}
-			
 		}
 		if ($this->hasError())
 		{
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * 判断是否有render，并且进行一次render
+	 */
+	private function render($rule,$value)
+	{
+		if (isset($rule['render']) && is_callable($rule['render']))
+		{
+			return call_user_func($rule['render'],$this->$value);
+		}
+		return $this->$value;
+	}
+	
+	/**
+	 * 获取错误信息
+	 * @param unknown $rule
+	 */
+	private function message($rule,$value)
+	{
+		if (isset($rule['message']))
+		{
+			$replacer = '{field}';
+			return str_replace($replacer, $value, $rule['message']);
+		}
+		return '';
 	}
 	
 	/**

@@ -1,9 +1,9 @@
 <?php
 return array(
-	'http' => array('未归类', '软件升级', '压缩文档', '文档管理', '图片'),
+	'http' => array('音乐图书', '软件升级', '压缩文档', '文档管理', '图片'),
 	'mobile' => array('Android', 'IOS', 'WP'),
 	'videoDemand' => array(
-		0 => '未归类',
+		0 => '点播-未归类',
 		1 => '优酷',
 		2 => '秒拍',
 		3 => '搜狐',

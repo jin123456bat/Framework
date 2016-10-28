@@ -9,5 +9,10 @@ return array(
 		'gc_maxlifetime' => 3600,
 		'use_cookies' => 1,
 		'name' => 'FXDATA',
+		'use_trans_sid' => 0,//禁止url中的session_id
+		'use_only_cookies' => 1,//只使用cookie中的session_id
+		'cookie_httponly' => 'On',//禁止js读取cookie
+		//'cookie_secure' => 'On',//https
+		'hash_function'=> 'sha256'
 	)
 );
