@@ -31,6 +31,7 @@ git clone https://github.com/jin123456bat/Framework3.0.git php
 
 cd php
 
+cp -r ./dat_api ../dat_api
 #删除不需要上传的文件
 rm -rf ./.git
 rm -rf ./.settings
