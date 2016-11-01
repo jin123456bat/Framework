@@ -36,8 +36,22 @@ class apiControl extends control
 		{
 			ksort($data);
 			reset($data);
-			$data1 = strtolower(http_build_query($data,NULL,'&',PHP_QUERY_RFC3986));
-			$data2 = strtolower(http_build_query($data,NULL,'&',PHP_QUERY_RFC1738));
+			//$data1 = strtolower(http_build_query($data,NULL,'&',PHP_QUERY_RFC3986));
+			//$data2 = strtolower(http_build_query($data,NULL,'&',PHP_QUERY_RFC1738));
+			
+			$data1 = '';
+			foreach ($data as $index=>$value)
+			{
+				$data1 .= $index.'='.urlencode($value).'&';
+			}
+			$data1 = strtolower(rtrim($data1,'&'));
+			
+			$data2 = '';
+			foreach ($data as $index=>$value)
+			{
+				$data2 .= $index.'='.urlencode($value).'&';
+			}
+			$data2 = strtolower(rtrim($data1,'&'));
 		}
 		else
 		{

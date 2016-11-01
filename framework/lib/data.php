@@ -136,11 +136,41 @@ class data extends error implements \ArrayAccess
 				$fields = $this->parseFileds($rule['fileds']);
 				$do = 'validate';
 			}
+			if (isset($rule['enum']) && !empty($rule['enum']))
+			{
+				$fields = $this->parseFileds($rule['enum']);
+				$do = 'enum';
+			}
+			if (isset($rule['email']) && !empty($rule['email']))
+			{
+				$fileds = $this->parseFileds($rule['email']);
+				$do = 'email';
+			}
 			
 			$rule['message'] = isset($rule['message'])?$rule['message']:'';
 			
 			switch ($do)
 			{
+				case 'email':
+					$pattern = '$(\w+@\w+\.\w+)(\.[a-zA-Z]{2})?$';
+					foreach ($fields as $index=>$value)
+					{
+						if (!preg_match($pattern, $this->$value))
+						{
+							$this->addError('000100', $this->message($rule, $value));
+						}
+					}
+					break;
+				case 'enum':
+					$values = is_array($rule['values'])?$rule['values']:explode(',', $rule['values']);
+					foreach ($fields as $index=>$value)
+					{
+						if (!in_array($this->$value, $values) || !isset($this->$value))
+						{
+							$this->addError('000100', $this->message($rule, $value));
+						}
+					}
+					break;
 				case 'required':
 					foreach ($fields as $index => $value)
 					{

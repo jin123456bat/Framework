@@ -51,6 +51,14 @@ class node extends BaseControl
 		{
 			$feedbackModel->in('feedback.sn',$group_sn);
 		}
+		
+		$search = request::param('search','');
+		if (!empty($search))
+		{
+			$feedbackModel->where('user_info.company like ? or user_info.sn=?',array('%'.$search.'%',$search));
+		}
+		
+		
 		$result = $feedbackModel
 		->Join('user_info','user_info.sn=feedback.sn')
 		->limit($start,$length)

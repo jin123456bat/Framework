@@ -168,7 +168,7 @@ class api extends apiControl
 	}
 	
 	/**
-	 * 资源引入
+	 * 资源流量
 	 */
 	function resource()
 	{
@@ -250,9 +250,91 @@ class api extends apiControl
 			'sum_service'=>'sum(service_size)',
 		));
 		
+		foreach ($result as $index => &$v)
+		{
+			foreach ($v as &$value)
+			{
+				$value = $value*1;
+			}
+		}
+		
 		return new json(json::OK,NULL,$result);
 	}
 	
-	
+	/**
+	 * 资源热榜
+	 * @return \framework\core\response\json
+	 */
+	function topfile()
+	{
+		$starttime = $this->post('starttime');
+		$endtime = $this->post('endtime');
+		$sn = $this->post('sn');
+		
+		$api = new \application\entity\api(array(
+			'starttime' => $starttime,
+			'endtime' => $endtime,
+			'sn' => $sn,
+		),'sn');
+		if(!$api->validate())
+		{
+			return new json(json::FAILED,$api->getError());
+		}
+		
+		$type = $this->post('type','');
+		$top = $this->post('top',10);
+		
+		$fields = array(
+			'max(cache_size) as cache_size',
+			'sum(service_size) as sum_service',
+			'host',
+			'filename',
+			'class',
+			'category',
+		);
+		
+		switch ($type)
+		{
+			case 'http':
+				$this->model('top_stat')->where('class=?',array(0));
+				break;
+			case 'mobile':
+				$this->model('top_stat')->where('class=?',array(1));
+				break;
+			case 'videoLive':
+				$this->model('top_stat')->where('class=? and category>=?',array(2,128));
+				$fields = array(
+					'sum(cache_size) as cache_size',
+					'sum(service_size) as sum_service',
+					'host',
+					'filename',
+					'class',
+					'category',
+				);
+				break;
+			case 'videoDemand':
+				$this->model('top_stat')->where('class=? and category<?',array(2,128));
+				break;
+		}
+		
+		/* $topfile = $this->model('top_stat')
+		->where('class=?',array(2))
+		->group('category')
+		->limit(5)
+		->order('sum_service','desc')
+		->select('sum(service_size) as sum_service'); */
+		$topfile = $this->model('top_stat')
+		->where('create_time >= ? and create_time<?',array(
+			$starttime,
+			$endtime
+		))
+		->where('sn=?',array($sn))
+		->group(array('hash'))
+		->order('sum_service','desc')
+		->limit($top)
+		->select($fields);
+		
+		return new json(json::OK,NULL,$topfile);
+	}
 	
 }

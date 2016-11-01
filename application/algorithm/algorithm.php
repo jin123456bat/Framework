@@ -88,7 +88,7 @@ class algorithm extends component
 			}
 			$max_online_gourp_sn = $this->model('feedbackHistory')
 			->group('sn')
-			->where('ctime >= ? and ctime<?',array(
+			->where('update_time >= ? and update_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration),
 			))

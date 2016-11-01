@@ -1,9 +1,17 @@
 <?php
 $dbuser = 'root';
+
 switch($_SERVER['HTTP_HOST'])
 {
-	case '192.168.1.225':$dbpass = '';$dbuser = 'root';break;
-	case 'localhost':$dbpass = '';$dbuser = 'root';break;
+	case '192.168.1.225':
+		$dbhost = 'localhost';
+		$dbpass = '';
+		$dbuser = 'root';break;
+	case 'localhost':
+		$dbhost = '192.168.1.225';
+		$dbpass = 'fxdata2000';
+		$dbuser = 'admin';
+	break;
 	case '192.168.0.73':$dbpass = 'jin2164389';$dbuser = 'root';break;
 }
 $sql_mode = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
@@ -14,7 +22,7 @@ $init_command = array(
 return array(
 	'cloud_web_v2' => array(
 		'db_type' => 'mysql',
-		'db_server' => 'localhost',
+		'db_server' => $dbhost,
 		'db_dbname' => 'cloud_web_v2',
 		'db_user' => $dbuser,
 		'db_password' => $dbpass,
@@ -23,7 +31,7 @@ return array(
 	),
 	'ordoac' => array(
 		'db_type' => 'mysql',
-		'db_server' => 'localhost',
+		'db_server' => $dbhost,
 		'db_dbname' => 'ordoac',
 		'db_user' => $dbuser,
 		'db_password' => $dbpass,
@@ -33,7 +41,7 @@ return array(
 	),
 	'cds_v2' => array(
 		'db_type' => 'mysql',
-		'db_server' => 'localhost',
+		'db_server' => $dbhost,
 		'db_dbname' => 'cds_v2',
 		'db_user' => $dbuser,
 		'db_password' => $dbpass,
@@ -49,7 +57,7 @@ return array(
 	),
 	'django' => array(
 		'db_type' => 'mysql',
-		'db_server' => '192.168.1.225',
+		'db_server' => $dbhost,
 		'db_dbname' => 'django',
 		'db_user' => $dbuser,
 		'db_password' => $dbpass,
@@ -58,7 +66,7 @@ return array(
 	),
 	'xvirt' => array(
 		'db_type' => 'mysql',
-		'db_server' => 'localhost',
+		'db_server' => $dbhost,
 		'db_dbname' => 'xvirt',
 		'db_user' => $dbuser,
 		'db_password' => $dbpass,

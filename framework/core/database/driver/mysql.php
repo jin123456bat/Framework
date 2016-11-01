@@ -3,6 +3,7 @@ namespace framework\core\database\driver;
 
 use \PDO;
 use framework\core\database\sql;
+use framework\core\log;
 /**
  * mysql类
  *
@@ -84,7 +85,13 @@ class mysql
 		//$this->pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
 		$statement = $this->pdo->prepare($sql);
 		if ($statement) {
+			list($start_m_second,$start_second) = explode(' ', microtime());
 			$result = $statement->execute($array);
+			list($end_m_second,$end_second) = explode(' ', microtime());
+			if (defined('DEBUG') && DEBUG)
+			{
+				log::mysql($sql,$end_second + $end_m_second - $start_m_second - $start_second);
+			}
 			if (in_array(strtolower(substr(trim($statement->queryString), 0, 6)), array('select'),true)) {
 				return $statement->fetchAll(PDO::FETCH_ASSOC);
 			}
