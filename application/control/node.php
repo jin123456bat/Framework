@@ -38,8 +38,8 @@ class node extends BaseControl
 		$start = request::param('start',0,'intval');
 		$length = request::param('length',10,'intval');
 		
-		$order = request::param('order','status');
-		$by = request::param('by','asc');
+		$order = request::param('order','feedback.update_time');
+		$by = request::param('by','desc');
 		
 		if (!in_array($by, array('asc','desc')))
 		{
@@ -63,7 +63,7 @@ class node extends BaseControl
 		->Join('user_info','user_info.sn=feedback.sn')
 		->limit($start,$length)
 		->order($order,$by)
-		->order('user_info.company','asc')
+		->order('feedback.online','desc')
 		->select(array(
 			'user_info.sn',//设备SN号
 			
@@ -98,6 +98,19 @@ class node extends BaseControl
 		{
 			$r['disk_detail'] = json_decode($r['disk_detail'],true);
 			$r['network_detail'] = json_decode($r['network_detail'],true);
+			if (is_array($r['network_detail']) && !empty($r['network_detail']))
+			{
+				foreach ($r['network_detail'] as $network)
+				{
+					if (!empty($network['bond_name']))
+					{
+						if ($network['link_status'] == 'no')
+						{
+							$r['network'] = '1';
+						}
+					}
+				}
+			}
 			if (!empty($r['rhelp']))
 			{
 				$r['rhelp'] = explode(':', $r['rhelp']);
@@ -130,7 +143,11 @@ class node extends BaseControl
 			}
 			
 			//子节点信息
-			$sub_vpe = $this->model('cdn_node_stat')->where('sn like ?',array('%'.substr($r['sn'], 3)))->select('sn,name');
+			$sub_vpe = $this->model('cdn_node_stat')
+			->where('sn like ?',array('V_S'.substr($r['sn'], 3)))
+			->where('make_time = (select max(make_time) from cdn_node_stat limit 1)')
+			->group('sn')
+			->select('sn,name');
 			foreach ($sub_vpe as &$vpe)
 			{
 				$t = $this->model('cdn_traffic_stat')

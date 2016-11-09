@@ -445,8 +445,11 @@ class sql extends base
 	
 	function notIn($field,array $data = array(),$combine = 'and')
 	{
-		$sql = self::fieldFormat($field).' NOT IN ('.implode(',', array_fill(0, count($data), '?')).')';
-		$this->where($sql,$data,$combine);
+		if (!empty($data))
+		{
+			$sql = self::fieldFormat($field).' NOT IN ('.implode(',', array_fill(0, count($data), '?')).')';	
+			$this->where($sql,$data,$combine);
+		}
 		return $this;
 	}
 	
@@ -677,6 +680,9 @@ class sql extends base
 			$sql = $this->__toString();
 		}
 		
+		
+		
+		
 		//去掉sql中的百分号
 		$sql = str_replace('%', '#', $sql);
 		
@@ -685,6 +691,7 @@ class sql extends base
 		{
 			$params = $this->getParams();
 		}
+		
 		$num_params = array();
 		$word_params = array();
 		foreach ($params as $index=>$value)
@@ -698,7 +705,6 @@ class sql extends base
 				$word_params[$index] = '\''.$value.'\'';
 			}
 		}
-		
 		$sql_w = vsprintf($sql_s,$num_params);
 		//把#替换为% 恢复sql
 		$sql_w = str_replace('#', '%', $sql_w);

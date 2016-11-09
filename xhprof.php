@@ -1,11 +1,17 @@
 <?php
 xhprof_start();
 function xhprof_start() {
-	VsmedProf::start();
-	register_shutdown_function('xhprof_stop');
+	if (defined('DEBUG') && DEBUG)
+	{
+		VsmedProf::start();
+		register_shutdown_function('xhprof_stop');
+	}
 }
 function xhprof_stop() {
-	VsmedProf::stop();
+	if (defined('DEBUG') && DEBUG)
+	{
+		VsmedProf::stop();
+	}
 }
 class  VsmedProf {
 	static $started = false;

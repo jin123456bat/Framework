@@ -14,6 +14,12 @@ class task extends bgControl
 	 */
 	function run()
 	{
+		$config = self::getConfig('app');
+		if (!$config['cache'])
+		{
+			return ;
+		}
+		
 		$minute = date('i');
 		//每5分钟执行
 		if ($minute%5 === 0)

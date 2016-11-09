@@ -11,7 +11,7 @@ include './xhprof.php';
 //定义app的名称  app的代码必须放在app名称对应的文件夹里面
 !define("APP_NAME", "application");
 
-!define('DEBUG', true);
+define('DEBUG', false);
 
 //载入框架
 include SYSTEM_ROOT.'/framework.php';

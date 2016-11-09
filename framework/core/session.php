@@ -30,7 +30,10 @@ class session extends component
 			register_shutdown_function('session_write_close');
 		}
 		
-		session_start();
+		if (request::php_sapi_name()=='web')
+		{
+			session_start();
+		}
 		//每次请求重新生成session_id，防止session_id暴力破解
 		//这里有个问题，假如当前请求还没有返回的话，直接发送第二次请求，会导致第二次请求带上旧的cookie，而旧的cookie已经被删除掉了，这样子的话直接判断为尚未登陆状态
 		//假如为false的话，会导致session在尚未gc之前有大量的session_id

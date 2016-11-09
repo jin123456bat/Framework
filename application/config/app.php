@@ -9,5 +9,5 @@ return array(
 	
 	'layout' => 'layout',
 	
-	'cache' => false,
+	'cache' => true,
 );

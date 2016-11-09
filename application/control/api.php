@@ -3,6 +3,7 @@ namespace application\control;
 use application\extend\apiControl;
 use framework\core\response\json;
 use application\algorithm\algorithm;
+use framework\core\model;
 
 class api extends apiControl
 {
@@ -317,17 +318,90 @@ class api extends apiControl
 				break;
 		}
 		
-		/* $topfile = $this->model('top_stat')
-		->where('class=?',array(2))
-		->group('category')
-		->limit(5)
-		->order('sum_service','desc')
-		->select('sum(service_size) as sum_service'); */
-		$topfile = $this->model('top_stat')
+		$top_category = array();
+		$topfile_category = $this->model('top_stat')
+		->where('sn=?',array($sn))
 		->where('create_time >= ? and create_time<?',array(
 			$starttime,
 			$endtime
 		))
+		->group('category')
+		->limit(5)
+		->order('sum_service','desc')
+		->select(array(
+			'sum_service' => 'sum(service_size)',
+			'category',
+			'class'
+		));
+		
+		foreach ($topfile_category as $category)
+		{
+			$top_category[] = array(
+				'class'=>$category['class'],
+				'category' => $category['category'],
+			);
+		}
+		
+		$category_config = self::getConfig('category');
+		
+		$getCategoryName = function($config,$category)
+		{
+			
+			if (isset($category['class']) && isset($category['category']))
+			{
+				switch ($category['class'])
+				{
+					case '0':return $config['http'][$category['category']];
+					case '1':return $config['mobile'][$category['category']];
+					case '2':
+						if ($category['category']>=128)
+						{
+							return $config['videoLive'][$category['category']-128];
+						}
+						return $config['videoLive'][$category['category']];
+				}
+			}
+		};
+		
+		$topfile = array();
+		$selected_class = 0;
+		$selected_category = array();
+		foreach ($top_category as $category)
+		{
+			$selected_category[] = $category['category'];
+			$selected_class = $category['class'];
+			$categoryName = $getCategoryName($category_config,$category);
+			$topfile[$categoryName] = $this->model('top_stat')
+			->where('create_time >= ? and create_time<?',array(
+				$starttime,
+				$endtime
+			))
+			->where('class=? and category=?',array($category['class'],$category['category']))
+			->where('sn=?',array($sn))
+			->group(array('hash'))
+			->order('sum_service','desc')
+			->limit($top)
+			->select($fields);
+		}
+		
+		if ($type == 'videoLive')
+		{
+			$this->model('top_stat')
+			->where('category>=?',array(128));
+		}
+		else
+		{
+			$this->model('top_stat')
+			->where('category<?',array(128));
+		}
+		
+		$topfile['其它'] = $this->model('top_stat')
+		->where('create_time >= ? and create_time<?',array(
+			$starttime,
+			$endtime
+		))
+		->where('class=?',array($selected_class))
+		->notIn('category',$selected_category)
 		->where('sn=?',array($sn))
 		->group(array('hash'))
 		->order('sum_service','desc')
