@@ -333,11 +333,11 @@ class node extends BaseControl
 				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
 			))
 			->where('sn=?',array($sn))
-			->group('create_time')
+			->group('time')
 			->select(array(
-				'create_time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
-				'service'=>'max(service)',
-				'cache'=>'max(cache)',
+				'time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
+				'service'=>'sum(service)',
+				'cache'=>'sum(cache)',
 				'hit_user'=>'max(hit_user)',//服务用户
 				'online_user'=>'max(online_user)',//活跃用户
 			));
@@ -348,13 +348,14 @@ class node extends BaseControl
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
 			))
-			->where('sn like ?',array('%'.substr($sn, 3)))
-			->group('make_time')
+			->where('sn like ?',array('V_S'.substr($sn, 3)))
+			->group('time')
 			->select(array(
-				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
+				'time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
 				'service' => 'sum(service)',
 				'cache' => 'sum(cache)',
 			));
+			
 			
 			$xvirt_traffic_stat = $this->model('xvirt_traffic_stat')
 			->where('make_time>=? and make_time<?',array(
@@ -362,60 +363,60 @@ class node extends BaseControl
 				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
 			))
 			->where('sn like ?',array('%'.substr($sn, 3)))
-			->group('make_time')
+			->group('time')
 			->select(array(
-				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
-				'service' => 'max(service)',
-				'cache' => 'max(cache)',
+				'time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
+				'service' => 'sum(service)',
+				'cache' => 'sum(cache)',
 			));
 			
 			foreach ($traffic_stat as $stat)
 			{
-				$temp_cache[$stat['create_time']] = $stat['cache']*1;
-				$temp_service[$stat['create_time']] = $stat['service']*1;
-				$temp_hit_user[$stat['create_time']] = $stat['hit_user'];
-				$temp_online[$stat['create_time']] = $stat['online_user'];
+				$temp_cache[$stat['time']] = $stat['cache']*1;
+				$temp_service[$stat['time']] = $stat['service']*1;
+				$temp_hit_user[$stat['time']] = $stat['hit_user'];
+				$temp_online[$stat['time']] = $stat['online_user'];
 			}
-			unset($traffic_stat);
 			
 			foreach ($cdn_traffic_stat as $stat)
 			{
-				if (isset($temp_cache[$stat['make_time']]))
+				if (isset($temp_cache[$stat['time']]))
 				{
-					$temp_cache[$stat['make_time']] += $stat['cache'];
+					$temp_cache[$stat['time']] += $stat['cache'];
 				}
 				else
 				{
-					$temp_cache[$stat['make_time']] = $stat['cache']*1;
+					$temp_cache[$stat['time']] = $stat['cache']*1;
 				}
 				
-				if (isset($temp_service[$stat['make_time']]))
+				if (isset($temp_service[$stat['time']]))
 				{
-					$temp_service[$stat['make_time']] += $stat['cache'];
+					$temp_service[$stat['time']] += $stat['service'];
 				}
 				else
 				{
-					$temp_service[$stat['make_time']] = $stat['cache']*1;
+					$temp_service[$stat['time']] = $stat['service']*1;
 				}
 			}
 			unset($cdn_traffic_stat);
 			
 			foreach ($xvirt_traffic_stat as $stat)
 			{
-				if (isset($temp_cache[$stat['make_time']]) && $temp_cache[$stat['make_time']]>$stat['cache'])
+				if (isset($temp_cache[$stat['time']]) && $temp_cache[$stat['time']]>=$stat['cache'])
 				{
-					$temp_cache[$stat['make_time']] -= $stat['cache'];
+					$temp_cache[$stat['time']] -= $stat['cache'];
 				}
 				
-				if (isset($temp_service[$stat['make_time']]) && $temp_service[$stat['make_time']]>$stat['service'])
+				if (isset($temp_service[$stat['time']]) && $temp_service[$stat['time']]>=$stat['service'])
 				{
-					$temp_service[$stat['make_time']] -= $stat['service'];
+					$temp_service[$stat['time']] -= $stat['service'];
 				}
 			}
 			unset($xvirt_traffic_stat);
 			
 			$max = 0;
 			$max_time = '';
+			
 			foreach ($temp_service as $time => $value)
 			{
 				if ($value >= $max)
