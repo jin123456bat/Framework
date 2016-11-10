@@ -71,8 +71,8 @@ class node extends BaseControl
 			'if(UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(feedback.update_time)<60*30,"在线","离线") as status',//CDS在线状态
 			
 			'feedback.online',//活跃用户数
-			'feedback.cache',//回源流速，kbp/s
-			'feedback.service',//服务速率
+			//'feedback.cache',//回源流速，kbp/s
+			//'feedback.service',//服务速率
 			'feedback.monitor',//镜像速率
 			'feedback.cpu_used',//CPU使用率
 			'feedback.mem_used',//内存使用率
@@ -116,14 +116,48 @@ class node extends BaseControl
 				$r['rhelp'] = explode(':', $r['rhelp']);
 			}
 			
+			$traffic_stat = $this->model('traffic_stat')
+			->where('sn=?',array($r['sn']))
+			->order('create_time','desc')
+			->find('service,cache');
+			
+			$cdn_traffic_stat = $this->model('cdn_traffic_stat')
+			->where('sn like ?',array('%'.substr($r['sn'], 3)))
+			->group('time')
+			->order('time','desc')
+			->find(array(
+				'service'=>'sum(service)',
+				'cache'=>'sum(cache)',
+				'time'=>'date_format(make_time,"%Y-%m-%d %H:%i")'
+			));
+			
+			$xvirt_traffic_stat = $this->model('xvirt_traffic_stat')
+			->where('sn like ?',array('%'.substr($r['sn'], 3)))
+			->group('time')
+			->order('time','desc')
+			->find(array(
+				'service' => 'sum(service)',
+				'cache' => 'sum(cache)',
+				'time' => 'date_format(make_time,"%Y-%m-%d %H:%i")'
+			));
+			$r['service'] = $traffic_stat['service'] + $cdn_traffic_stat['service'] - $xvirt_traffic_stat['service'];
+			$r['cache'] = $traffic_stat['cache'] + $cdn_traffic_stat['cache'] - $xvirt_traffic_stat['cache'];
+			
+			$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
+			$endtime = date('Y-m-d H:i:s',$timestamp);
+			$starttime = date('Y-m-d H:i:s',strtotime('-24 hour',strtotime($endtime)));
+			$duration = 60*60*24;
+			$algorithm = new algorithm($starttime,$endtime,$duration);
+			$traffic_stat = $algorithm->traffic_stat_alone($r['sn']);
+			$r['max_service'] = empty($traffic_stat['service'])?0:max($traffic_stat['service']);
+			$r['max_cache'] = empty($traffic_stat['cache'])?0:max($traffic_stat['cache']);
+			
 			//最大值
 			$max = $this->model('feedbackHistory')
 			->where('sn=?',array($r['sn']))
 			->where('update_time>=? and update_time<?',array($start_time,$end_time))
 			->find(array(
 				'max(online) as max_online',//最大活跃人数
-				'max(cache) as max_cache',//最大回源流速
-				'max(service) as max_service',//最大服务流速,
 				'max(monitor) as max_monitor',//最大镜像流速
 				'max(cpu_used) as max_cpu_used',//最大cpu使用率
 				'max(mem_used) as max_mem_used',//最大内存使用率
@@ -133,8 +167,6 @@ class node extends BaseControl
 			if (!empty($max))
 			{
 				$r['max_online'] = $max['max_online']<$r['online']?$r['online']:$max['max_online'];
-				$r['max_cache'] = $max['max_cache']<$r['cache']?$r['cache']:$max['max_cache'];
-				$r['max_service'] = $max['max_service']<$r['service']?$r['service']:$max['max_service'];
 				$r['max_monitor'] = $max['max_monitor']<$r['monitor']?$r['monitor']:$max['max_monitor'];
 				$r['max_cpu_used'] = $max['max_cpu_used']<$r['cpu_used']?$r['cpu_used']:$max['max_cpu_used'];
 				$r['max_mem_used'] = $max['max_mem_used']<$r['mem_used']?$r['mem_used']:$max['max_mem_used'];
@@ -145,7 +177,6 @@ class node extends BaseControl
 			//子节点信息
 			$sub_vpe = $this->model('cdn_node_stat')
 			->where('sn like ?',array('V_S'.substr($r['sn'], 3)))
-			->where('make_time = (select max(make_time) from cdn_node_stat limit 1)')
 			->group('sn')
 			->select('sn,name');
 			foreach ($sub_vpe as &$vpe)

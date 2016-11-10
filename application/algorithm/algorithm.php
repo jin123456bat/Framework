@@ -408,7 +408,7 @@ class algorithm extends component
 	/**
 	 * 计算独立的服务流速和缓存流速
 	 */
-	function traffic_stat_alone()
+	function traffic_stat_alone($sn = NULL)
 	{
 		$service = array();
 		$cache = array();
@@ -416,7 +416,11 @@ class algorithm extends component
 		{
 			$temp_service = array();
 			$temp_cache = array();
-		
+			
+			if (!empty($sn))
+			{
+				$this->model('traffic_stat')->where('sn=?',array($sn));
+			}
 			$traffic_stat = $this->model('traffic_stat')
 			->where('create_time>=? and create_time<?',array(
 				$t_time,
@@ -449,7 +453,10 @@ class algorithm extends component
 				}
 			}
 				
-				
+			if (!empty($sn))
+			{
+				$this->model('cdn_traffic_stat')->where('sn like ?',array('%'.substr($sn, 3)));
+			}
 			$cdn_traffic_stat = $this->model('cdn_traffic_stat')
 			->where('make_time>=? and make_time<?',array(
 				$t_time,
@@ -480,7 +487,12 @@ class algorithm extends component
 					$temp_cache[$stat['make_time']] = $stat['sum_cache'];
 				}
 			}
-				
+			
+			if (!empty($sn))
+			{
+				$this->model('xvirt_traffic_stat')
+				->where('sn like ?',array('%'.substr($sn, 3)));
+			}
 			$xvirt = $this->model('xvirt_traffic_stat')
 			->where('make_time>=? and make_time<?',array(
 				$t_time,
