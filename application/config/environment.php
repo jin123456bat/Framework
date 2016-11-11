@@ -14,5 +14,6 @@ return array(
 		'cookie_httponly' => 'On',//禁止js读取cookie
 		//'cookie_secure' => 'On',//https
 		'hash_function'=> 'sha256'
-	)
+	),
+	
 );

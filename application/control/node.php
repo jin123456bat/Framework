@@ -38,7 +38,7 @@ class node extends BaseControl
 		$start = request::param('start',0,'intval');
 		$length = request::param('length',10,'intval');
 		
-		$order = request::param('order','feedback.update_time');
+		$order = request::param('order','feedback.online');
 		$by = request::param('by','desc');
 		
 		if (!in_array($by, array('asc','desc')))
@@ -62,8 +62,8 @@ class node extends BaseControl
 		$result = $feedbackModel
 		->Join('user_info','user_info.sn=feedback.sn')
 		->limit($start,$length)
+		//->order('feedback.online','desc')
 		->order($order,$by)
-		->order('feedback.online','desc')
 		->select(array(
 			'user_info.sn',//设备SN号
 			

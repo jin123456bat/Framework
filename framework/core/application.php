@@ -30,9 +30,25 @@ class application extends component
 		$this->setConfig(base::$APP_NAME);
 		//载入环境变量
 		$this->env();
-		
+		//导入app配置中的文件类
 		$this->import('app');
-
+		//set_error_handler
+		$app = $this->getConfig('app');
+		if (isset($app['errorHandler']) && !empty($app['errorHandler']))
+		{
+			if(isset($app['errorHandler']['class']))
+			{
+				$types = isset($app['errorHandler']['types'])?$app['errorHandler']['types']:'';
+				list($class,$method) = explode($app['errorHandler']['class'], '::');
+				$method = empty($method)?'run':$method;
+				if (!empty($class))
+				{
+					$class = new $class();
+					set_error_handler(array($class,$method),$types);
+				}
+			}
+		}
+		
 		parent::initlize();
 	}
 	
