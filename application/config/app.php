@@ -14,5 +14,6 @@ return array(
 	'errorHandler' => array(
 		'class' => '/application/extend/errorHandler::run',
 		'types' => E_ALL,
+		'storage' => 'file',
 	),
 );

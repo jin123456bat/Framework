@@ -1,8 +1,9 @@
 <?php
-include './xhprof.php';
-
 //定义根目录
 !defined('ROOT') & define('ROOT', __DIR__);
+
+include ROOT.'/xhprof.php';
+
 //定义框架的目录
 !defined('SYSTEM_ROOT') & define("SYSTEM_ROOT",ROOT.'/framework');
 

@@ -39,9 +39,11 @@ class application extends component
 			if(isset($app['errorHandler']['class']))
 			{
 				$types = isset($app['errorHandler']['types'])?$app['errorHandler']['types']:'';
-				list($class,$method) = explode($app['errorHandler']['class'], '::');
+				$result = explode('::',$app['errorHandler']['class']);
+				$class = array_shift($result);
+				$method = array_shift($result);
 				$method = empty($method)?'run':$method;
-				if (!empty($class))
+				if (!empty($class) && class_exists($class))
 				{
 					$class = new $class();
 					set_error_handler(array($class,$method),$types);

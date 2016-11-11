@@ -52,7 +52,7 @@ class node extends BaseControl
 			$feedbackModel->in('feedback.sn',$group_sn);
 		}
 		
-		$search = request::param('search','');
+		$search = request::param('search','','trim');
 		if (!empty($search))
 		{
 			$feedbackModel->where('user_info.company like ? or user_info.sn=?',array('%'.$search.'%',$search));
@@ -199,8 +199,15 @@ class node extends BaseControl
 			$r['sub_vpe'] = $sub_vpe;
 		}
 		
-		$total = $this->model('feedback')
-		->Join('user_info','user_info.sn=feedback.sn')->count('*');
+		if (!empty($group_sn))
+		{
+			$feedbackModel->in('feedback.sn',$group_sn);
+		}
+		if (!empty($search))
+		{
+			$feedbackModel->where('user_info.company like ? or user_info.sn=?',array('%'.$search.'%',$search));
+		}
+		$total = $feedbackModel->Join('user_info','user_info.sn=feedback.sn')->count('*');
 		
 		$data = array(
 			'total' => $total,

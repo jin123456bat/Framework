@@ -1,18 +1,27 @@
 <?php
+use framework\core\request;
+
 $dbuser = 'root';
 
+if (request::php_sapi_name() != 'web')
+{
+	$_SERVER['HTTP_HOST'] = '';
+}
 switch($_SERVER['HTTP_HOST'])
 {
-	case '192.168.1.225':
+	case 'localhost':
 		$dbhost = 'localhost';
 		$dbpass = '';
-		$dbuser = 'root';break;
-	case 'localhost':
-		$dbhost = '192.168.1.225';
-		$dbpass = 'fxdata2000';
-		$dbuser = 'admin';
+		$dbuser = 'root';
 	break;
-	case '192.168.0.73':$dbpass = 'jin2164389';$dbuser = 'root';break;
+	case '192.168.0.73':
+		$dbpass = 'jin2164389';
+		$dbuser = 'root';
+	break;
+	default:
+		$dbhost = 'localhost';
+		$dbpass = '';
+		$dbuser = 'root';
 }
 $sql_mode = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
 

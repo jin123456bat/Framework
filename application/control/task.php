@@ -20,6 +20,7 @@ class task extends bgControl
 			return ;
 		}
 		
+		
 		$starttime = date('Y-m-d H:i:s',time());
 		
 		$minute = date('i');
@@ -28,7 +29,7 @@ class task extends bgControl
 		{
 			//首页 最近24小时的数据
 			$string = 'php '.ROOT.'\index.php -c main -a overview -duration minutely -timemode 1';
-			exec($string,$output,$return_var);
+			exec($string);
 			
 			//内容交付概览  最近24小时的数据
 			$string = 'php '.ROOT.'\index.php -c content -a overview -duration minutely -timemode 1';
@@ -64,13 +65,13 @@ class task extends bgControl
 		{
 			//首页 昨天的数据
 			$string = 'php '.ROOT.'\index.php -c main -a overview -duration minutely -timemode 2';
-			exec($string,$output,$return_var);
+			exec($string);
 			//首页近7天的数据
 			$string = 'php '.ROOT.'\index.php -c main -a overview -duration hourly -timemode 3';
 			exec($string);
 			//首页近30天的数据
 			$string = 'php '.ROOT.'\index.php -c main -a overview -duration daily -timemode 5';
-			exec($string,$output,$return_var);
+			exec($string);
 			
 			
 			//内容交付概览  昨天的数据
@@ -155,9 +156,7 @@ class task extends bgControl
 		{
 			//首页上月的数据
 			$string = 'php '.ROOT.'\index.php -c main -a overview -duration daily -timemode 6';
-			exec($string,$output,$return_var);
-			
-			
+			exec($string);
 			//内容交付概览 上月的数据
 			$string = 'php '.ROOT.'\index.php -c content -a overview -duration daily -timemode 6';
 			exec($string);
@@ -176,7 +175,7 @@ class task extends bgControl
 		}
 		
 		$endtime = date('Y-m-d H:i:s',time());
-		file_put_contents('./task_log.log', $starttime.'-'.$endtime."\r\n",FILE_APPEND);
+		file_put_contents(ROOT.'/task_log.log', $starttime.'-'.$endtime."\r\n",FILE_APPEND);
 	}
 	
 	/**
