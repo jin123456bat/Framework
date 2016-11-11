@@ -20,6 +20,8 @@ class task extends bgControl
 			return ;
 		}
 		
+		$starttime = date('Y-m-d H:i:s',time());
+		
 		$minute = date('i');
 		//每5分钟执行
 		if ($minute%5 === 0)
@@ -172,6 +174,9 @@ class task extends bgControl
 			$string = 'php '.ROOT.'\index.php -c content -a http -duration daily -timemode 6';
 			exec($string);
 		}
+		
+		$endtime = date('Y-m-d H:i:s',time());
+		file_put_contents('./task_log.log', $starttime.'-'.$endtime."\r\n",FILE_APPEND);
 	}
 	
 	/**
