@@ -215,13 +215,13 @@ class model extends component
 			{
 				if (!isset($data[$value['Field']]))
 				{
-					if ($value['Null'] == 'YES')
+					if ($value['Default'] === NULL)
 					{
-						$data[$value['Field']] = NULL;
-					}
-					else
-					{
-						if ($value['Default'] === NULL)
+						if ($value['Null'] == 'YES')
+						{
+							$data[$value['Field']] = NULL;
+						}
+						else
 						{
 							switch ($value['Type'])
 							{
@@ -247,6 +247,10 @@ class model extends component
 									}
 							}
 						}
+					}
+					else
+					{
+						$data[$value['Field']] = $value['Default'];
 					}
 				}
 			}
