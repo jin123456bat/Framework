@@ -346,7 +346,6 @@ class api extends apiControl
 		
 		$getCategoryName = function($config,$category)
 		{
-			
 			if (isset($category['class']) && isset($category['category']))
 			{
 				switch ($category['class'])
@@ -356,9 +355,10 @@ class api extends apiControl
 					case '2':
 						if ($category['category']>=128)
 						{
+								
 							return $config['videoLive'][$category['category']-128];
 						}
-						return $config['videoLive'][$category['category']];
+						return $config['videoDemand'][$category['category']];
 				}
 			}
 		};

@@ -2,6 +2,7 @@
 namespace application\control;
 
 use application\extend\bgControl;
+use framework\core\debugger;
 
 /**
  * 生成各个接口的文件数据
@@ -20,13 +21,19 @@ class task extends bgControl
 			return ;
 		}
 		
-		
-		$starttime = date('Y-m-d H:i:s',time());
+		$debugger = new debugger();
+		$minute5 = new debugger();
+		$hour1 = new debugger();
+		$hour2 = new debugger();
+		$day1 = new debugger();
+		$week1 = new debugger();
+		$month1 = new debugger();
 		
 		$minute = date('i');
 		//每5分钟执行
 		if ($minute%5 === 0)
 		{
+			$minute5->start();
 			//首页 最近24小时的数据
 			$string = 'php '.ROOT.'\index.php -c main -a overview -duration minutely -timemode 1';
 			exec($string);
@@ -46,23 +53,30 @@ class task extends bgControl
 			//内容交付常规资源 最近24小时的数据
 			$string = 'php '.ROOT.'\index.php -c content -a http -duration minutely -timemode 1';
 			exec($string);
+			$minute5->stop();
 		}
 		
 		//每小时的5分钟执行一次
 		if ($minute == '05')
 		{
+			$hour1->start();
+			
+			$hour1->stop();
 		}
 		
 		//每2小时的5分钟执行一次
 		$hour = date('H');
 		if ($hour%2===0 && $minute=='05')
 		{
+			$hour2->start();
 			
+			$hour2->stop();
 		}
 		
 		//每天的05分钟执行一次
 		if ($hour === '00' && $minute == '05')
 		{
+			$day1->start();
 			//首页 昨天的数据
 			$string = 'php '.ROOT.'\index.php -c main -a overview -duration minutely -timemode 2';
 			exec($string);
@@ -123,12 +137,14 @@ class task extends bgControl
 			//内容交付常规资源 30天的数据
 			$string = 'php '.ROOT.'\index.php -c content -a http -duration daily -timemode 5';
 			exec($string);
+			$day1->stop();
 		}
 		
 		//每个星期一的0点5分执行一次
 		$week = date('N');
 		if ($week == 1 && $hour === '00' && $minute === '05')
 		{
+			$week1->start();
 			//首页上周的数据
 			$string = 'php '.ROOT.'\index.php -c main -a overview -duration hourly -timemode 4';
 			exec($string,$output,$return_var);
@@ -148,12 +164,15 @@ class task extends bgControl
 			//内容交付常规资源 上周的数据
 			$string = 'php '.ROOT.'\index.php -c content -a http -duration hourly -timemode 4';
 			exec($string);
+			$week1->stop();
 		}
 		
 		//每个月1号，0点5分执行
 		$day = date('d');
 		if ($day == '01' && $hour === '00' && $minute == '05')
 		{
+			$month1->start();
+			
 			//首页上月的数据
 			$string = 'php '.ROOT.'\index.php -c main -a overview -duration daily -timemode 6';
 			exec($string);
@@ -172,10 +191,48 @@ class task extends bgControl
 			//内容交付常规资源 上月的数据
 			$string = 'php '.ROOT.'\index.php -c content -a http -duration daily -timemode 6';
 			exec($string);
+			$month1->stop();
 		}
+		$debugger->stop();
 		
-		$endtime = date('Y-m-d H:i:s',time());
-		file_put_contents(ROOT.'/task_log.log', $starttime.'-'.$endtime."\r\n",FILE_APPEND);
+		$this->log($debugger,$minute5,$hour1,$hour2,$day1,$week1,$month1);
+	}
+	
+	/**
+	 * 记录运行日志
+	 * @param debugger $debugger
+	 * @param debugger $minute5
+	 * @param debugger $hour1
+	 * @param debugger $hour2
+	 * @param debugger $day1
+	 * @param debugger $week1
+	 * @param debugger $month1
+	 */
+	function log(debugger $debugger,debugger $minute5,debugger $hour1,debugger $hour2,debugger $day1,debugger $week1,debugger $month1)
+	{
+		$this->model('task_run_log')->insert(array(
+			'starttime' => date('Y-m-d H:i:s',intval($debugger->getStarttime())),
+			'endtime' => date('Y-m-d H:i:s',intval($debugger->getEndtime())),
+			'time' => $debugger->getTime(),
+			'task_5minutes_starttime' => date('Y-m-d H:i:s',intval($minute5->getStarttime())),
+			'task_5minutes_endtime' => date('Y-m-d H:i:s',intval($minute5->getEndtime())),
+			'task_5minutes_time' => $minute5->getTime(),
+			'task_1hour_starttime' => date('Y-m-d H:i:s',intval($hour1->getStarttime())),
+			'task_1hour_endtime' => date('Y-m-d H:i:s',intval($hour1->getEndtime())),
+			'task_1hour_time' => $hour1->getTime(),
+			'task_2hour_starttime' => date('Y-m-d H:i:s',intval($hour2->getStarttime())),
+			'task_2hour_endtime' => date('Y-m-d H:i:s',intval($hour2->getEndtime())),
+			'task_2hour_time' => $hour2->getTime(),
+			'task_1day_starttime' => date('Y-m-d H:i:s',intval($day1->getStarttime())),
+			'task_1day_endtime' => date('Y-m-d H:i:s',intval($day1->getEndtime())),
+			'task_1day_time' => $day1->getTime(),
+			'task_1week_starttime' => date('Y-m-d H:i:s',intval($week1->getStarttime())),
+			'task_1week_endtime' => date('Y-m-d H:i:s',intval($week1->getEndtime())),
+			'task_1week_time' => $week1->getTime(),
+			'task_1month_starttime' => date('Y-m-d H:i:s',intval($month1->getStarttime())),
+			'task_1month_endtime' => date('Y-m-d H:i:s',intval($month1->getEndtime())),
+			'task_1month_time' => $month1->getTime(),
+		));
 	}
 	
 	/**
