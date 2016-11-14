@@ -42,21 +42,23 @@ class apiControl extends control
 			$data1 = '';
 			foreach ($data as $index=>$value)
 			{
-				$data1 .= $index.'='.urlencode($value).'&';
+				$data1 .= $index.'='.($value).'&';
 			}
 			$data1 = strtolower(rtrim($data1,'&'));
 			
 			$data2 = '';
 			foreach ($data as $index=>$value)
 			{
-				$data2 .= $index.'='.urlencode($value).'&';
+				$data2 .= $index.'='.($value).'&';
 			}
 			$data2 = strtolower(rtrim($data1,'&'));
+			
 		}
 		else
 		{
 			$data1 = $data2 = '';
 		}
+		
 		$result1 = strtoupper(md5($timestamp.$data1.$partner.$key));
 		$result2 = strtoupper(md5($timestamp.$data2.$partner.$key));
 		return array($result1,$result2);
