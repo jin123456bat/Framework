@@ -208,9 +208,10 @@ class model extends component
 				}
 			}
 			
+			//填充默认数据
 			foreach ($this->_desc as $index=>$value)
 			{
-				if (!isset($data[$value['Field']]))
+				if (!in_array($value['Field'], array_keys($data)))
 				{
 					if ($value['Default'] === NULL)
 					{
@@ -220,28 +221,35 @@ class model extends component
 						}
 						else
 						{
-							switch ($value['Type'])
+							if ($value['Key'] == 'PRI' && $value['Extra'] == trim('AUTO_INCREMENT'))
 							{
-								case 'datetime':
-									$data[$value['Field']] = date('Y-m-d H:i:s');
-									break;
-								case 'timestamp':
-									$data[$value['Field']] = date('Y-m-d H:i:s');
-									break;
-								case 'date':
-									$data[$value['Field']] = date('Y-m-d');
-									break;
-								default:
-									$zero = '$int\(\d+\)$';
-									$empty_string = '$(char)?(text)?$';
-									if (preg_match($zero, $value['Type']))
-									{
-										$data[$value['Field']] = 0;
-									}
-									else if (preg_match($empty_string, $value['Type']))
-									{
-										$data[$value['Field']] = '';
-									}
+								$data[$value['Field']] = NULL;
+							}
+							else
+							{
+								switch ($value['Type'])
+								{
+									case 'datetime':
+										$data[$value['Field']] = date('Y-m-d H:i:s');
+										break;
+									case 'timestamp':
+										$data[$value['Field']] = date('Y-m-d H:i:s');
+										break;
+									case 'date':
+										$data[$value['Field']] = date('Y-m-d');
+										break;
+									default:
+										$zero = '$int\(\d+\)$';
+										$empty_string = '$(char)?(text)?$';
+										if (preg_match($zero, $value['Type']))
+										{
+											$data[$value['Field']] = 0;
+										}
+										else if (preg_match($empty_string, $value['Type']))
+										{
+											$data[$value['Field']] = '';
+										}
+								}
 							}
 						}
 					}
@@ -251,6 +259,14 @@ class model extends component
 					}
 				}
 			}
+			
+			//调整字段顺序
+			$temp = array();
+			foreach ($this->_desc as $value)
+			{
+				$temp[$value['Field']] = $data[$value['Field']];
+			}
+			$data = $temp;
 		}
 		
 		$this->_sql->from($this->_table);
