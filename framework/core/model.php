@@ -190,18 +190,6 @@ class model extends component
 			$fields[] = $value['Field'];
 		}
 		
-		//去除多余的数据
-		foreach ($data as $index => $value)
-		{
-			if (!is_int($index))
-			{
-				if (!in_array($index, $fields))
-				{
-					unset($data[$index]);
-				}
-			}
-		}
-		
 		//是否是数字下标
 		$source_keys = array_keys($data);
 		$des_keys = range(0, count($data)-1,1);
@@ -211,17 +199,26 @@ class model extends component
 		//补充默认值
 		if (!$is_num_index)
 		{
+			//去除多余的数据
+			foreach ($data as $index => $value)
+			{
+				if (!in_array($index, $fields))
+				{
+					unset($data[$index]);
+				}
+			}
+			
 			foreach ($this->_desc as $index=>$value)
 			{
 				if (!isset($data[$value['Field']]))
 				{
-					if ($value['Null'] == 'YES')
+					if ($value['Default'] === NULL)
 					{
-						$data[$value['Field']] = NULL;
-					}
-					else
-					{
-						if ($value['Default'] === NULL)
+						if ($value['Null'] == 'YES')
+						{
+							$data[$value['Field']] = NULL;
+						}
+						else
 						{
 							switch ($value['Type'])
 							{
@@ -247,6 +244,10 @@ class model extends component
 									}
 							}
 						}
+					}
+					else
+					{
+						$data[$value['Field']] = $value['Default'];
 					}
 				}
 			}
