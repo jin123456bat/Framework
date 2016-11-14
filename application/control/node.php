@@ -477,6 +477,7 @@ class node extends BaseControl
 			$result['user_percent'] = 100*number_format(division($result['hit_user'],$result['online_user']),4,'.','');
 			$result['max_service_user'] = 100*number_format(division($result['max_service'],$result['hit_user']),4,'.','');
 			$result['service_cache'] = 100*number_format(division($result['sum_service'],$result['sum_cache']),4,'.','');
+			$result['service_power'] = 100 * number_format(division($result['max_service'], $result['online_user']),4,'.','');
 			
 			$avg = $this->model('report_jxreport')->where('day=? and sn=?',array($t_time,$sn))->find(array(
 				'capture_avg',

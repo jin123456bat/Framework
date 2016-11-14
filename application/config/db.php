@@ -15,6 +15,7 @@ switch($_SERVER['HTTP_HOST'])
 		$dbuser = 'root';
 	break;
 	case '192.168.0.73':
+		$dbhost = 'localhost';
 		$dbpass = 'jin2164389';
 		$dbuser = 'root';
 	break;
