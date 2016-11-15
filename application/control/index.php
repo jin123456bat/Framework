@@ -19,48 +19,4 @@ class index extends control
 		'CAS0530000008',
 		'CAS0530000009',
 	);
-	
-	function index()
-	{
-		$data = array(
-			'A',
-			'B',
-			'C',
-			'D',
-			'B',
-			'C',
-			'e',
-			'E',
-		);
-		
-		$collection = new collection($data,array(
-			collection::CASE_INSENSITIVE => false,
-		));
-		
-		//$collection->unique();
-		
-		//ok
-		/* $collection['a'] = 'asdasf';
-		var_dump($collection['a']);
-		 */
-		
-		//ok
-		//var_dump($collection['a']);
-		
-		//failed
-		/* if (is_array($collection))
-		{
-			echo "ok";
-		}
-		else
-		{
-			echo "failed";
-		} */
-		
-		//ok
-		foreach ($collection as $key => $value)
-		{
-			echo $key.'=>'.$value.'<br>';
-		}
-	}
 }

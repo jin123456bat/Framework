@@ -36,23 +36,51 @@ class task extends bgControl
 			$minute5->start();
 			//首页 最近24小时的数据
 			$string = 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 1';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'main_overview_minutely_1',
+				'response' => exec($string),
+			));
 			
 			//内容交付概览  最近24小时的数据
 			$string = 'php '.ROOT.'/index.php -c content -a overview -duration minutely -timemode 1';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_overview_minutely_1',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频点播 最近24小时的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration minutely -timemode 1';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoDemand_minutely_1',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频直播 最近24小时的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration minutely -timemode 1';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoLive_minutely_1',
+				'response' => exec($string),
+			));
+			
 			//内容交付移动应用 最近24小时的数据
 			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration minutely -timemode 1';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_mobile_minutely_1',
+				'response' => exec($string),
+			));
+			
 			//内容交付常规资源 最近24小时的数据
 			$string = 'php '.ROOT.'/index.php -c content -a http -duration minutely -timemode 1';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_http_minutely_1',
+				'response' => exec($string),
+			));
 			$minute5->stop();
 		}
 		

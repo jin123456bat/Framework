@@ -67,6 +67,10 @@ class application extends component
 					{
 						include $import;
 					}
+					else if (is_file(ROOT.'/'.ltrim($import,'/')))
+					{
+						include ROOT.'/'.ltrim($import,'/');
+					}
 				}
 			}
 			else
@@ -74,6 +78,10 @@ class application extends component
 				if (is_file($config['import']))
 				{
 					include $config['import'];
+				}
+				else if (is_file(ROOT.'/'.ltrim($config['import'],'/')))
+				{
+					include ROOT.'/'.ltrim($config['import'],'/');
 				}
 			}
 		}
