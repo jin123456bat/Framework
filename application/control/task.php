@@ -35,23 +35,23 @@ class task extends bgControl
 		{
 			$minute5->start();
 			//首页 最近24小时的数据
-			$string = 'php '.ROOT.'\index.php -c main -a overview -duration minutely -timemode 1';
+			$string = 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 1';
 			exec($string);
 			
 			//内容交付概览  最近24小时的数据
-			$string = 'php '.ROOT.'\index.php -c content -a overview -duration minutely -timemode 1';
+			$string = 'php '.ROOT.'/index.php -c content -a overview -duration minutely -timemode 1';
 			exec($string);
 			//内容交付视频点播 最近24小时的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoDemand -duration minutely -timemode 1';
+			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration minutely -timemode 1';
 			exec($string);
 			//内容交付视频直播 最近24小时的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoLive -duration minutely -timemode 1';
+			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration minutely -timemode 1';
 			exec($string);
 			//内容交付移动应用 最近24小时的数据
-			$string = 'php '.ROOT.'\index.php -c content -a mobile -duration minutely -timemode 1';
+			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration minutely -timemode 1';
 			exec($string);
 			//内容交付常规资源 最近24小时的数据
-			$string = 'php '.ROOT.'\index.php -c content -a http -duration minutely -timemode 1';
+			$string = 'php '.ROOT.'/index.php -c content -a http -duration minutely -timemode 1';
 			exec($string);
 			$minute5->stop();
 		}
@@ -78,64 +78,64 @@ class task extends bgControl
 		{
 			$day1->start();
 			//首页 昨天的数据
-			$string = 'php '.ROOT.'\index.php -c main -a overview -duration minutely -timemode 2';
+			$string = 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 2';
 			exec($string);
 			//首页近7天的数据
-			$string = 'php '.ROOT.'\index.php -c main -a overview -duration hourly -timemode 3';
+			$string = 'php '.ROOT.'/index.php -c main -a overview -duration hourly -timemode 3';
 			exec($string);
 			//首页近30天的数据
-			$string = 'php '.ROOT.'\index.php -c main -a overview -duration daily -timemode 5';
+			$string = 'php '.ROOT.'/index.php -c main -a overview -duration daily -timemode 5';
 			exec($string);
 			
 			
 			//内容交付概览  昨天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a overview -duration minutely -timemode 2';
+			$string = 'php '.ROOT.'/index.php -c content -a overview -duration minutely -timemode 2';
 			exec($string);
 			//内容交付视频点播 昨天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoDemand -duration minutely -timemode 2';
+			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration minutely -timemode 2';
 			exec($string);
 			//内容交付视频直播 昨天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoLive -duration minutely -timemode 2';
+			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration minutely -timemode 2';
 			exec($string);
 			//内容交付移动应用 昨天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a mobile -duration minutely -timemode 2';
+			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration minutely -timemode 2';
 			exec($string);
 			//内容交付常规资源 昨天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a http -duration minutely -timemode 2';
+			$string = 'php '.ROOT.'/index.php -c content -a http -duration minutely -timemode 2';
 			exec($string);
 			
 			
 			//内容交付概览 7天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a overview -duration hourly -timemode 3';
+			$string = 'php '.ROOT.'/index.php -c content -a overview -duration hourly -timemode 3';
 			exec($string);
 			//内容交付视频点播 7天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoDemand -duration hourly -timemode 3';
+			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration hourly -timemode 3';
 			exec($string);
 			//内容交付视频直播 7天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoLive -duration hourly -timemode 3';
+			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration hourly -timemode 3';
 			exec($string);
 			//内容交付移动应用 7天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a mobile -duration hourly -timemode 3';
+			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration hourly -timemode 3';
 			exec($string);
 			//内容交付常规资源 7天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a http -duration hourly -timemode 3';
+			$string = 'php '.ROOT.'/index.php -c content -a http -duration hourly -timemode 3';
 			exec($string);
 			
 			
 			//内容交付概览 30天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a overview -duration daily -timemode 5';
+			$string = 'php '.ROOT.'/index.php -c content -a overview -duration daily -timemode 5';
 			exec($string);
 			//内容交付视频点播 30天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoDemand -duration daily -timemode 5';
+			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration daily -timemode 5';
 			exec($string);
 			//内容交付视频直播 30天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoLive -duration daily -timemode 5';
+			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration daily -timemode 5';
 			exec($string);
 			//内容交付移动应用 30天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a mobile -duration daily -timemode 5';
+			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration daily -timemode 5';
 			exec($string);
 			//内容交付常规资源 30天的数据
-			$string = 'php '.ROOT.'\index.php -c content -a http -duration daily -timemode 5';
+			$string = 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 5';
 			exec($string);
 			$day1->stop();
 		}
@@ -146,23 +146,23 @@ class task extends bgControl
 		{
 			$week1->start();
 			//首页上周的数据
-			$string = 'php '.ROOT.'\index.php -c main -a overview -duration hourly -timemode 4';
+			$string = 'php '.ROOT.'/index.php -c main -a overview -duration hourly -timemode 4';
 			exec($string,$output,$return_var);
 			
 			//内容交付概览 上周的数据
-			$string = 'php '.ROOT.'\index.php -c content -a overview -duration hourly -timemode 4';
+			$string = 'php '.ROOT.'/index.php -c content -a overview -duration hourly -timemode 4';
 			exec($string);
 			//内容交付视频点播 上周的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoDemand -duration hourly -timemode 4';
+			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration hourly -timemode 4';
 			exec($string);
 			//内容交付视频直播 上周的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoLive -duration hourly -timemode 4';
+			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration hourly -timemode 4';
 			exec($string);
 			//内容交付移动应用 上周的数据
-			$string = 'php '.ROOT.'\index.php -c content -a mobile -duration hourly -timemode 4';
+			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration hourly -timemode 4';
 			exec($string);
 			//内容交付常规资源 上周的数据
-			$string = 'php '.ROOT.'\index.php -c content -a http -duration hourly -timemode 4';
+			$string = 'php '.ROOT.'/index.php -c content -a http -duration hourly -timemode 4';
 			exec($string);
 			$week1->stop();
 		}
@@ -174,22 +174,22 @@ class task extends bgControl
 			$month1->start();
 			
 			//首页上月的数据
-			$string = 'php '.ROOT.'\index.php -c main -a overview -duration daily -timemode 6';
+			$string = 'php '.ROOT.'/index.php -c main -a overview -duration daily -timemode 6';
 			exec($string);
 			//内容交付概览 上月的数据
-			$string = 'php '.ROOT.'\index.php -c content -a overview -duration daily -timemode 6';
+			$string = 'php '.ROOT.'/index.php -c content -a overview -duration daily -timemode 6';
 			exec($string);
 			//内容交付视频点播 上月的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoDemand -duration daily -timemode 6';
+			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration daily -timemode 6';
 			exec($string);
 			//内容交付视频直播 上月的数据
-			$string = 'php '.ROOT.'\index.php -c content -a videoLive -duration daily -timemode 6';
+			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration daily -timemode 6';
 			exec($string);
 			//内容交付移动应用 上月的数据
-			$string = 'php '.ROOT.'\index.php -c content -a mobile -duration daily -timemode 6';
+			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration daily -timemode 6';
 			exec($string);
 			//内容交付常规资源 上月的数据
-			$string = 'php '.ROOT.'\index.php -c content -a http -duration daily -timemode 6';
+			$string = 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 6';
 			exec($string);
 			$month1->stop();
 		}
