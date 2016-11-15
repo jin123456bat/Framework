@@ -46,7 +46,7 @@ class debugger extends component
 	
 	function __construct()
 	{
-		list($msec,$sec) = microtime();
+		list($msec,$sec) = explode(' ', microtime());
 		$this->_micro_starttime = $sec + $msec;
 		$this->_start_memory = memory_get_usage(true);
 	}
@@ -56,7 +56,7 @@ class debugger extends component
 	 */
 	function start()
 	{
-		list($msec,$sec) = microtime();
+		list($msec,$sec) = explode(' ', microtime());
 		$this->_micro_starttime = $sec + $msec;
 		$this->_start_memory = memory_get_usage(true);
 	}
@@ -66,7 +66,7 @@ class debugger extends component
 	 */
 	function stop()
 	{
-		list($msec,$sec) = microtime();
+		list($msec,$sec) = explode(' ', microtime());
 		$this->_micro_endtime = $sec + $msec;
 		$this->_end_memory = memory_get_usage(true);
 		
