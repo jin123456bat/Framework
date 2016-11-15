@@ -25,13 +25,16 @@ class content extends BaseControl
 	 */
 	function overview()
 	{
-		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		if (!empty($this->_timemode))
 		{
 			$cache_key = 'content_overview_'.$this->_timemode;
-			$response = cache::get($cache_key);
-			if (!empty($response))
+			if (request::php_sapi_name()=='web')
 			{
-				return new json(json::OK,NULL,$response);
+				$response = cache::get($cache_key);
+				if (!empty($response))
+				{
+					return new json(json::OK,NULL,$response);
+				}
 			}
 		}
 		
@@ -232,13 +235,16 @@ class content extends BaseControl
 	 */
 	function videoDemand()
 	{
-		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		if (!empty($this->_timemode))
 		{
 			$cache_key = 'content_videoDemand_'.$this->_timemode;
-			$response = cache::get($cache_key);
-			if (!empty($response))
+			if (request::php_sapi_name()=='web')
 			{
-				return new json(json::OK,NULL,$response);
+				$response = cache::get($cache_key);
+				if (!empty($response))
+				{
+					return new json(json::OK,NULL,$response);
+				}
 			}
 		}
 		
@@ -464,13 +470,16 @@ class content extends BaseControl
 	 */
 	function videoLive()
 	{
-		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		if (!empty($this->_timemode))
 		{
 			$cache_key = 'content_videoLive_'.$this->_timemode;
-			$response = cache::get($cache_key);
-			if (!empty($response))
+			if (request::php_sapi_name()=='web')
 			{
-				return new json(json::OK,NULL,$response);
+				$response = cache::get($cache_key);
+				if (!empty($response))
+				{
+					return new json(json::OK,NULL,$response);
+				}
 			}
 		}
 		
@@ -693,13 +702,16 @@ class content extends BaseControl
 	 */
 	function mobile()
 	{
-		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		if (!empty($this->_timemode))
 		{
 			$cache_key = 'content_mobile_'.$this->_timemode;
-			$response = cache::get($cache_key);
-			if (!empty($response))
+			if (request::php_sapi_name()=='web')
 			{
-				return new json(json::OK,NULL,$response);
+				$response = cache::get($cache_key);
+				if (!empty($response))
+				{
+					return new json(json::OK,NULL,$response);
+				}
 			}
 		}
 		
@@ -825,13 +837,16 @@ class content extends BaseControl
 	 */
 	function http()
 	{
-		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		if (!empty($this->_timemode))
 		{
 			$cache_key = 'content_http_'.$this->_timemode;
-			$response = cache::get($cache_key);
-			if (!empty($response))
+			if (request::php_sapi_name()=='web')
 			{
-				return new json(json::OK,NULL,$response);
+				$response = cache::get($cache_key);
+				if (!empty($response))
+				{
+					return new json(json::OK,NULL,$response);
+				}
 			}
 		}
 		

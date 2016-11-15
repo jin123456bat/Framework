@@ -16,12 +16,12 @@ class mysql extends base implements cache
 	{
 		// TODO Auto-generated method stub
 		$result = $this->model('cache')->duplicate(array(
-			'createtime' => time(),
+			'createtime' => date('Y-m-d H:i:s'),
 			'expires' => $expires,
 			'value' => $value,
 		))->insert(array(
 			'unique_key' => $name,
-			'createtime' => time(),
+			'createtime' => date('Y-m-d H:i:s'),
 			'expires' => $expires,
 			'value' => $value
 		));
@@ -36,7 +36,7 @@ class mysql extends base implements cache
 	public function get($name)
 	{
 		// TODO Auto-generated method stub
-		$value = $this->model('cache')->where('unique_key=? and (createtime+expires>UNIX_TIMESTAMP(now()) or expires=?)',array($name,0))->scalar('value');
+		$value = $this->model('cache')->where('unique_key=? and (UNIX_TIMESTAMP(createtime)+expires>UNIX_TIMESTAMP(now()) or expires=?)',array($name,0))->scalar('value');
 		return $value;
 	}
 	

@@ -25,13 +25,16 @@ class main extends BaseControl
 	function overview()
 	{
 		
-		if (!empty($this->_timemode) && request::php_sapi_name()=='web')
+		if (!empty($this->_timemode))
 		{
 			$cache_key = 'main_overview_'.$this->_timemode;
-			$response = cache::get($cache_key);
-			if (!empty($response))
+			if (request::php_sapi_name()=='web')
 			{
-				return new json(json::OK,NULL,$response);
+				$response = cache::get($cache_key);
+				if (!empty($response))
+				{
+					return new json(json::OK,NULL,$response);
+				}
 			}
 		}
 		
