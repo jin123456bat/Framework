@@ -213,7 +213,7 @@ class task extends bgControl
 		$data = array(
 			'starttime' => date('Y-m-d H:i:s',intval($debugger->getStarttime())),
 			'endtime' => date('Y-m-d H:i:s',intval($debugger->getEndtime())),
-			'time' => $debugger->getTime(),
+			'runtime' => $debugger->getTime(),
 			'task_5minutes_starttime' => date('Y-m-d H:i:s',intval($minute5->getStarttime())),
 			'task_5minutes_endtime' => date('Y-m-d H:i:s',intval($minute5->getEndtime())),
 			'task_5minutes_time' => $minute5->getTime(),

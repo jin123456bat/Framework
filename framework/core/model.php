@@ -230,18 +230,24 @@ class model extends component
 								switch ($value['Type'])
 								{
 									case 'datetime':
-										$data[$value['Field']] = date('Y-m-d H:i:s');
-										break;
 									case 'timestamp':
 										$data[$value['Field']] = date('Y-m-d H:i:s');
 										break;
 									case 'date':
 										$data[$value['Field']] = date('Y-m-d');
 										break;
+									case 'year(4)':
+										$data[$value['Field']] = date('Y');
+										break;
+									case 'float':
+										$data[$value['Field']] = 0;
+										break;
 									default:
 										$zero = '$int\(\d+\)$';
 										$empty_string = '$(char)?(text)?$';
 										$double = '$double\(\d+,\d+\)$';
+										$decimal = '$decimal\(\d+,\d+\)$';
+										$bit = '$bit\(\d+\)$';
 										if (preg_match($zero, $value['Type']))
 										{
 											$data[$value['Field']] = 0;
@@ -251,6 +257,14 @@ class model extends component
 											$data[$value['Field']] = '';
 										}
 										else if (preg_match($double, $value['Type']))
+										{
+											$data[$value['Field']] = 0;
+										}
+										else if (preg_match($decimal, $value['Type']))
+										{
+											$data[$value['Field']] = 0;
+										}
+										else if (preg_match($bit, $value['Type']))
 										{
 											$data[$value['Field']] = 0;
 										}
