@@ -46,9 +46,7 @@ class debugger extends component
 	
 	function __construct()
 	{
-		list($msec,$sec) = explode(' ', microtime());
-		$this->_micro_starttime = $sec + $msec;
-		$this->_start_memory = memory_get_usage(true);
+		$this->start();
 	}
 	
 	/**

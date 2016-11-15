@@ -209,7 +209,7 @@ class api extends apiControl
 		->find(array(
 			'sum_cache'=>'sum(cache_size)',
 			'sum_proxy'=>'sum(proxy_cache_size)',
-			'sum(service_size)',
+			'sum_service'=>'sum(service_size)',
 		));
 		
 		$result['videoLive'] = $this->model('operation_stat')
