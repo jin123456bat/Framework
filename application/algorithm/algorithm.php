@@ -287,9 +287,9 @@ class algorithm extends component
 			->group('create_time')
 			->select(array(
 				'create_time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
-				'sum_service'=>'sum(service)',
-				'sum_cache' => 'sum(cache)',
-				'sum_monitor' => 'sum(monitor)',
+				'sum_service'=>'sum(service) * 1024',
+				'sum_cache' => 'sum(cache) * 1024',
+				'sum_monitor' => 'sum(monitor) * 1024',
 			));
 			
 			foreach ($traffic_stat as $r)
@@ -429,8 +429,8 @@ class algorithm extends component
 			->group('create_time')
 			->select(array(
 				'create_time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
-				'sum_service'=>'sum(service)',
-				'sum_cache' => 'sum(cache)',
+				'sum_service'=>'sum(service) * 1024',
+				'sum_cache' => 'sum(cache) * 1024',
 			));
 				
 			foreach ($traffic_stat as $stat)

@@ -119,7 +119,10 @@ class node extends BaseControl
 			$traffic_stat = $this->model('traffic_stat')
 			->where('sn=?',array($r['sn']))
 			->order('create_time','desc')
-			->find('service,cache');
+			->find(array(
+				'service' => 'service * 1024',
+				'cache' => 'cache * 1024'
+			));
 			
 			$cdn_traffic_stat = $this->model('cdn_traffic_stat')
 			->where('sn like ?',array('%'.substr($r['sn'], 3)))
@@ -374,8 +377,8 @@ class node extends BaseControl
 			->group('time')
 			->select(array(
 				'time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
-				'service'=>'sum(service)',
-				'cache'=>'sum(cache)',
+				'service'=>'sum(service) * 1024',
+				'cache'=>'sum(cache) * 1024',
 				'hit_user'=>'max(hit_user)',//服务用户
 				'online_user'=>'max(online_user)',//活跃用户
 			));
