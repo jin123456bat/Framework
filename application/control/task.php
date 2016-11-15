@@ -210,7 +210,7 @@ class task extends bgControl
 	 */
 	function log(debugger $debugger,debugger $minute5,debugger $hour1,debugger $hour2,debugger $day1,debugger $week1,debugger $month1)
 	{
-		$this->model('task_run_log')->insert(array(
+		$data = array(
 			'starttime' => date('Y-m-d H:i:s',intval($debugger->getStarttime())),
 			'endtime' => date('Y-m-d H:i:s',intval($debugger->getEndtime())),
 			'time' => $debugger->getTime(),
@@ -232,7 +232,8 @@ class task extends bgControl
 			'task_1month_starttime' => date('Y-m-d H:i:s',intval($month1->getStarttime())),
 			'task_1month_endtime' => date('Y-m-d H:i:s',intval($month1->getEndtime())),
 			'task_1month_time' => $month1->getTime(),
-		));
+		);
+		$this->model('task_run_log')->insert($data);
 	}
 	
 	/**

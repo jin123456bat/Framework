@@ -241,6 +241,7 @@ class model extends component
 									default:
 										$zero = '$int\(\d+\)$';
 										$empty_string = '$(char)?(text)?$';
+										$double = '$double\(\d+,\d+\)$';
 										if (preg_match($zero, $value['Type']))
 										{
 											$data[$value['Field']] = 0;
@@ -248,6 +249,10 @@ class model extends component
 										else if (preg_match($empty_string, $value['Type']))
 										{
 											$data[$value['Field']] = '';
+										}
+										else if (preg_match($double, $value['Type']))
+										{
+											$data[$value['Field']] = 0;
 										}
 								}
 							}
