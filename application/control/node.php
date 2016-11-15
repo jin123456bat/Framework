@@ -152,13 +152,12 @@ class node extends BaseControl
 			$duration = 60*60*24;
 			$algorithm = new algorithm($starttime,$endtime,$duration);
 			
-			$traffic_stat = $algorithm->traffic_stat($r['sn']);
-			$r['service'] = round(array_pop($traffic_stat['service'])/1024);
-			$r['cache'] = round(array_pop($traffic_stat['cache'])/1024);
-			
 			$traffic_stat = $algorithm->traffic_stat_alone($r['sn']);
 			$r['max_service'] = empty($traffic_stat['service'])?0:round(max($traffic_stat['service'])/1024);
 			$r['max_cache'] = empty($traffic_stat['cache'])?0:round(max($traffic_stat['cache'])/1024);
+			
+			$r['service'] = round(array_pop($traffic_stat['service'])/1024);
+			$r['cache'] = round(array_pop($traffic_stat['cache'])/1024);
 			
 			//最大值
 			$max = $this->model('feedbackHistory')

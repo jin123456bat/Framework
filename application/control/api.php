@@ -7,6 +7,46 @@ use framework\core\model;
 
 class api extends apiControl
 {
+	function overview()
+	{
+		$starttime = $this->post('starttime');
+		$endtime = $this->post('endtime');
+		$duration = $this->post('duration',5*60,'int','i');
+		$sn = $this->post('sn',array(),NULL,'a');
+		
+		$api = new \application\entity\api(array(
+			'starttime' => $starttime,
+			'endtime' => $endtime,
+			'duration' => $duration,
+			'sn' => $sn,
+		),'sn_duration');
+		if (!$api->validate())
+		{
+			return new json(json::FAILED,$api->getError());
+		}
+		
+		$result = array();
+		if (is_array($sn))
+		{
+			$algorithm = new algorithm($starttime,$endtime,$duration);
+			foreach ($sn as $s)
+			{
+				$traffic_stat = $algorithm->traffic_stat($s);
+				$result[] = array(
+					'name' => $this->model('user_info')->where('sn=?',array($s))->scalar('company'),
+					'max_service' => 1*empty($traffic_stat)?0:max($traffic_stat['service']),
+					'max_online' => 1*$this->model('traffic_stat')
+					->where('sn=?',array($s))
+					->where('create_time>=? and create_time<?',array(
+						$starttime,$endtime
+					))
+					->max('online'),
+				);
+			}
+		}
+		return $result;
+	}
+	
 	/**
 	 * 服务流速，缓存流速
 	 */
