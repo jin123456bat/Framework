@@ -67,6 +67,7 @@ class content extends BaseControl
 			->select(array(
 				'service_size',
 				'cache_size',
+				'proxy_cache_size',
 				'class',
 				'category',
 			));
@@ -99,15 +100,20 @@ class content extends BaseControl
 				}
 				
 				$total_operation_stat_cache[$t_time] += $r['cache_size'];
+				$total_operation_stat_cache[$t_time] += $r['proxy_cache_size'];
 				$total_operation_stat_service[$t_time] += $r['service_size'];
 				
 				$category_service[$classname][$t_time] += $r['service_size'] * 1;
 				$category_cache[$classname][$t_time] += $r['cache_size'] * 1;
+				$category_cache[$classname][$t_time] += $r['proxy_cache_size'] * 1;
 				
 				$flow[$classname]['service'] += $r['service_size'] * 1;
 				$flow[$classname]['cache'] += $r['cache_size']*1;
+				$flow[$classname]['cache'] += $r['proxy_cache_size']*1;
+				
 				$flow['total']['service'] += $r['service_size']*1;
 				$flow['total']['cache'] += $r['cache_size']*1;
+				$flow['total']['cache'] += $r['proxy_cache_size']*1;
 			}
 		}
 		
@@ -521,7 +527,7 @@ class content extends BaseControl
 			->select(array(
 				'category'=>'category - 128',
 				'service_size',
-				'cache_size'
+				'cache_size' => 'cache_size + proxy_cache_size',
 			));
 			
 			

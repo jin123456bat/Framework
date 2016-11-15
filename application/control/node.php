@@ -116,7 +116,7 @@ class node extends BaseControl
 				$r['rhelp'] = explode(':', $r['rhelp']);
 			}
 			
-			$traffic_stat = $this->model('traffic_stat')
+			/* $traffic_stat = $this->model('traffic_stat')
 			->where('sn=?',array($r['sn']))
 			->order('create_time','desc')
 			->find(array(
@@ -142,18 +142,23 @@ class node extends BaseControl
 				'service' => 'sum(service)',
 				'cache' => 'sum(cache)',
 				'time' => 'date_format(make_time,"%Y-%m-%d %H:%i")'
-			));
-			$r['service'] = $traffic_stat['service'] + $cdn_traffic_stat['service'] - $xvirt_traffic_stat['service'];
-			$r['cache'] = $traffic_stat['cache'] + $cdn_traffic_stat['cache'] - $xvirt_traffic_stat['cache'];
-			
+			)); */
+			//$r['service'] = $traffic_stat['service'] + $cdn_traffic_stat['service'] - $xvirt_traffic_stat['service'];
+			//$r['cache'] = $traffic_stat['cache'] + $cdn_traffic_stat['cache'] - $xvirt_traffic_stat['cache'];
+				
 			$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
 			$endtime = date('Y-m-d H:i:s',$timestamp);
 			$starttime = date('Y-m-d H:i:s',strtotime('-24 hour',strtotime($endtime)));
 			$duration = 60*60*24;
 			$algorithm = new algorithm($starttime,$endtime,$duration);
+			
+			$traffic_stat = $algorithm->traffic_stat($r['sn']);
+			$r['service'] = round(array_pop($traffic_stat['service'])/1024);
+			$r['cache'] = round(array_pop($traffic_stat['cache'])/1024);
+			
 			$traffic_stat = $algorithm->traffic_stat_alone($r['sn']);
-			$r['max_service'] = empty($traffic_stat['service'])?0:max($traffic_stat['service']);
-			$r['max_cache'] = empty($traffic_stat['cache'])?0:max($traffic_stat['cache']);
+			$r['max_service'] = empty($traffic_stat['service'])?0:round(max($traffic_stat['service'])/1024);
+			$r['max_cache'] = empty($traffic_stat['cache'])?0:round(max($traffic_stat['cache'])/1024);
 			
 			//最大值
 			$max = $this->model('feedbackHistory')
