@@ -26,10 +26,24 @@ class api extends data
 	public function isSn($sn)
 	{
 		$pattern = '$C[A-Z]S\d{10}$';
-		if (preg_match($pattern, $sn,$match))
+		if (is_array($sn))
 		{
+			foreach ($sn as $s)
+			{
+				if (!preg_match($pattern, $s,$match))
+				{
+					return false;
+				}
+			}
 			return true;
 		}
-		return false;
+		else
+		{
+			if (preg_match($pattern, $sn,$match))
+			{
+				return true;
+			}
+			return false;
+		}
 	}
 }

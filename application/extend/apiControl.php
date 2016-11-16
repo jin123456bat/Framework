@@ -38,7 +38,6 @@ class apiControl extends control
 			reset($data);
 			//$data1 = strtolower(http_build_query($data,NULL,'&',PHP_QUERY_RFC3986));
 			//$data2 = strtolower(http_build_query($data,NULL,'&',PHP_QUERY_RFC1738));
-			
 			$data1 = '';
 			foreach ($data as $index=>$value)
 			{
@@ -52,7 +51,6 @@ class apiControl extends control
 				$data2 .= $index.'='.($value).'&';
 			}
 			$data2 = strtolower(rtrim($data1,'&'));
-			
 		}
 		else
 		{
@@ -77,8 +75,7 @@ class apiControl extends control
 		$requestData = request::post('data',$default,NULL,'a');
 		if (isset($requestData[$name]))
 		{
-			$data = self::setVariableType($requestData[$name],$type);
-				
+			$data = $requestData[$name];
 			if (is_string($filter))
 			{
 				$filters = explode('|', $filter);
@@ -95,9 +92,28 @@ class apiControl extends control
 						{
 							$data = call_user_func(array($filterClass,$filter_t),$data);
 						}
+						else
+						{
+							list($func,$param) = explode(':', $filter);
+							if (is_callable($func))
+							{
+								$pattern = '$["\'].["\']$';
+								if (preg_match_all($pattern, $param,$matches))
+								{
+									$params = array_map(function($param) use($data){
+										if (trim($param,'\'"') == '?')
+										{
+											return $data;
+										}
+										return trim($param,'\'"');
+									}, $matches[0]);
+									$data = call_user_func_array($func, $params);
+								}
+							}
+						}
 					}
 				}
-				return $data;
+				return self::setVariableType($data,$type);
 			}
 			else
 			{
@@ -105,7 +121,7 @@ class apiControl extends control
 				{
 					return call_user_func($filter, $data);
 				}
-				return $data;
+				return self::setVariableType($requestData[$name],$type);
 			}
 		}
 		else

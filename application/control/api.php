@@ -12,7 +12,7 @@ class api extends apiControl
 		$starttime = $this->post('starttime');
 		$endtime = $this->post('endtime');
 		$duration = $this->post('duration',5*60,'int','i');
-		$sn = $this->post('sn',array(),NULL,'a');
+		$sn = $this->post('sn',array(),'explode:",","?"','a');
 		
 		$api = new \application\entity\api(array(
 			'starttime' => $starttime,
@@ -25,14 +25,27 @@ class api extends apiControl
 			return new json(json::FAILED,$api->getError());
 		}
 		
+		$algorithm = new algorithm($starttime,$endtime,$duration);
+		$cds_online_num = $algorithm->CDSOnlineNum($sn);
+		$user_online_num = $algorithm->USEROnlineNum($sn);
+		$traffic_stat = $algorithm->traffic_stat($sn);
+		$operation_stat = $algorithm->operation_stat($sn);
+		$data = array(
+			'cds_online_num' => $cds_online_num['max'],
+			'user_online_num' => $user_online_num['max'],
+			'service' => !empty($traffic_stat['service'])?max($traffic_stat['service']):0,
+			'service_sum' => !empty($traffic_stat['service'])?max($operation_stat['service']):0,
+		);
+		
+		
 		$result = array();
 		if (is_array($sn))
 		{
-			$algorithm = new algorithm($starttime,$endtime,$duration);
 			foreach ($sn as $s)
 			{
 				$traffic_stat = $algorithm->traffic_stat($s);
 				$result[] = array(
+					'sn' => $s,
 					'name' => $this->model('user_info')->where('sn=?',array($s))->scalar('company'),
 					'max_service' => 1*empty($traffic_stat)?0:max($traffic_stat['service']),
 					'max_online' => 1*$this->model('traffic_stat')
@@ -40,11 +53,13 @@ class api extends apiControl
 					->where('create_time>=? and create_time<?',array(
 						$starttime,$endtime
 					))
-					->max('online'),
+					->max('online_user'),
 				);
 			}
 		}
-		return $result;
+		
+		$data['detail'] = $result;
+		return new json(json::OK,'ok',$data);
 	}
 	
 	/**
