@@ -47,9 +47,22 @@ class node extends BaseControl
 		}
 		
 		$feedbackModel = $this->model('feedback');
-		if (!empty($group_sn))
+		if (!empty($group))
 		{
-			$feedbackModel->in('feedback.sn',$group_sn);
+			if (!empty($group_sn))
+			{
+				$feedbackModel->in('feedback.sn',$group_sn);
+			}
+			else
+			{
+				//{"code":1,"result":"ok","data":{"total":"0","data":[],"start":0,"length":10}}
+				return new json(json::OK,'ok',array(
+					'total' => 0,
+					'data' => array(),
+					'start' => $start,
+					'length' => $length,
+				));
+			}
 		}
 		
 		$search = request::param('search','','trim');

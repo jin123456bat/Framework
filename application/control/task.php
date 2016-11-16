@@ -107,64 +107,150 @@ class task extends bgControl
 			$day1->start();
 			//首页 昨天的数据
 			$string = 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 2';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'main_overview_minutely_2',
+				'response' => exec($string),
+			));
+			
 			//首页近7天的数据
 			$string = 'php '.ROOT.'/index.php -c main -a overview -duration hourly -timemode 3';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'main_overview_hourly_3',
+				'response' => exec($string),
+			));
+			
 			//首页近30天的数据
 			$string = 'php '.ROOT.'/index.php -c main -a overview -duration daily -timemode 5';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'main_overview_daily_5',
+				'response' => exec($string),
+			));
 			
 			
 			//内容交付概览  昨天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a overview -duration minutely -timemode 2';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_overview_minutely_2',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频点播 昨天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration minutely -timemode 2';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoDemand_minutely_2',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频直播 昨天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration minutely -timemode 2';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoLive_minutely_2',
+				'response' => exec($string),
+			));
+			
 			//内容交付移动应用 昨天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration minutely -timemode 2';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_mobile_minutely_2',
+				'response' => exec($string),
+			));
+			
 			//内容交付常规资源 昨天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a http -duration minutely -timemode 2';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_http_minutely_2',
+				'response' => exec($string),
+			));
 			
 			
 			//内容交付概览 7天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a overview -duration hourly -timemode 3';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_overview_hourly_3',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频点播 7天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration hourly -timemode 3';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoDemand_hourly_3',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频直播 7天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration hourly -timemode 3';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoLive_hourly_3',
+				'response' => exec($string),
+			));
+			
 			//内容交付移动应用 7天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration hourly -timemode 3';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_mobile_hourly_3',
+				'response' => exec($string),
+			));
+			
 			//内容交付常规资源 7天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a http -duration hourly -timemode 3';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_http_hourly_3',
+				'response' => exec($string),
+			));
 			
 			
 			//内容交付概览 30天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a overview -duration daily -timemode 5';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_overview_daily_5',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频点播 30天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration daily -timemode 5';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoDemand_daily_5',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频直播 30天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration daily -timemode 5';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoLive_daily_5',
+				'response' => exec($string),
+			));
+			
 			//内容交付移动应用 30天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration daily -timemode 5';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_mobile_daily_5',
+				'response' => exec($string),
+			));
+			
 			//内容交付常规资源 30天的数据
 			$string = 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 5';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_http_daily_5',
+				'response' => exec($string),
+			));
 			$day1->stop();
 		}
 		
@@ -175,23 +261,51 @@ class task extends bgControl
 			$week1->start();
 			//首页上周的数据
 			$string = 'php '.ROOT.'/index.php -c main -a overview -duration hourly -timemode 4';
-			exec($string,$output,$return_var);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'main_overview_hourly_4',
+				'response' => exec($string),
+			));
 			
 			//内容交付概览 上周的数据
 			$string = 'php '.ROOT.'/index.php -c content -a overview -duration hourly -timemode 4';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_overview_hourly_4',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频点播 上周的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration hourly -timemode 4';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoDemand_hourly_4',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频直播 上周的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration hourly -timemode 4';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoLive_hourly_4',
+				'response' => exec($string),
+			));
+			
 			//内容交付移动应用 上周的数据
 			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration hourly -timemode 4';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_mobile_hourly_4',
+				'response' => exec($string),
+			));
+			
 			//内容交付常规资源 上周的数据
 			$string = 'php '.ROOT.'/index.php -c content -a http -duration hourly -timemode 4';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_http_hourly_4',
+				'response' => exec($string),
+			));
 			$week1->stop();
 		}
 		
@@ -203,22 +317,51 @@ class task extends bgControl
 			
 			//首页上月的数据
 			$string = 'php '.ROOT.'/index.php -c main -a overview -duration daily -timemode 6';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'main_overview_daily_6',
+				'response' => exec($string),
+			));
+			
 			//内容交付概览 上月的数据
 			$string = 'php '.ROOT.'/index.php -c content -a overview -duration daily -timemode 6';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_overview_daily_6',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频点播 上月的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration daily -timemode 6';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoDemand_daily_6',
+				'response' => exec($string),
+			));
+			
 			//内容交付视频直播 上月的数据
 			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration daily -timemode 6';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_videoLive_daily_6',
+				'response' => exec($string),
+			));
+			
 			//内容交付移动应用 上月的数据
 			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration daily -timemode 6';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_mobile_daily_6',
+				'response' => exec($string),
+			));
+			
 			//内容交付常规资源 上月的数据
 			$string = 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 6';
-			exec($string);
+			$this->model('task_detail')->insert(array(
+				'time' => date('Y-m-d H:i:s'),
+				'name' => 'content_http_daily_6',
+				'response' => exec($string),
+			));
 			$month1->stop();
 		}
 		$debugger->stop();

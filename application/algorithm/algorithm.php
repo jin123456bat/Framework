@@ -262,6 +262,7 @@ class algorithm extends component
 	
 	/**
 	 * 网卡流速
+	 * 计算最大Service和对应的cache
 	 * @return number[][]|number[]|boolean[]
 	 */
 	public function traffic_stat($sn = NULL)
@@ -410,6 +411,7 @@ class algorithm extends component
 	
 	/**
 	 * 计算独立的服务流速和缓存流速
+	 * service和cache互不依赖
 	 */
 	function traffic_stat_alone($sn = NULL)
 	{
@@ -525,6 +527,10 @@ class algorithm extends component
 		return array('service' => $service,'cache' => $cache);
 	}
 	
+	/**
+	 * 获取流量
+	 * @return number
+	 */
 	function operation_stat()
 	{
 		$operation_stat = array();

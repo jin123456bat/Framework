@@ -441,7 +441,7 @@ class content extends BaseControl
 			$start_time,
 			$end_time,
 		))
-		->where('class=?',array(2))
+		->where('class=? and category<?',array(2,128))
 		->notIn('category',$other_key)
 		->group('hash')
 		->order('sum_service','desc')
