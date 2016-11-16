@@ -70,7 +70,7 @@ class api extends apiControl
 		$starttime = $this->post('starttime');
 		$endtime = $this->post('endtime');
 		$duration = $this->post('duration',5*60,'int','i');
-		$sn = $this->post('sn');
+		$sn = $this->post('sn',array(),'explode:",","?"','a');
 		$api = new \application\entity\api(array(
 			'starttime' => $starttime,
 			'endtime' => $endtime,
@@ -96,7 +96,7 @@ class api extends apiControl
 		$starttime = $this->post('starttime');
 		$endtime = $this->post('endtime');
 		$duration = $this->post('duration',5*60,'int','i');
-		$sn = $this->post('sn');
+		$sn = $this->post('sn',array(),'explode:",","?"','a');
 		$top = $this->post('top',5);
 		
 		$api = new \application\entity\api(array(
@@ -145,7 +145,7 @@ class api extends apiControl
 			$endtime,
 		))
 		->limit($top)
-		->where('sn=?',array($sn))
+		->In('sn',$sn)
 		->group(array('class','category'))
 		->order('sum_service','desc')
 		->select(array(
@@ -171,7 +171,7 @@ class api extends apiControl
 			}
 			
 			$result = $this->model('operation_stat')
-			->where('sn=?',array($sn))
+			->In('sn',$sn)
 			->where('make_time>=? and make_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time) + $duration)
@@ -205,7 +205,7 @@ class api extends apiControl
 		$starttime = $this->post('starttime');
 		$endtime = $this->post('endtime');
 		$duration = $this->post('duration');
-		$sn = $this->post('sn');
+		$sn = $this->post('sn',array(),'explode:",","?"','a');
 		
 		$api = new \application\entity\api(array(
 			'starttime' => $starttime,
@@ -514,7 +514,7 @@ class api extends apiControl
 	{
 		$starttime = $this->post('starttime');
 		$endtime = $this->post('endtime');
-		$sn = $this->post('sn');
+		$sn = $this->post('sn',array(),'explode:",","?"','a');
 		
 		$api = new \application\entity\api(array(
 			'starttime' => $starttime,
@@ -564,12 +564,12 @@ class api extends apiControl
 		
 		$top_category = array();
 		$topfile_category = $this->model('top_stat')
-		->where('sn=?',array($sn))
+		->In('sn',$sn)
 		->where('create_time >= ? and create_time<?',array(
 			$starttime,
 			$endtime
 		))
-		->group('category')
+		->group('class,category')
 		->limit(5)
 		->order('sum_service','desc')
 		->select(array(
@@ -621,7 +621,7 @@ class api extends apiControl
 				$endtime
 			))
 			->where('class=? and category=?',array($category['class'],$category['category']))
-			->where('sn=?',array($sn))
+			->In('sn',$sn)
 			->group(array('hash'))
 			->order('sum_service','desc')
 			->limit($top)
@@ -638,7 +638,7 @@ class api extends apiControl
 			$this->model('top_stat')
 			->where('category<?',array(128));
 		}
-		
+			
 		$topfile['其它'] = $this->model('top_stat')
 		->where('create_time >= ? and create_time<?',array(
 			$starttime,
@@ -646,7 +646,7 @@ class api extends apiControl
 		))
 		->where('class=?',array($selected_class))
 		->notIn('category',$selected_category)
-		->where('sn=?',array($sn))
+		->In('sn',$sn)
 		->group(array('hash'))
 		->order('sum_service','desc')
 		->limit($top)
