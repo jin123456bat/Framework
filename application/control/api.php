@@ -224,13 +224,13 @@ class api extends apiControl
 	}
 	
 	/**
-	 * 资源流量
+	 * 常规资源 - 资源流量
 	 */
-	function resource()
+	function resource_http()
 	{
 		$starttime = $this->post('starttime');
 		$endtime = $this->post('endtime');
-		$sn = $this->post('sn');
+		$sn = $this->post('sn',array(),'explode:",","?"','a');
 		
 		$api = new \application\entity\api(array(
 			'starttime' => $starttime,
@@ -242,8 +242,197 @@ class api extends apiControl
 			return new json(json::FAILED,$api->getError());
 		}
 		
+		$data = $this->model('operation_stat')
+		->where('make_time>=? and make_time<?',array(
+			$starttime,
+			$endtime
+		))
+		->In('sn',$sn)
+		->where('class=?',array(0))
+		->group('category')
+		->order('service','desc')
+		->select(array(
+			'category',
+			'service' => 'sum(service_size)',
+			'cache' => 'sum(cache_size)',
+		));
+		
+		$category = $this->getConfig('category');
+		$temp = array();
+		foreach ($data as $r)
+		{
+			$temp[$category['http'][$r['category']]] = array(
+				'service' => $r['service']*1,
+				'cache' => $r['cache']*1,
+			);
+		}
+		
+		return new json(json::OK,'ok',$temp);
+	}
+	
+	/**
+	 * 常规资源 - 移动应用
+	 */
+	function resource_mobile()
+	{
+		$starttime = $this->post('starttime');
+		$endtime = $this->post('endtime');
+		$sn = $this->post('sn',array(),'explode:",","?"','a');
+	
+		$api = new \application\entity\api(array(
+			'starttime' => $starttime,
+			'endtime' => $endtime,
+			'sn' => $sn,
+		),'sn');
+		if(!$api->validate())
+		{
+			return new json(json::FAILED,$api->getError());
+		}
+	
+		$data = $this->model('operation_stat')
+		->where('make_time>=? and make_time<?',array(
+			$starttime,
+			$endtime
+		))
+		->In('sn',$sn)
+		->where('class=?',array(1))
+		->group('category')
+		->order('service','desc')
+		->select(array(
+			'category',
+			'service' => 'sum(service_size)',
+			'cache' => 'sum(cache_size)',
+		));
+	
+		$category = $this->getConfig('category');
+		$temp = array();
+		foreach ($data as $r)
+		{
+			$temp[$category['mobile'][$r['category']]] = array(
+				'service' => $r['service']*1,
+				'cache' => $r['cache']*1,
+			);
+		}
+	
+		return new json(json::OK,'ok',$temp);
+	}
+	
+	/**
+	 * 常规资源 - 视频点播
+	 */
+	function resource_videoDemand()
+	{
+		$starttime = $this->post('starttime');
+		$endtime = $this->post('endtime');
+		$sn = $this->post('sn',array(),'explode:",","?"','a');
+	
+		$api = new \application\entity\api(array(
+			'starttime' => $starttime,
+			'endtime' => $endtime,
+			'sn' => $sn,
+		),'sn');
+		if(!$api->validate())
+		{
+			return new json(json::FAILED,$api->getError());
+		}
+	
+		$data = $this->model('operation_stat')
+		->where('make_time>=? and make_time<?',array(
+			$starttime,
+			$endtime
+		))
+		->In('sn',$sn)
+		->where('class=? and category<?',array(2,128))
+		->group('category')
+		->order('service','desc')
+		->select(array(
+			'category',
+			'service' => 'sum(service_size)',
+			'cache' => 'sum(cache_size)',
+		));
+	
+		$category = $this->getConfig('category');
+		$temp = array();
+		foreach ($data as $r)
+		{
+			$temp[$category['videoDemand'][$r['category']]] = array(
+				'service' => $r['service']*1,
+				'cache' => $r['cache']*1,
+			);
+		}
+	
+		return new json(json::OK,'ok',$temp);
+	}
+	
+	/**
+	 * 常规资源 - 视频直播
+	 */
+	function resource_videoLive()
+	{
+		$starttime = $this->post('starttime');
+		$endtime = $this->post('endtime');
+		$sn = $this->post('sn',array(),'explode:",","?"','a');
+	
+		$api = new \application\entity\api(array(
+			'starttime' => $starttime,
+			'endtime' => $endtime,
+			'sn' => $sn,
+		),'sn');
+		if(!$api->validate())
+		{
+			return new json(json::FAILED,$api->getError());
+		}
+	
+		$data = $this->model('operation_stat')
+		->where('make_time>=? and make_time<?',array(
+			$starttime,
+			$endtime
+		))
+		->In('sn',$sn)
+		->where('class=? and category>=?',array(2,128))
+		->group('category')
+		->order('service','desc')
+		->select(array(
+			'category',
+			'service' => 'sum(service_size)',
+			'cache' => 'sum(proxy_cache_size)',
+		));
+	
+		$category = $this->getConfig('category');
+		$temp = array();
+		foreach ($data as $r)
+		{
+			$temp[$category['videoLive'][$r['category']]] = array(
+				'service' => $r['service']*1,
+				'cache' => $r['cache']*1,
+			);
+		}
+	
+		return new json(json::OK,'ok',$temp);
+	}
+	
+	/**
+	 * 资源流量
+	 */
+	function resource()
+	{
+		$starttime = $this->post('starttime');
+		$endtime = $this->post('endtime');
+		$sn = $this->post('sn',array(),'explode:",","?"','a');
+		
+		$api = new \application\entity\api(array(
+			'starttime' => $starttime,
+			'endtime' => $endtime,
+			'sn' => $sn,
+		),'sn');
+		if(!$api->validate())
+		{
+			return new json(json::FAILED,$api->getError());
+		}
+		
+		
 		$result['total'] = $this->model('operation_stat')
-		->where('sn=?',array($sn))
+		->In('sn',$sn)
 		->where('make_time>=? and make_time<?',array(
 			$starttime,
 			$endtime
@@ -255,7 +444,7 @@ class api extends apiControl
 		));
 		
 		$result['videoDemand'] = $this->model('operation_stat')
-		->where('sn=?',array($sn))
+		->In('sn',$sn)
 		->where('make_time>=? and make_time<?',array(
 			$starttime,
 			$endtime
@@ -268,7 +457,7 @@ class api extends apiControl
 		));
 		
 		$result['videoLive'] = $this->model('operation_stat')
-		->where('sn=?',array($sn))
+		->In('sn',$sn)
 		->where('make_time>=? and make_time<?',array(
 			$starttime,
 			$endtime
@@ -281,7 +470,7 @@ class api extends apiControl
 		));
 		
 		$result['mobile'] = $this->model('operation_stat')
-		->where('sn=?',array($sn))
+		->In('sn',$sn)
 		->where('make_time>=? and make_time<?',array(
 			$starttime,
 			$endtime
@@ -294,7 +483,7 @@ class api extends apiControl
 		));
 		
 		$result['http'] = $this->model('operation_stat')
-		->where('sn=?',array($sn))
+		->In('sn',$sn)
 		->where('make_time>=? and make_time<?',array(
 			$starttime,
 			$endtime
