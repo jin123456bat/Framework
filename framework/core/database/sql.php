@@ -436,19 +436,59 @@ class sql extends base
 		return $this;
 	}
 	
+	/**
+	 * field in (data1,data2...)
+	 * 当data的数据只有一个的时候会自动转化为field = data
+	 * @param unknown $field
+	 * @param array $data
+	 * @param string $combine
+	 * @return \framework\core\database\sql
+	 */
 	function in($field,array $data = array(),$combine = 'and')
 	{
-		$sql = self::fieldFormat($field).' IN ('.implode(',', array_fill(0, count($data), '?')).')';
-	    $this->where($sql,$data,$combine);
+		if (count($data)>1)
+		{
+			$sql = self::fieldFormat($field).' IN ('.implode(',', array_fill(0, count($data), '?')).')';
+		    $this->where($sql,$data,$combine);
+		}
+		else if (count($data) == 1)
+		{
+			$data = array_shift($data);
+			if (is_scalar($data))
+			{
+				$sql = self::fieldFormat($field).' = ?';
+				$this->where($sql,array($data),$combine);
+			}
+		}
 		return $this;
 	}
 	
+	/**
+	 * field not in (data1,data2...)
+	 * 当data的数据只有一个的时候会自动转化为field = data
+	 * @param unknown $field
+	 * @param array $data
+	 * @param string $combine
+	 * @return \framework\core\database\sql
+	 */
 	function notIn($field,array $data = array(),$combine = 'and')
 	{
 		if (!empty($data))
 		{
-			$sql = self::fieldFormat($field).' NOT IN ('.implode(',', array_fill(0, count($data), '?')).')';	
-			$this->where($sql,$data,$combine);
+			if (count($data) > 1)
+			{
+				$sql = self::fieldFormat($field).' NOT IN ('.implode(',', array_fill(0, count($data), '?')).')';	
+				$this->where($sql,$data,$combine);
+			}
+			else if (count($data) == 1)
+			{
+				$data = array_shift($data);
+				if (is_scalar($data))
+				{
+					$sql = self::fieldFormat($field).' != ?';
+					$this->where($sql,array($data),$combine);
+				}
+			}
 		}
 		return $this;
 	}
