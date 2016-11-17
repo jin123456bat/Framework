@@ -84,4 +84,24 @@ abstract class BaseControl extends control
 				return new json(json::FAILED,'duration参数错误');
 		}
 	}
+	
+	function getCategory($class_category)
+	{
+		if (isset($class_category['class']) && isset($class_category['category']))
+		{
+			$category = $this->getConfig('category');
+			switch ($class_category['class'])
+			{
+				case 0: return $category['http'][$class_category['category']];
+				case 1: return $category['mobile'][$class_category['category']];
+				case 2:
+					if ($class_category['category']>=128)
+					{
+						return $category['videoLive'][$class_category['category']-128];
+					}
+					return $category['videoDemand'][$class_category['category']];
+			}
+		}
+		return NULL;
+	}
 }

@@ -121,12 +121,12 @@ class ratio extends base
 	 * 计算CDS最大数量的同比和环比
 	 * @return number[]
 	 */
-	function cds()
+	function cds($sn = array())
 	{
 		if (!empty($this->_same))
 		{
 			$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
-			$same = $this->_algorithm->CDSOnlineNum();
+			$same = $this->_algorithm->CDSOnlineNum($sn);
 		}
 		else
 		{
@@ -138,7 +138,7 @@ class ratio extends base
 		if (!empty($this->_link))
 		{
 			$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
-			$link = $this->_algorithm->CDSOnlineNum();
+			$link = $this->_algorithm->CDSOnlineNum($sn);
 		}
 		else
 		{
@@ -153,12 +153,12 @@ class ratio extends base
 		);
 	}
 	
-	function user()
+	function user($sn = array())
 	{
 		if (!empty($this->_same))
 		{
 			$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
-			$same = $this->_algorithm->USEROnlineNum();
+			$same = $this->_algorithm->USEROnlineNum($sn);
 		}
 		else
 		{
@@ -170,7 +170,7 @@ class ratio extends base
 		if (!empty($this->_link))
 		{
 			$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
-			$link = $this->_algorithm->USEROnlineNum();
+			$link = $this->_algorithm->USEROnlineNum($sn);
 		}
 		else
 		{
@@ -185,12 +185,12 @@ class ratio extends base
 		);
 	}
 	
-	function service_max()
+	function service_max($sn = array())
 	{
 		if (!empty($this->_same))
 		{
 			$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
-			$same = $this->_algorithm->ServiceMax();
+			$same = $this->_algorithm->ServiceMax($sn);
 		}
 		else
 		{
@@ -202,7 +202,7 @@ class ratio extends base
 		if (!empty($this->_link))
 		{
 			$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
-			$link = $this->_algorithm->ServiceMax();
+			$link = $this->_algorithm->ServiceMax($sn);
 		}
 		else
 		{
@@ -217,12 +217,12 @@ class ratio extends base
 		);
 	}
 	
-	function service_sum()
+	function service_sum($sn = array())
 	{
 		if (!empty($this->_same))
 		{
 			$this->_algorithm->setTime($this->_same['starttime'], $this->_same['endtime']);
-			$same = $this->_algorithm->ServiceSum();
+			$same = $this->_algorithm->ServiceSum($sn);
 		}
 		else
 		{
@@ -234,7 +234,7 @@ class ratio extends base
 		if (!empty($this->_link))
 		{
 			$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);
-			$link = $this->_algorithm->ServiceSum();
+			$link = $this->_algorithm->ServiceSum($sn);
 		}
 		else
 		{

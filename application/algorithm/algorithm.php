@@ -132,21 +132,11 @@ class algorithm extends component
 	 * 服务流速
 	 * @return number[]|number[][]
 	 */
-	public function ServiceMax()
+	public function ServiceMax($sn = array())
 	{
-		$service_max_max = 0;
-		$service_max_detail = array();
-		
-		$traffic_stat = $this->traffic_stat();
+		$traffic_stat = $this->traffic_stat($sn);
 		$service_max_detail = $traffic_stat['service'];
-		
-		foreach ($service_max_detail as $time => $value)
-		{
-			if ($value > $service_max_max)
-			{
-				$service_max_max = $value;
-			}
-		}
+		$service_max_max = max($service_max_detail);
 		
 		return array(
 			'max' => $service_max_max,
@@ -154,9 +144,30 @@ class algorithm extends component
 		);
 	}
 	
-	public function ServiceSum()
+	/**
+	 * 计算累计流量，不分时间段
+	 * @param array $sn
+	 * @return number[]
+	 */
+	public function ServiceSum($sn = array())
 	{
-		$service_sum_sum = 1*$this->model('operation_stat')->where('make_time >= ? and make_time < ?',array($this->_starttime,$this->_endtime))->sum('service_size');
+		if (!empty($sn))
+		{
+			if (is_array($sn))
+			{
+				$this->model('operation_stat')->In('sn',$sn);
+			}
+			else if (is_scalar($sn))
+			{
+				$this->model('operation_stat')->where('sn=?',array($sn));
+			}
+		}
+		$service_sum_sum = 1*$this->model('operation_stat')
+		->where('make_time >= ? and make_time < ?',array(
+			$this->_starttime,
+			$this->_endtime
+		))
+		->sum('service_size');
 		return array(
 			'max' => $service_sum_sum,
 			'detail' => array(),
@@ -189,10 +200,22 @@ class algorithm extends component
 		return $classname;
 	}
 	
-	public function CPService()
+	/**
+	 * 分CP服务流速
+	 * @param number $top
+	 * @return NULL[]|unknown[]
+	 */
+	public function CPService($sn = array(),$top = 9)
 	{
 		$cp_service = array();
-		
+		if (is_array($sn))
+		{
+			$this->model('operation_stat')->In('sn',$sn);
+		}
+		else if (is_scalar($sn))
+		{
+			$this->model('operation_stat')->where('sn=?',array($sn));
+		}
 		//取出service累计最大的前9个分类
 		$categoryTop = $this->model('operation_stat')->where('make_time>=? and make_time<?',array(
 			$this->_starttime,
@@ -200,7 +223,7 @@ class algorithm extends component
 		))
 		->group(array('class','category'))
 		->order('service_sum','desc')
-		->limit(9)
+		->limit($top)
 		->forceIndex('primary')//强制索引
 		->select(array(
 			'category',
@@ -221,6 +244,14 @@ class algorithm extends component
 		$total_operation_stat = array();
 		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
 		{
+			if (is_array($sn))
+			{
+				$this->model('operation_stat')->In('sn',$sn);
+			}
+			else if (is_scalar($sn))
+			{
+				$this->model('operation_stat')->where('sn=?',array($sn));
+			}
 			$result = $this->model('operation_stat')
 			->where('make_time>=? and make_time<?',array(
 				$t_time,
@@ -259,7 +290,7 @@ class algorithm extends component
 			}
 		}
 		
-		$service = $this->ServiceMax();
+		$service = $this->ServiceMax($sn);
 		$service = $service['detail'];
 		
 		foreach ($cp_service as $classname => &$v)
@@ -270,8 +301,14 @@ class algorithm extends component
 			}
 		}
 		
+		$max = array();
+		foreach ($cp_service as $classname => $v)
+		{
+			$max[$classname] = max($v);
+		}
+		
 		return array(
-			'max' => NULL,
+			'max' => $max,
 			'detail' => $cp_service
 		);
 	}
