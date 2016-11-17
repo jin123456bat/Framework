@@ -272,7 +272,7 @@ class api extends apiControl
 			'online' => $online['detail'],//用户趋势图
 			'resource' => $resource,//资源引入情况
 			'class_resource' => $class_resource,//分类型资源引入  分类型服务流量
-			''
+			'cp_resource' => $cp_resource,//分cp资源引入详情
 		);
 		
 		return new json(json::OK,'ok',$data);
