@@ -115,7 +115,7 @@ abstract class BaseControl extends control
 	 * 获取有效的sn
 	 * @return unknown[]
 	 */
-	function getSns()
+	function combineSns($sn = array())
 	{
 		$return = array();
 		$sql = 'SELECT sn FROM (SELECT DISTINCT (sn) FROM  `operation_stat`) AS t WHERE sn REGEXP  "C[A_Z]S"';
@@ -124,6 +124,14 @@ abstract class BaseControl extends control
 		{
 			$return[] = $sn['sn'];
 		}
-		return $return;
+		if (is_array($sn))
+		{
+			return array_unique(array_merge($return,$sn));
+		}
+		else if (is_scalar($sn))
+		{
+			$return[] = $sn;
+			return $return;
+		}
 	}
 }

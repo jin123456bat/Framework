@@ -1,11 +1,11 @@
 <?php
 namespace application\algorithm;
 
-use framework\core\component;
 use framework\core\model;
 use application\extend\cache;
+use application\extend\BaseComponent;
 
-class algorithm extends component
+class algorithm extends BaseComponent
 {
 	private $_duration = 0;
 	
@@ -51,6 +51,8 @@ class algorithm extends component
 	 */
 	public function CDSOnlineNum($sn = array())
 	{
+		$sn = $this->combineSns($sn);
+		
 		$cds_max = 0;
 		$cds_detail = array();
 		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
@@ -87,8 +89,10 @@ class algorithm extends component
 	/**
 	 * 在线用户数量
 	 */
-	public function USEROnlineNum($sn = NULL)
+	public function USEROnlineNum($sn = array())
 	{
+		$sn = $this->combineSns($sn);
+		
 		$user_max = 0;
 		$user_detail = array();
 		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
@@ -349,6 +353,8 @@ class algorithm extends component
 	 */
 	public function traffic_stat($sn = array())
 	{
+		$sn = $this->combineSns($sn);
+		
 		$cache_max_detail = array();
 		$service_max_detail = array();
 		$monitor_max_detail = array();
@@ -534,6 +540,8 @@ class algorithm extends component
 	 */
 	function traffic_stat_alone($sn = NULL)
 	{
+		$sn = $this->combineSns($sn);
+		
 		$service = array();
 		$cache = array();
 		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
@@ -543,7 +551,14 @@ class algorithm extends component
 			
 			if (!empty($sn))
 			{
-				$this->model('traffic_stat')->where('sn=?',array($sn));
+				if (is_array($sn))
+				{
+					$this->model('traffic_stat')->In('sn',$sn);
+				}
+				else if (is_scalar($sn))
+				{
+					$this->model('traffic_stat')->where('sn=?',array($sn));
+				}
 			}
 			$traffic_stat = $this->model('traffic_stat')
 			->where('create_time>=? and create_time<?',array(
@@ -579,7 +594,22 @@ class algorithm extends component
 				
 			if (!empty($sn))
 			{
-				$this->model('cdn_traffic_stat')->where('sn like ?',array('%'.substr($sn, 3)));
+				if (is_scalar($sn))
+				{
+					$this->model('cdn_traffic_stat')->where('sn like ?',array('%'.substr($sn, 3)));
+				}
+				else if (is_array($sn))
+				{
+					$where = '';
+					$param = array();
+					foreach ($sn as $s)
+					{
+						$where .= 'sn like ? or ';
+						$param[] = '%'.substr($s, 3);
+					}
+					$where = substr($where,0, -4);
+					$this->model('cdn_traffic_stat')->where($where,$param);
+				}
 			}
 			$cdn_traffic_stat = $this->model('cdn_traffic_stat')
 			->where('make_time>=? and make_time<?',array(
@@ -614,8 +644,22 @@ class algorithm extends component
 			
 			if (!empty($sn))
 			{
-				$this->model('xvirt_traffic_stat')
-				->where('sn like ?',array('%'.substr($sn, 3)));
+				if(is_scalar($sn))
+				{
+					$this->model('xvirt_traffic_stat')->where('sn like ?',array('%'.substr($sn, 3)));
+				}
+				else
+				{
+					$where = '';
+					$param = array();
+					foreach ($sn as $s)
+					{
+						$where .= 'sn like ? or ';
+						$param[] = '%'.substr($s, 3);
+					}
+					$where = substr($where,0, -4);
+					$this->model('xvirt_traffic_stat')->where($where,$param);
+				}
 			}
 			$xvirt = $this->model('xvirt_traffic_stat')
 			->where('make_time>=? and make_time<?',array(
