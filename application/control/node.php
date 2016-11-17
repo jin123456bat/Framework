@@ -222,6 +222,8 @@ class node extends BaseControl
 			$r['sub_vpe'] = $sub_vpe;
 		}
 		
+		$sns = $this->combineSns();
+		$this->model('feedback')->in('feedback.sn',$sns);
 		if (!empty($group_sn))
 		{
 			$feedbackModel->in('feedback.sn',$group_sn);
