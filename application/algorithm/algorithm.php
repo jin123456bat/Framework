@@ -155,11 +155,18 @@ class algorithm extends component
 		{
 			if (is_array($sn))
 			{
-				$this->model('operation_stat')->In('sn',$sn);
+				$sql = '';
+				while ($s = array_shift($sn))
+				{
+					$sql .= 'sn like ? or ';
+					$param[] = '%'.substr($s,3);
+				}
+				$sql = substr($sql, 0,-4);
+				$this->model('operation_stat')->where($sql,$param);
 			}
-			else if (is_scalar($sn))
+			else if(is_scalar($sn))
 			{
-				$this->model('operation_stat')->where('sn=?',array($sn));
+				$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
 			}
 		}
 		$service_sum_sum = 1*$this->model('operation_stat')
@@ -208,13 +215,23 @@ class algorithm extends component
 	public function CPService($sn = array(),$top = 9)
 	{
 		$cp_service = array();
-		if (is_array($sn))
+		if (!empty($sn))
 		{
-			$this->model('operation_stat')->In('sn',$sn);
-		}
-		else if (is_scalar($sn))
-		{
-			$this->model('operation_stat')->where('sn=?',array($sn));
+			if (is_array($sn))
+			{
+				$sql = '';
+				while ($s = array_shift($sn))
+				{
+					$sql .= 'sn like ? or ';
+					$param[] = '%'.substr($s,3);
+				}
+				$sql = substr($sql, 0,-4);
+				$this->model('operation_stat')->where($sql,$param);
+			}
+			else if(is_scalar($sn))
+			{
+				$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
+			}
 		}
 		//取出service累计最大的前9个分类
 		$categoryTop = $this->model('operation_stat')->where('make_time>=? and make_time<?',array(
@@ -244,13 +261,23 @@ class algorithm extends component
 		$total_operation_stat = array();
 		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
 		{
-			if (is_array($sn))
+			if (!empty($sn))
 			{
-				$this->model('operation_stat')->In('sn',$sn);
-			}
-			else if (is_scalar($sn))
-			{
-				$this->model('operation_stat')->where('sn=?',array($sn));
+				if (is_array($sn))
+				{
+					$sql = '';
+					while ($s = array_shift($sn))
+					{
+						$sql .= 'sn like ? or ';
+						$param[] = '%'.substr($s,3);
+					}
+					$sql = substr($sql, 0,-4);
+					$this->model('operation_stat')->where($sql,$param);
+				}
+				else if(is_scalar($sn))
+				{
+					$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
+				}
 			}
 			$result = $this->model('operation_stat')
 			->where('make_time>=? and make_time<?',array(
@@ -632,11 +659,18 @@ class algorithm extends component
 			{
 				if (is_array($sn))
 				{
-					$this->model('operation_stat')->In('sn',$sn);
+					$sql = '';
+					while ($s = array_shift($sn))
+					{
+						$sql .= 'sn like ? or ';
+						$param[] = '%'.substr($s,3);
+					}
+					$sql = substr($sql, 0,-4);
+					$this->model('operation_stat')->where($sql,$param);
 				}
 				else if(is_scalar($sn))
 				{
-					$this->model('operation_stat')->where('sn=?',array($sn));
+					$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
 				}
 			}
 			$result = $this->model('operation_stat')

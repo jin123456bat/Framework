@@ -85,6 +85,11 @@ abstract class BaseControl extends control
 		}
 	}
 	
+	/**
+	 * 获取分类名称
+	 * @param array('class','category') $class_category
+	 * @return NULL
+	 */
 	function getCategory($class_category)
 	{
 		if (isset($class_category['class']) && isset($class_category['category']))
@@ -103,5 +108,22 @@ abstract class BaseControl extends control
 			}
 		}
 		return NULL;
+	}
+	
+	
+	/**
+	 * 获取有效的sn
+	 * @return unknown[]
+	 */
+	function getSns()
+	{
+		$return = array();
+		$sql = 'SELECT sn FROM (SELECT DISTINCT (sn) FROM  `operation_stat`) AS t WHERE sn REGEXP  "C[A_Z]S"';
+		$sns = $this->model('operation_stat')->query($sql);
+		foreach ($sns as $sn)
+		{
+			$return[] = $sn['sn'];
+		}
+		return $return;
 	}
 }

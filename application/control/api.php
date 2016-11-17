@@ -114,11 +114,18 @@ class api extends apiControl
 		//resource
 		if (is_array($sn))
 		{
-			$this->model('operation_stat')->In('sn',$sn);
+			$sql = '';
+			while ($s = array_shift($sn))
+			{
+				$sql .= 'sn like ? or ';
+				$param[] = '%'.substr($s,3);
+			}
+			$sql = substr($sql, 0,-4);
+			$this->model('operation_stat')->where($sql,$param);
 		}
-		else if (is_scalar($sn))
+		else if(is_scalar($sn))
 		{
-			$this->model('operation_stat')->where('sn=?',array($sn));
+			$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
 		}
 		$operation_stat = $this->model('operation_stat')
 		->where('make_time>=? and make_time<?',array(
