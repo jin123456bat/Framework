@@ -46,6 +46,9 @@ class node extends BaseControl
 			return new json(json::FAILED,'by参数只允许asc或desc,默认为asc');
 		}
 		
+		$sns = $this->combineSns();
+		$this->model('feedback')->in('feedback.sn',$sns);
+		
 		$feedbackModel = $this->model('feedback');
 		if (!empty($group))
 		{
@@ -244,7 +247,7 @@ class node extends BaseControl
 	 */
 	function detail()
 	{
-		$sn = request::param('sn');
+		$sn = request::param('sn',NULL,'trim','s');
 		$info = $this->model('feedback')->where('sn=?',array($sn))->find(array(
 			//CDS在线状态(在线，离线)
 			'status'=>'if(UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(feedback.update_time)<60*30,"在线","离线")',

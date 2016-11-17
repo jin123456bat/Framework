@@ -140,7 +140,7 @@ class content extends BaseControl
 		}
 		
 		$topfile = array();
-		$topModel = $this->model('top_stat');
+		$topModel = $this->modelWithSn('top_stat');
 		$topfile['http'] = $topModel
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
@@ -412,7 +412,7 @@ class content extends BaseControl
 		
 		$topfile = array();
 		$other_key = array();
-		$topModel = $this->model('top_stat');
+		$topModel = $this->modelWithSn('top_stat');
 		foreach ($category['videoDemand'] as $key=>$name)
 		{
 			if (in_array($name, $top5_category))
@@ -641,7 +641,7 @@ class content extends BaseControl
 		
 
 		$topfile = array();
-		$topModel = $this->model('top_stat');
+		$topModel = $this->modelWithSn('top_stat');
 		$selected_key = array();
 		foreach ($category['videoLive'] as $key=>$name)
 		{
@@ -804,7 +804,7 @@ class content extends BaseControl
 		$topfile = array();
 		foreach ($category['mobile'] as $key=>$name)
 		{
-			$topfile[$name] = $this->model('top_stat')
+			$topfile[$name] = $this->modelWithSn('top_stat')
 			->where('create_time>=? and create_time<?',array(
 				$start_time,
 				$end_time,
@@ -936,7 +936,7 @@ class content extends BaseControl
 		$topfile = array();
 		foreach ($category['http'] as $key=>$name)
 		{
-			$topfile[$name] = $this->model('top_stat')
+			$topfile[$name] = $this->modelWithSn('top_stat')
 			->where('create_time>=? and create_time<?',array(
 				$start_time,
 				$end_time,
