@@ -155,6 +155,8 @@ class algorithm extends BaseComponent
 	 */
 	public function ServiceSum($sn = array())
 	{
+		$sn = $this->combineSns($sn);
+		
 		if (!empty($sn))
 		{
 			if (is_array($sn))
@@ -218,6 +220,8 @@ class algorithm extends BaseComponent
 	 */
 	public function CPService($sn = array(),$top = 9)
 	{
+		$sn = $this->combineSns($sn);
+		
 		$cp_service = array();
 		if (!empty($sn))
 		{
@@ -699,6 +703,8 @@ class algorithm extends BaseComponent
 	 */
 	function operation_stat($sn = array())
 	{
+		$sn = $this->combineSns($sn);
+		
 		$operation_stat = array();
 		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
 		{
