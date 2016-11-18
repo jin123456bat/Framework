@@ -162,10 +162,12 @@ class algorithm extends BaseComponent
 			if (is_array($sn))
 			{
 				$sql = '';
-				while ($s = array_shift($sn))
+				$s = array_shift($sn);
+				while ($s)
 				{
 					$sql .= 'sn like ? or ';
 					$param[] = '%'.substr($s,3);
+					$s = array_shift($sn);
 				}
 				$sql = substr($sql, 0,-4);
 				$this->model('operation_stat')->where($sql,$param);
@@ -228,10 +230,12 @@ class algorithm extends BaseComponent
 			if (is_array($sn))
 			{
 				$sql = '';
-				while ($s = array_shift($sn))
+				$s = array_shift($sn);
+				while ($s)
 				{
 					$sql .= 'sn like ? or ';
 					$param[] = '%'.substr($s,3);
+					$s = array_shift($sn);
 				}
 				$sql = substr($sql, 0,-4);
 				$this->model('operation_stat')->where($sql,$param);
@@ -274,10 +278,12 @@ class algorithm extends BaseComponent
 				if (is_array($sn))
 				{
 					$sql = '';
-					while ($s = array_shift($sn))
+					$s = array_shift($sn);
+					while ($s)
 					{
 						$sql .= 'sn like ? or ';
 						$param[] = '%'.substr($s,3);
+						$s = array_shift($sn);
 					}
 					$sql = substr($sql, 0,-4);
 					$this->model('operation_stat')->where($sql,$param);

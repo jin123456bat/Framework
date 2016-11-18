@@ -14,9 +14,12 @@ use application\extend\cache;
  */
 class content extends BaseControl
 {
+	private $_sn;
+	
 	function initlize()
 	{
 		parent::initlize();
+		$this->_sn = $this->combineSns();
 		return $this->setTime();
 	}
 	
@@ -64,6 +67,7 @@ class content extends BaseControl
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
+			->in('sn',$this->_sn)
 			->select(array(
 				'service_size',
 				'cache_size',
@@ -119,7 +123,7 @@ class content extends BaseControl
 		
 		//获取traffic_stat  做占比
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat_alone();
+		$traffic_stat = $algorithm->traffic_stat_alone($this->_sn);
 		$service = $traffic_stat['service'];
 		$cache = $traffic_stat['cache'];
 		
@@ -140,8 +144,7 @@ class content extends BaseControl
 		}
 		
 		$topfile = array();
-		$topModel = $this->modelWithSn('top_stat');
-		$topfile['http'] = $topModel
+		$topfile['http'] = $this->modelWithSn('top_stat')
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -163,7 +166,7 @@ class content extends BaseControl
 			$file['category'] = isset($category['http'][$file['category']])?$category['http'][$file['category']]:'其他';
 		}
 		
-		$topfile['mobile'] = $topModel
+		$topfile['mobile'] = $this->modelWithSn('top_stat')
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -184,7 +187,7 @@ class content extends BaseControl
 			$file['category'] = isset($category['mobile'][$file['category']])?$category['mobile'][$file['category']]:'其他';
 		}
 		
-		$topfile['videoDemand'] = $topModel
+		$topfile['videoDemand'] = $this->modelWithSn('top_stat')
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -201,7 +204,7 @@ class content extends BaseControl
 		));
 		
 		//直播的话文件大小按照累加的cache_size ,其他资源全部取max(cache_size)
-		$topfile['videoLive'] = $topModel
+		$topfile['videoLive'] = $this->modelWithSn('top_stat')
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -287,6 +290,7 @@ class content extends BaseControl
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
+			->in('sn',$this->_sn)
 			->where('class=? and category<?',array(2,128))
 			->select(array(
 				'category',
@@ -393,8 +397,8 @@ class content extends BaseControl
 		
 		//进行占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat_alone();
-		$operation_stat = $algorithm->operation_stat();	
+		$traffic_stat = $algorithm->traffic_stat_alone($this->_sn);
+		$operation_stat = $algorithm->operation_stat($this->_sn);	
 		foreach ($cp_cache_flow as $classname => &$v)
 		{
 			foreach ($v as $time=>&$value)
@@ -412,12 +416,11 @@ class content extends BaseControl
 		
 		$topfile = array();
 		$other_key = array();
-		$topModel = $this->modelWithSn('top_stat');
 		foreach ($category['videoDemand'] as $key=>$name)
 		{
 			if (in_array($name, $top5_category))
 			{
-				$topfile[$name] = $topModel
+				$topfile[$name] = $this->modelWithSn('top_stat')
 				->where('create_time>=? and create_time<?',array(
 					$start_time,
 					$end_time,
@@ -436,7 +439,7 @@ class content extends BaseControl
 			}
 		}
 	
-		$topfile['其他'] = $topModel
+		$topfile['其他'] = $this->modelWithSn('top_stat')
 		->where('create_time>=? and create_time<?',array(
 			$start_time,
 			$end_time,
@@ -523,6 +526,7 @@ class content extends BaseControl
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
+			->in('sn',$this->_sn)
 			->where('class=? and category>=?',array(2,128))
 			->select(array(
 				'category'=>'category - 128',
@@ -622,8 +626,8 @@ class content extends BaseControl
 		
 		//占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat_alone();
-		$operation_stat = $algorithm->operation_stat();
+		$traffic_stat = $algorithm->traffic_stat_alone($this->_sn);
+		$operation_stat = $algorithm->operation_stat($this->_sn);
 		foreach ($cp_cache_flow as $classname=>&$v)
 		{
 			foreach ($v as $time => &$value)
@@ -641,13 +645,12 @@ class content extends BaseControl
 		
 
 		$topfile = array();
-		$topModel = $this->modelWithSn('top_stat');
 		$selected_key = array();
 		foreach ($category['videoLive'] as $key=>$name)
 		{
 			if (in_array($name, $top5_category))
 			{
-				$topfile[$name] = $topModel
+				$topfile[$name] = $this->modelWithSn('top_stat')
 				->where('create_time>=? and create_time<?',array(
 					$start_time,
 					$end_time,
@@ -667,7 +670,7 @@ class content extends BaseControl
 			}
 		}
 		
-		$topfile['其他'] = $topModel
+		$topfile['其他'] = $this->modelWithSn('top_stat')
 		->where('create_time>=? and create_time<?',array(
 			$start_time,
 			$end_time,
@@ -760,6 +763,7 @@ class content extends BaseControl
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
+			->in('sn',$this->_sn)
 			->where('class=?',array(1))
 			->select(array(
 				'category',
@@ -783,8 +787,8 @@ class content extends BaseControl
 		
 		//占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat_alone();
-		$operation_stat = $algorithm->operation_stat();
+		$traffic_stat = $algorithm->traffic_stat_alone($this->_sn);
+		$operation_stat = $algorithm->operation_stat($this->_sn);
 	
 		foreach ($cp_cache_flow as $classname=>&$v)
 		{
@@ -891,6 +895,7 @@ class content extends BaseControl
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
+			->in('sn',$this->_sn)
 			->where('class=?',array(0))
 			->select(array(
 				'category',
@@ -915,8 +920,8 @@ class content extends BaseControl
 		
 		//占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat_alone();
-		$operation_stat = $algorithm->operation_stat();
+		$traffic_stat = $algorithm->traffic_stat_alone($this->_sn);
+		$operation_stat = $algorithm->operation_stat($this->_sn);
 		
 		foreach ($cp_cache_flow as $classname=>&$v)
 		{

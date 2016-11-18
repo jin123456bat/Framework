@@ -4,7 +4,6 @@ namespace application\control;
 use application\extend\BaseControl;
 use framework\core\response\json;
 use framework\core\request;
-use framework\core\database\sql;
 use framework\core\model;
 use application\entity\user;
 use application\algorithm\algorithm;
@@ -248,25 +247,15 @@ class node extends BaseControl
 		$end_time = date('Y-m-d H:'.$m.':00');
 		$start_time = date('Y-m-d H:i:s',strtotime($end_time) - 24*3600);
 		$duration = 30*60;//半个小时
-		$online_user = array();
-		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
-		{
-			$online_user[$t_time] = $this->model('feedbackHistory')
-			->where('ctime>=? and ctime<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time) + $duration),
-			))
-			->where('sn=?',array($sn))
-			->max('online') * 1;
-		}
-		
+		$algorithm = new algorithm($start_time,$end_time,$duration);
+		$online_user = $algorithm->USEROnlineNum($sn);
+		$online_user = $online_user['detail'];
 		
 		//最近24小时的服务，回源，镜像速率
 		$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
 		$end_time = date('Y-m-d H:i:s',$timestamp);
 		$start_time = date('Y-m-d H:i:s',strtotime('-24 hour',strtotime($end_time)));
 		$duration = 5*60;//5分钟
-		
 		$algorithm = new algorithm($start_time,$end_time,$duration);
 		$speed = $algorithm->traffic_stat($sn);
 		
@@ -350,7 +339,7 @@ class node extends BaseControl
 		$result = array();
 		
 		$algorithm = new algorithm($start_time,$end_time,$duration);
-		$operation_stat = $algorithm->operation_stat();
+		$operation_stat = $algorithm->operation_stat($sn);
 		
 		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
 		{
