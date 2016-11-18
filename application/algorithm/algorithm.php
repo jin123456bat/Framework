@@ -565,6 +565,7 @@ class algorithm extends BaseComponent
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
 			))
+			->order('create_time','asc')
 			->group('create_time')
 			->select(array(
 				'create_time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
@@ -616,6 +617,7 @@ class algorithm extends BaseComponent
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration)
 			))
+			->order('make_time','asc')
 			->group('make_time')
 			->select(array(
 				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
@@ -666,6 +668,7 @@ class algorithm extends BaseComponent
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
 			))
+			->order('make_time','asc')
 			->group('make_time')
 			->select(array(
 				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',

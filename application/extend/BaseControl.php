@@ -117,22 +117,26 @@ abstract class BaseControl extends control
 	 */
 	function combineSns($sn = array())
 	{
-		$return = array();
-		$sql = 'SELECT sn FROM (SELECT DISTINCT (sn) FROM  `operation_stat`) AS t WHERE sn REGEXP  "C[A_Z]S"';
-		$sns = $this->model('operation_stat')->query($sql);
-		foreach ($sns as $sn)
+		if (empty($sn))
 		{
-			$return[] = $sn['sn'];
+			$return = array();
+			$return1 = array();
+			$sql = 'SELECT sn FROM (SELECT DISTINCT (sn) FROM  `operation_stat`) AS t WHERE sn REGEXP  "C[A_Z]S"';
+			$sns = $this->model('operation_stat')->query($sql);
+			foreach ($sns as $s)
+			{
+				$return[] = $s['sn'];
+			}
+			
+			//sn必须同时在user_info表和feedback表中存在
+			$u_sn = $this->model('feedback')->join('user_info','user_info.sn=feedback.sn')->select('distinct(user_info.sn)');
+			foreach ($u_sn as $s)
+			{
+				$return1[] = $s['sn'];
+			}
+			return array_intersect($return,$return1);
 		}
-		if (is_array($sn))
-		{
-			return array_unique(array_merge($return,$sn));
-		}
-		else if (is_scalar($sn))
-		{
-			$return[] = $sn;
-			return $return;
-		}
+		return $sn;
 	}
 	
 	function modelWithSn($name)

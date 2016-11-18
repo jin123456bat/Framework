@@ -132,40 +132,10 @@ class node extends BaseControl
 				$r['rhelp'] = explode(':', $r['rhelp']);
 			}
 			
-			/* $traffic_stat = $this->model('traffic_stat')
-			->where('sn=?',array($r['sn']))
-			->order('create_time','desc')
-			->find(array(
-				'service' => 'service * 1024',
-				'cache' => 'cache * 1024'
-			));
-			
-			$cdn_traffic_stat = $this->model('cdn_traffic_stat')
-			->where('sn like ?',array('%'.substr($r['sn'], 3)))
-			->group('time')
-			->order('time','desc')
-			->find(array(
-				'service'=>'sum(service)',
-				'cache'=>'sum(cache)',
-				'time'=>'date_format(make_time,"%Y-%m-%d %H:%i")'
-			));
-			
-			$xvirt_traffic_stat = $this->model('xvirt_traffic_stat')
-			->where('sn like ?',array('%'.substr($r['sn'], 3)))
-			->group('time')
-			->order('time','desc')
-			->find(array(
-				'service' => 'sum(service)',
-				'cache' => 'sum(cache)',
-				'time' => 'date_format(make_time,"%Y-%m-%d %H:%i")'
-			)); */
-			//$r['service'] = $traffic_stat['service'] + $cdn_traffic_stat['service'] - $xvirt_traffic_stat['service'];
-			//$r['cache'] = $traffic_stat['cache'] + $cdn_traffic_stat['cache'] - $xvirt_traffic_stat['cache'];
-				
 			$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
 			$endtime = date('Y-m-d H:i:s',$timestamp);
 			$starttime = date('Y-m-d H:i:s',strtotime('-24 hour',strtotime($endtime)));
-			$duration = 60*60*24;
+			$duration = 5*60;
 			$algorithm = new algorithm($starttime,$endtime,$duration);
 			
 			$traffic_stat = $algorithm->traffic_stat_alone($r['sn']);

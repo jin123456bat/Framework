@@ -366,7 +366,10 @@ class task extends bgControl
 		}
 		$debugger->stop();
 		
-		$this->log($debugger,$minute5,$hour1,$hour2,$day1,$week1,$month1);
+		if ($minute%5===0)
+		{
+			$this->log($debugger,$minute5,$hour1,$hour2,$day1,$week1,$month1);
+		}
 	}
 	
 	/**
@@ -388,21 +391,27 @@ class task extends bgControl
 			'task_5minutes_starttime' => date('Y-m-d H:i:s',intval($minute5->getStarttime())),
 			'task_5minutes_endtime' => date('Y-m-d H:i:s',intval($minute5->getEndtime())),
 			'task_5minutes_time' => $minute5->getTime(),
+			'task_5minutes_memory' => $minute5->getMemory(),
 			'task_1hour_starttime' => date('Y-m-d H:i:s',intval($hour1->getStarttime())),
 			'task_1hour_endtime' => date('Y-m-d H:i:s',intval($hour1->getEndtime())),
 			'task_1hour_time' => $hour1->getTime(),
+			'task_1hour_memory' => $hour1->getMemory(),
 			'task_2hour_starttime' => date('Y-m-d H:i:s',intval($hour2->getStarttime())),
 			'task_2hour_endtime' => date('Y-m-d H:i:s',intval($hour2->getEndtime())),
 			'task_2hour_time' => $hour2->getTime(),
+			'task_2hour_memory' => $hour2->getMemory(),
 			'task_1day_starttime' => date('Y-m-d H:i:s',intval($day1->getStarttime())),
 			'task_1day_endtime' => date('Y-m-d H:i:s',intval($day1->getEndtime())),
 			'task_1day_time' => $day1->getTime(),
+			'task_1day_memory' => $day1->getMemory(),
 			'task_1week_starttime' => date('Y-m-d H:i:s',intval($week1->getStarttime())),
 			'task_1week_endtime' => date('Y-m-d H:i:s',intval($week1->getEndtime())),
 			'task_1week_time' => $week1->getTime(),
+			'task_1week_memory' => $week1->getMemory(),
 			'task_1month_starttime' => date('Y-m-d H:i:s',intval($month1->getStarttime())),
 			'task_1month_endtime' => date('Y-m-d H:i:s',intval($month1->getEndtime())),
 			'task_1month_time' => $month1->getTime(),
+			'task_1month_memory' => $month1->getMemory(),
 		);
 		$this->model('task_run_log')->insert($data);
 	}
