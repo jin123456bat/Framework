@@ -85,18 +85,28 @@ class header extends base
 		}
 	}
 	
+	/**
+	 * 设置一个头信息，已经设置的会被覆盖
+	 * @param unknown $name
+	 * @param unknown $value
+	 */
 	function set($name,$value)
 	{
 		self::$_header[$name] = $value;
 	}
 	
+	/**
+	 * 获取已经设置的头信息
+	 * @param unknown $name
+	 * @return mixed
+	 */
 	function get($name)
 	{
 		return self::$_header[$name];
 	}
 
 	/**
-	 * 发送一个header
+	 * 立即发送一个header
 	 *
 	 * @param unknown $key        	
 	 * @param string $value        	

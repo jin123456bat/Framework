@@ -112,6 +112,13 @@ class node extends BaseControl
 		foreach ($result as &$r)
 		{
 			$r['disk_detail'] = json_decode($r['disk_detail'],true);
+			if (is_array($r['disk_detail']))
+			{
+				usort($r['disk_detail'], function($a,$b){
+					return (intval($a['name']) < intval($b['name']))?-1:1;
+				});
+			}
+			
 			$r['network_detail'] = json_decode($r['network_detail'],true);
 			if (is_array($r['network_detail']) && !empty($r['network_detail']))
 			{

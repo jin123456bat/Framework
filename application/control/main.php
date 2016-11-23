@@ -131,24 +131,24 @@ class main extends BaseControl
 			'cds' => array(
 				'max' => array(
 					'current' => $cds['max'],
-					'linkRatio' => $cds_ratio['link']===NULL?NULL:1*number_format(division($cds['max'] - $cds_ratio['link'], $cds['max']),2,'.',''),//环比
-					'sameRatio' => $cds_ratio['same']===NULL?NULL:1*number_format(division($cds['max'] - $cds_ratio['same'], $cds['max']),2,'.','')//同比
+					'linkRatio' => $cds_ratio['link']===NULL?NULL:1*number_format(division($cds['max'] - $cds_ratio['link'], $cds_ratio['link']),2,'.',''),//环比
+					'sameRatio' => $cds_ratio['same']===NULL?NULL:1*number_format(division($cds['max'] - $cds_ratio['same'], $cds_ratio['same']),2,'.','')//同比
 				),//CDS在线节点数
 				'detail' => $cds['detail'],
 			),
 			'user' => array(
 				'max' => array(
 					'current' => $user['max'],
-					'linkRatio' => $user_ratio['link']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['link'], $user['max']),2,'.',''),//环比
-					'sameRatio' => $user_ratio['same']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['same'], $user['max']),2,'.','')//同比
+					'linkRatio' => $user_ratio['link']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['link'], $user_ratio['link']),2,'.',''),//环比
+					'sameRatio' => $user_ratio['same']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['same'], $user_ratio['same']),2,'.','')//同比
 				),//用户数
 				'detail' => $user['detail'],
 			),
 			'service_max' => array(
 				'max' => array(
 					'current' => $service_max['max'],
-					'linkRatio' => $service_max_ratio['link']===NULL?NULL:1*number_format(division($service_max['max'] - $service_max_ratio['link'], $service_max['max']),2,'.',''),//环比
-					'sameRatio' => $service_max_ratio['same']===NULL?NULL:1*number_format(division($service_max['max'] - $service_max_ratio['same'], $service_max['max']),2,'.',''),//同比
+					'linkRatio' => $service_max_ratio['link']===NULL?NULL:1*number_format(division($service_max['max'] - $service_max_ratio['link'], $service_max_ratio['link']),2,'.',''),//环比
+					'sameRatio' => $service_max_ratio['same']===NULL?NULL:1*number_format(division($service_max['max'] - $service_max_ratio['same'], $service_max_ratio['same']),2,'.',''),//同比
 				),//服务流速峰值（时间点内的最大值）
 				'detail' => $service_max['detail'],//服务流速按照时间节点的详情
 			),
@@ -158,8 +158,8 @@ class main extends BaseControl
 			'service_sum' => array(
 				'max' => array(
 					'current' => $service_sum['max'],
-					'linkRatio' => $service_sum_ratio['link']===NULL?NULL:1*number_format(division($service_sum['max'] - $service_sum_ratio['link'], $service_sum['max']),2,'.',''),//环比
-					'sameRatio' => $service_sum_ratio['same']===NULL?NULL:1*number_format(division($service_sum['max'] - $service_sum_ratio['same'], $service_sum['max']),2,'.','')//同比
+					'linkRatio' => $service_sum_ratio['link']===NULL?NULL:1*number_format(division($service_sum['max'] - $service_sum_ratio['link'], $service_sum_ratio['link']),2,'.',''),//环比
+					'sameRatio' => $service_sum_ratio['same']===NULL?NULL:1*number_format(division($service_sum['max'] - $service_sum_ratio['same'], $service_sum_ratio['same']),2,'.','')//同比
 				),//服务流量(时间点内的累加值)
 				//'detail' => $service_sum_detail,//服务流量
 			)

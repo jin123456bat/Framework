@@ -54,6 +54,21 @@ class session extends component
 		return self::$_session;
 	}
 	
+	/**
+	 * 判断一个session是否存在
+	 * @param unknown $name
+	 */
+	public static function has($name)
+	{
+		self::getInstance();
+		return isset($_SESSION[$name]);
+	}
+	
+	/**
+	 * 设置一个session,已经存在的会被覆盖
+	 * @param unknown $name
+	 * @param unknown $value
+	 */
 	public static function set($name,$value)
 	{
 		self::getInstance();
@@ -61,7 +76,7 @@ class session extends component
 	}
 	
 	/**
-	 * 获取SESSION信息
+	 * 获取一个session变量，不存在的话返回NULL
 	 * @param unknown $name
 	 * @return NULL|mixed
 	 */
@@ -73,6 +88,16 @@ class session extends component
 			return $_SESSION[$name];
 		}
 		return NULL;
+	}
+	
+	/**
+	 * 删除一个session变量
+	 * @param unknown $name
+	 */
+	public static function delete($name)
+	{
+		self::getInstance();
+		unset($_SESSION[$name]);
 	}
 	
 	/**

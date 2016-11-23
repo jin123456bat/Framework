@@ -114,8 +114,8 @@ class algorithm extends BaseComponent
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration),
 			))
-			->select('max(online) as online');
-				
+			->select('max(online) as online,sn,ctime');
+			
 			$user_detail[$t_time] = 0;
 			foreach ($max_online_gourp_sn as $online)
 			{
@@ -336,6 +336,7 @@ class algorithm extends BaseComponent
 		
 		foreach ($cp_service as $classname => &$v)
 		{
+			
 			foreach ($v as $time => &$value)
 			{
 				$value = $service[$time] * division($value,$total_operation_stat[$time]);
@@ -343,9 +344,9 @@ class algorithm extends BaseComponent
 		}
 		
 		$max = array();
-		foreach ($cp_service as $classname => $v)
+		foreach ($cp_service as $classname => $v_t)
 		{
-			$max[$classname] = max($v);
+			$max[$classname] = max($v_t);
 		}
 		
 		return array(
@@ -739,7 +740,7 @@ class algorithm extends BaseComponent
 			))
 			->find(array(
 				'sum_service'=>'sum(service_size)',
-				'sum_cache'=>'sum(cache_size)'
+				'sum_cache'=>'sum(cache_size+proxy_cache_size)'
 			));
 			$operation_stat['service'][$t_time] = $result['sum_service']*1;
 			$operation_stat['cache'][$t_time] = $result['sum_cache']*1;

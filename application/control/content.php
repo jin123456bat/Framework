@@ -62,12 +62,30 @@ class content extends BaseControl
 			$total_operation_stat_cache[$t_time] = 0;
 			$total_operation_stat_service[$t_time] = 0;
 			
+			if (!empty($this->_sn))
+			{
+				if (is_array($this->_sn))
+				{
+					$where = '';
+					$param = array();
+					foreach ($this->_sn as $sn)
+					{
+						$where .= 'sn like ? or ';
+						$param[] = '%'.substr($sn,3);
+					}
+					$where = substr($where, 0,-4);
+					$this->model('operation_stat')->where($where,$param);
+				}
+				else if (is_scalar($this->_sn))
+				{
+					$this->model('operation_stat')->where('sn like ?','%'.substr($sn,3));
+				}
+			}
 			$result = $this->model('operation_stat')
 			->where('make_time >=? and make_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
-			->in('sn',$this->_sn)
 			->select(array(
 				'service_size',
 				'cache_size',
@@ -108,12 +126,18 @@ class content extends BaseControl
 				$total_operation_stat_service[$t_time] += $r['service_size'];
 				
 				$category_service[$classname][$t_time] += $r['service_size'] * 1;
-				$category_cache[$classname][$t_time] += $r['cache_size'] * 1;
-				$category_cache[$classname][$t_time] += $r['proxy_cache_size'] * 1;
+				if ($classname == 'videoLive')
+				{
+					$flow[$classname]['cache'] += $r['proxy_cache_size']*1;
+					$category_cache[$classname][$t_time] += $r['proxy_cache_size'] * 1;
+				}
+				else
+				{
+					$flow[$classname]['cache'] += $r['cache_size']*1;
+					$category_cache[$classname][$t_time] += $r['cache_size'] * 1;
+				}
 				
 				$flow[$classname]['service'] += $r['service_size'] * 1;
-				$flow[$classname]['cache'] += $r['cache_size']*1;
-				$flow[$classname]['cache'] += $r['proxy_cache_size']*1;
 				
 				$flow['total']['service'] += $r['service_size']*1;
 				$flow['total']['cache'] += $r['cache_size']*1;
@@ -134,6 +158,7 @@ class content extends BaseControl
 				$value = $service[$time] * division($value, $total_operation_stat_service[$time]);
 			}
 		}
+		
 		
 		foreach ($category_cache as $classname => &$v)
 		{
@@ -285,17 +310,36 @@ class content extends BaseControl
 		
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
 		{
+			if (!empty($this->_sn))
+			{
+				if (is_array($this->_sn))
+				{
+					$where = '';
+					$param = array();
+					foreach ($this->_sn as $sn)
+					{
+						$where .= 'sn like ? or ';
+						$param[] = '%'.substr($sn,3);
+					}
+					$where = substr($where, 0,-4);
+					$this->model('operation_stat')->where($where,$param);
+				}
+				else if (is_scalar($this->_sn))
+				{
+					$this->model('operation_stat')->where('sn like ?','%'.substr($sn,3));
+				}
+			}
 			$result = $this->model('operation_stat')
 			->where('make_time >=? and make_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
-			->in('sn',$this->_sn)
 			->where('class=? and category<?',array(2,128))
 			->select(array(
 				'category',
 				'service_size',
-				'cache_size'
+				'cache_size',
+				'proxy_cache_size'
 			));
 			
 			foreach ($category['videoDemand'] as $key=>$name)
@@ -521,17 +565,35 @@ class content extends BaseControl
 		
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
 		{
+			if (!empty($this->_sn))
+			{
+				if (is_array($this->_sn))
+				{
+					$where = '';
+					$param = array();
+					foreach ($this->_sn as $sn)
+					{
+						$where .= 'sn like ? or ';
+						$param[] = '%'.substr($sn,3);
+					}
+					$where = substr($where, 0,-4);
+					$this->model('operation_stat')->where($where,$param);
+				}
+				else if (is_scalar($this->_sn))
+				{
+					$this->model('operation_stat')->where('sn like ?','%'.substr($sn,3));
+				}
+			}
 			$result = $this->model('operation_stat')
 			->where('make_time >=? and make_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
-			->in('sn',$this->_sn)
 			->where('class=? and category>=?',array(2,128))
 			->select(array(
 				'category'=>'category - 128',
 				'service_size',
-				'cache_size' => 'cache_size + proxy_cache_size',
+				'cache_size' => 'proxy_cache_size+cache_size',
 			));
 			
 			
@@ -758,17 +820,36 @@ class content extends BaseControl
 			$cp_service_flow['IOS'][$t_time] = 0;
 			$cp_service_flow['WP'][$t_time] = 0;
 			
+			
+			if (!empty($this->_sn))
+			{
+				if (is_array($this->_sn))
+				{
+					$where = '';
+					$param = array();
+					foreach ($this->_sn as $sn)
+					{
+						$where .= 'sn like ? or ';
+						$param[] = '%'.substr($sn,3);
+					}
+					$where = substr($where, 0,-4);
+					$this->model('operation_stat')->where($where,$param);
+				}
+				else if (is_scalar($this->_sn))
+				{
+					$this->model('operation_stat')->where('sn like ?','%'.substr($sn,3));
+				}
+			}
 			$result = $this->model('operation_stat')
 			->where('make_time >=? and make_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
-			->in('sn',$this->_sn)
 			->where('class=?',array(1))
 			->select(array(
 				'category',
 				'service_size',
-				'cache_size'
+				'cache_size',
 			));
 				
 			foreach ($result as $r)
@@ -890,12 +971,30 @@ class content extends BaseControl
 			}
 			
 			//计算当前时间段内各个类型的业务流量
+			if (!empty($this->_sn))
+			{
+				if (is_array($this->_sn))
+				{
+					$where = '';
+					$param = array();
+					foreach ($this->_sn as $sn)
+					{
+						$where .= 'sn like ? or ';
+						$param[] = '%'.substr($sn,3);
+					}
+					$where = substr($where, 0,-4);
+					$this->model('operation_stat')->where($where,$param);
+				}
+				else if (is_scalar($this->_sn))
+				{
+					$this->model('operation_stat')->where('sn like ?','%'.substr($sn,3));
+				}
+			}
 			$result = $this->model('operation_stat')
 			->where('make_time >=? and make_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
-			->in('sn',$this->_sn)
 			->where('class=?',array(0))
 			->select(array(
 				'category',
