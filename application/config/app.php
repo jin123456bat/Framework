@@ -9,7 +9,7 @@ return array(
 	
 	'layout' => 'layout',
 	
-	'cache' => false,
+	'cache' => true,
 	
 	'errorHandler' => array(
 		'class' => '/application/extend/errorHandler::run',

@@ -18,10 +18,13 @@ class api extends apiControl
 			return $response;
 		}
 		
-		$response = $this->setTime();
-		if (!is_null($response))
+		if (request::param('a','','trim|strtolower') != strtolower('saveSnInCache'))
 		{
-			return $response;
+			$response = $this->setTime();
+			if (!is_null($response))
+			{
+				return $response;
+			}
 		}
 	}
 	
