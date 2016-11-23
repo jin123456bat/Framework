@@ -59,23 +59,23 @@ class api extends apiControl
 		$data = array(
 			'cds' => array(
 				'max' => $cds['max'],
-				'link' => $cds_ratio['link']===NULL?NULL:1*number_format(division($cds['max'] - $cds_ratio['link'],$cds_ratio['max']),2,'.',''),
-				'same' => $cds_ratio['same']===NULL?NULL:1*number_format(division($cds['max'] - $cds_ratio['same'],$cds_ratio['max']),2,'.',''),
+				'link' => $cds_ratio['link']===NULL?NULL:1*number_format(division($cds['max'] - $cds_ratio['link'],$cds_ratio['link']),2,'.',''),
+				'same' => $cds_ratio['same']===NULL?NULL:1*number_format(division($cds['max'] - $cds_ratio['same'],$cds_ratio['same']),2,'.',''),
 			),
 			'online' => array(
 				'max' => $online['max'],
-				'link' => $online_ratio['link']===NULL?NULL:1*number_format(division($online['max'] - $online_ratio['link'],$online_ratio['max']),2,'.',''),
-				'same' => $online_ratio['same']===NULL?NULL:1*number_format(division($online['max'] - $online_ratio['same'],$online_ratio['max']),2,'.',''),
+				'link' => $online_ratio['link']===NULL?NULL:1*number_format(division($online['max'] - $online_ratio['link'],$online_ratio['link']),2,'.',''),
+				'same' => $online_ratio['same']===NULL?NULL:1*number_format(division($online['max'] - $online_ratio['same'],$online_ratio['same']),2,'.',''),
 			),
 			'serviceMax' => array(
 				'max' => $serviceMax['max'],
-				'link' => $serviceMax_ratio['link']===NULL?NULL:1*number_format(division($serviceMax['max'] - $serviceMax_ratio['link'],$serviceMax_ratio['max']),2,'.',''),
-				'same' => $serviceMax_ratio['same']===NULL?NULL:1*number_format(division($serviceMax['max'] - $serviceMax_ratio['same'],$serviceMax_ratio['max']),2,'.',''),
+				'link' => $serviceMax_ratio['link']===NULL?NULL:1*number_format(division($serviceMax['max'] - $serviceMax_ratio['link'],$serviceMax_ratio['link']),2,'.',''),
+				'same' => $serviceMax_ratio['same']===NULL?NULL:1*number_format(division($serviceMax['max'] - $serviceMax_ratio['same'],$serviceMax_ratio['same']),2,'.',''),
 			),
 			'serviceSum' => array(
 				'max' => $serviceSum['max'],
-				'link' => $serviceSum_ratio['link']===NULL?NULL:1*number_format(division($serviceSum['max'] - $serviceSum_ratio['link'],$serviceSum_ratio['max']),2,'.',''),
-				'same' => $serviceSum_ratio['same']===NULL?NULL:1*number_format(division($serviceSum['max'] - $serviceSum_ratio['same'],$serviceSum_ratio['max']),2,'.',''),
+				'link' => $serviceSum_ratio['link']===NULL?NULL:1*number_format(division($serviceSum['max'] - $serviceSum_ratio['link'],$serviceSum_ratio['link']),2,'.',''),
+				'same' => $serviceSum_ratio['same']===NULL?NULL:1*number_format(division($serviceSum['max'] - $serviceSum_ratio['same'],$serviceSum_ratio['same']),2,'.',''),
 			),
 			'detail' => $detail,
 		);
@@ -264,13 +264,13 @@ class api extends apiControl
 			'main' => array(
 				'user' => array(
 					'max' => $user['max'],
-					'link' => $user_ratio['link']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['link'],$user_ratio['max']),2,'.',''),
-					'same' => $user_ratio['same']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['same'],$user_ratio['max']),2,'.',''),
+					'link' => $user_ratio['link']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['link'],$user_ratio['link']),2,'.',''),
+					'same' => $user_ratio['same']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['same'],$user_ratio['same']),2,'.',''),
 				),
 				'service' => array(
 					'max' => $service['max'],
-					'link' => $service_ratio['link']===NULL?NULL:1*number_format(division($service['max'] - $service_ratio['link'],$service_ratio['max']),2,'.',''),
-					'same' => $service_ratio['same']===NULL?NULL:1*number_format(division($service['max'] - $service_ratio['same'],$service_ratio['max']),2,'.',''),
+					'link' => $service_ratio['link']===NULL?NULL:1*number_format(division($service['max'] - $service_ratio['link'],$service_ratio['link']),2,'.',''),
+					'same' => $service_ratio['same']===NULL?NULL:1*number_format(division($service['max'] - $service_ratio['same'],$service_ratio['same']),2,'.',''),
 				)
 			),
 			'cds_service_cache' => $cds_velocity_gain,//流速增益
