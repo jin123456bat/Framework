@@ -17,16 +17,20 @@ class apiControl extends BaseControl
 	
 	function initlize()
 	{
-		$partner = request::post('partner',NULL,'trim');
-		$key = isset($this->_partner[$partner])?$this->_partner[$partner]:'';
-		$timestamp = request::post('timestamp',time(),'trim|int','i');
-		$sign = request::post('sign',NULL,'trim');
-		$data = request::post('data',array(),'','a');
-		$signed = $this->sign($partner, $timestamp, $data, $key);
-		if (!in_array($sign,$signed))
+		if (request::php_sapi_name() == 'web')
 		{
-			return new json(json::FAILED,'签名失败');
+			$partner = request::post('partner',NULL,'trim');
+			$key = isset($this->_partner[$partner])?$this->_partner[$partner]:'';
+			$timestamp = request::post('timestamp',time(),'trim|int','i');
+			$sign = request::post('sign',NULL,'trim');
+			$data = request::post('data',array(),'','a');
+			$signed = $this->sign($partner, $timestamp, $data, $key);
+			if (!in_array($sign,$signed))
+			{
+				return new json(json::FAILED,'签名失败');
+			}
 		}
+		parent::initlize();
 	}
 	
 	
@@ -73,61 +77,68 @@ class apiControl extends BaseControl
 	 */
 	function post($name,$default = NULL,$filter = NULL,$type = 's')
 	{
-		$requestData = request::post('data',$default,NULL,'a');
-		if (isset($requestData[$name]))
+		if (request::php_sapi_name() == 'cli')
 		{
-			$data = $requestData[$name];
-			if (is_string($filter))
+			return request::param($name,$default,$filter,$type);
+		}
+		else
+		{
+			$requestData = request::post('data',$default,NULL,'a');
+			if (isset($requestData[$name]))
 			{
-				$filters = explode('|', $filter);
-				foreach ($filters as $filter_t)
+				$data = $requestData[$name];
+				if (is_string($filter))
 				{
-					if (is_callable($filter_t))
+					$filters = explode('|', $filter);
+					foreach ($filters as $filter_t)
 					{
-						$data = call_user_func($filter_t, $data);
-					}
-					else 
-					{
-						$filterClass = application::load('filter');
-						if (is_callable(array($filterClass,$filter_t)))
+						if (is_callable($filter_t))
 						{
-							$data = call_user_func(array($filterClass,$filter_t),$data);
+							$data = call_user_func($filter_t, $data);
 						}
-						else
+						else 
 						{
-							list($func,$param) = explode(':', $filter);
-							if (is_callable($func))
+							$filterClass = application::load('filter');
+							if (is_callable(array($filterClass,$filter_t)))
 							{
-								$pattern = '$["\'].["\']$';
-								if (preg_match_all($pattern, $param,$matches))
+								$data = call_user_func(array($filterClass,$filter_t),$data);
+							}
+							else
+							{
+								list($func,$param) = explode(':', $filter);
+								if (is_callable($func))
 								{
-									$params = array_map(function($param) use($data){
-										if (trim($param,'\'"') == '?')
-										{
-											return $data;
-										}
-										return trim($param,'\'"');
-									}, $matches[0]);
-									$data = call_user_func_array($func, $params);
+									$pattern = '$["\'].["\']$';
+									if (preg_match_all($pattern, $param,$matches))
+									{
+										$params = array_map(function($param) use($data){
+											if (trim($param,'\'"') == '?')
+											{
+												return $data;
+											}
+											return trim($param,'\'"');
+										}, $matches[0]);
+										$data = call_user_func_array($func, $params);
+									}
 								}
 							}
 						}
 					}
+					return self::setVariableType($data,$type);
 				}
-				return self::setVariableType($data,$type);
+				else
+				{
+					if (is_callable($filter))
+					{
+						return call_user_func($filter, $data);
+					}
+					return self::setVariableType($requestData[$name],$type);
+				}
 			}
 			else
 			{
-				if (is_callable($filter))
-				{
-					return call_user_func($filter, $data);
-				}
-				return self::setVariableType($requestData[$name],$type);
+				return $default;
 			}
-		}
-		else
-		{
-			return $default;
 		}
 	}
 	

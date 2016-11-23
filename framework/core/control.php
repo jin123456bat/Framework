@@ -9,7 +9,7 @@ class control extends component
 {
 	function initlize()
 	{
-		
+		parent::initlize();
 	}
 	
 	/**

@@ -66,7 +66,7 @@ class request extends base
 	{
 		if (isset($_POST[$name]))
 		{
-			$data = self::setVariableType($_POST[$name],$type);
+			$data = $_POST[$name];
 				
 			if (is_string($filter))
 			{
@@ -84,17 +84,36 @@ class request extends base
 						{
 							$data = filter::$filter_t($data);
 						}
+						else
+						{
+							list($func,$param) = explode(':', $filter);
+							if (is_callable($func))
+							{
+								$pattern = '$["\'].["\']$';
+								if (preg_match_all($pattern, $param,$matches))
+								{
+									$params = array_map(function($param) use($data){
+										if (trim($param,'\'"') == '?')
+										{
+											return $data;
+										}
+										return trim($param,'\'"');
+									}, $matches[0]);
+										$data = call_user_func_array($func, $params);
+								}
+							}
+						}
 					}
 				}
-				return $data;
+				return self::setVariableType($data,$type);
 			}
 			else
 			{
 				if (is_callable($filter))
 				{
-					return call_user_func($filter, $data);
+					$data = call_user_func($filter, $data);
 				}
-				return $data;
+				return self::setVariableType($data,$type);
 			}
 		}
 		else
@@ -114,7 +133,7 @@ class request extends base
 	{
 		if (isset($_GET[$name]))
 		{
-			$data = self::setVariableType($_GET[$name],$type);
+			$data = $_GET[$name];
 		
 			if (is_string($filter))
 			{
@@ -133,17 +152,36 @@ class request extends base
 						{
 							$data = filter::$filter_t($data);
 						}
+						else
+						{
+							list($func,$param) = explode(':', $filter);
+							if (is_callable($func))
+							{
+								$pattern = '$["\'].["\']$';
+								if (preg_match_all($pattern, $param,$matches))
+								{
+									$params = array_map(function($param) use($data){
+										if (trim($param,'\'"') == '?')
+										{
+											return $data;
+										}
+										return trim($param,'\'"');
+									}, $matches[0]);
+										$data = call_user_func_array($func, $params);
+								}
+							}
+						}
 					}
 				}
-				return $data;
+				return self::setVariableType($data,$type);
 			}
 			else
 			{
 				if (is_callable($filter))
 				{
-					return call_user_func($filter, $data);
+					$data = call_user_func($filter, $data);
 				}
-				return $data;
+				return self::setVariableType($data,$type);
 			}
 		}
 		else
@@ -163,7 +201,7 @@ class request extends base
 	{
 		if (isset($_REQUEST[$name]))
 		{
-			$data = self::setVariableType($_REQUEST[$name],$type);
+			$data = $_REQUEST[$name];
 			
 			if (is_string($filter))
 			{
@@ -182,17 +220,36 @@ class request extends base
 						{
 							$data = filter::$filter_t($data);
 						}
+						else
+						{
+							list($func,$param) = explode(':', $filter);
+							if (is_callable($func))
+							{
+								$pattern = '$["\'].["\']$';
+								if (preg_match_all($pattern, $param,$matches))
+								{
+									$params = array_map(function($param) use($data){
+										if (trim($param,'\'"') == '?')
+										{
+											return $data;
+										}
+										return trim($param,'\'"');
+									}, $matches[0]);
+										$data = call_user_func_array($func, $params);
+								}
+							}
+						}
 					}
 				}
-				return $data;
+				return self::setVariableType($data,$type);
 			}
 			else
 			{
 				if (is_callable($filter))
 				{
-					return call_user_func($filter, $data);
+					$data = call_user_func($filter, $data);
 				}
-				return $data;
+				return self::setVariableType($data,$type);;
 			}
 		}
 		else

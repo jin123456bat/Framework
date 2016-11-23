@@ -5,6 +5,8 @@ use framework\core\response\json;
 use application\algorithm\algorithm;
 use framework\core\model;
 use application\algorithm\ratio;
+use framework\core\request;
+use application\extend\cache;
 
 class api extends apiControl
 {
@@ -23,12 +25,137 @@ class api extends apiControl
 		}
 	}
 	
+	function saveSnInCache()
+	{
+		$oldsn = $this->post('oldsn',array(),'explode:",","?"','a');
+		$newsn = $this->post('newsn',array(),'explode:",","?"','a');
+		
+		if (empty($oldsn) && empty($newsn))
+		{
+			return new json(json::FAILED,'sn不能都为空');
+		}
+		
+		$oldsn_string = implode(',', $oldsn);
+		$newsn_string = implode(',', $newsn);
+		
+		$create_cache_sn = array();
+		
+		if (empty($oldsn))
+		{
+			$result = $this->model('sn_in_cache')->insert(array(
+				'sns' => $newsn_string,
+				'num' => 1,
+			));
+			
+			$create_cache_sn = $newsn;
+		}
+		else
+		{
+			if (empty($newsn))
+			{
+				$data = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->find();
+				if ($data['num'] == 1)
+				{
+					$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->delete();
+				}
+				else
+				{
+					$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->update(array(
+						'num-=' => 1
+					));
+				}
+			}
+			else
+			{
+				$data = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->find();
+				if (empty($data))
+				{
+					//旧的sn居然还没加入到缓存
+					$result = $this->model('sn_in_cache')->insert(array(
+						'sns' => $oldsn_string,
+						'num' => 1,
+					));
+					$create_cache_sn = $oldsn;
+				}
+				else
+				{
+					if ($data['num'] == 1)
+					{
+						$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->delete();
+					}
+					else
+					{
+						$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->update(array(
+							'num-=' => 1
+						));
+					}
+					
+					$data = $this->model('sn_in_cache')->where('sns=?',array($newsn_string))->find();
+					if (empty($data))
+					{
+						$result = $this->model('sn_in_cache')->insert(array(
+							'sns' => $newsn_string,
+							'num' => 1,
+						));
+						$create_cache_sn = $newsn;
+					}
+					else
+					{
+						$result = $this->model('sn_in_cache')->where('sns=?',array($newsn_string))->update(array(
+							'num+=' => 1
+						));
+					}
+				}
+			}
+		}
+		
+		
+		if ($result)
+		{
+			$response = new json(json::OK,'ok');
+			$response->getHeader()->sendAll();
+			echo $response->getBody();
+		}
+		
+		fastcgi_finish_request();
+		
+		if (!empty($create_cache_sn))
+		{
+			$create_cache_sn = implode(',', $create_cache_sn);
+			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 1 -sn '.$create_cache_sn;
+			exec($string);
+			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 2 -sn '.$create_cache_sn;
+			exec($string);
+			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 3 -sn '.$create_cache_sn;
+			exec($string);
+			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 4 -sn '.$create_cache_sn;
+			exec($string);
+			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 5 -sn '.$create_cache_sn;
+			exec($string);
+			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 6 -sn '.$create_cache_sn;
+			exec($string);
+		}
+	}
+	
 	function overview()
 	{
 		$sn = $this->post('sn',array(),'explode:",","?"','a');
 		if (empty($sn))
 		{
 			return new json(json::FAILED,'sn不能为空');
+		}
+
+		if (!empty($this->_timemode))
+		{
+			$cache_key = 'api_overview_'.$this->_timemode.'_'.implode(',', $sn);
+			if (request::php_sapi_name()=='web')
+			{
+				$response = cache::get($cache_key);
+				if (!empty($response))
+				{
+					return new json(json::OK,NULL,$response);
+				}
+			}
 		}
 		
 		$algorithm = new algorithm($this->_startTime,$this->_endTime,$this->_duration_second);
@@ -80,15 +207,37 @@ class api extends apiControl
 			'detail' => $detail,
 		);
 		
+		if (!empty($this->_timemode))
+		{
+			cache::set($cache_key, $data);
+		}
+		
 		return new json(json::OK,'ok',$data);
 	}
 	
+	/**
+	 * 移动端CDS详情接口
+	 * @return \framework\core\response\json
+	 */
 	function detail()
 	{
 		$sn = $this->post('sn',array(),'explode:",","?"','a');
 		if (empty($sn))
 		{
 			return new json(json::FAILED,'sn不能为空');
+		}
+		
+		if (!empty($this->_timemode))
+		{
+			$cache_key = 'api_detail_'.$this->_timemode.'_'.implode(',', $sn);
+			if (request::php_sapi_name()=='web')
+			{
+				$response = cache::get($cache_key);
+				if (!empty($response))
+				{
+					return new json(json::OK,NULL,$response);
+				}
+			}
 		}
 		
 		$algorithm = new algorithm($this->_startTime,$this->_endTime,$this->_duration_second);
@@ -281,6 +430,11 @@ class api extends apiControl
 			'class_resource' => $class_resource,//分类型资源引入  分类型服务流量
 			'cp_resource' => $cp_resource,//分cp资源引入详情
 		);
+		
+		if (!empty($this->_timemode))
+		{
+			cache::set($cache_key, $data);
+		}
 		
 		return new json(json::OK,'ok',$data);
 	}
