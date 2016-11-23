@@ -68,7 +68,7 @@ class request extends base
 		{
 			$data = $_POST[$name];
 				
-			if (is_string($filter))
+			if (is_string($filter) && !empty($filter))
 			{
 				$filters = explode('|', $filter);
 				foreach ($filters as $filter_t)
@@ -86,7 +86,7 @@ class request extends base
 						}
 						else
 						{
-							list($func,$param) = explode(':', $filter);
+							list($func,$param) = explode(':', $filter_t);
 							if (is_callable($func))
 							{
 								$pattern = '$["\'].["\']$';
@@ -135,7 +135,7 @@ class request extends base
 		{
 			$data = $_GET[$name];
 		
-			if (is_string($filter))
+			if (is_string($filter) && !empty($filter))
 			{
 				$filters = explode('|', $filter);
 				foreach ($filters as $filter_t)
@@ -154,7 +154,7 @@ class request extends base
 						}
 						else
 						{
-							list($func,$param) = explode(':', $filter);
+							list($func,$param) = explode(':', $filter_t);
 							if (is_callable($func))
 							{
 								$pattern = '$["\'].["\']$';

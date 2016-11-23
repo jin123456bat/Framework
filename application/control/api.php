@@ -32,7 +32,7 @@ class api extends apiControl
 	{
 		$oldsn = $this->post('oldsn',array(),'explode:",","?"','a');
 		$newsn = $this->post('newsn',array(),'explode:",","?"','a');
-		
+	
 		if (empty($oldsn) && empty($newsn))
 		{
 			return new json(json::FAILED,'sn不能都为空');
@@ -43,18 +43,27 @@ class api extends apiControl
 		
 		$create_cache_sn = array();
 		
-		if (empty($oldsn))
+		if (empty($oldsn_string))
 		{
-			$result = $this->model('sn_in_cache')->insert(array(
-				'sns' => $newsn_string,
-				'num' => 1,
-			));
-			
-			$create_cache_sn = $newsn;
+			$data = $this->model('sn_in_cache')->where('sns=?',array($newsn_string))->find();
+			if (empty($data))
+			{
+				$result = $this->model('sn_in_cache')->insert(array(
+					'sns' => $newsn_string,
+					'num' => 1,
+				));
+				$create_cache_sn = $newsn;
+			}
+			else
+			{
+				$result = $this->model('sn_in_cache')->where('sns=?',array($newsn_string))->limit(1)->update(array(
+					'num+=' => 1
+				));
+			}
 		}
 		else
 		{
-			if (empty($newsn))
+			if (empty($newsn_string))
 			{
 				$data = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->find();
 				if ($data['num'] == 1)
@@ -63,7 +72,7 @@ class api extends apiControl
 				}
 				else
 				{
-					$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->update(array(
+					$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->limit(1)->update(array(
 						'num-=' => 1
 					));
 				}
@@ -88,7 +97,7 @@ class api extends apiControl
 					}
 					else
 					{
-						$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->update(array(
+						$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->limit(1)->update(array(
 							'num-=' => 1
 						));
 					}
@@ -104,7 +113,7 @@ class api extends apiControl
 					}
 					else
 					{
-						$result = $this->model('sn_in_cache')->where('sns=?',array($newsn_string))->update(array(
+						$result = $this->model('sn_in_cache')->where('sns=?',array($newsn_string))->limit(1)->update(array(
 							'num+=' => 1
 						));
 					}
@@ -124,6 +133,22 @@ class api extends apiControl
 		
 		if (!empty($create_cache_sn))
 		{
+			foreach ($create_cache_sn as $sn)
+			{
+				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 1 -sn '.$sn;
+				exec($string);
+				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 2 -sn '.$sn;
+				exec($string);
+				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 3 -sn '.$sn;
+				exec($string);
+				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 4 -sn '.$sn;
+				exec($string);
+				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 5 -sn '.$sn;
+				exec($string);
+				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 6 -sn '.$sn;
+				exec($string);
+			}
+			
 			$create_cache_sn = implode(',', $create_cache_sn);
 			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 1 -sn '.$create_cache_sn;
 			exec($string);

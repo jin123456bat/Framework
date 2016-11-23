@@ -81,6 +81,29 @@ class task extends bgControl
 				'name' => 'content_http_minutely_1',
 				'response' => exec($string),
 			));
+			
+			//生成api的缓存数据
+			$data = $this->model('sns_in_cache')->select();
+			foreach ($data as $sns)
+			{
+				$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 1 -sn '.$sns['sns'];
+				$this->model('task_detail')->insert(array(
+					'time' => date('Y-m-d H:i:s'),
+					'name' => 'api_overview_minutely_1_'.$sns['sns'],
+					'response' => exec($string),
+				));
+				
+				$sn = explode(',', $sns);
+				foreach ($sn as $s)
+				{
+					$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 1 -sn '.$s;
+					$this->model('task_detail')->insert(array(
+						'time' => date('Y-m-d H:i:s'),
+						'name' => 'api_detail_minutely_1_'.$s,
+						'response' => exec($string),
+					));
+				}
+			}
 			$minute5->stop();
 		}
 		
