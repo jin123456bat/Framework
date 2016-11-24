@@ -237,7 +237,7 @@ class api extends apiControl
 
 		if (!empty($this->_timemode))
 		{
-			$cache_key = 'api_overview_'.$this->_timemode.'_'.implode(',', $sn);
+			$cache_key = 'api_overview_'.$this->_duration.'_'.$this->_timemode.'_'.implode(',', $sn);
 			if (request::php_sapi_name()=='web')
 			{
 				$response = cache::get($cache_key);
@@ -319,7 +319,7 @@ class api extends apiControl
 		
 		if (!empty($this->_timemode))
 		{
-			$cache_key = 'api_detail_'.$this->_timemode.'_'.implode(',', $sn);
+			$cache_key = 'api_detail_'.$this->_duration.'_'.$this->_timemode.'_'.implode(',', $sn);
 			if (request::php_sapi_name()=='web')
 			{
 				$response = cache::get($cache_key);

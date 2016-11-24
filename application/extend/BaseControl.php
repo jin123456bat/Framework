@@ -121,8 +121,7 @@ abstract class BaseControl extends control
 		{
 			$return = array();
 			$return1 = array();
-			$sql = 'SELECT sn FROM (SELECT DISTINCT (sn) FROM  `operation_stat`) AS t WHERE sn REGEXP  "C[A_Z]S"';
-			$sns = $this->model('operation_stat')->query($sql);
+			$sns = $this->model('operation_stat')->where('sn like ?',array('C_S%'))->select('distinct(sn)');
 			foreach ($sns as $s)
 			{
 				$return[] = $s['sn'];
