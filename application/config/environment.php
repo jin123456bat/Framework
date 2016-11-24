@@ -2,6 +2,7 @@
 return array(
 	'display_errors' => 'On',
 	'error_reporting' => E_ALL,
+	//'memory_limit' => '128M',
 	
 	'max_execution_time' => 0,
 	'session' => array(
@@ -15,5 +16,7 @@ return array(
 		//'cookie_secure' => 'On',//https
 		'hash_function'=> 'sha256'
 	),
-	
+	'date' => array(
+		'timezone' => 'Asia/Shanghai',
+	),
 );

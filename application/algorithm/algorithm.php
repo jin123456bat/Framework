@@ -298,10 +298,11 @@ class algorithm extends BaseComponent
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration)
 			))
+			->group('class,category')
 			->select(array(
-				'category',
 				'class',
-				'service_size',
+				'category',
+				'service_size' => 'sum(service_size)',
 			));
 			
 			foreach ($top as $r)
@@ -364,7 +365,7 @@ class algorithm extends BaseComponent
 	 */
 	public function traffic_stat($sn = array())
 	{
-		$key = md5($this->_starttime.$this->_endtime.$this->_duration.is_array($sn)?implode(',', $sn):$sn);
+		$key = md5($this->_starttime.$this->_endtime.$this->_duration.(is_array($sn)?implode(',', $sn):$sn));
 		
 		static $cacheContainer = array();
 		if (isset($cacheContainer[$key]) && !empty($cacheContainer[$key]))
@@ -399,10 +400,10 @@ class algorithm extends BaseComponent
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
 			))
-			->order('create_time','asc')
-			->group('create_time')
+			->order('time','asc')
+			->group('time')
 			->select(array(
-				'create_time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
+				'time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
 				'sum_service'=>'sum(service) * 1024',
 				'sum_cache' => 'sum(cache) * 1024',
 				'sum_monitor' => 'sum(monitor) * 1024',
@@ -410,9 +411,9 @@ class algorithm extends BaseComponent
 			
 			foreach ($traffic_stat as $r)
 			{
-				$temp_service[$r['create_time']] = $r['sum_service'];
-				$temp_cache[$r['create_time']] = $r['sum_cache'];
-				$temp_monitor[$r['create_time']] = $r['sum_monitor'];
+				$temp_service[$r['time']] = $r['sum_service'];
+				$temp_cache[$r['time']] = $r['sum_cache'];
+				$temp_monitor[$r['time']] = $r['sum_monitor'];
 			}
 			
 			$cdn_traffic_stat_model = $this->model('cdn_traffic_stat');
@@ -440,10 +441,10 @@ class algorithm extends BaseComponent
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration)
 			))
-			->order('make_time','asc')
-			->group('make_time')
+			->order('time','asc')
+			->group('time')
 			->select(array(
-				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
+				'time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
 				'sum_service' => 'sum(service)',
 				'sum_cache' => 'sum(cache)',
 				'sum_monitor' => 'sum(monitor)',
@@ -451,31 +452,31 @@ class algorithm extends BaseComponent
 			
 			foreach ($cdn_traffic_stat as $r)
 			{
-				if (isset($temp_service[$r['make_time']]))
+				if (isset($temp_service[$r['time']]))
 				{
-					$temp_service[$r['make_time']] += $r['sum_service'];
+					$temp_service[$r['time']] += $r['sum_service'];
 				}
 				else
 				{
-					$temp_service[$r['make_time']] = $r['sum_service']*1;
+					$temp_service[$r['time']] = $r['sum_service']*1;
 				}
 				
-				if (isset($temp_cache[$r['make_time']]))
+				if (isset($temp_cache[$r['time']]))
 				{
-					$temp_cache[$r['make_time']] += $r['sum_service'];
+					$temp_cache[$r['time']] += $r['sum_service'];
 				}
 				else
 				{
-					$temp_cache[$r['make_time']] = $r['sum_service']*1;
+					$temp_cache[$r['time']] = $r['sum_service']*1;
 				}
 				
-				if (isset($temp_monitor[$r['make_time']]))
+				if (isset($temp_monitor[$r['time']]))
 				{
-					$temp_monitor[$r['make_time']] += $r['sum_monitor'];
+					$temp_monitor[$r['time']] += $r['sum_monitor'];
 				}
 				else
 				{
-					$temp_monitor[$r['make_time']] = $r['sum_service']*1;
+					$temp_monitor[$r['time']] = $r['sum_service']*1;
 				}
 			}
 			
@@ -504,22 +505,22 @@ class algorithm extends BaseComponent
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
 			))
-			->order('make_time','asc')
-			->group('make_time')
+			->order('time','asc')
+			->group('time')
 			->select(array(
-				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
+				'time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
 				'sum_service'=>'sum(service)',
 				'sum_cache'=>'sum(cache)',
 			));
 			foreach ($xvirt as $r)
 			{
-				if (isset($temp_cache[$r['make_time']]) && $temp_cache[$r['make_time']] > $r['sum_cache'])
+				if (isset($temp_cache[$r['time']]) && $temp_cache[$r['time']] > $r['sum_cache'])
 				{
-					$temp_cache[$r['make_time']] -= $r['sum_cache'];
+					$temp_cache[$r['time']] -= $r['sum_cache'];
 				}
-				if (isset($temp_service[$r['make_time']]) && $temp_service[$r['make_time']] > $r['sum_service'])
+				if (isset($temp_service[$r['time']]) && $temp_service[$r['time']] > $r['sum_service'])
 				{
-					$temp_service[$r['make_time']] -= $r['sum_service'];
+					$temp_service[$r['time']] -= $r['sum_service'];
 				}
 			}
 			
@@ -550,7 +551,6 @@ class algorithm extends BaseComponent
 			'cache' => $cache_max_detail,
 			'monitor' => $monitor_max_detail
 		);
-		
 		return $cacheContainer[$key];
 	}
 	
@@ -585,31 +585,31 @@ class algorithm extends BaseComponent
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
 			))
-			->order('create_time','asc')
-			->group('create_time')
+			->order('time','asc')
+			->group('time')
 			->select(array(
-				'create_time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
+				'time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
 				'sum_service'=>'sum(service) * 1024',
 				'sum_cache' => 'sum(cache) * 1024',
 			));
 				
 			foreach ($traffic_stat as $stat)
 			{
-				if (isset($temp_service[$stat['create_time']]))
+				if (isset($temp_service[$stat['time']]))
 				{
-					$temp_service[$stat['create_time']] += $stat['sum_service'];
+					$temp_service[$stat['time']] += $stat['sum_service'];
 				}
 				else
 				{
-					$temp_service[$stat['create_time']] = $stat['sum_service'];
+					$temp_service[$stat['time']] = $stat['sum_service'];
 				}
-				if (isset($temp_cache[$stat['create_time']]))
+				if (isset($temp_cache[$stat['time']]))
 				{
-					$temp_cache[$stat['create_time']] += $stat['sum_cache'];
+					$temp_cache[$stat['time']] += $stat['sum_cache'];
 				}
 				else
 				{
-					$temp_cache[$stat['create_time']] = $stat['sum_cache'];
+					$temp_cache[$stat['time']] = $stat['sum_cache'];
 				}
 			}
 				
@@ -637,30 +637,30 @@ class algorithm extends BaseComponent
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration)
 			))
-			->order('make_time','asc')
-			->group('make_time')
+			->order('time','asc')
+			->group('time')
 			->select(array(
-				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
+				'time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
 				'sum_service' => 'sum(service)',
 				'sum_cache' => 'sum(cache)',
 			));
 			foreach ($cdn_traffic_stat as $stat)
 			{
-				if (isset($temp_service[$stat['make_time']]))
+				if (isset($temp_service[$stat['time']]))
 				{
-					$temp_service[$stat['make_time']] += $stat['sum_service'];
+					$temp_service[$stat['time']] += $stat['sum_service'];
 				}
 				else
 				{
-					$temp_service[$stat['make_time']] = $stat['sum_service'];
+					$temp_service[$stat['time']] = $stat['sum_service'];
 				}
-				if (isset($temp_cache[$stat['make_time']]))
+				if (isset($temp_cache[$stat['time']]))
 				{
-					$temp_cache[$stat['make_time']] += $stat['sum_cache'];
+					$temp_cache[$stat['time']] += $stat['sum_cache'];
 				}
 				else
 				{
-					$temp_cache[$stat['make_time']] = $stat['sum_cache'];
+					$temp_cache[$stat['time']] = $stat['sum_cache'];
 				}
 			}
 			
@@ -688,22 +688,22 @@ class algorithm extends BaseComponent
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
 			))
-			->order('make_time','asc')
-			->group('make_time')
+			->order('time','asc')
+			->group('time')
 			->select(array(
-				'make_time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
+				'time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
 				'sum_service'=>'sum(service)',
 				'sum_cache'=>'sum(cache)',
 			));
 			foreach ($xvirt as $stat)
 			{
-				if (isset($temp_service[$stat['make_time']]))
+				if (isset($temp_service[$stat['time']]))
 				{
-					$temp_service[$stat['make_time']] -= $stat['sum_service'];
+					$temp_service[$stat['time']] -= $stat['sum_service'];
 				}
-				if (isset($temp_cache[$stat['make_time']]))
+				if (isset($temp_cache[$stat['time']]))
 				{
-					$temp_cache[$stat['make_time']] -= $stat['sum_cache'];
+					$temp_cache[$stat['time']] -= $stat['sum_cache'];
 				}
 			}
 
@@ -719,6 +719,14 @@ class algorithm extends BaseComponent
 	 */
 	function operation_stat($sn = array())
 	{
+		$key = md5($this->_starttime.$this->_endtime.$this->_duration.(is_array($sn)?implode(',', $sn):$sn));
+		
+		static $cacheContainer = array();
+		if (isset($cacheContainer[$key]) && !empty($cacheContainer[$key]))
+		{
+			return $cacheContainer[$key];
+		}
+		
 		$sn = $this->combineSns($sn);
 		
 		$operation_stat = array();
@@ -754,6 +762,7 @@ class algorithm extends BaseComponent
 			$operation_stat['service'][$t_time] = $result['sum_service']*1;
 			$operation_stat['cache'][$t_time] = $result['sum_cache']*1;
 		}
-		return $operation_stat;
+		$cacheContainer[$key] = $operation_stat;
+		return $cacheContainer[$key];
 	}
 }

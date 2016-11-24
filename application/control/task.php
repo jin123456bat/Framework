@@ -96,7 +96,7 @@ class task extends bgControl
 			$hour1->start();
 			
 			//生成api的缓存数据
-			$data = $this->model('sns_in_cache')->select();
+			$data = $this->model('sn_in_cache')->select();
 			foreach ($data as $sns)
 			{
 				//近24小时的数据
@@ -107,7 +107,7 @@ class task extends bgControl
 					'response' => exec($string),
 				));
 				
-				$sn = explode(',', $sns);
+				$sn = explode(',', $sns['sns']);
 				foreach ($sn as $s)
 				{
 					$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$s;
@@ -284,7 +284,7 @@ class task extends bgControl
 			
 			
 			//生成api的缓存数据
-			$data = $this->model('sns_in_cache')->select();
+			$data = $this->model('sn_in_cache')->select();
 			foreach ($data as $sns)
 			{
 				//昨天的数据
@@ -311,7 +311,7 @@ class task extends bgControl
 					'response' => exec($string),
 				));
 				
-				$sn = explode(',', $sns);
+				$sn = explode(',', $sns['sns']);
 				foreach ($sn as $s)
 				{
 					$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$s;
@@ -393,7 +393,7 @@ class task extends bgControl
 			));
 			
 			//生成api的缓存数据
-			$data = $this->model('sns_in_cache')->select();
+			$data = $this->model('sn_in_cache')->select();
 			foreach ($data as $sns)
 			{
 				//上周的数据
@@ -404,7 +404,7 @@ class task extends bgControl
 					'response' => exec($string),
 				));
 			
-				$sn = explode(',', $sns);
+				$sn = explode(',', $sns['sns']);
 				foreach ($sn as $s)
 				{
 					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$s;
@@ -474,7 +474,7 @@ class task extends bgControl
 			));
 			
 			//生成api的缓存数据
-			$data = $this->model('sns_in_cache')->select();
+			$data = $this->model('sn_in_cache')->select();
 			foreach ($data as $sns)
 			{
 				//上个月的数据
@@ -485,7 +485,7 @@ class task extends bgControl
 					'response' => exec($string),
 				));
 					
-				$sn = explode(',', $sns);
+				$sn = explode(',', $sns['sns']);
 				foreach ($sn as $s)
 				{
 					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$s;

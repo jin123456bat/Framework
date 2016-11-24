@@ -478,6 +478,7 @@ class api extends apiControl
 			{
 				$cp_resource[$className][$categoryName]['cache'] = $stat['cache'];
 			}
+			
 			if (isset($cp_resource[$className][$categoryName]['service']))
 			{
 				$cp_resource[$className][$categoryName]['service'] += $stat['service'];
@@ -486,6 +487,7 @@ class api extends apiControl
 			{
 				$cp_resource[$className][$categoryName]['service'] = $stat['service'];
 			}
+			
 			if (isset($cp_resource[$className][$categoryName]['proxy_cache']))
 			{
 				$cp_resource[$className][$categoryName]['proxy_cache'] += $stat['proxy_cache'];
