@@ -129,39 +129,101 @@ class api extends apiControl
 			echo $response->getBody();
 		}
 		
-		fastcgi_finish_request();
-		
-		if (!empty($create_cache_sn))
+		if(fastcgi_finish_request())
 		{
-			foreach ($create_cache_sn as $sn)
+			//立即创建缓存
+			if (!empty($create_cache_sn))
 			{
-				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 1 -sn '.$sn;
-				exec($string);
-				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 2 -sn '.$sn;
-				exec($string);
-				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 3 -sn '.$sn;
-				exec($string);
-				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 4 -sn '.$sn;
-				exec($string);
-				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 5 -sn '.$sn;
-				exec($string);
-				$string = 'php '.ROOT.'/index.php -c api -a detail -duration minutely -timemode 6 -sn '.$sn;
-				exec($string);
+				//生成详情页的缓存
+				foreach ($create_cache_sn as $sn)
+				{
+					$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$sn;
+					$this->model('task_detail')->insert(array(
+						'time' => date('Y-m-d H:i:s'),
+						'name' => 'api_detail_hourly_1_'.$sn,
+						'response' => exec($string),
+					));
+					
+					$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$sn;
+					$this->model('task_detail')->insert(array(
+						'time' => date('Y-m-d H:i:s'),
+						'name' => 'api_detail_hourly_2_'.$sn,
+						'response' => exec($string),
+					));
+					
+					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 3 -sn '.$sn;
+					$this->model('task_detail')->insert(array(
+						'time' => date('Y-m-d H:i:s'),
+						'name' => 'api_detail_daily_3_'.$sn,
+						'response' => exec($string),
+					));
+					
+					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$sn;
+					$this->model('task_detail')->insert(array(
+						'time' => date('Y-m-d H:i:s'),
+						'name' => 'api_detail_daily_4_'.$sn,
+						'response' => exec($string),
+					));
+					
+					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$sn;
+					$this->model('task_detail')->insert(array(
+						'time' => date('Y-m-d H:i:s'),
+						'name' => 'api_detail_daily_5_'.$sn,
+						'response' => exec($string),
+					));
+					
+					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$sn;
+					$this->model('task_detail')->insert(array(
+						'time' => date('Y-m-d H:i:s'),
+						'name' => 'api_detail_daily_6_'.$sn,
+						'response' => exec($string),
+					));
+				}
+				
+				//生成概览页的缓存
+				$create_cache_sn = implode(',', $create_cache_sn);
+				$string = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 1 -sn '.$create_cache_sn;
+				$this->model('task_detail')->insert(array(
+					'time' => date('Y-m-d H:i:s'),
+					'name' => 'api_overview_hourly_1_'.$create_cache_sn,
+					'response' => exec($string),
+				));
+				
+				$string = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 2 -sn '.$create_cache_sn;
+				$this->model('task_detail')->insert(array(
+					'time' => date('Y-m-d H:i:s'),
+					'name' => 'api_overview_hourly_2_'.$create_cache_sn,
+					'response' => exec($string),
+				));
+				
+				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 3 -sn '.$create_cache_sn;
+				$this->model('task_detail')->insert(array(
+					'time' => date('Y-m-d H:i:s'),
+					'name' => 'api_overview_daily_3_'.$create_cache_sn,
+					'response' => exec($string),
+				));
+				
+				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 4 -sn '.$create_cache_sn;
+				$this->model('task_detail')->insert(array(
+					'time' => date('Y-m-d H:i:s'),
+					'name' => 'api_overview_daily_4_'.$create_cache_sn,
+					'response' => exec($string),
+				));
+				
+				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 5 -sn '.$create_cache_sn;
+				$this->model('task_detail')->insert(array(
+					'time' => date('Y-m-d H:i:s'),
+					'name' => 'api_overview_daily_5_'.$create_cache_sn,
+					'response' => exec($string),
+				));
+				
+				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$create_cache_sn;
+				$this->model('task_detail')->insert(array(
+					'time' => date('Y-m-d H:i:s'),
+					'name' => 'api_overview_daily_6_'.$create_cache_sn,
+					'response' => exec($string),
+				));
 			}
-			
-			$create_cache_sn = implode(',', $create_cache_sn);
-			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 1 -sn '.$create_cache_sn;
-			exec($string);
-			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 2 -sn '.$create_cache_sn;
-			exec($string);
-			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 3 -sn '.$create_cache_sn;
-			exec($string);
-			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 4 -sn '.$create_cache_sn;
-			exec($string);
-			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 5 -sn '.$create_cache_sn;
-			exec($string);
-			$string = 'php '.ROOT.'/index.php -c api -a overview -duration minutely -timemode 6 -sn '.$create_cache_sn;
-			exec($string);
 		}
 	}
 	
