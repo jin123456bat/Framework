@@ -364,6 +364,14 @@ class algorithm extends BaseComponent
 	 */
 	public function traffic_stat($sn = array())
 	{
+		$key = md5($this->_starttime.$this->_endtime.$this->_duration.is_array($sn)?implode(',', $sn):$sn);
+		
+		static $cacheContainer = array();
+		if (isset($cacheContainer[$key]) && !empty($cacheContainer[$key]))
+		{
+			return $cacheContainer[$key];
+		}
+		
 		$sn = $this->combineSns($sn);
 		
 		$cache_max_detail = array();
@@ -537,12 +545,13 @@ class algorithm extends BaseComponent
 				$monitor_max_detail[$t_time] = 0;
 			}
 		}
-		$data = array(
+		$cacheContainer[$key] = array(
 			'service' => $service_max_detail,
 			'cache' => $cache_max_detail,
 			'monitor' => $monitor_max_detail
 		);
-		return $data;
+		
+		return $cacheContainer[$key];
 	}
 	
 	/**

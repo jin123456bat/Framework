@@ -348,8 +348,6 @@ class api extends apiControl
 		
 		$cp_service = $algorithm->CPService($sn,5);
 		
-		$online = $algorithm->USEROnlineNum($sn);
-		
 		//resource
 		if (is_array($sn))
 		{
@@ -515,7 +513,7 @@ class api extends apiControl
 			'cds_service_cache' => $cds_velocity_gain,//流速增益
 			'cds_traffic_stat' => $traffic_stat,//流速详细
 			'cds_cp_traffic_stat' => $cp_service,//分cp服务流速
-			'online' => $online['detail'],//用户趋势图
+			'online' => $user['detail'],//用户趋势图
 			'resource' => $resource,//资源引入情况
 			'class_resource' => $class_resource,//分类型资源引入  分类型服务流量
 			'cp_resource' => $cp_resource,//分cp资源引入详情
