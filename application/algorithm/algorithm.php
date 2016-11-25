@@ -714,6 +714,183 @@ class algorithm extends BaseComponent
 	}
 	
 	/**
+	 * 计算服务，缓存回源，代理缓存回源流速
+	 */
+	function traffic_stat_service_cache_proxy($sn = array())
+	{
+		$key = md5($this->_starttime.$this->_endtime.$this->_duration.(is_array($sn)?implode(',', $sn):$sn));
+		
+		static $cacheContainer = array();
+		if (isset($cacheContainer[$key]) && !empty($cacheContainer[$key]))
+		{
+			return $cacheContainer[$key];
+		}
+		
+		$sn = $this->combineSns($sn);
+		
+		$cache_max_detail = array();
+		$service_max_detail = array();
+		$proxy_max_detail = array();
+		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+		{
+			$temp_service = array();
+			$temp_cache = array();
+			$temp_proxy = array();
+			
+			$traffic_stat_model = $this->model('traffic_stat');
+			if (!empty($sn))
+			{
+				if (is_array($sn))
+				{
+					$traffic_stat_model->In('sn',$sn);
+				}
+				else if (is_scalar($sn))
+				{
+					$traffic_stat_model->where('sn=?',array($sn));
+				}
+			}
+			$traffic_stat = $traffic_stat_model->where('create_time>=? and create_time<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
+			))
+			->order('time','asc')
+			->group('time')
+			->select(array(
+				'time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
+				'sum_service'=>'sum(service) * 1024',
+				'sum_cache' => 'sum(cache) * 1024',
+			));
+			
+			foreach ($traffic_stat as $r)
+			{
+				$temp_service[$r['time']] = $r['sum_service'];
+				$temp_cache[$r['time']] = $r['sum_cache'];
+			}
+			
+			$cdn_traffic_stat_model = $this->model('cdn_traffic_stat');
+			if (!empty($sn))
+			{
+				if (is_scalar($sn))
+				{
+					$cdn_traffic_stat_model->where('sn like ?',array('%'.substr($sn, 3)));
+				}
+				else if (is_array($sn))
+				{
+					$where = '';
+					$param = array();
+					foreach ($sn as $s)
+					{
+						$where .= 'sn like ? or ';
+						$param[] = '%'.substr($s, 3);
+					}
+					$where = substr($where,0, -4);
+					$cdn_traffic_stat_model->where($where,$param);
+				}
+			}
+			$cdn_traffic_stat = $cdn_traffic_stat_model
+			->where('make_time>=? and make_time<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration)
+			))
+			->order('time','asc')
+			->group('time')
+			->select(array(
+				'time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
+				'sum_service' => 'sum(service)',
+				'sum_cache' => 'sum(cache)',
+			));
+			
+			foreach ($cdn_traffic_stat as $r)
+			{
+				if (isset($temp_service[$r['time']]))
+				{
+					$temp_service[$r['time']] += $r['sum_service'];
+				}
+				else
+				{
+					$temp_service[$r['time']] = $r['sum_service']*1;
+				}
+				
+				if (isset($temp_proxy[$r['time']]))
+				{
+					$temp_proxy[$r['time']] += $r['sum_service'];
+				}
+				else
+				{
+					$temp_proxy[$r['time']] = $r['sum_service']*1;
+				}
+			}
+			
+			$xvirt_traffic_stat_model = $this->model('xvirt_traffic_stat');
+			if (!empty($sn))
+			{
+				if(is_scalar($sn))
+				{
+					$xvirt_traffic_stat_model->where('sn like ?',array('%'.substr($sn, 3)));
+				}
+				else
+				{
+					$where = '';
+					$param = array();
+					foreach ($sn as $s)
+					{
+						$where .= 'sn like ? or ';
+						$param[] = '%'.substr($s, 3);
+					}
+					$where = substr($where,0, -4);
+					$xvirt_traffic_stat_model->where($where,$param);
+				}
+			}
+			//traffic_stat + cdn_traffic_stat - xvirt_traffic_stat
+			$xvirt = $xvirt_traffic_stat_model->where('make_time>=? and make_time<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
+			))
+			->order('time','asc')
+			->group('time')
+			->select(array(
+				'time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
+				'sum_service'=>'sum(service)',
+			));
+			foreach ($xvirt as $r)
+			{
+				if (isset($temp_service[$r['time']]) && $temp_service[$r['time']] > $r['sum_service'])
+				{
+					$temp_service[$r['time']] -= $r['sum_service'];
+				}
+			}
+			
+			$max = 0;
+			$max_time = '';
+			foreach ($temp_service as $time=>$service)
+			{
+				if ($service>=$max)
+				{
+					$max = $service * 1;
+					$max_time = $time;
+				}
+			}
+			$service_max_detail[$t_time] = $max;
+			if (!empty($max_time))
+			{
+				$cache_max_detail[$t_time] = $temp_cache[$max_time];
+				$proxy_max_detail[$t_time] = $temp_proxy[$max_time];
+			}
+			else
+			{
+				$cache_max_detail[$t_time] = 0;
+				$proxy_max_detail[$t_time] = 0;
+			}
+		}
+		$cacheContainer[$key] = array(
+			'service' => $service_max_detail,
+			'cache' => $cache_max_detail,
+			'proxy' => $proxy_max_detail,
+		);
+		return $cacheContainer[$key];
+	}
+	
+	/**
 	 * 获取流量
 	 * @return number
 	 */

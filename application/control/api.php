@@ -255,6 +255,7 @@ class api extends apiControl
 		$serviceSum = $algorithm->ServiceSum($sn);
 		
 		$ratio = new ratio($this->_timemode);
+		$ratio->setDuration($this->_duration_second);
 		$cds_ratio = $ratio->cds($sn);
 		$online_ratio = $ratio->user($sn);
 		$serviceMax_ratio = $ratio->service_max($sn);
@@ -325,7 +326,7 @@ class api extends apiControl
 				$response = cache::get($cache_key);
 				if (!empty($response))
 				{
-					//return new json(json::OK,NULL,$response);
+					return new json(json::OK,NULL,$response);
 				}
 			}
 		}
@@ -346,6 +347,9 @@ class api extends apiControl
 		{
 			$cds_velocity_gain[$time] = $stat - $traffic_stat['cache'][$time];
 		}
+		
+		//服务流速，缓存回源，代理缓存回源
+		$traffic_stat_cache_proxy = $algorithm->traffic_stat_service_cache_proxy($sn);
 		
 		$cp_service = $algorithm->CPService($sn,5);
 		
@@ -513,7 +517,7 @@ class api extends apiControl
 				)
 			),
 			'cds_service_cache' => $cds_velocity_gain,//流速增益
-			'cds_traffic_stat' => $traffic_stat,//流速详细
+			'cds_traffic_stat' => $traffic_stat_cache_proxy,//流速详细
 			'cds_cp_traffic_stat' => $cp_service,//分cp服务流速
 			'online' => $user['detail'],//用户趋势图
 			'resource' => $resource,//资源引入情况
