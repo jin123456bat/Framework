@@ -142,7 +142,7 @@ class node extends BaseControl
 		
 		$cache_key = 'node_cds';
 		cache::set($cache_key, $result);
-		return json_encode($result,true);
+		return $result;
 	}
 	
 	/**
@@ -152,13 +152,11 @@ class node extends BaseControl
 	{
 		//获取全部数据
 		$cache_key = 'node_cds';
-		$cds_list_json = cache::get($cache_key);
-		if (empty($cds_list_json))
+		$cds_list = cache::get($cache_key);
+		if (empty($cds_list))
 		{
-			$cds_list_json = $this->cds_cache();
+			$cds_list = $this->cds_cache();
 		}
-		
-		$cds_list = json_decode($cds_list_json,true);
 		
 		//根据group过滤
 		$group = request::param('group',NULL,'int','i');
@@ -201,8 +199,8 @@ class node extends BaseControl
 					$cds_temp[] = $cds;
 				}
 			}
+			$cds_list = $cds_temp;
 		}
-		$cds_list = $cds_temp;
 		
 		//根据sn过滤
 		$sns = $this->combineSns();
@@ -608,7 +606,7 @@ class node extends BaseControl
 		return array(
 			array(
 				'deny',
-				'express' => \application\entity\user::getLoginUserId()===NULL,
+				'express' => request::php_sapi_name()=='web'?\application\entity\user::getLoginUserId()===NULL:false,
 				'actions' => '*',
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆'))
 			)

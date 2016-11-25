@@ -325,13 +325,14 @@ class api extends apiControl
 				$response = cache::get($cache_key);
 				if (!empty($response))
 				{
-					return new json(json::OK,NULL,$response);
+					//return new json(json::OK,NULL,$response);
 				}
 			}
 		}
 		
 		$algorithm = new algorithm($this->_startTime,$this->_endTime,$this->_duration_second);
 		$ratio = new ratio($this->_timemode);
+		$ratio->setDuration($this->_duration_second);
 		
 		$user = $algorithm->USEROnlineNum($sn);
 		$user_ratio = $ratio->user($sn);
@@ -498,18 +499,17 @@ class api extends apiControl
 			}
 		}
 		
-		
 		$data = array(
 			'main' => array(
 				'user' => array(
 					'max' => $user['max'],
-					'link' => $user_ratio['link']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['link'],$user_ratio['link']),2,'.',''),
-					'same' => $user_ratio['same']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['same'],$user_ratio['same']),2,'.',''),
+					'link' => $user_ratio['link']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['link'],$user_ratio['link']),4,'.',''),
+					'same' => $user_ratio['same']===NULL?NULL:1*number_format(division($user['max'] - $user_ratio['same'],$user_ratio['same']),4,'.',''),
 				),
 				'service' => array(
 					'max' => $service['max'],
-					'link' => $service_ratio['link']===NULL?NULL:1*number_format(division($service['max'] - $service_ratio['link'],$service_ratio['link']),2,'.',''),
-					'same' => $service_ratio['same']===NULL?NULL:1*number_format(division($service['max'] - $service_ratio['same'],$service_ratio['same']),2,'.',''),
+					'link' => $service_ratio['link']===NULL?NULL:1*number_format(division($service['max'] - $service_ratio['link'],$service_ratio['link']),4,'.',''),
+					'same' => $service_ratio['same']===NULL?NULL:1*number_format(division($service['max'] - $service_ratio['same'],$service_ratio['same']),4,'.',''),
 				)
 			),
 			'cds_service_cache' => $cds_velocity_gain,//流速增益

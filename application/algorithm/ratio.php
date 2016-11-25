@@ -62,6 +62,17 @@ class ratio extends base
 				);
 				break;
 			case 3:
+				//近7天的同比 跟上个月的同样的7天
+				$this->_same = array(
+					'starttime' => date('Y-m-d 00:00:00',strtotime('-1 month -7day')),
+					'endtime' => date('Y-m-d 00:00:00',strtotime('-1 month'))
+				);
+				$this->_link = array(
+					'starttime' => date('Y-m-d 00:00:00',strtotime('-14 day')),
+					'endtime' => date('Y-m-d 00:00:00',strtotime('-7 day')),
+				);
+				break;
+			case 4:
 				//上周的同比  是指跟上个月的同一周做对比
 				$this->_same = array(
 					'starttime' => date('Y-m-d 00:00:00',strtotime('last week last month')),
@@ -70,17 +81,6 @@ class ratio extends base
 				$this->_link = array(
 					'starttime' => date('Y-m-d 00:00:00',strtotime('last week last week')),
 					'endtime' => date('Y-m-d 00:00:00',strtotime('last week')),
-				);
-				break;
-				//近7天的同比 跟上个月的同样的7天
-			case 4:
-				$this->_same = array(
-					'starttime' => date('Y-m-d 00:00:00',strtotime('-1 month -7day')),
-					'endtime' => date('Y-m-d 00:00:00',strtotime('-1 month'))
-				);
-				$this->_link = array(
-					'starttime' => date('Y-m-d 00:00:00',strtotime('-14 day')),
-					'endtime' => date('Y-m-d 00:00:00',strtotime('-7 day')),
 				);
 				break;
 			case 5:
