@@ -7,6 +7,7 @@ use framework\core\request;
 use framework\core\model;
 use application\entity\user;
 use application\algorithm\algorithm;
+use application\extend\cache;
 
 /**
  * 节点管理相关接口
@@ -139,7 +140,9 @@ class node extends BaseControl
 			$r['sub_vpe'] = $sub_vpe;
 		}
 		
-		return new json(json::OK,'ok',$result);
+		$cache_key = 'node_cds';
+		cache::set($cache_key, $result);
+		return json_encode($result,true);
 	}
 	
 	/**
@@ -147,19 +150,17 @@ class node extends BaseControl
 	 */
 	function cds()
 	{
-		/* if (!empty($this->_timemode))
+		//获取全部数据
+		$cache_key = 'node_cds';
+		$cds_list_json = cache::get($cache_key);
+		if (empty($cds_list_json))
 		{
-			$cache_key = 'main_overview_'.$this->_timemode;
-			if (request::php_sapi_name()=='web')
-			{
-				$response = cache::get($cache_key);
-				if (!empty($response))
-				{
-					return new json(json::OK,NULL,$response);
-				}
-			}
-		} */
+			$cds_list_json = $this->cds_cache();
+		}
 		
+		$cds_list = json_decode($cds_list_json,true);
+		
+		//根据group过滤
 		$group = request::param('group',NULL,'int','i');
 		$group_sn = array();
 		if (!empty($group))
@@ -171,183 +172,79 @@ class node extends BaseControl
 				{
 					$group_sn[] = $sn['sn'];
 				}
+				
+				$cds_temp = array();
+				foreach ($cds_list as $cds)
+				{
+					if (in_array($cds['sn'], $group_sn,true))
+					{
+						$cds_temp[] = $cds;
+					}
+				}
+				$cds_list = $cds_temp;
 			}
 		}
 		
-		$start = request::param('start',0,'intval');
-		$length = request::param('length',10,'intval');
+		//搜索
+		$search = request::param('search','','trim');
+		$cds_temp = array();
+		if (!empty($search))
+		{
+			foreach ($cds_list as $cds)
+			{
+				if (strpos($cds['sn'], $search) !== false)
+				{
+					$cds_temp[] = $cds;
+				}
+				else if (strpos($cds['company'], $search) !== false)
+				{
+					$cds_temp[] = $cds;
+				}
+			}
+		}
+		$cds_list = $cds_temp;
 		
-		$order = request::param('order','feedback.online');
-		$by = request::param('by','desc');
+		//根据sn过滤
+		$sns = $this->combineSns();
+		$cds_temp = array();
+		foreach ($cds_list as $cds)
+		{
+			if (in_array($cds['sn'], $sns,true))
+			{
+				$cds_temp[] = $cds;
+			}
+		}
+		$cds_list = $cds_temp;
 		
+		//排序
+		$order = request::param('order','online','strtolower|trim');
+		$by = request::param('by','desc','strtolower|trim');
 		if (!in_array($by, array('asc','desc')))
 		{
 			return new json(json::FAILED,'by参数只允许asc或desc,默认为asc');
 		}
-		
-		$sns = $this->combineSns();
-		$this->model('feedback')->in('feedback.sn',$sns);
-		
-		$feedbackModel = $this->model('feedback');
-		if (!empty($group))
-		{
-			if (!empty($group_sn))
+		usort($cds_list, function($a,$b) use($order,$by){
+			if ($by == 'asc')
 			{
-				$feedbackModel->in('feedback.sn',$group_sn);
+				return ($a[$order] < $b[$order])?-1:1;
 			}
 			else
 			{
-				return new json(json::OK,'ok',array(
-					'total' => 0,
-					'data' => array(),
-					'start' => $start,
-					'length' => $length,
-				));
+				return ($a[$order] < $b[$order])?1:-1;
 			}
-		}
+		});
 		
-		$search = request::param('search','','trim');
-		if (!empty($search))
-		{
-			$feedbackModel->where('user_info.company like ? or user_info.sn=?',array('%'.$search.'%',$search));
-		}
+		//计算数据总数
+		$total = count($cds_list);
 		
-		
-		$result = $feedbackModel
-		->Join('user_info','user_info.sn=feedback.sn')
-		->limit($start,$length)
-		->order($order,$by)
-		->select(array(
-			'user_info.sn',//设备SN号
-			
-			'user_info.company',//CDS设备名称
-			'if(UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(feedback.update_time)<60*30,"在线","离线") as status',//CDS在线状态
-			'feedback.online',//活跃用户数
-			'feedback.monitor',//镜像速率
-			'feedback.cpu_used',//CPU使用率
-			'feedback.mem_used',//内存使用率
-			'feedback.sys_disk_used',//系统盘使用率
-			'feedback.data_disk_used',//数据盘使用率
-			
-			'feedback.data_disk_status',//数据盘状态
-			'feedback.network',//网卡状态
-			'feedback.version',//系统版本号
-			'feedback.disk_detail',//硬盘详情
-			'feedback.network_detail',//网卡详情
-			
-			'feedback.rhelp',//登陆信息
-			'feedback.update_time',//更新时间
-		));
-		
-		
-		//查找24小时内的最大值
-		$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
-		$start_time = date('Y-m-d H:i:s',strtotime('-24 hour',$timestamp));
-		$end_time = date('Y-m-d H:i:s',$timestamp);
-		foreach ($result as &$r)
-		{
-			$r['disk_detail'] = json_decode($r['disk_detail'],true);
-			if (is_array($r['disk_detail']))
-			{
-				usort($r['disk_detail'], function($a,$b){
-					return (intval($a['name']) < intval($b['name']))?-1:1;
-				});
-			}
-			
-			$r['network_detail'] = json_decode($r['network_detail'],true);
-			if (is_array($r['network_detail']) && !empty($r['network_detail']))
-			{
-				foreach ($r['network_detail'] as $network)
-				{
-					if (!empty($network['bond_name']))
-					{
-						if ($network['link_status'] == 'no')
-						{
-							$r['network'] = '1';
-						}
-					}
-				}
-			}
-			if (!empty($r['rhelp']))
-			{
-				$r['rhelp'] = explode(':', $r['rhelp']);
-			}
-			
-			$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
-			$endtime = date('Y-m-d H:i:s',$timestamp);
-			$starttime = date('Y-m-d H:i:s',strtotime('-24 hour',strtotime($endtime)));
-			$duration = 5*60;
-			$algorithm = new algorithm($starttime,$endtime,$duration);
-			
-			$traffic_stat = $algorithm->traffic_stat_alone($r['sn']);
-			$r['max_service'] = empty($traffic_stat['service'])?0:round(max($traffic_stat['service'])/1024);
-			$r['max_cache'] = empty($traffic_stat['cache'])?0:round(max($traffic_stat['cache'])/1024);
-			
-			$r['service'] = round(array_pop($traffic_stat['service'])/1024);
-			$r['cache'] = round(array_pop($traffic_stat['cache'])/1024);
-			
-			//最大值
-			$max = $this->model('feedbackHistory')
-			->where('sn=?',array($r['sn']))
-			->where('update_time>=? and update_time<?',array($start_time,$end_time))
-			->find(array(
-				'max(online) as max_online',//最大活跃人数
-				'max(monitor) as max_monitor',//最大镜像流速
-				'max(cpu_used) as max_cpu_used',//最大cpu使用率
-				'max(mem_used) as max_mem_used',//最大内存使用率
-				'max(sys_disk_used) as max_sys_disk_used',//最大系统盘使用率
-				'max(data_disk_used) as max_data_disk_used',//最大数据盘使用率
-			));
-			if (!empty($max))
-			{
-				$r['max_online'] = $max['max_online']<$r['online']?$r['online']:$max['max_online'];
-				$r['max_monitor'] = $max['max_monitor']<$r['monitor']?$r['monitor']:$max['max_monitor'];
-				$r['max_cpu_used'] = $max['max_cpu_used']<$r['cpu_used']?$r['cpu_used']:$max['max_cpu_used'];
-				$r['max_mem_used'] = $max['max_mem_used']<$r['mem_used']?$r['mem_used']:$max['max_mem_used'];
-				$r['max_sys_disk_used'] = $max['max_sys_disk_used']<$r['sys_disk_used']?$r['sys_disk_used']:$max['max_sys_disk_used'];
-				$r['max_data_disk_used'] = $max['max_data_disk_used']<$r['data_disk_used']?$r['data_disk_used']:$max['max_data_disk_used'];
-			}
-			
-			//子节点信息
-			$sub_vpe = $this->model('cdn_node_stat')
-			->where('sn like ?',array('V_S'.substr($r['sn'], 3)))
-			->group('sn')
-			->select('sn,name');
-			foreach ($sub_vpe as &$vpe)
-			{
-				$t = $this->model('cdn_traffic_stat')
-				->where('sn=?',array($vpe['sn']))
-				->order('make_time','desc')
-				->find(array(
-					'cache',//缓存 kbps
-					'service',//服务 kbps
-					'cpu',//cpu使用
-					'mem',//mem使用
-				));
-				
-				$vpe['cache'] = $t['cache'] * 1;
-				$vpe['service'] = $t['service'] * 1;
-				$vpe['cpu'] = $t['cpu'] * 1;
-				$vpe['mem'] = $t['mem'] * 1;
-			}
-			$r['sub_vpe'] = $sub_vpe;
-		}
-		
-		$sns = $this->combineSns();
-		$this->model('feedback')->in('feedback.sn',$sns);
-		if (!empty($group_sn))
-		{
-			$feedbackModel->in('feedback.sn',$group_sn);
-		}
-		if (!empty($search))
-		{
-			$feedbackModel->where('user_info.company like ? or user_info.sn=?',array('%'.$search.'%',$search));
-		}
-		$total = $feedbackModel->Join('user_info','user_info.sn=feedback.sn')->count('*');
+		//截取排名
+		$start = request::param('start',0,'intval');
+		$length = request::param('length',10,'intval');
+		$cds_list = array_slice($cds_list, $start,$length);
 		
 		$data = array(
 			'total' => $total,
-			'data' => $result,
+			'data' => $cds_list,
 			'start' => $start,
 			'length' => $length,
 		);

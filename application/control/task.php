@@ -34,54 +34,16 @@ class task extends bgControl
 		if ($minute%5 === 0)
 		{
 			$minute5->start();
-			//首页 最近24小时的数据
-			$string = 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 1';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'main_overview_minutely_1',
-				'response' => exec($string),
-			));
-			
-			//内容交付概览  最近24小时的数据
-			$string = 'php '.ROOT.'/index.php -c content -a overview -duration minutely -timemode 1';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_overview_minutely_1',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频点播 最近24小时的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration minutely -timemode 1';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoDemand_minutely_1',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频直播 最近24小时的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration minutely -timemode 1';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoLive_minutely_1',
-				'response' => exec($string),
-			));
-			
-			//内容交付移动应用 最近24小时的数据
-			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration minutely -timemode 1';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_mobile_minutely_1',
-				'response' => exec($string),
-			));
-			
-			//内容交付常规资源 最近24小时的数据
-			$string = 'php '.ROOT.'/index.php -c content -a http -duration minutely -timemode 1';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_http_minutely_1',
-				'response' => exec($string),
-			));
-			
+			$commands = array(
+				'node_cds' => 'php '.ROOT.'/index.php -c node -a cds_cache',//CDS列表的数据
+				'main_overview_minutely_1' => 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 1',//首页 最近24小时的数据
+				'content_overview_minutely_1' => 'php '.ROOT.'/index.php -c content -a overview -duration minutely -timemode 1',//内容交付概览  最近24小时的数据
+				'content_videoDemand_minutely_1' => 'php '.ROOT.'/index.php -c content -a videoDemand -duration minutely -timemode 1',//内容交付视频点播 最近24小时的数据
+				'content_videoLive_minutely_1' => 'php '.ROOT.'/index.php -c content -a videoLive -duration minutely -timemode 1',//内容交付视频直播 最近24小时的数据
+				'content_mobile_minutely_1' => 'php '.ROOT.'/index.php -c content -a mobile -duration minutely -timemode 1',//内容交付移动应用 最近24小时的数据
+				'content_http_minutely_1' => 'php '.ROOT.'/index.php -c content -a http -duration minutely -timemode 1',//内容交付常规资源 最近24小时的数据
+			);
+			$this->runTask($commands);
 			$minute5->stop();
 		}
 		
@@ -96,16 +58,11 @@ class task extends bgControl
 			$hour1->start();
 			
 			//生成api的缓存数据
+			$commands = array();
 			$data = $this->model('sn_in_cache')->select();
 			foreach ($data as $sns)
 			{
-				//近24小时的数据
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 1 -sn '.$sns['sns'];
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_hourly_1_'.$sns['sns'],
-					'response' => exec($string),
-				));
+				$commands['api_overview_hourly_1_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 1 -sn '.$sns['sns'];
 				
 				$sn = explode(',', $sns['sns']);
 				$build_sn_list = array();
@@ -114,16 +71,11 @@ class task extends bgControl
 					if (!in_array($s, $build_sn_list,true))
 					{
 						$build_sn_list[] = $s;
-						$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$s;
-						$this->model('task_detail')->insert(array(
-							'time' => date('Y-m-d H:i:s'),
-							'name' => 'api_detail_hourly_1_'.$s,
-							'response' => exec($string),
-						));
+						$commands['api_detail_hourly_1_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$s;
 					}
 				}
 			}
-			
+			$this->runTask($commands);
 			$hour1->stop();
 		}
 		
@@ -140,182 +92,35 @@ class task extends bgControl
 		if ($hour === '00' && $minute == '05')
 		{
 			$day1->start();
-			//首页 昨天的数据
-			$string = 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 2';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'main_overview_minutely_2',
-				'response' => exec($string),
-			));
-			
-			//首页近7天的数据
-			$string = 'php '.ROOT.'/index.php -c main -a overview -duration hourly -timemode 3';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'main_overview_hourly_3',
-				'response' => exec($string),
-			));
-			
-			//首页近30天的数据
-			$string = 'php '.ROOT.'/index.php -c main -a overview -duration daily -timemode 5';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'main_overview_daily_5',
-				'response' => exec($string),
-			));
-			
-			
-			//内容交付概览  昨天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a overview -duration minutely -timemode 2';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_overview_minutely_2',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频点播 昨天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration minutely -timemode 2';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoDemand_minutely_2',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频直播 昨天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration minutely -timemode 2';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoLive_minutely_2',
-				'response' => exec($string),
-			));
-			
-			//内容交付移动应用 昨天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration minutely -timemode 2';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_mobile_minutely_2',
-				'response' => exec($string),
-			));
-			
-			//内容交付常规资源 昨天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a http -duration minutely -timemode 2';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_http_minutely_2',
-				'response' => exec($string),
-			));
-			
-			
-			//内容交付概览 7天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a overview -duration hourly -timemode 3';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_overview_hourly_3',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频点播 7天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration hourly -timemode 3';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoDemand_hourly_3',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频直播 7天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration hourly -timemode 3';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoLive_hourly_3',
-				'response' => exec($string),
-			));
-			
-			//内容交付移动应用 7天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration hourly -timemode 3';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_mobile_hourly_3',
-				'response' => exec($string),
-			));
-			
-			//内容交付常规资源 7天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a http -duration hourly -timemode 3';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_http_hourly_3',
-				'response' => exec($string),
-			));
-			
-			
-			//内容交付概览 30天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a overview -duration daily -timemode 5';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_overview_daily_5',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频点播 30天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration daily -timemode 5';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoDemand_daily_5',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频直播 30天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration daily -timemode 5';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoLive_daily_5',
-				'response' => exec($string),
-			));
-			
-			//内容交付移动应用 30天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration daily -timemode 5';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_mobile_daily_5',
-				'response' => exec($string),
-			));
-			
-			//内容交付常规资源 30天的数据
-			$string = 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 5';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_http_daily_5',
-				'response' => exec($string),
-			));
-			
+			$commands = array(
+				'main_overview_minutely_2' => 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 2',//首页 昨天的数据
+				'main_overview_hourly_3' => 'php '.ROOT.'/index.php -c main -a overview -duration hourly -timemode 3',//首页近7天的数据
+				'main_overview_daily_5' => 'php '.ROOT.'/index.php -c main -a overview -duration daily -timemode 5',//首页近30天的数据
+				'content_overview_minutely_2' => 'php '.ROOT.'/index.php -c content -a overview -duration minutely -timemode 2',//内容交付概览  昨天的数据
+				'content_videoDemand_minutely_2' => 'php '.ROOT.'/index.php -c content -a videoDemand -duration minutely -timemode 2',//内容交付视频点播 昨天的数据
+				'content_videoLive_minutely_2' => 'php '.ROOT.'/index.php -c content -a videoLive -duration minutely -timemode 2',//内容交付视频直播 昨天的数据
+				'content_mobile_minutely_2' => 'php '.ROOT.'/index.php -c content -a mobile -duration minutely -timemode 2',//内容交付移动应用 昨天的数据
+				'content_http_minutely_2' => 'php '.ROOT.'/index.php -c content -a http -duration minutely -timemode 2',//内容交付常规资源 昨天的数据
+				'content_overview_hourly_3' => 'php '.ROOT.'/index.php -c content -a overview -duration hourly -timemode 3',//内容交付概览 7天的数据
+				'content_videoDemand_hourly_3' => 'php '.ROOT.'/index.php -c content -a videoDemand -duration hourly -timemode 3',//内容交付视频点播 7天的数据
+				'content_videoLive_hourly_3' => 'php '.ROOT.'/index.php -c content -a videoLive -duration hourly -timemode 3',//内容交付视频直播 7天的数据
+				'content_mobile_hourly_3' => 'php '.ROOT.'/index.php -c content -a mobile -duration hourly -timemode 3',//内容交付移动应用 7天的数据
+				'content_http_hourly_3' => 'php '.ROOT.'/index.php -c content -a http -duration hourly -timemode 3',//内容交付常规资源 7天的数据
+				'content_overview_daily_5' => 'php '.ROOT.'/index.php -c content -a overview -duration daily -timemode 5',//内容交付概览 30天的数据
+				'content_videoDemand_daily_5' => 'php '.ROOT.'/index.php -c content -a videoDemand -duration daily -timemode 5',//内容交付视频点播 30天的数据
+				'content_videoLive_daily_5' => 'php '.ROOT.'/index.php -c content -a videoLive -duration daily -timemode 5',//内容交付视频直播 30天的数据
+				'content_mobile_daily_5' => 'php '.ROOT.'/index.php -c content -a mobile -duration daily -timemode 5',//内容交付移动应用 30天的数据
+				'content_http_daily_5' => 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 5',//内容交付常规资源 30天的数据
+			);
 			
 			//生成api的缓存数据
 			$data = $this->model('sn_in_cache')->select();
 			$build_sn_list = array();
 			foreach ($data as $sns)
 			{
-				//昨天的数据
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 2 -sn '.$sns['sns'];
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_hourly_2_'.$sns['sns'],
-					'response' => exec($string),
-				));
-				
-				//近7天
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 3 -sn '.$sns['sns'];
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_daily_3_'.$sns['sns'],
-					'response' => exec($string),
-				));
-				
-				//最近30天
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 5 -sn '.$sns['sns'];
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_daily_5_'.$sns['sns'],
-					'response' => exec($string),
-				));
+				$commands['api_overview_hourly_2_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 2 -sn '.$sns['sns'];
+				$commands['api_overview_daily_3_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 3 -sn '.$sns['sns'];
+				$commands['api_overview_daily_5_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 5 -sn '.$sns['sns'];
 				
 				$sn = explode(',', $sns['sns']);
 				foreach ($sn as $s)
@@ -323,29 +128,13 @@ class task extends bgControl
 					if (!in_array($s, $build_sn_list,true))
 					{
 						$build_sn_list[] = $s;
-						$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$s;
-						$this->model('task_detail')->insert(array(
-							'time' => date('Y-m-d H:i:s'),
-							'name' => 'api_detail_hourly_2_'.$s,
-							'response' => exec($string),
-						));
-						
-						$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 3 -sn '.$s;
-						$this->model('task_detail')->insert(array(
-							'time' => date('Y-m-d H:i:s'),
-							'name' => 'api_detail_daily_3_'.$s,
-							'response' => exec($string),
-						));
-							
-						$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$s;
-						$this->model('task_detail')->insert(array(
-							'time' => date('Y-m-d H:i:s'),
-							'name' => 'api_detail_daily_5_'.$s,
-							'response' => exec($string),
-						));
+						$commands['api_detail_hourly_2_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$s;
+						$commands['api_detail_daily_3_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 3 -sn '.$s;
+						$commands['api_detail_daily_5_'.$s]	= 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$s;
 					}
 				}
 			}
+			$this->runTask($commands);
 			$day1->stop();
 		}
 		
@@ -354,66 +143,21 @@ class task extends bgControl
 		if ($week == 1 && $hour === '00' && $minute === '05')
 		{
 			$week1->start();
-			//首页上周的数据
-			$string = 'php '.ROOT.'/index.php -c main -a overview -duration hourly -timemode 4';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'main_overview_hourly_4',
-				'response' => exec($string),
-			));
-			
-			//内容交付概览 上周的数据
-			$string = 'php '.ROOT.'/index.php -c content -a overview -duration hourly -timemode 4';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_overview_hourly_4',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频点播 上周的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration hourly -timemode 4';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoDemand_hourly_4',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频直播 上周的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration hourly -timemode 4';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoLive_hourly_4',
-				'response' => exec($string),
-			));
-			
-			//内容交付移动应用 上周的数据
-			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration hourly -timemode 4';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_mobile_hourly_4',
-				'response' => exec($string),
-			));
-			
-			//内容交付常规资源 上周的数据
-			$string = 'php '.ROOT.'/index.php -c content -a http -duration hourly -timemode 4';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_http_hourly_4',
-				'response' => exec($string),
-			));
+			$commands = array(
+				'main_overview_hourly_4' => 'php '.ROOT.'/index.php -c main -a overview -duration hourly -timemode 4',//首页上周的数据
+				'content_overview_hourly_4' => 'php '.ROOT.'/index.php -c content -a overview -duration hourly -timemode 4',//内容交付概览 上周的数据
+				'content_videoDemand_hourly_4' => 'php '.ROOT.'/index.php -c content -a videoDemand -duration hourly -timemode 4',//内容交付视频点播 上周的数据
+				'content_videoLive_hourly_4' => 'php '.ROOT.'/index.php -c content -a videoLive -duration hourly -timemode 4',//内容交付视频直播 上周的数据
+				'content_mobile_hourly_4' => 'php '.ROOT.'/index.php -c content -a mobile -duration hourly -timemode 4',//内容交付移动应用 上周的数据
+				'content_http_hourly_4' => 'php '.ROOT.'/index.php -c content -a http -duration hourly -timemode 4',//内容交付常规资源 上周的数据
+			);
 			
 			//生成api的缓存数据
 			$data = $this->model('sn_in_cache')->select();
 			foreach ($data as $sns)
 			{
-				//上周的数据
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 4 -sn '.$sns['sns'];
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_daily_4_'.$sns['sns'],
-					'response' => exec($string),
-				));
-			
+				$commands['api_overview_daily_4_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 4 -sn '.$sns['sns'];
+				
 				$sn = explode(',', $sns['sns']);
 				$build_sn_list = array();
 				foreach ($sn as $s)
@@ -421,16 +165,11 @@ class task extends bgControl
 					if (!in_array($s, $build_sn_list,true))
 					{
 						$build_sn_list[] = $s;
-						$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$s;
-						$this->model('task_detail')->insert(array(
-							'time' => date('Y-m-d H:i:s'),
-							'name' => 'api_detail_daily_4_'.$s,
-							'response' => exec($string),
-						));
+						$commands['api_detail_daily_4_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$s;
 					}
 				}
 			}
-			
+			$this->runTask($commands);
 			$week1->stop();
 		}
 		
@@ -439,67 +178,23 @@ class task extends bgControl
 		if ($day == '01' && $hour === '00' && $minute == '05')
 		{
 			$month1->start();
+			$commands = array(
+				'main_overview_daily_6' => 'php '.ROOT.'/index.php -c main -a overview -duration daily -timemode 6',//首页上月的数据
+				'content_overview_daily_6' => 'php '.ROOT.'/index.php -c content -a overview -duration daily -timemode 6',//内容交付概览 上月的数据
+				'content_videoDemand_daily_6' => 'php '.ROOT.'/index.php -c content -a videoDemand -duration daily -timemode 6',//内容交付视频点播 上月的数据
+				'content_videoLive_daily_6' => 'php '.ROOT.'/index.php -c content -a videoLive -duration daily -timemode 6',//内容交付视频直播 上月的数据
+				'content_mobile_daily_6' => 'php '.ROOT.'/index.php -c content -a mobile -duration daily -timemode 6',//内容交付移动应用 上月的数据
+				'content_http_daily_6' => 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 6',//内容交付常规资源 上月的数据
 			
-			//首页上月的数据
-			$string = 'php '.ROOT.'/index.php -c main -a overview -duration daily -timemode 6';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'main_overview_daily_6',
-				'response' => exec($string),
-			));
-			
-			//内容交付概览 上月的数据
-			$string = 'php '.ROOT.'/index.php -c content -a overview -duration daily -timemode 6';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_overview_daily_6',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频点播 上月的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoDemand -duration daily -timemode 6';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoDemand_daily_6',
-				'response' => exec($string),
-			));
-			
-			//内容交付视频直播 上月的数据
-			$string = 'php '.ROOT.'/index.php -c content -a videoLive -duration daily -timemode 6';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_videoLive_daily_6',
-				'response' => exec($string),
-			));
-			
-			//内容交付移动应用 上月的数据
-			$string = 'php '.ROOT.'/index.php -c content -a mobile -duration daily -timemode 6';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_mobile_daily_6',
-				'response' => exec($string),
-			));
-			
-			//内容交付常规资源 上月的数据
-			$string = 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 6';
-			$this->model('task_detail')->insert(array(
-				'time' => date('Y-m-d H:i:s'),
-				'name' => 'content_http_daily_6',
-				'response' => exec($string),
-			));
-			
+			);
+						
 			//生成api的缓存数据
 			$data = $this->model('sn_in_cache')->select();
 			foreach ($data as $sns)
 			{
 				//上个月的数据
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$sns['sns'];
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_daily_6_'.$sns['sns'],
-					'response' => exec($string),
-				));
-					
+				$commands['api_overview_daily_6_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$sns['sns'];
+				
 				$sn = explode(',', $sns['sns']);
 				$build_sn_list = array();
 				foreach ($sn as $s)
@@ -507,15 +202,11 @@ class task extends bgControl
 					if (!in_array($s, $build_sn_list,true))
 					{
 						$build_sn_list[] = $s;
-						$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$s;
-						$this->model('task_detail')->insert(array(
-							'time' => date('Y-m-d H:i:s'),
-							'name' => 'api_detail_daily_6_'.$s,
-							'response' => exec($string),
-						));
+						$commands['api_detail_daily_6_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$s;
 					}
 				}
 			}
+			$this->runTask($commands);
 			$month1->stop();
 		}
 		$debugger->stop();
@@ -568,6 +259,36 @@ class task extends bgControl
 			'task_1month_memory' => $month1->getMemory(),
 		);
 		$this->model('task_run_log')->insert($data);
+	}
+	
+	/**
+	 * 运行单条命令
+	 * @param unknown $command
+	 * @param unknown $name
+	 */
+	function runTask($command,$name = '')
+	{
+		if (is_string($command))
+		{
+			$createtime = date('Y-m-d H:i:s',time());
+			$debugger = new debugger();
+			$response = exec($command);
+			$debugger->stop();
+			$this->model('task_detail')->insert(array(
+				'createtime'=>$createtime,
+				'endtime' => date('Y-m-d H:i:s',time()),
+				'time' => $debugger->getTime(),
+				'name' => $name,
+				'response' => $response
+			));
+		}
+		else if (is_array($command))
+		{
+			foreach ($command as $name => $com)
+			{
+				$this->runTask($com,$name);
+			}
+		}
 	}
 	
 	/**
