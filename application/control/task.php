@@ -108,14 +108,19 @@ class task extends bgControl
 				));
 				
 				$sn = explode(',', $sns['sns']);
+				$build_sn_list = array();
 				foreach ($sn as $s)
 				{
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$s;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_hourly_1_'.$s,
-						'response' => exec($string),
-					));
+					if (!in_array($s, $build_sn_list,true))
+					{
+						$build_sn_list[] = $s;
+						$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$s;
+						$this->model('task_detail')->insert(array(
+							'time' => date('Y-m-d H:i:s'),
+							'name' => 'api_detail_hourly_1_'.$s,
+							'response' => exec($string),
+						));
+					}
 				}
 			}
 			
@@ -285,6 +290,7 @@ class task extends bgControl
 			
 			//生成api的缓存数据
 			$data = $this->model('sn_in_cache')->select();
+			$build_sn_list = array();
 			foreach ($data as $sns)
 			{
 				//昨天的数据
@@ -314,26 +320,30 @@ class task extends bgControl
 				$sn = explode(',', $sns['sns']);
 				foreach ($sn as $s)
 				{
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$s;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_hourly_2_'.$s,
-						'response' => exec($string),
-					));
-					
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 3 -sn '.$s;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_daily_3_'.$s,
-						'response' => exec($string),
-					));
+					if (!in_array($s, $build_sn_list,true))
+					{
+						$build_sn_list[] = $s;
+						$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$s;
+						$this->model('task_detail')->insert(array(
+							'time' => date('Y-m-d H:i:s'),
+							'name' => 'api_detail_hourly_2_'.$s,
+							'response' => exec($string),
+						));
 						
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$s;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_daily_5_'.$s,
-						'response' => exec($string),
-					));
+						$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 3 -sn '.$s;
+						$this->model('task_detail')->insert(array(
+							'time' => date('Y-m-d H:i:s'),
+							'name' => 'api_detail_daily_3_'.$s,
+							'response' => exec($string),
+						));
+							
+						$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$s;
+						$this->model('task_detail')->insert(array(
+							'time' => date('Y-m-d H:i:s'),
+							'name' => 'api_detail_daily_5_'.$s,
+							'response' => exec($string),
+						));
+					}
 				}
 			}
 			$day1->stop();
@@ -405,14 +415,19 @@ class task extends bgControl
 				));
 			
 				$sn = explode(',', $sns['sns']);
+				$build_sn_list = array();
 				foreach ($sn as $s)
 				{
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$s;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_daily_4_'.$s,
-						'response' => exec($string),
-					));
+					if (!in_array($s, $build_sn_list,true))
+					{
+						$build_sn_list[] = $s;
+						$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$s;
+						$this->model('task_detail')->insert(array(
+							'time' => date('Y-m-d H:i:s'),
+							'name' => 'api_detail_daily_4_'.$s,
+							'response' => exec($string),
+						));
+					}
 				}
 			}
 			
@@ -486,14 +501,19 @@ class task extends bgControl
 				));
 					
 				$sn = explode(',', $sns['sns']);
+				$build_sn_list = array();
 				foreach ($sn as $s)
 				{
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$s;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_daily_6_'.$s,
-						'response' => exec($string),
-					));
+					if (!in_array($s, $build_sn_list,true))
+					{
+						$build_sn_list[] = $s;
+						$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$s;
+						$this->model('task_detail')->insert(array(
+							'time' => date('Y-m-d H:i:s'),
+							'name' => 'api_detail_daily_6_'.$s,
+							'response' => exec($string),
+						));
+					}
 				}
 			}
 			$month1->stop();
