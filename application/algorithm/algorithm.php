@@ -514,10 +514,10 @@ class algorithm extends BaseComponent
 			));
 			foreach ($xvirt as $r)
 			{
-				if (isset($temp_cache[$r['time']]) && $temp_cache[$r['time']] > $r['sum_cache'])
+				/* if (isset($temp_cache[$r['time']]) && $temp_cache[$r['time']] > $r['sum_cache'])
 				{
 					$temp_cache[$r['time']] -= $r['sum_cache'];
-				}
+				} */
 				if (isset($temp_service[$r['time']]) && $temp_service[$r['time']] > $r['sum_service'])
 				{
 					$temp_service[$r['time']] -= $r['sum_service'];
@@ -701,10 +701,10 @@ class algorithm extends BaseComponent
 				{
 					$temp_service[$stat['time']] -= $stat['sum_service'];
 				}
-				if (isset($temp_cache[$stat['time']]))
+				/* if (isset($temp_cache[$stat['time']]))
 				{
 					$temp_cache[$stat['time']] -= $stat['sum_cache'];
-				}
+				} */
 			}
 
 			$service[$t_time] = empty($temp_service)?0:max($temp_service);
@@ -811,14 +811,7 @@ class algorithm extends BaseComponent
 					$temp_service[$r['time']] = $r['sum_service']*1;
 				}
 				
-				if (isset($temp_proxy[$r['time']]))
-				{
-					$temp_proxy[$r['time']] += $r['sum_service'];
-				}
-				else
-				{
-					$temp_proxy[$r['time']] = $r['sum_service']*1;
-				}
+				$temp_proxy[$r['time']] = $r['sum_cache']*1;
 			}
 			
 			$xvirt_traffic_stat_model = $this->model('xvirt_traffic_stat');
@@ -873,8 +866,8 @@ class algorithm extends BaseComponent
 			$service_max_detail[$t_time] = $max;
 			if (!empty($max_time))
 			{
-				$cache_max_detail[$t_time] = $temp_cache[$max_time];
-				$proxy_max_detail[$t_time] = $temp_proxy[$max_time];
+				$cache_max_detail[$t_time] = isset($temp_cache[$max_time])?$temp_cache[$max_time]:0;
+				$proxy_max_detail[$t_time] = isset($temp_proxy[$max_time])?$temp_proxy[$max_time]:0;
 			}
 			else
 			{
