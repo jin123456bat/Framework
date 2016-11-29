@@ -35,14 +35,14 @@ abstract class BaseControl extends control
 				$this->_endTime = date('Y-m-d 00:00:00');
 				break;
 			case '3':
+				//近7天
+				$this->_startTime = date('Y-m-d 00:00:00',strtotime('-7 day'));
+				$this->_endTime = date('Y-m-d 00:00:00');
+				break;
+			case '4':
 				//上周
 				$this->_startTime = date('Y-m-d 00:00:00', strtotime('last week'));
 				$this->_endTime = date('Y-m-d 00:00:00',strtotime('this week'));
-				break;
-				//近7天
-			case '4':
-				$this->_startTime = date('Y-m-d 00:00:00',strtotime('-7 day'));
-				$this->_endTime = date('Y-m-d 00:00:00');
 				break;
 			case '5':
 				//最近30天
