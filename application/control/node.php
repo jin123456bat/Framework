@@ -21,7 +21,10 @@ class node extends BaseControl
 	 */
 	function cds_cache()
 	{
+		//根据sn过滤
+		$sns = $this->combineSns();
 		$feedbackModel = $this->model('feedback');
+		$feedbackModel->in('user_info.sn',$sns);
 		$result = $feedbackModel
 		->Join('user_info','user_info.sn=feedback.sn')
 		->select(array(
@@ -201,18 +204,6 @@ class node extends BaseControl
 			}
 			$cds_list = $cds_temp;
 		}
-		
-		//根据sn过滤
-		$sns = $this->combineSns();
-		$cds_temp = array();
-		foreach ($cds_list as $cds)
-		{
-			if (in_array($cds['sn'], $sns,true))
-			{
-				$cds_temp[] = $cds;
-			}
-		}
-		$cds_list = $cds_temp;
 		
 		//排序
 		$order = request::param('order','online','strtolower|trim');

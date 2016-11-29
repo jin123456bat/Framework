@@ -60,12 +60,11 @@ class task extends bgControl
 			//生成api的缓存数据
 			$commands = array();
 			$data = $this->model('sn_in_cache')->select();
+			$build_sn_list = array();
 			foreach ($data as $sns)
 			{
 				$commands['api_overview_hourly_1_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 1 -sn '.$sns['sns'];
-				
 				$sn = explode(',', $sns['sns']);
-				$build_sn_list = array();
 				foreach ($sn as $s)
 				{
 					if (!in_array($s, $build_sn_list,true))
@@ -154,12 +153,12 @@ class task extends bgControl
 			
 			//生成api的缓存数据
 			$data = $this->model('sn_in_cache')->select();
+			$build_sn_list = array();
 			foreach ($data as $sns)
 			{
 				$commands['api_overview_daily_4_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 4 -sn '.$sns['sns'];
 				
 				$sn = explode(',', $sns['sns']);
-				$build_sn_list = array();
 				foreach ($sn as $s)
 				{
 					if (!in_array($s, $build_sn_list,true))
@@ -190,13 +189,12 @@ class task extends bgControl
 						
 			//生成api的缓存数据
 			$data = $this->model('sn_in_cache')->select();
+			$build_sn_list = array();
 			foreach ($data as $sns)
 			{
 				//上个月的数据
 				$commands['api_overview_daily_6_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$sns['sns'];
-				
 				$sn = explode(',', $sns['sns']);
-				$build_sn_list = array();
 				foreach ($sn as $s)
 				{
 					if (!in_array($s, $build_sn_list,true))
@@ -272,14 +270,15 @@ class task extends bgControl
 		{
 			$createtime = date('Y-m-d H:i:s',time());
 			$debugger = new debugger();
-			$response = exec($command);
+			$response = exec($command,$output);
+			$output = implode('', $output);
 			$debugger->stop();
 			$this->model('task_detail')->insert(array(
 				'createtime'=>$createtime,
 				'endtime' => date('Y-m-d H:i:s',time()),
 				'time' => $debugger->getTime(),
 				'name' => $name,
-				'response' => $response
+				'response' => $output
 			));
 		}
 		else if (is_array($command))

@@ -270,6 +270,10 @@ class application extends component
 				echo $response->getBody();
 				exit();
 			}
+			else 
+			{
+				var_dump($response);
+			}
 		}
 	}
 	

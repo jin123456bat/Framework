@@ -7,6 +7,7 @@ use framework\core\model;
 use application\algorithm\ratio;
 use framework\core\request;
 use application\extend\cache;
+use framework\core\debugger;
 
 class api extends apiControl
 {
@@ -45,36 +46,42 @@ class api extends apiControl
 		
 		if (empty($oldsn_string))
 		{
-			$data = $this->model('sn_in_cache')->where('sns=?',array($newsn_string))->find();
-			if (empty($data))
-			{
-				$result = $this->model('sn_in_cache')->insert(array(
-					'sns' => $newsn_string,
-					'num' => 1,
-				));
-				$create_cache_sn = $newsn;
-			}
-			else
-			{
-				$result = $this->model('sn_in_cache')->where('sns=?',array($newsn_string))->limit(1)->update(array(
-					'num+=' => 1
-				));
+			if (!empty($newsn_string))
+			{	
+				$data = $this->model('sn_in_cache')->where('sns=?',array($newsn_string))->find();
+				if (empty($data))
+				{
+					$result = $this->model('sn_in_cache')->insert(array(
+						'sns' => $newsn_string,
+						'num' => 1,
+					));
+					$create_cache_sn = $newsn;
+				}
+				else
+				{
+					$result = $this->model('sn_in_cache')->where('sns=?',array($newsn_string))->limit(1)->update(array(
+						'num+=' => 1
+					));
+				}
 			}
 		}
 		else
 		{
 			if (empty($newsn_string))
 			{
-				$data = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->find();
-				if ($data['num'] == 1)
+				if (!empty($oldsn_string))
 				{
-					$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->delete();
-				}
-				else
-				{
-					$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->limit(1)->update(array(
-						'num-=' => 1
-					));
+					$data = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->find();
+					if ($data['num'] == 1)
+					{
+						$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->delete();
+					}
+					else
+					{
+						$result = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->limit(1)->update(array(
+							'num-=' => 1
+						));
+					}
 				}
 			}
 			else
@@ -82,12 +89,25 @@ class api extends apiControl
 				$data = $this->model('sn_in_cache')->where('sns=?',array($oldsn_string))->find();
 				if (empty($data))
 				{
-					//旧的sn居然还没加入到缓存
-					$result = $this->model('sn_in_cache')->insert(array(
-						'sns' => $oldsn_string,
-						'num' => 1,
-					));
-					$create_cache_sn = $oldsn;
+					if (!empty($oldsn_string))
+					{
+						//旧的sn居然还没加入到缓存
+						$result = $this->model('sn_in_cache')->insert(array(
+							'sns' => $oldsn_string,
+							'num' => 1,
+						));
+						$create_cache_sn = $oldsn;
+					}
+					
+					if (!empty($newsn_string))
+					{
+						//把新的也加进去
+						$result = $this->model('sn_in_cache')->insert(array(
+							'sns' => $newsn_string,
+							'num' => 1,
+						));
+						$create_cache_sn = $newsn;
+					}
 				}
 				else
 				{
@@ -137,92 +157,56 @@ class api extends apiControl
 				//生成详情页的缓存
 				foreach ($create_cache_sn as $sn)
 				{
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$sn;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_hourly_1_'.$sn,
-						'response' => exec($string),
-					));
-					
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$sn;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_hourly_2_'.$sn,
-						'response' => exec($string),
-					));
-					
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 3 -sn '.$sn;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_daily_3_'.$sn,
-						'response' => exec($string),
-					));
-					
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$sn;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_daily_4_'.$sn,
-						'response' => exec($string),
-					));
-					
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$sn;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_daily_5_'.$sn,
-						'response' => exec($string),
-					));
-					
-					$string = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$sn;
-					$this->model('task_detail')->insert(array(
-						'time' => date('Y-m-d H:i:s'),
-						'name' => 'api_detail_daily_6_'.$sn,
-						'response' => exec($string),
-					));
+					$commands = array(
+						'api_detail_hourly_1_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$sn,
+						'api_detail_hourly_2_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$sn,
+						'api_detail_daily_3_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 3 -sn '.$sn,
+						'api_detail_daily_4_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$sn,
+						'api_detail_daily_5_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$sn,
+						'api_detail_daily_6_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$sn,
+					);
 				}
 				
 				//生成概览页的缓存
 				$create_cache_sn = implode(',', $create_cache_sn);
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 1 -sn '.$create_cache_sn;
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_hourly_1_'.$create_cache_sn,
-					'response' => exec($string),
-				));
-				
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 2 -sn '.$create_cache_sn;
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_hourly_2_'.$create_cache_sn,
-					'response' => exec($string),
-				));
-				
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 3 -sn '.$create_cache_sn;
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_daily_3_'.$create_cache_sn,
-					'response' => exec($string),
-				));
-				
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 4 -sn '.$create_cache_sn;
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_daily_4_'.$create_cache_sn,
-					'response' => exec($string),
-				));
-				
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 5 -sn '.$create_cache_sn;
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_daily_5_'.$create_cache_sn,
-					'response' => exec($string),
-				));
-				
-				$string = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$create_cache_sn;
-				$this->model('task_detail')->insert(array(
-					'time' => date('Y-m-d H:i:s'),
-					'name' => 'api_overview_daily_6_'.$create_cache_sn,
-					'response' => exec($string),
-				));
+				$commands['api_overview_hourly_1_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 1 -sn '.$create_cache_sn;
+				$commands['api_overview_hourly_2_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 2 -sn '.$create_cache_sn;
+				$commands['api_overview_daily_3_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 3 -sn '.$create_cache_sn;
+				$commands['api_overview_daily_4_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 4 -sn '.$create_cache_sn;
+				$commands['api_overview_daily_5_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 5 -sn '.$create_cache_sn;
+				$commands['api_overview_daily_6_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$create_cache_sn;
+				$this->runTask($commands);
+			}
+		}
+	}
+	
+	/**
+	 * 运行单条命令
+	 * @param unknown $command
+	 * @param unknown $name
+	 */
+	function runTask($command,$name = '')
+	{
+		if (is_string($command))
+		{
+			$createtime = date('Y-m-d H:i:s',time());
+			$debugger = new debugger();
+			$response = exec($command,$output);
+			$output = implode('', $output);
+			$debugger->stop();
+			$this->model('task_detail')->insert(array(
+				'createtime'=>$createtime,
+				'endtime' => date('Y-m-d H:i:s',time()),
+				'time' => $debugger->getTime(),
+				'name' => $name,
+				'response' => $output
+			));
+		}
+		else if (is_array($command))
+		{
+			foreach ($command as $name => $com)
+			{
+				$this->runTask($com,$name);
 			}
 		}
 	}
@@ -244,6 +228,10 @@ class api extends apiControl
 				if (!empty($response))
 				{
 					return new json(json::OK,NULL,$response);
+				}
+				else
+				{
+					return new json(3,'正在生成报表,请稍后...');
 				}
 			}
 		}
@@ -327,6 +315,10 @@ class api extends apiControl
 				if (!empty($response))
 				{
 					return new json(json::OK,NULL,$response);
+				}
+				else
+				{
+					return new json(3,'正在生成报表,请稍后...');
 				}
 			}
 		}
