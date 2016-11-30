@@ -306,6 +306,7 @@ class api extends apiControl
 			return new json(json::FAILED,'sn不能为空');
 		}
 		
+		
 		if (!empty($this->_timemode))
 		{
 			$cache_key = 'api_detail_'.$this->_duration.'_'.$this->_timemode.'_'.implode(',', $sn);
@@ -314,7 +315,10 @@ class api extends apiControl
 				$response = cache::get($cache_key);
 				if (!empty($response))
 				{
-					return new json(json::OK,NULL,$response);
+					if ($this->post('debug')!=1)
+					{
+						return new json(json::OK,NULL,$response);
+					}
 				}
 				else
 				{
@@ -349,10 +353,14 @@ class api extends apiControl
 		if (is_array($sn))
 		{
 			$sql = '';
-			while ($s = array_shift($sn))
+			$param = array();
+			reset($sn);
+			$s = array_shift($sn);
+			while ($s)
 			{
 				$sql .= 'sn like ? or ';
 				$param[] = '%'.substr($s,3);
+				$s = next($sn);
 			}
 			$sql = substr($sql, 0,-4);
 			$this->model('operation_stat')->where($sql,$param);
@@ -449,7 +457,7 @@ class api extends apiControl
 			$categoryName = $this->getCategory($stat);
 			if ($stat['class'] == 0)
 			{
-				$className = 'class';
+				$className = 'http';
 			}
 			else if ($stat['class']==1)
 			{
@@ -465,6 +473,11 @@ class api extends apiControl
 				{
 					$className = 'videoDemand';
 				}
+			}
+			
+			if ($className == 'videoDemand' && isset($cp_resource['videoDemand']) && count($cp_resource['videoDemand'])>=5)
+			{
+				$categoryName = '其它';
 			}
 			
 			if (isset($cp_resource[$className][$categoryName]['cache']))
@@ -517,7 +530,7 @@ class api extends apiControl
 			'cp_resource' => $cp_resource,//分cp资源引入详情
 		);
 		
-		if (!empty($this->_timemode))
+		if (!empty($cache_key))
 		{
 			cache::set($cache_key, $data);
 		}

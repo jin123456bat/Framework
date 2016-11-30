@@ -150,8 +150,8 @@ class apiControl extends BaseControl
 		{
 			case '1':
 				//最近24小时
-				$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
-				$this->_endTime = date('Y-m-d H:i:s',$timestamp);
+				//$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
+				$this->_endTime = date('Y-m-d H:00:00');
 				$this->_startTime = date('Y-m-d H:i:s',strtotime('-24 hour',strtotime($this->_endTime)));
 				break;
 			case '2':

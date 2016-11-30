@@ -10,9 +10,9 @@ if (request::php_sapi_name() != 'web')
 switch($_SERVER['HTTP_HOST'])
 {
 	case 'localhost':
-		$dbhost = 'localhost';
-		$dbpass = '';
-		$dbuser = 'root';
+		$dbhost = '192.168.1.225';
+		$dbpass = 'fxdata_Select-2016';
+		$dbuser = 'selecter';
 	break;
 	case '192.168.0.73':
 		$dbhost = 'localhost';

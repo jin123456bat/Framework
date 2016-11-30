@@ -162,12 +162,14 @@ class algorithm extends BaseComponent
 			if (is_array($sn))
 			{
 				$sql = '';
-				$s = array_shift($sn);
+				$param = array();
+				reset($sn);
+				$s = current($sn);
 				while ($s)
 				{
 					$sql .= 'sn like ? or ';
 					$param[] = '%'.substr($s,3);
-					$s = array_shift($sn);
+					$s = next($sn);
 				}
 				$sql = substr($sql, 0,-4);
 				$this->model('operation_stat')->where($sql,$param);
@@ -230,12 +232,14 @@ class algorithm extends BaseComponent
 			if (is_array($sn))
 			{
 				$sql = '';
-				$s = array_shift($sn);
+				$param = array();
+				reset($sn);
+				$s = current($sn);
 				while ($s)
 				{
 					$sql .= 'sn like ? or ';
 					$param[] = '%'.substr($s,3);
-					$s = array_shift($sn);
+					$s = next($sn);
 				}
 				$sql = substr($sql, 0,-4);
 				$this->model('operation_stat')->where($sql,$param);
@@ -245,7 +249,7 @@ class algorithm extends BaseComponent
 				$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
 			}
 		}
-		//取出service累计最大的前9个分类
+		//取出service累计最大的前n个分类
 		$categoryTop = $this->model('operation_stat')->where('make_time>=? and make_time<?',array(
 			$this->_starttime,
 			$this->_endtime
@@ -278,12 +282,14 @@ class algorithm extends BaseComponent
 				if (is_array($sn))
 				{
 					$sql = '';
-					$s = array_shift($sn);
+					$param = array();
+					reset($sn);
+					$s = current($sn);
 					while ($s)
 					{
 						$sql .= 'sn like ? or ';
 						$param[] = '%'.substr($s,3);
-						$s = array_shift($sn);
+						$s = next($sn);
 					}
 					$sql = substr($sql, 0,-4);
 					$this->model('operation_stat')->where($sql,$param);
@@ -332,8 +338,10 @@ class algorithm extends BaseComponent
 			}
 		}
 		
+		reset($sn);
 		$service = $this->ServiceMax($sn);
 		$service = $service['detail'];
+		
 		
 		foreach ($cp_service as $classname => &$v)
 		{
@@ -416,6 +424,7 @@ class algorithm extends BaseComponent
 				$temp_monitor[$r['time']] = $r['sum_monitor'];
 			}
 			
+			
 			$cdn_traffic_stat_model = $this->model('cdn_traffic_stat');
 			if (!empty($sn))
 			{
@@ -463,11 +472,11 @@ class algorithm extends BaseComponent
 				
 				if (isset($temp_cache[$r['time']]))
 				{
-					$temp_cache[$r['time']] += $r['sum_service'];
+					$temp_cache[$r['time']] += $r['sum_cache'];
 				}
 				else
 				{
-					$temp_cache[$r['time']] = $r['sum_service']*1;
+					$temp_cache[$r['time']] = $r['sum_cache']*1;
 				}
 				
 				if (isset($temp_monitor[$r['time']]))
@@ -476,7 +485,7 @@ class algorithm extends BaseComponent
 				}
 				else
 				{
-					$temp_monitor[$r['time']] = $r['sum_service']*1;
+					$temp_monitor[$r['time']] = $r['sum_monitor']*1;
 				}
 			}
 			
@@ -514,15 +523,13 @@ class algorithm extends BaseComponent
 			));
 			foreach ($xvirt as $r)
 			{
-				/* if (isset($temp_cache[$r['time']]) && $temp_cache[$r['time']] > $r['sum_cache'])
-				{
-					$temp_cache[$r['time']] -= $r['sum_cache'];
-				} */
-				if (isset($temp_service[$r['time']]) && $temp_service[$r['time']] > $r['sum_service'])
+				if (isset($temp_service[$r['time']]))
 				{
 					$temp_service[$r['time']] -= $r['sum_service'];
 				}
 			}
+			
+			
 			
 			$max = 0;
 			$max_time = '';
@@ -534,11 +541,12 @@ class algorithm extends BaseComponent
 					$max_time = $time;
 				}
 			}
+			
 			$service_max_detail[$t_time] = $max;
 			if (!empty($max_time))
 			{
-				$cache_max_detail[$t_time] = $temp_cache[$max_time];
-				$monitor_max_detail[$t_time] = $temp_monitor[$max_time];
+				$cache_max_detail[$t_time] = isset($temp_cache[$max_time])?$temp_cache[$max_time]:0;
+				$monitor_max_detail[$t_time] = isset($temp_monitor[$max_time])?$temp_monitor[$max_time]:0;
 			}
 			else
 			{
@@ -592,7 +600,7 @@ class algorithm extends BaseComponent
 				'sum_service'=>'sum(service) * 1024',
 				'sum_cache' => 'sum(cache) * 1024',
 			));
-				
+			
 			foreach ($traffic_stat as $stat)
 			{
 				if (isset($temp_service[$stat['time']]))
@@ -603,13 +611,14 @@ class algorithm extends BaseComponent
 				{
 					$temp_service[$stat['time']] = $stat['sum_service'];
 				}
+				
 				if (isset($temp_cache[$stat['time']]))
 				{
 					$temp_cache[$stat['time']] += $stat['sum_cache'];
 				}
 				else
 				{
-					$temp_cache[$stat['time']] = $stat['sum_cache'];
+					$temp_cache[$stat['time']] = $stat['sum_cache']*1;
 				}
 			}
 				
@@ -847,7 +856,7 @@ class algorithm extends BaseComponent
 			));
 			foreach ($xvirt as $r)
 			{
-				if (isset($temp_service[$r['time']]) && $temp_service[$r['time']] > $r['sum_service'])
+				if (isset($temp_service[$r['time']]))
 				{
 					$temp_service[$r['time']] -= $r['sum_service'];
 				}
@@ -907,10 +916,14 @@ class algorithm extends BaseComponent
 				if (is_array($sn))
 				{
 					$sql = '';
-					while ($s = array_shift($sn))
+					$param = array();
+					reset($sn);
+					$s = current($sn);
+					while ($s)
 					{
 						$sql .= 'sn like ? or ';
 						$param[] = '%'.substr($s,3);
+						$s = next($sn);
 					}
 					$sql = substr($sql, 0,-4);
 					$this->model('operation_stat')->where($sql,$param);
