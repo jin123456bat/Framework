@@ -389,7 +389,7 @@ class algorithm extends BaseComponent
 			
 			foreach ($v as $time => &$value)
 			{
-				$value = $service[$time] * division($value,$total_operation_stat[$time]);
+				$value = (isset($service[$time])?$service[$time]:0) * division($value,$total_operation_stat[$time]);
 			}
 		}
 		
@@ -427,7 +427,7 @@ class algorithm extends BaseComponent
 		switch ($this->_duration)
 		{
 			case 5*60:
-				$time = 'concat(date_format(time,"%Y-%m-%d %H"),":",LPAD(floor(date_format(time,"%i")/5)*5,2,0))';
+				$time = 'concat(date_format(time,"%Y-%m-%d %H"),":",LPAD(floor(date_format(time,"%i")/5)*5,2,0),":00")';
 				break;
 			case 30*60:
 				$time = 'if( date_format(time,"%i")<30,date_format(time,"%Y-%m-%d %H:00:00"),date_format(time,"%Y-%m-%d %H:30:00") )';
@@ -715,7 +715,7 @@ class algorithm extends BaseComponent
 		switch ($this->_duration)
 		{
 			case 5*60:
-				$time = 'concat(date_format(time,"%Y-%m-%d %H"),":",LPAD(floor(date_format(time,"%i")/5)*5,2,0))';
+				$time = 'concat(date_format(time,"%Y-%m-%d %H"),":",LPAD(floor(date_format(time,"%i")/5)*5,2,0),":00")';
 				break;
 			case 30*60:
 				$time = 'if( date_format(time,"%i")<30,date_format(time,"%Y-%m-%d %H:00:00"),date_format(time,"%Y-%m-%d %H:30:00") )';
