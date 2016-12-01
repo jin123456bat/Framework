@@ -240,6 +240,10 @@ class sql extends base
 	 */
 	function setFrom($table,$as = '')
 	{
+		if ($table instanceof sql)
+		{
+			$this->_temp['params'] = array_merge($table->getParams(),$this->getParams());
+		}
 		if (empty($as))
 		{
 			$this->_temp['from'] = array(
@@ -388,11 +392,12 @@ class sql extends base
 		return $this;
 	}
 	
-	function union($all = false,$sql1,$sql2,$sql_)
+	function union($all = false,$sql_)
 	{
 		$all = false;
 		$sqls = func_get_args();
 		$sql_string = array();
+		$this->_temp['other_sql_params'] = isset($this->_temp['other_sql_params'])?$this->_temp['other_sql_params']:array();
 		foreach ($sqls as $index => $sql)
 		{
 			if ($sql === true)
@@ -402,13 +407,15 @@ class sql extends base
 			else if ($sql instanceof sql)
 			{
 				$sql_string[] = $sql->__toString();
+				$this->_temp['other_sql_params'] = array_merge($this->_temp['other_sql_params'],$sql->getParams());
 			}
 			else if (is_string($sql))
 			{
 				$sql_string[] = $sql;
 			}
 		}
-		return implode(' UNION '.($all?'ALL ':''), $sql_string);
+		$this->_temp['union'] = $this->__toString().' UNION '.($all?'ALL ':'').implode(' UNION '.($all?'ALL ':''), $sql_string);
+		return $this;
 	}
 	
 	function order($field,$order = 'ASC')
@@ -608,6 +615,10 @@ class sql extends base
 	
 	function __toString()
 	{
+		if (isset($this->_temp['union']) && !empty($this->_temp['union']))
+		{
+			return $this->_temp['union'];
+		}
 		switch (strtolower(trim($this->_do)))
 		{
 			case 'insert':
@@ -677,7 +688,6 @@ class sql extends base
 						{
 							if ($from instanceof sql)
 							{
-								$this->_temp['params'] = array_merge($from->getParams(),$this->getParams());
 								if (is_int($as))
 								{
 									$table .= '('.$from->__toString().'),';
@@ -786,9 +796,9 @@ class sql extends base
 		$this->_temp['params'] = isset($this->_temp['params'])?$this->_temp['params']:array();
 		$this->_temp['_having_params'] = isset($this->_temp['_having_params'])?$this->_temp['_having_params']:array();
 		$this->_temp['duplicate_params'] = isset($this->_temp['duplicate_params'])?$this->_temp['duplicate_params']:array();
+		$this->_temp['other_sql_params'] = isset($this->_temp['other_sql_params'])?$this->_temp['other_sql_params']:array();
 		
-		$this->_temp['params'] = array_merge($this->_temp['params'],$this->_temp['_having_params'],$this->_temp['duplicate_params']);
-		return $this->_temp['params'];
+		return array_merge($this->_temp['params'],$this->_temp['_having_params'],$this->_temp['duplicate_params'],$this->_temp['other_sql_params']);
 	}
 	
 	/**
@@ -801,9 +811,6 @@ class sql extends base
 			$sql = $this->__toString();
 		}
 		
-		
-		
-		
 		//去掉sql中的百分号
 		$sql = str_replace('%', '#', $sql);
 		
@@ -812,6 +819,7 @@ class sql extends base
 		{
 			$params = $this->getParams();
 		}
+		//echo $sql.'<br>|';
 		
 		$num_params = array();
 		$word_params = array();

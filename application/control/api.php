@@ -312,7 +312,7 @@ class api extends apiControl
 			$cache_key = 'api_detail_'.$this->_duration.'_'.$this->_timemode.'_'.implode(',', $sn);
 			if (request::php_sapi_name()=='web')
 			{
-				$response = cache::get($cache_key);
+				/* $response = cache::get($cache_key);
 				if (!empty($response))
 				{
 					if ($this->post('debug')!=1)
@@ -323,7 +323,7 @@ class api extends apiControl
 				else
 				{
 					return new json(3,'正在生成报表,请稍后...');
-				}
+				} */
 			}
 		}
 		
