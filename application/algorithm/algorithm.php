@@ -4,6 +4,7 @@ namespace application\algorithm;
 use framework\core\model;
 use application\extend\cache;
 use application\extend\BaseComponent;
+use framework\core\database\sql;
 
 class algorithm extends BaseComponent
 {
@@ -93,41 +94,77 @@ class algorithm extends BaseComponent
 	{
 		$sn = $this->combineSns($sn);
 		
-		$user_max = 0;
 		$user_detail = array();
-		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+		
+		switch ($this->_duration)
 		{
-			if (!empty($sn))
-			{
-				if (is_array($sn))
-				{
-					$this->model('feedbackHistory')->In('sn',$sn);
-				}
-				else if (is_scalar($sn))
-				{
-					$this->model('feedbackHistory')->where('sn=?',array($sn));
-				}
-			}
-			$max_online_gourp_sn = $this->model('feedbackHistory')
-			->group('sn')
-			->where('update_time >= ? and update_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration),
+			case 30*60:
+				$time = 'if( date_format(update_time,"%i")<30,date_format(update_time,"%Y-%m-%d %H:00:00"),date_format(update_time,"%Y-%m-%d %H:30:00") )';
+			break;
+			case 60*60:
+				$time = 'date_format(update_time,"%Y-%m-%d %H:00:00")';
+			break;
+			case 24*60*60:
+				$time = 'date_format(update_time,"%Y-%m-%d 00:00:00")';
+			break;
+			default:
+				$time = '';
+		}
+		
+		if (!empty($time))
+		{
+			$sql = new sql();
+			$sql->from('_feedback_history');
+			$sql->in('sn',$sn);
+			$sql = $sql->where('update_time >= ? and update_time < ?',array(
+				$this->_starttime,
+				$this->_endtime
 			))
-			->select('max(online) as online,sn,ctime');
+			->group('time,sn')
+			->select(array(
+				'time' => $time,
+				'online'=>'max(online)'
+			));
 			
-			$user_detail[$t_time] = 0;
-			foreach ($max_online_gourp_sn as $online)
+			$result = $this->model('feedbackHistory')->setFrom($sql,'a')->group('time')->select('time,sum(online) as online');
+			foreach ($result as $r)
 			{
-				$user_detail[$t_time] += $online['online'];
-			}
-			if ($user_detail[$t_time] > $user_max)
-			{
-				$user_max = $user_detail[$t_time];
+				$user_detail[$r['time']] = $r['online']*1;
 			}
 		}
+		else
+		{
+			for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+			{
+				if (!empty($sn))
+				{
+					if (is_array($sn))
+					{
+						$this->model('feedbackHistory')->In('sn',$sn);
+					}
+					else if (is_scalar($sn))
+					{
+						$this->model('feedbackHistory')->where('sn=?',array($sn));
+					}
+				}
+				$max_online_gourp_sn = $this->model('feedbackHistory')
+				->group('sn')
+				->where('update_time >= ? and update_time<?',array(
+					$t_time,
+					date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration),
+				))
+				->select('max(online) as online,sn,ctime');
+			
+				$user_detail[$t_time] = 0;
+				foreach ($max_online_gourp_sn as $online)
+				{
+					$user_detail[$t_time] += $online['online'];
+				}
+			}
+		}
+		
 		return array(
-			'max' => $user_max,
+			'max' => empty($user_detail)?0:max($user_detail),
 			'detail' => $user_detail,
 		);
 	}

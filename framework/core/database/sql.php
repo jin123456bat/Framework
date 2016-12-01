@@ -214,9 +214,44 @@ class sql extends base
 		return $this;
 	}
 	
-	function from($table)
+	/**
+	 * 添加额外的表
+	 * @param unknown $table
+	 * @return \framework\core\database\sql
+	 */
+	function from($table,$as = '')
 	{
-		$this->_temp['from'][] = $table;
+		if (empty($as))
+		{
+			$this->_temp['from'][] = $table;
+		}
+		else
+		{
+			$this->_temp['from'][$as] = $table;
+		}
+		return $this;
+	}
+	
+	/**
+	 * 重新设定from
+	 * @param unknown $table
+	 * @param string $as
+	 * @return \framework\core\database\sql
+	 */
+	function setFrom($table,$as = '')
+	{
+		if (empty($as))
+		{
+			$this->_temp['from'] = array(
+				$table
+			);
+		}
+		else
+		{
+			$this->_temp['from'] = array(
+				$as=>$table
+			);
+		}
 		return $this;
 	}
 	
@@ -243,6 +278,23 @@ class sql extends base
 		{
 			$this->_temp['params'] = array_merge($this->_temp['params'],$array);
 		}
+		return $this;
+	}
+	
+	/**
+	 * like in 扩展方法
+	 * @param unknown $field
+	 * @param array $array
+	 */
+	function likein($field,$array = array())
+	{
+		$sql = '';
+		foreach ($array as $value)
+		{
+			$sql .= $field.' like ? or ';
+		}
+		$sql = substr($sql, 0,-4);
+		$this->where($sql,$array);
 		return $this;
 	}
 	
@@ -619,7 +671,36 @@ class sql extends base
 				$table = '';
 				if (isset($this->_temp['from']) && !empty($this->_temp['from']))
 				{
-					$table = '`'.implode('`,`',$this->_temp['from']).'`';
+					if (is_array($this->_temp['from']))
+					{
+						foreach ($this->_temp['from'] as $as => $from)
+						{
+							if ($from instanceof sql)
+							{
+								$this->_temp['params'] = array_merge($from->getParams(),$this->getParams());
+								if (is_int($as))
+								{
+									$table .= '('.$from->__toString().'),';
+								}
+								else
+								{
+									$table .= '('.$from->__toString().') as '.$as.',';
+								}
+							}
+							else if (is_string($from))
+							{
+								if (is_int($as))
+								{
+									$table .= $from.',';
+								}
+								else
+								{
+									$table .= $from.' as '.$as.',';
+								}
+							}
+						}
+						$table = substr($table, 0,-1);
+					}
 				}
 				
 				$this->_temp['where'] = isset($this->_temp['where'])?$this->_temp['where']:'';
@@ -756,9 +837,16 @@ class sql extends base
 		return $sql_w;
 	}
 	
+	/**
+	 * 除了from外都清空
+	 */
 	function clear()
 	{
-		$this->_temp = array();
+		//保留from
+		$from = $this->_temp['from'];
+		$this->_temp = array(
+			'from' => $from
+		);
 		$this->_do = '';
 	}
 	

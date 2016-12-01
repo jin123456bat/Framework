@@ -86,7 +86,7 @@ class node extends BaseControl
 			$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
 			$endtime = date('Y-m-d H:i:s',$timestamp);
 			$starttime = date('Y-m-d H:i:s',strtotime('-24 hour',strtotime($endtime)));
-			$duration = 5*60;
+			$duration = 24*3600;
 			$algorithm = new algorithm($starttime,$endtime,$duration);
 				
 			$traffic_stat = $algorithm->traffic_stat_alone($r['sn']);

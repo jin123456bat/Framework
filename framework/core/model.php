@@ -90,6 +90,7 @@ class model extends component
 	function setTable($table)
 	{
 		$this->_table = $table;
+		$this->_sql->from($this->_table);
 		$this->parse();
 	}
 	
@@ -115,7 +116,7 @@ class model extends component
 	 */
 	function select($fields = '*')
 	{
-		$this->_sql->from($this->_table);
+		//$this->_sql->from($this->_table);
 		$sql = $this->_sql->select($fields);
 		$result = $this->query($sql);
 		return $result;
@@ -176,7 +177,7 @@ class model extends component
 	 */
 	function update($name,$value = '')
 	{
-		$this->_sql->from($this->_table);
+		//$this->_sql->from($this->_table);
 		$sql = $this->_sql->update($name,$value);
 		return $this->query($sql);
 	}
@@ -288,7 +289,7 @@ class model extends component
 			$data = $temp;
 		}
 		
-		$this->_sql->from($this->_table);
+		//$this->_sql->from($this->_table);
 		if ($this->_compress)
 		{
 			if (!isset($this->_compress_sql['insert']))
@@ -312,7 +313,7 @@ class model extends component
 	 */
 	function delete()
 	{
-		$this->_sql->from($this->_table);
+		//$this->_sql->from($this->_table);
 		$sql = $this->_sql->delete();
 		return $this->query($sql);
 	}
@@ -339,6 +340,7 @@ class model extends component
 			$complete_sql = $this->_sql->getSql($sql,$array);
 			self::$_history[] = $complete_sql;
 		}
+		
 		if ($this->_compress)
 		{
 			$this->_compress_sql[] = $complete_sql;
