@@ -181,7 +181,7 @@ class algorithm extends BaseComponent
 	{
 		$traffic_stat = $this->traffic_stat($sn);
 		$service_max_detail = $traffic_stat['service'];
-		$service_max_max = max($service_max_detail);
+		$service_max_max = empty($service_max_detail)?0:max($service_max_detail);
 		
 		return array(
 			'max' => $service_max_max,
