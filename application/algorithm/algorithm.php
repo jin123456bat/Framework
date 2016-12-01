@@ -127,6 +127,10 @@ class algorithm extends BaseComponent
 			));
 			
 			$result = $this->model('feedbackHistory')->setFrom($sql,'a')->group('time')->select('time,sum(online) as online');
+			
+			//重置
+			$this->model('feedbackHistory')->setFrom('_feedback_history');
+			
 			foreach ($result as $r)
 			{
 				$user_detail[$r['time']] = $r['online']*1;
