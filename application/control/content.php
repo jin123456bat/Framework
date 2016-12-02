@@ -446,7 +446,7 @@ class content extends BaseControl
 		//进行占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
 		$traffic_stat = $algorithm->traffic_stat_alone($this->_sn);
-		$operation_stat = $algorithm->operation_stat($this->_sn);	
+		$operation_stat = $algorithm->operation_stat($this->_sn);
 		foreach ($cp_cache_flow as $classname => &$v)
 		{
 			foreach ($v as $time=>&$value)

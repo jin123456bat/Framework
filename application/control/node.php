@@ -167,23 +167,20 @@ class node extends BaseControl
 		if (!empty($group))
 		{
 			$sns = $this->model('cds_group_sn')->where('cds_group_id=?',array($group))->select('sn');
-			if (!empty($sns))
+			foreach ($sns as $sn)
 			{
-				foreach ($sns as $sn)
-				{
-					$group_sn[] = $sn['sn'];
-				}
-				
-				$cds_temp = array();
-				foreach ($cds_list as $cds)
-				{
-					if (in_array($cds['sn'], $group_sn,true))
-					{
-						$cds_temp[] = $cds;
-					}
-				}
-				$cds_list = $cds_temp;
+				$group_sn[] = $sn['sn'];
 			}
+			
+			$cds_temp = array();
+			foreach ($cds_list as $cds)
+			{
+				if (in_array($cds['sn'], $group_sn,true))
+				{
+					$cds_temp[] = $cds;
+				}
+			}
+			$cds_list = $cds_temp;
 		}
 		
 		//搜索

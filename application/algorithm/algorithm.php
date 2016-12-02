@@ -56,28 +56,70 @@ class algorithm extends BaseComponent
 		
 		$cds_max = 0;
 		$cds_detail = array();
-		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+		
+		switch ($this->_duration)
 		{
-			if (!empty($sn))
-			{
-				if (is_array($sn))
-				{
-					$this->model('feedbackHistory')->In('sn',$sn);
-				}
-				else if (is_scalar($sn))
-				{
-					$this->model('feedbackHistory')->where('sn=?',array($sn));
-				}
-			}
-			$cds_detail[$t_time] = 1 * $this->model('feedbackHistory')
+			case 30*60:
+				$time = 'if( date_format(ctime,"%i")<30,date_format(ctime,"%Y-%m-%d %H:00:00"),date_format(ctime,"%Y-%m-%d %H:30:00") )';
+			break;
+			case 60*60:
+				$time = 'date_format(ctime,"%Y-%m-%d %H:00:00")';
+			break;
+			case 2*60*60:
+				$time = 'concat(date_format(ctime,"%Y-%m-%d")," ",floor(date_format(ctime,"%H")/2)*2,":00:00")';
+			break;
+			case 24*60*60:
+				$time = 'date_format(ctime,"%Y-%m-%d 00:00:00")';
+			break;
+			default:
+				$time = '';
+		}
+		
+		
+		if (!empty($time))
+		{
+			$result = $this->model('feedbackHistory')
 			->where('ctime >= ? and ctime < ?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
+				$this->_starttime,$this->_endtime
 			))
-			->scalar('count(distinct(sn))');
-			if ($cds_detail[$t_time] > $cds_max)
+			->group('time')
+			->order('time','asc')
+			->in('sn',$sn)
+			->select(array(
+				'time' => $time,
+				'count' => 'count(distinct(sn))'
+			));
+			foreach ($result as $r)
 			{
-				$cds_max = $cds_detail[$t_time];
+				$cds_detail[$r['time']] = $r['count'];
+			}
+			$cds_max = empty($cds_detail)?0:max($cds_detail);
+		}
+		else
+		{
+			for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+			{
+				if (!empty($sn))
+				{
+					if (is_array($sn))
+					{
+						$this->model('feedbackHistory')->In('sn',$sn);
+					}
+					else if (is_scalar($sn))
+					{
+						$this->model('feedbackHistory')->where('sn=?',array($sn));
+					}
+				}
+				$cds_detail[$t_time] = 1 * $this->model('feedbackHistory')
+				->where('ctime >= ? and ctime < ?',array(
+					$t_time,
+					date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration)
+				))
+				->scalar('count(distinct(sn))');
+				if ($cds_detail[$t_time] > $cds_max)
+				{
+					$cds_max = $cds_detail[$t_time];
+				}
 			}
 		}
 		
@@ -103,6 +145,9 @@ class algorithm extends BaseComponent
 			break;
 			case 60*60:
 				$time = 'date_format(update_time,"%Y-%m-%d %H:00:00")';
+			break;
+			case 2*60*60:
+				$time = 'concat(date_format(update_time,"%Y-%m-%d")," ",floor(date_format(update_time,"%H")/2)*2,":00:00")';
 			break;
 			case 24*60*60:
 				$time = 'date_format(update_time,"%Y-%m-%d 00:00:00")';
@@ -1125,7 +1170,7 @@ class algorithm extends BaseComponent
 	}
 	
 	/**
-	 * 获取流量
+	 * 分时间段，累计流量
 	 * @return number
 	 */
 	function operation_stat($sn = array())
@@ -1140,42 +1185,87 @@ class algorithm extends BaseComponent
 		
 		$sn = $this->combineSns($sn);
 		
-		$operation_stat = array();
-		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+		
+		switch ($this->_duration)
 		{
-			if (!empty($sn))
-			{
-				if (is_array($sn))
-				{
-					$sql = '';
-					$param = array();
-					reset($sn);
-					$s = current($sn);
-					while ($s)
-					{
-						$sql .= 'sn like ? or ';
-						$param[] = '%'.substr($s,3);
-						$s = next($sn);
-					}
-					$sql = substr($sql, 0,-4);
-					$this->model('operation_stat')->where($sql,$param);
-				}
-				else if(is_scalar($sn))
-				{
-					$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
-				}
-			}
+			case 30*60:
+				$time = 'if( date_format(make_time,"%i")<30,date_format(make_time,"%Y-%m-%d %H:00:00"),date_format(make_time,"%Y-%m-%d %H:30:00") )';
+				break;
+			case 60*60:
+				$time = 'date_format(make_time,"%Y-%m-%d %H:00:00")';
+				break;
+			case 2*60*60:
+				$time = 'concat(date_format(make_time,"%Y-%m-%d")," ",floor(date_format(make_time,"%H")/2)*2,":00:00")';
+				break;
+			case 24*60*60:
+				$time = 'date_format(make_time,"%Y-%m-%d 00:00:00")';
+				break;
+			default:
+				$time = '';
+		}
+		$operation_stat = array();
+		if (!empty($time))
+		{
+			$sn = array_map(function($s){
+				return '%'.substr($s, 3);
+			}, $sn);
 			$result = $this->model('operation_stat')
 			->where('make_time>=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration),
+				$this->_starttime,$this->_endtime
 			))
-			->find(array(
-				'sum_service'=>'sum(service_size)',
-				'sum_cache'=>'sum(cache_size+proxy_cache_size)'
+			->group('time')
+			->order('time','asc')
+			->likein('sn',$sn)
+			->select(array(
+				'time' => $time,
+				'service' => 'sum(service_size)',
+				'cache' => 'sum(cache_size+proxy_cache_size)'
 			));
-			$operation_stat['service'][$t_time] = $result['sum_service']*1;
-			$operation_stat['cache'][$t_time] = $result['sum_cache']*1;
+			foreach ($result as $r)
+			{
+				$operation_stat['service'][$r['time']] = $r['service']*1;
+				$operation_stat['cache'][$r['time']] = $r['cache']*1;
+			}
+		}
+		else
+		{
+			
+			for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+			{
+				if (!empty($sn))
+				{
+					if (is_array($sn))
+					{
+						$sql = '';
+						$param = array();
+						reset($sn);
+						$s = current($sn);
+						while ($s)
+						{
+							$sql .= 'sn like ? or ';
+							$param[] = '%'.substr($s,3);
+							$s = next($sn);
+						}
+						$sql = substr($sql, 0,-4);
+						$this->model('operation_stat')->where($sql,$param);
+					}
+					else if(is_scalar($sn))
+					{
+						$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
+					}
+				}
+				$result = $this->model('operation_stat')
+				->where('make_time>=? and make_time<?',array(
+					$t_time,
+					date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration),
+				))
+				->find(array(
+					'sum_service'=>'sum(service_size)',
+					'sum_cache'=>'sum(cache_size+proxy_cache_size)'
+				));
+				$operation_stat['service'][$t_time] = $result['sum_service']*1;
+				$operation_stat['cache'][$t_time] = $result['sum_cache']*1;
+			}
 		}
 		$cacheContainer[$key] = $operation_stat;
 		return $cacheContainer[$key];
