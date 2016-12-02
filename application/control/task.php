@@ -278,7 +278,8 @@ class task extends bgControl
 				'endtime' => date('Y-m-d H:i:s',time()),
 				'time' => $debugger->getTime(),
 				'name' => $name,
-				'response' => $output
+				'response' => $output,
+				'command' => $command,
 			));
 		}
 		else if (is_array($command))

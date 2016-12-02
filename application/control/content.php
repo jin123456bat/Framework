@@ -335,11 +335,12 @@ class content extends BaseControl
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
 			->where('class=? and category<?',array(2,128))
+			->group('category')
 			->select(array(
 				'category',
-				'service_size',
-				'cache_size',
-				'proxy_cache_size'
+				'service_size' => 'sum(service_size)',
+				'cache_size' => 'sum(cache_size)',
+				'proxy_cache_size' => 'sum(proxy_cache_size)',
 			));
 			
 			foreach ($category['videoDemand'] as $key=>$name)
@@ -590,10 +591,11 @@ class content extends BaseControl
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
 			->where('class=? and category>=?',array(2,128))
+			->group('category')
 			->select(array(
 				'category'=>'category - 128',
-				'service_size',
-				'cache_size' => 'proxy_cache_size+cache_size',
+				'service_size' => 'sum(service_size)',
+				'cache_size' => 'sum(proxy_cache_size)+sum(cache_size)',
 			));
 			
 			
@@ -845,11 +847,12 @@ class content extends BaseControl
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
+			->group('category')
 			->where('class=?',array(1))
 			->select(array(
 				'category',
-				'service_size',
-				'cache_size',
+				'service_size' => 'sum(service_size)',
+				'cache_size' => 'sum(cache_size)',
 			));
 				
 			foreach ($result as $r)
@@ -995,11 +998,12 @@ class content extends BaseControl
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
 			))
+			->group('category')
 			->where('class=?',array(0))
 			->select(array(
 				'category',
-				'service_size',
-				'cache_size'
+				'service_size' => 'sum(service_size)',
+				'cache_size' => 'sum(cache_size)',
 			));
 			
 			foreach ($result as $r)

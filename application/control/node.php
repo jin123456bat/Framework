@@ -86,7 +86,7 @@ class node extends BaseControl
 			$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
 			$endtime = date('Y-m-d H:i:s',$timestamp);
 			$starttime = date('Y-m-d H:i:s',strtotime('-24 hour',strtotime($endtime)));
-			$duration = 24*3600;
+			$duration = 5*60;
 			$algorithm = new algorithm($starttime,$endtime,$duration);
 				
 			$traffic_stat = $algorithm->traffic_stat_alone($r['sn']);
@@ -120,7 +120,7 @@ class node extends BaseControl
 				
 			//子节点信息
 			$sub_vpe = $this->model('cdn_node_stat')
-			->where('sn like ?',array('V_S'.substr($r['sn'], 3)))
+			->where('sn like ?',array('%'.substr($r['sn'], 3)))
 			->group('sn')
 			->select('sn,name');
 			foreach ($sub_vpe as &$vpe)

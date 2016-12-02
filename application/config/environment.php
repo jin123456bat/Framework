@@ -2,7 +2,7 @@
 return array(
 	'display_errors' => 'On',
 	'error_reporting' => E_ALL,
-	//'memory_limit' => '128M',
+	'memory_limit' => '512M',
 	
 	'max_execution_time' => 0,
 	'session' => array(
