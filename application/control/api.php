@@ -243,7 +243,7 @@ class api extends apiControl
 				}
 				else
 				{
-					return new json(3,'正在生成报表,请稍后...');
+					return new json(3,'生成报表大约需要10分钟,请稍后...');
 				}
 			}
 		}
@@ -334,7 +334,7 @@ class api extends apiControl
 				}
 				else
 				{
-					return new json(3,'正在生成报表,请稍后...');
+					return new json(3,'生成报表大约需要10分钟,请稍后...');
 				}
 			}
 		}
