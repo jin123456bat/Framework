@@ -196,9 +196,14 @@ class task extends bgControl
 		{
 			return ;
 		}
-		
+		//debugger $debugger,debugger $minute5,debugger $hour1,debugger $hour2,debugger $day1,debugger $week1,debugger $month1
 		$debugger = new debugger();
+		$minute5 = new debugger();
+		$hour1 = new debugger();
 		$hour2 = new debugger();
+		$day1 = new debugger();
+		$week1 = new debugger();
+		$month1 = new debugger();
 		$minute = date('i');
 		//每5分钟执行
 		if ($minute%5 === 0)
