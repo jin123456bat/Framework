@@ -42,7 +42,9 @@ class api extends apiControl
 		$oldsn_string = implode(',', $oldsn);
 		$newsn_string = implode(',', $newsn);
 		
-		$create_cache_sn = array();
+		//$create_cache_sn = array();
+		$overview_sn = '';
+		$detail_sn = array();
 		
 		if (empty($oldsn_string))
 		{
@@ -55,7 +57,9 @@ class api extends apiControl
 						'sns' => $newsn_string,
 						'num' => 1,
 					));
-					$create_cache_sn = $newsn;
+					//$create_cache_sn = $newsn;
+					$overview_sn = $newsn_string;
+					$detail_sn = $newsn;
 				}
 				else
 				{
@@ -96,7 +100,9 @@ class api extends apiControl
 							'sns' => $oldsn_string,
 							'num' => 1,
 						));
-						$create_cache_sn = $oldsn;
+						//$create_cache_sn = $oldsn;
+						$overview_sn = $oldsn_string;
+						$detail_sn = $oldsn;
 					}
 					
 					if (!empty($newsn_string))
@@ -106,7 +112,10 @@ class api extends apiControl
 							'sns' => $newsn_string,
 							'num' => 1,
 						));
-						$create_cache_sn = $newsn;
+						
+						$overview_sn = empty($overview_sn)?$oldsn_string:($overview_sn.','.$oldsn_string);
+						$detail_sn = array_merge($oldsn,$newsn);
+						//$create_cache_sn = $newsn;
 					}
 				}
 				else
@@ -129,7 +138,9 @@ class api extends apiControl
 							'sns' => $newsn_string,
 							'num' => 1,
 						));
-						$create_cache_sn = $newsn;
+						//$create_cache_sn = $newsn;
+						$overview_sn = $newsn_string;
+						$detail_sn = array_diff($newsn, $oldsn);
 					}
 					else
 					{
@@ -155,7 +166,7 @@ class api extends apiControl
 			if (!empty($create_cache_sn))
 			{
 				//生成详情页的缓存
-				foreach ($create_cache_sn as $sn)
+				foreach ($detail_sn as $sn)
 				{
 					$commands = array(
 						'api_detail_hourly_1_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$sn,
@@ -168,13 +179,13 @@ class api extends apiControl
 				}
 				
 				//生成概览页的缓存
-				$create_cache_sn = implode(',', $create_cache_sn);
-				$commands['api_overview_hourly_1_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 1 -sn '.$create_cache_sn;
-				$commands['api_overview_hourly_2_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 2 -sn '.$create_cache_sn;
-				$commands['api_overview_daily_3_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 3 -sn '.$create_cache_sn;
-				$commands['api_overview_daily_4_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 4 -sn '.$create_cache_sn;
-				$commands['api_overview_daily_5_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 5 -sn '.$create_cache_sn;
-				$commands['api_overview_daily_6_'.$create_cache_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$create_cache_sn;
+				//$create_cache_sn = implode(',', $create_cache_sn);
+				$commands['api_overview_hourly_1_'.$overview_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 1 -sn '.$overview_sn;
+				$commands['api_overview_hourly_2_'.$overview_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 2 -sn '.$overview_sn;
+				$commands['api_overview_daily_3_'.$overview_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 3 -sn '.$overview_sn;
+				$commands['api_overview_daily_4_'.$overview_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 4 -sn '.$overview_sn;
+				$commands['api_overview_daily_5_'.$overview_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 5 -sn '.$overview_sn;
+				$commands['api_overview_daily_6_'.$overview_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$overview_sn;
 				$this->runTask($commands);
 			}
 		}
