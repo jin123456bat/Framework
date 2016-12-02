@@ -11,6 +11,80 @@ use framework\core\debugger;
 class task extends bgControl
 {
 	/**
+	 * 生成每周的数据报告
+	 */
+	function week()
+	{
+		$week1 = new debugger();
+		$week1->start();
+		$commands = array(
+			'main_overview_hourly_4' => 'php '.ROOT.'/index.php -c main -a overview -duration hourly -timemode 4',//首页上周的数据
+			'content_overview_hourly_4' => 'php '.ROOT.'/index.php -c content -a overview -duration hourly -timemode 4',//内容交付概览 上周的数据
+			'content_videoDemand_hourly_4' => 'php '.ROOT.'/index.php -c content -a videoDemand -duration hourly -timemode 4',//内容交付视频点播 上周的数据
+			'content_videoLive_hourly_4' => 'php '.ROOT.'/index.php -c content -a videoLive -duration hourly -timemode 4',//内容交付视频直播 上周的数据
+			'content_mobile_hourly_4' => 'php '.ROOT.'/index.php -c content -a mobile -duration hourly -timemode 4',//内容交付移动应用 上周的数据
+			'content_http_hourly_4' => 'php '.ROOT.'/index.php -c content -a http -duration hourly -timemode 4',//内容交付常规资源 上周的数据
+		);
+			
+		//生成api的缓存数据
+		$data = $this->model('sn_in_cache')->select();
+		$build_sn_list = array();
+		foreach ($data as $sns)
+		{
+			$commands['api_overview_daily_4_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 4 -sn '.$sns['sns'];
+		
+			$sn = explode(',', $sns['sns']);
+			foreach ($sn as $s)
+			{
+				if (!in_array($s, $build_sn_list,true))
+				{
+					$build_sn_list[] = $s;
+					$commands['api_detail_daily_4_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$s;
+				}
+			}
+		}
+		$this->runTask($commands);
+		$week1->stop();
+		return $week1;
+	}
+	
+	function month()
+	{
+		$month1 = new debugger();
+		$month1->start();
+		$commands = array(
+			'main_overview_daily_6' => 'php '.ROOT.'/index.php -c main -a overview -duration daily -timemode 6',//首页上月的数据
+			'content_overview_daily_6' => 'php '.ROOT.'/index.php -c content -a overview -duration daily -timemode 6',//内容交付概览 上月的数据
+			'content_videoDemand_daily_6' => 'php '.ROOT.'/index.php -c content -a videoDemand -duration daily -timemode 6',//内容交付视频点播 上月的数据
+			'content_videoLive_daily_6' => 'php '.ROOT.'/index.php -c content -a videoLive -duration daily -timemode 6',//内容交付视频直播 上月的数据
+			'content_mobile_daily_6' => 'php '.ROOT.'/index.php -c content -a mobile -duration daily -timemode 6',//内容交付移动应用 上月的数据
+			'content_http_daily_6' => 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 6',//内容交付常规资源 上月的数据
+				
+		);
+		
+		//生成api的缓存数据
+		$data = $this->model('sn_in_cache')->select();
+		$build_sn_list = array();
+		foreach ($data as $sns)
+		{
+			//上个月的数据
+			$commands['api_overview_daily_6_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$sns['sns'];
+			$sn = explode(',', $sns['sns']);
+			foreach ($sn as $s)
+			{
+				if (!in_array($s, $build_sn_list,true))
+				{
+					$build_sn_list[] = $s;
+					$commands['api_detail_daily_6_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$s;
+				}
+			}
+		}
+		$this->runTask($commands);
+		$month1->stop();
+		return $month1;
+	}
+	
+	/**
 	 * 总方法是每分钟执行一次
 	 */
 	function run()
@@ -26,8 +100,7 @@ class task extends bgControl
 		$hour1 = new debugger();
 		$hour2 = new debugger();
 		$day1 = new debugger();
-		$week1 = new debugger();
-		$month1 = new debugger();
+		
 		
 		$minute = date('i');
 		//每5分钟执行
@@ -141,71 +214,14 @@ class task extends bgControl
 		$week = date('N');
 		if ($week == 1 && $hour === '00' && $minute === '05')
 		{
-			$week1->start();
-			$commands = array(
-				'main_overview_hourly_4' => 'php '.ROOT.'/index.php -c main -a overview -duration hourly -timemode 4',//首页上周的数据
-				'content_overview_hourly_4' => 'php '.ROOT.'/index.php -c content -a overview -duration hourly -timemode 4',//内容交付概览 上周的数据
-				'content_videoDemand_hourly_4' => 'php '.ROOT.'/index.php -c content -a videoDemand -duration hourly -timemode 4',//内容交付视频点播 上周的数据
-				'content_videoLive_hourly_4' => 'php '.ROOT.'/index.php -c content -a videoLive -duration hourly -timemode 4',//内容交付视频直播 上周的数据
-				'content_mobile_hourly_4' => 'php '.ROOT.'/index.php -c content -a mobile -duration hourly -timemode 4',//内容交付移动应用 上周的数据
-				'content_http_hourly_4' => 'php '.ROOT.'/index.php -c content -a http -duration hourly -timemode 4',//内容交付常规资源 上周的数据
-			);
-			
-			//生成api的缓存数据
-			$data = $this->model('sn_in_cache')->select();
-			$build_sn_list = array();
-			foreach ($data as $sns)
-			{
-				$commands['api_overview_daily_4_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 4 -sn '.$sns['sns'];
-				
-				$sn = explode(',', $sns['sns']);
-				foreach ($sn as $s)
-				{
-					if (!in_array($s, $build_sn_list,true))
-					{
-						$build_sn_list[] = $s;
-						$commands['api_detail_daily_4_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$s;
-					}
-				}
-			}
-			$this->runTask($commands);
-			$week1->stop();
+			$week1 = $this->week();
 		}
 		
 		//每个月1号，0点5分执行
 		$day = date('d');
 		if ($day == '01' && $hour === '00' && $minute == '05')
 		{
-			$month1->start();
-			$commands = array(
-				'main_overview_daily_6' => 'php '.ROOT.'/index.php -c main -a overview -duration daily -timemode 6',//首页上月的数据
-				'content_overview_daily_6' => 'php '.ROOT.'/index.php -c content -a overview -duration daily -timemode 6',//内容交付概览 上月的数据
-				'content_videoDemand_daily_6' => 'php '.ROOT.'/index.php -c content -a videoDemand -duration daily -timemode 6',//内容交付视频点播 上月的数据
-				'content_videoLive_daily_6' => 'php '.ROOT.'/index.php -c content -a videoLive -duration daily -timemode 6',//内容交付视频直播 上月的数据
-				'content_mobile_daily_6' => 'php '.ROOT.'/index.php -c content -a mobile -duration daily -timemode 6',//内容交付移动应用 上月的数据
-				'content_http_daily_6' => 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 6',//内容交付常规资源 上月的数据
-			
-			);
-						
-			//生成api的缓存数据
-			$data = $this->model('sn_in_cache')->select();
-			$build_sn_list = array();
-			foreach ($data as $sns)
-			{
-				//上个月的数据
-				$commands['api_overview_daily_6_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$sns['sns'];
-				$sn = explode(',', $sns['sns']);
-				foreach ($sn as $s)
-				{
-					if (!in_array($s, $build_sn_list,true))
-					{
-						$build_sn_list[] = $s;
-						$commands['api_detail_daily_6_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$s;
-					}
-				}
-			}
-			$this->runTask($commands);
-			$month1->stop();
+			$month1 = $this->month();
 		}
 		$debugger->stop();
 		

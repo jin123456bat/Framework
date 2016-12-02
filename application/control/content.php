@@ -19,7 +19,6 @@ class content extends BaseControl
 	function initlize()
 	{
 		parent::initlize();
-		$this->_sn = $this->combineSns();
 		return $this->setTime();
 	}
 	
@@ -40,6 +39,8 @@ class content extends BaseControl
 				}
 			}
 		}
+		
+		$this->_sn = $this->combineSns();
 		
 		$start_time = $this->_startTime;
 		$end_time = $this->_endTime;
@@ -281,6 +282,8 @@ class content extends BaseControl
 				}
 			}
 		}
+		
+		$this->_sn = $this->combineSns();
 		
 		$start_time = $this->_startTime;
 		$end_time = $this->_endTime;
@@ -537,6 +540,8 @@ class content extends BaseControl
 			}
 		}
 		
+		$this->_sn = $this->combineSns();
+		
 		$start_time = $this->_startTime;
 		$end_time = $this->_endTime;
 		
@@ -788,6 +793,8 @@ class content extends BaseControl
 			}
 		}
 		
+		$this->_sn = $this->combineSns();
+		
 		$start_time = $this->_startTime;
 		$end_time = $this->_endTime;
 		
@@ -943,6 +950,8 @@ class content extends BaseControl
 				}
 			}
 		}
+		
+		$this->_sn = $this->combineSns();
 		
 		$start_time = $this->_startTime;
 		$end_time = $this->_endTime;
