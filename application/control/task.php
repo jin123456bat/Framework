@@ -204,7 +204,12 @@ class task extends bgControl
 		$day1 = new debugger();
 		$week1 = new debugger();
 		$month1 = new debugger();
+		
+		
 		$minute = date('i');
+		$hour = date('H');
+		$week = date('N');
+		$day = date('d');
 		//每5分钟执行
 		if ($minute%5 === 0)
 		{
@@ -223,7 +228,6 @@ class task extends bgControl
 		}
 		
 		//每2小时的5分钟执行一次
-		$hour = date('H');
 		if ($hour%2===0 && $minute=='05')
 		{
 			$hour2->start();
@@ -238,14 +242,12 @@ class task extends bgControl
 		}
 		
 		//每个星期一的0点5分执行一次
-		$week = date('N');
 		if ($week == 1 && $hour === '00' && $minute === '05')
 		{
 			$week1 = $this->week();
 		}
 		
 		//每个月1号，0点5分执行
-		$day = date('d');
 		if ($day == '01' && $hour === '00' && $minute == '05')
 		{
 			$month1 = $this->month();

@@ -2,6 +2,8 @@
 //定义根目录
 !defined('ROOT') & define('ROOT', __DIR__);
 
+define('DEBUG', false);
+
 include ROOT.'/xhprof.php';
 
 //定义框架的目录
@@ -12,7 +14,7 @@ include ROOT.'/xhprof.php';
 //定义app的名称  app的代码必须放在app名称对应的文件夹里面
 !define("APP_NAME", "application");
 
-define('DEBUG', false);
+
 
 //载入框架
 include SYSTEM_ROOT.'/framework.php';

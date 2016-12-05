@@ -292,13 +292,16 @@ class sql extends base
 	 */
 	function likein($field,$array = array())
 	{
-		$sql = '';
-		foreach ($array as $value)
+		if (!empty($array))
 		{
-			$sql .= $field.' like ? or ';
+			$sql = '';
+			foreach ($array as $value)
+			{
+				$sql .= $field.' like ? or ';
+			}
+			$sql = substr($sql, 0,-4);
+			$this->where($sql,$array);
 		}
-		$sql = substr($sql, 0,-4);
-		$this->where($sql,$array);
 		return $this;
 	}
 	

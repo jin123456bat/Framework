@@ -1188,6 +1188,9 @@ class algorithm extends BaseComponent
 		
 		switch ($this->_duration)
 		{
+			case 5*60:
+				$time = 'concat(date_format(make_time,"%Y-%m-%d %H:"),lpad(floor(date_format(make_time,"%i")/5)*5,2,0),":00")';
+				break;
 			case 30*60:
 				$time = 'if( date_format(make_time,"%i")<30,date_format(make_time,"%Y-%m-%d %H:00:00"),date_format(make_time,"%Y-%m-%d %H:30:00") )';
 				break;
