@@ -3,6 +3,7 @@ namespace application\control;
 
 use application\extend\bgControl;
 use framework\core\debugger;
+use application\algorithm\algorithm;
 
 /**
  * 生成各个接口的文件数据
@@ -224,7 +225,7 @@ class task extends bgControl
 		$day = date('d');
 		
 		//每5分钟执行  暂时调整为30分钟一次
-		if ($minute%5 === 0)
+		if ($minute%15 === 0)
 		{
 			$minute5 = $this->minute();
 		}
@@ -370,13 +371,44 @@ class task extends bgControl
 		
 		$endTime = date('Y-m-d H:i:s');
 		
-		$result = $this->model('traffic_stat')->where('add_time >=? and add_time<?',array(
+		
+		$time_traffic_stat = $this->model('traffic_stat')->where('add_time >=? and add_time<?',array(
 			$startTime,$endTime
-		))->select();
-		foreach ($result as $r)
+		))->find('max(create_time) as max,min(create_time) as min');
+		$time_cdn_traffic_stat = $this->model('cdn_traffic_stat')->where('create_time>=? and create_time<?',array(
+			$startTime,$endTime
+		))->find('max(make_time) as max,min(make_time) as min');
+		$time_xvirt_traffic_stat = $this->model('xvirt_traffic_stat')->where('create_time>=? and create_time<?',array(
+			$startTime,$endTime
+		))->find('max(make_time) as max,min(make_time) as min');
+		
+		$max_time = max($time_cdn_traffic_stat['max'],$time_cdn_traffic_stat['max'],$time_xvirt_traffic_stat['max']);
+		$min_time = min($time_cdn_traffic_stat['min'],$time_cdn_traffic_stat['min'],$time_xvirt_traffic_stat['min']);
+		
+		$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/300)*300);
+		$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/300)*300);
+		$algorithm = new algorithm($min_time,$max_time,300);
+		
+		$sn = $this->combineSns();
+		$this->model('traffic_stat_5_minute')->startCompress();
+		foreach ($sn as $s)
 		{
-			
+			$traffic_stat = $algorithm->traffic_stat($s);
+			foreach ($traffic_stat['service'] as $time => $service)
+			{
+				$this->model('traffic_stat_5_minute')->insert(array(
+					'time' => $time,
+					'sn' => $s,
+					'service' => $service,
+					'cache' => $traffic_stat['cache'][$time],
+					'monitor' => $traffic_stat['monitor'][$time],
+				));
+			}
 		}
+		/* $this->model('traffic_stat_5_minute')->duplicate(array(
+			'service','cache','monitor'
+		)); */
+		$this->model('traffic_stat_5_minute')->commitCompress();
 		
 		return array(
 			'starttime' => $startTime,
