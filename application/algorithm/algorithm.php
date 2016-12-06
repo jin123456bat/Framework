@@ -5,6 +5,7 @@ use framework\core\model;
 use application\extend\cache;
 use application\extend\BaseComponent;
 use framework\core\database\sql;
+use application;
 
 class algorithm extends BaseComponent
 {
@@ -239,33 +240,23 @@ class algorithm extends BaseComponent
 	 * @param array $sn
 	 * @return number[]
 	 */
-	public function ServiceSum($sn = array())
+	public function ServiceSum($sn = array(),$type = '')
 	{
 		$sn = $this->combineSns($sn);
+		$sn = array_map(function($s){
+			return '%'.substr($s, 4);
+		}, $sn);
 		
-		if (!empty($sn))
+		switch ($type)
 		{
-			if (is_array($sn))
-			{
-				$sql = '';
-				$param = array();
-				reset($sn);
-				$s = current($sn);
-				while ($s)
-				{
-					$sql .= 'sn like ? or ';
-					$param[] = '%'.substr($s,3);
-					$s = next($sn);
-				}
-				$sql = substr($sql, 0,-4);
-				$this->model('operation_stat')->where($sql,$param);
-			}
-			else if(is_scalar($sn))
-			{
-				$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
-			}
+			case 'http':$this->model('operation_stat')->where('class=?',array(0));break;
+			case 'mobile':$this->model('operation_stat')->where('class=?',array(1));break;
+			case 'videoDemand':$this->model('operation_stat')->where('class=? and category<?',array(2,128));break;
+			case 'videoLive':$this->model('operation_stat')->where('class=? and category>=?',array(2,128));break;
 		}
+		
 		$service_sum_sum = 1*$this->model('operation_stat')
+		->likein('sn',$sn)
 		->where('make_time >= ? and make_time < ?',array(
 			$this->_starttime,
 			$this->_endtime
@@ -459,12 +450,12 @@ class algorithm extends BaseComponent
 	 */
 	public function traffic_stat($sn = array())
 	{
-		$key = md5($this->_starttime.$this->_endtime.$this->_duration.(is_array($sn)?implode(',', $sn):$sn));
+		$cache_key = 'traffic_stat_'.$this->_starttime.$this->_endtime.$this->_duration.(is_array($sn)?implode(',', $sn):$sn);
 		
-		static $cacheContainer = array();
-		if (isset($cacheContainer[$key]) && !empty($cacheContainer[$key]))
+		$result = cache::get($cache_key);
+		if (!empty($result))
 		{
-			return $cacheContainer[$key];
+			return $result;
 		}
 		
 		$sn = $this->combineSns($sn);
@@ -738,12 +729,13 @@ class algorithm extends BaseComponent
 				}
 			}
 		}
-		$cacheContainer[$key] = array(
+		$data = array(
 			'service' => $service_max_detail,
 			'cache' => $cache_max_detail,
 			'monitor' => $monitor_max_detail
 		);
-		return $cacheContainer[$key];
+		cache::set($cache_key, $data,$this->_duration);
+		return $data;
 	}
 	
 	/**
@@ -752,6 +744,13 @@ class algorithm extends BaseComponent
 	 */
 	function traffic_stat_alone($sn = NULL)
 	{
+		$cache_key = 'traffic_stat_alone_'.$this->_starttime.$this->_endtime.$this->_duration.(is_array($sn)?implode(',', $sn):$sn);
+		$result = \application\extend\cache::get($cache_key);
+		if (!empty($result))
+		{
+			return $result;
+		}
+		
 		$sn = $this->combineSns($sn);
 		
 		$service = array();
@@ -986,17 +985,18 @@ class algorithm extends BaseComponent
 					{
 						$temp_service[$stat['time']] -= $stat['sum_service'];
 					}
-					/* if (isset($temp_cache[$stat['time']]))
-					{
-						$temp_cache[$stat['time']] -= $stat['sum_cache'];
-					} */
 				}
 	
 				$service[$t_time] = empty($temp_service)?0:max($temp_service);
 				$cache[$t_time] = empty($temp_cache)?0:max($temp_cache);
 			}
 		}
-		return array('service' => $service,'cache' => $cache);
+		
+		$data = array('service' => $service,'cache' => $cache);
+		
+		\application\extend\cache::set($cache_key, $data,$this->_duration);
+		
+		return $data;
 	}
 	
 	/**
@@ -1004,12 +1004,12 @@ class algorithm extends BaseComponent
 	 */
 	function traffic_stat_service_cache_proxy($sn = array())
 	{
-		$key = md5($this->_starttime.$this->_endtime.$this->_duration.(is_array($sn)?implode(',', $sn):$sn));
+		$cache_key = 'traffic_stat_service_cache_proxy_'.$this->_starttime.$this->_endtime.$this->_duration.(is_array($sn)?implode(',', $sn):$sn);
 		
-		static $cacheContainer = array();
-		if (isset($cacheContainer[$key]) && !empty($cacheContainer[$key]))
+		$result = cache::get($cache_key);
+		if (!empty($result))
 		{
-			return $cacheContainer[$key];
+			return $result;
 		}
 		
 		$sn = $this->combineSns($sn);
@@ -1161,12 +1161,13 @@ class algorithm extends BaseComponent
 				$proxy_max_detail[$t_time] = 0;
 			}
 		}
-		$cacheContainer[$key] = array(
+		$data = array(
 			'service' => $service_max_detail,
 			'cache' => $cache_max_detail,
 			'proxy' => $proxy_max_detail,
 		);
-		return $cacheContainer[$key];
+		cache::set($cache_key, $data,$this->_duration);
+		return $data;
 	}
 	
 	/**
@@ -1175,16 +1176,14 @@ class algorithm extends BaseComponent
 	 */
 	function operation_stat($sn = array())
 	{
-		$key = md5($this->_starttime.$this->_endtime.$this->_duration.(is_array($sn)?implode(',', $sn):$sn));
-		
-		static $cacheContainer = array();
-		if (isset($cacheContainer[$key]) && !empty($cacheContainer[$key]))
+		$cache_key = 'operation_stat_'.$this->_starttime.$this->_endtime.$this->_duration.(is_array($sn)?implode(',', $sn):$sn);
+		$result = \application\extend\cache::get($cache_key);
+		if (!empty($result))
 		{
-			return $cacheContainer[$key];
+			return $result;
 		}
 		
 		$sn = $this->combineSns($sn);
-		
 		
 		switch ($this->_duration)
 		{
@@ -1270,7 +1269,7 @@ class algorithm extends BaseComponent
 				$operation_stat['cache'][$t_time] = $result['sum_cache']*1;
 			}
 		}
-		$cacheContainer[$key] = $operation_stat;
-		return $cacheContainer[$key];
+		cache::set($cache_key, $operation_stat,$this->_duration);
+		return $operation_stat;
 	}
 }

@@ -12,6 +12,18 @@ class task extends bgControl
 {
 	function minute()
 	{
+		/* $starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$time = $this->buildData();
+		$this->model('build_data_log')->insert(array(
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+			'response' => '',
+		)); */
+		
 		$minute5 = new debugger();
 		$minute5->start();
 		$commands = array(
@@ -210,7 +222,8 @@ class task extends bgControl
 		$hour = date('H');
 		$week = date('N');
 		$day = date('d');
-		//每5分钟执行
+		
+		//每5分钟执行  暂时调整为30分钟一次
 		if ($minute%5 === 0)
 		{
 			$minute5 = $this->minute();
@@ -342,5 +355,32 @@ class task extends bgControl
 	function rebuild()
 	{
 		$this->model('cache')->truncate();
+	}
+	
+	/**
+	 * 创建第三种算法的数据
+	 */
+	function buildData()
+	{
+		$startTime = $this->model('build_data_log')->scalar('max(data_endtime)');
+		if (empty($startTime))
+		{
+			$startTime = date('Y-m-d H:i:s',strtotime('-5 minute'));
+		}
+		
+		$endTime = date('Y-m-d H:i:s');
+		
+		$result = $this->model('traffic_stat')->where('add_time >=? and add_time<?',array(
+			$startTime,$endTime
+		))->select();
+		foreach ($result as $r)
+		{
+			
+		}
+		
+		return array(
+			'starttime' => $startTime,
+			'endtime' => $endTime,
+		);
 	}
 }
