@@ -30,14 +30,15 @@ $sql_mode = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CRE
 
 $init_command = array(
 	'set sql_mode = "'.$sql_mode.'"',
+	'set global max_allowed_packet = 512*1024*1024'
 );
 return array(
 	'cloud_web_v2' => array(
 		'db_type' => 'mysql',
 		'db_server' => $dbhost,
 		'db_dbname' => 'cloud_web_v2',
-		'db_user' => 'cm2_admin',
-		'db_password' => 'fxd^CM2-2016',
+		'db_user' => $dbuser,
+		'db_password' => $dbpass,
 		'db_charset' => 'utf8',
 		'init_command' => $init_command,
 	),

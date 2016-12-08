@@ -3,6 +3,7 @@ namespace application\control;
 
 use application\extend\bgControl;
 use framework\core\debugger;
+use application\algorithm\cache;
 
 /**
  * 生成各个接口的文件数据
@@ -53,7 +54,7 @@ class task extends bgControl
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
-		$time = $cacheComponent->traffic_stat(300);
+		$time = $cacheComponent->traffic_stat(60*60);
 		$datadebugger->stop();
 		$this->model('build_data_log')->insert(array(
 			'name' => 'traffic_stat',
@@ -97,7 +98,7 @@ class task extends bgControl
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
-		$time = $cacheComponent->traffic_stat(300);
+		$time = $cacheComponent->traffic_stat(2*60*60);
 		$datadebugger->stop();
 		$this->model('build_data_log')->insert(array(
 			'name' => 'traffic_stat',
@@ -124,7 +125,7 @@ class task extends bgControl
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
-		$time = $cacheComponent->traffic_stat(300);
+		$time = $cacheComponent->traffic_stat(24*60*60);
 		$datadebugger->stop();
 		$this->model('build_data_log')->insert(array(
 			'name' => 'traffic_stat',
@@ -420,5 +421,61 @@ class task extends bgControl
 	function buildData()
 	{
 		
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->traffic_stat(300);
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'traffic_stat',
+			'duration'=>300,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->traffic_stat(60*60);
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'traffic_stat',
+			'duration'=>60*60,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->traffic_stat(2*60*60);
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'traffic_stat',
+			'duration'=>2*60*60,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->traffic_stat(24*60*60);
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'traffic_stat',
+			'duration'=>24*60*60,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
 	}
 }

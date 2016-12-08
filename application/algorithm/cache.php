@@ -1,9 +1,8 @@
 <?php
 namespace application\algorithm;
-use framework\core\component;
-use framework\core\debugger;
+use application\extend\BaseComponent;
 
-class cache extends component
+class cache extends BaseComponent
 {
 	function initlize()
 	{
@@ -15,14 +14,15 @@ class cache extends component
 	 */
 	function traffic_stat($duration)
 	{
-		$startTime = $this->model('build_data_log')->scalar('max(data_endtime)');
+		$startTime = $this->model('build_data_log')
+		->where('name=? and duration=?',array('traffic_stat',$duration))
+		->scalar('max(data_endtime)');
 		if (empty($startTime))
 		{
-			$startTime = date('Y-m-d H:i:s',strtotime('-5 minute'));
+			$startTime = date('Y-m-d H:i:s',strtotime('-7 day'));
 		}
 		
 		$endTime = date('Y-m-d H:i:s');
-		
 		
 		$time_traffic_stat = $this->model('traffic_stat')->where('add_time >=? and add_time<?',array(
 			$startTime,$endTime
@@ -63,11 +63,14 @@ class cache extends component
 					'service' => $service,
 					'cache' => $traffic_stat['cache'][$time],
 					'monitor' => $traffic_stat['monitor'][$time],
+					'max_cache' => $traffic_stat['max_cache'][$time],
+					'icache_cache' => $traffic_stat['icache_cache'][$time],
+					'vpe_cache' => $traffic_stat['vpe_cache'][$time],
 				));
 			}
 		}
 		$this->model($tableName)->duplicate(array(
-			'service','cache','monitor'
+			'service','cache','monitor','max_cache','icache_cache','vpe_cache'
 		));
 		$this->model($tableName)->commitCompress();
 		

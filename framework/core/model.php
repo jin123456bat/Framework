@@ -478,6 +478,7 @@ class model extends component
 				$insert_duplicate_values = isset($this->_compress_sql['insert_duplicate_values'])?$this->_compress_sql['insert_duplicate_values']:'';
 				unset($this->_compress_sql['insert_duplicate_values']);
 				$insert_sql = explode(';',$this->_compress_sql['insert']);
+				
 				$insert_sql = array_map(function($sql) use($insert_duplicate_values){
 					return $sql.$insert_duplicate_values;
 				}, $insert_sql);

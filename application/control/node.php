@@ -283,7 +283,9 @@ class node extends BaseControl
 		$duration = 5*60;//5分钟
 		$algorithm = new algorithm($start_time,$end_time,$duration);
 		$speed = $algorithm->traffic_stat($sn);
-		
+		unset($speed['icache_cache']);
+		unset($speed['vpe_cache']);
+		unset($speed['max_cache']);
 		$speed = array_merge($speed,array(
 			'sys_disk_used' => array(),
 			'data_disk_used' => array(),
