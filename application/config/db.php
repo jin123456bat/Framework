@@ -13,11 +13,13 @@ switch($_SERVER['HTTP_HOST'])
 		$dbhost = '192.168.1.225';
 		$dbpass = 'fxdata_Select-2016';
 		$dbuser = 'selecter';
+		//$dbuser= 'cm2_admin';
+		//$dbpass = 'fxd^CM2-2016';
 	break;
-	case '192.168.0.73':
-		$dbhost = 'localhost';
-		$dbpass = 'jin2164389';
-		$dbuser = 'root';
+	case '192.168.0.74':
+		$dbhost = '192.168.1.225';
+		$dbpass = 'fxdata_Select-2016';
+		$dbuser = 'selecter';
 	break;
 	default:
 		$dbhost = 'localhost';
@@ -34,8 +36,8 @@ return array(
 		'db_type' => 'mysql',
 		'db_server' => $dbhost,
 		'db_dbname' => 'cloud_web_v2',
-		'db_user' => $dbuser,
-		'db_password' => $dbpass,
+		'db_user' => 'cm2_admin',
+		'db_password' => 'fxd^CM2-2016',
 		'db_charset' => 'utf8',
 		'init_command' => $init_command,
 	),

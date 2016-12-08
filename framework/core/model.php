@@ -25,6 +25,21 @@ class model extends component
 		$this->_table = $table;
 	}
 	
+	/**
+	 * show variables like $name
+	 * @param string $name
+	 * @return NULL|boolean
+	 */
+	public function getVariables($name = '')
+	{
+		if (!empty($name))
+		{
+			$result = $this->query('show variables like ?',array($name));
+			return isset($result[0]['Value'])?$result[0]['Value']:NULL;
+		}
+		return $this->query('show variables');
+	}
+	
 	public static function debug_trace_sql()
 	{
 		return self::$_history;
@@ -109,6 +124,7 @@ class model extends component
 	private function parse()
 	{
 		$this->_desc = $this->query('DESC `'.$this->_table.'`');
+		$this->_config['max_allowed_packet'] = $this->getVariables('max_allowed_packet');
 	}
 	
 	/**
@@ -292,19 +308,69 @@ class model extends component
 		//$this->_sql->from($this->_table);
 		if ($this->_compress)
 		{
+			static $__strlen = 0;
 			if (!isset($this->_compress_sql['insert']))
 			{
 				$keys = array_keys($data);
 				$this->_compress_sql['insert'] = 'INSERT INTO '.$this->_table.' (`'.implode('`,`', $keys).'`) values (\''.implode('\',\'', $data).'\')';
+				$__strlen = strlen($this->_compress_sql['insert']);
 			}
 			else
 			{
-				$this->_compress_sql['insert'] .= ',(\''.implode('\',\'', $data).'\')';
+				$sql = ',(\''.implode('\',\'', $data).'\')';
+				$this->_compress_sql['insert_duplicate_values'] = isset($this->_compress_sql['insert_duplicate_values'])?$this->_compress_sql['insert_duplicate_values']:'';
+				if (($__strlen+strlen($sql)+strlen($this->_compress_sql['insert_duplicate_values'])+1)*3 < $this->_config['max_allowed_packet'])
+				{
+					$this->_compress_sql['insert'] .= $sql;
+					$__strlen+=strlen($sql);
+				}
+				else
+				{
+					$keys = array_keys($data);
+					$sql = 'INSERT INTO '.$this->_table.' (`'.implode('`,`', $keys).'`) values (\''.implode('\',\'', $data).'\')';
+					$this->_compress_sql['insert'] .= ';'.$sql;
+					$__strlen = strlen($sql);
+				}
 			}
 			return true;
 		}
 		$sql = $this->_sql->insert($data);
 		return $this->query($sql);
+	}
+	
+	/**
+	 * insert into on duplicate
+	 * 目前增加了在compress状态下的使用条件，对于多个insert的duplicate
+	 * @param unknown $name
+	 * @param string $value
+	 * @return \framework\core\database\sql
+	 */
+	function duplicate($name,$value = '')
+	{
+		if ($this->_compress)
+		{
+			if (is_array($name))
+			{
+				//是否是数字下标
+				$source_keys = array_keys($name);
+				$des_keys = range(0, count($name)-1,1);
+				$diff = array_diff($source_keys,$des_keys);
+				$is_num_index = empty($diff);
+				if ($is_num_index)
+				{
+					$duplicate = '';
+					foreach ($name as $n)
+					{
+						$duplicate .= $n.'=VALUES('.$n.'),';
+					}
+					$duplicate = rtrim($duplicate,',');
+					$this->_compress_sql['insert_duplicate_values'] = ' ON DUPLICATE KEY UPDATE '.$duplicate;
+					return $this;
+				}
+			}
+		}
+		$this->_sql->duplicate($name,$value);
+		return $this;
 	}
 	
 	/**
@@ -340,7 +406,6 @@ class model extends component
 			$complete_sql = $this->_sql->getSql($sql,$array);
 			self::$_history[] = $complete_sql;
 		}
-		
 		if ($this->_compress)
 		{
 			$this->_compress_sql[] = $complete_sql;
@@ -408,8 +473,26 @@ class model extends component
 	{
 		if ($this->_compress && !empty($this->_compress_sql))
 		{
-			$sql = implode(';', $this->_compress_sql).';';
-			$result = $this->_db->exec($sql);
+			if (isset($this->_compress_sql['insert']))
+			{
+				$insert_duplicate_values = isset($this->_compress_sql['insert_duplicate_values'])?$this->_compress_sql['insert_duplicate_values']:'';
+				unset($this->_compress_sql['insert_duplicate_values']);
+				$insert_sql = explode(';',$this->_compress_sql['insert']);
+				$insert_sql = array_map(function($sql) use($insert_duplicate_values){
+					return $sql.$insert_duplicate_values;
+				}, $insert_sql);
+				$this->_compress_sql = array_merge($this->_compress_sql,$insert_sql);
+				unset($this->_compress_sql['insert']);
+			}
+			$sql = array_shift($this->_compress_sql);
+			$sql = trim($sql,' ;');//去除前后空格和分号
+			$sql = str_replace('  ', ' ', $sql);//把2个空格转化为1个空格
+			$result = 0;
+			while (!empty($sql))
+			{
+				$result += $this->_db->exec($sql.';');
+				$sql = array_shift($this->_compress_sql);
+			}
 			$this->_compress = false;
 			return $result;
 		}

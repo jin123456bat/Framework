@@ -138,7 +138,6 @@ class api extends apiControl
 							'sns' => $newsn_string,
 							'num' => 1,
 						));
-						//$create_cache_sn = $newsn;
 						$overview_sn = $newsn_string;
 						$detail_sn = array_diff($newsn, $oldsn);
 					}
