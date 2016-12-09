@@ -793,31 +793,13 @@ class algorithm extends BaseComponent
 	function operation_stat($sn = array())
 	{
 		$sn = $this->combineSns($sn);
+		$sn = array_map(function($s){
+			return '%'.substr($s,3);
+		}, $sn);
 		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
 		{
-			if (!empty($sn))
-			{
-				if (is_array($sn))
-				{
-					$sql = '';
-					$param = array();
-					reset($sn);
-					$s = current($sn);
-					while ($s)
-					{
-						$sql .= 'sn like ? or ';
-						$param[] = '%'.substr($s,3);
-						$s = next($sn);
-					}
-					$sql = substr($sql, 0,-4);
-					$this->model('operation_stat')->where($sql,$param);
-				}
-				else if(is_scalar($sn))
-				{
-					$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
-				}
-			}
 			$result = $this->model('operation_stat')
+			->likein('sn',$sn)
 			->where('make_time>=? and make_time<?',array(
 				$t_time,
 				date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration),
