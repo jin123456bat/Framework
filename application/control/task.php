@@ -303,7 +303,7 @@ class task extends bgControl
 		//每2小时的5分钟执行一次
 		if ($hour%2===0 && $minute=='05')
 		{
-			$hour2->$this->hour2();
+			$hour2 = $this->hour2();
 		}
 		
 		//每天的05分钟执行一次
