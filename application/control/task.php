@@ -28,6 +28,21 @@ class task extends bgControl
 			'data_endtime' => $time['endtime'],
 			'runtime' => $datadebugger->getTime(),
 		));
+		//创建5分钟的流量图
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->operation_stat(300);
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'operation_stat',
+			'duration'=>300,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
 		
 		$minute5 = new debugger();
 		$minute5->start();
@@ -58,6 +73,20 @@ class task extends bgControl
 		$datadebugger->stop();
 		$this->model('build_data_log')->insert(array(
 			'name' => 'traffic_stat',
+			'duration'=>60*60,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->operation_stat(60*60);
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'operation_stat',
 			'duration'=>60*60,
 			'run_starttime' => $starttime,
 			'run_endtime' => date('Y-m-d H:i:s'),
@@ -129,6 +158,20 @@ class task extends bgControl
 		$datadebugger->stop();
 		$this->model('build_data_log')->insert(array(
 			'name' => 'traffic_stat',
+			'duration'=>24*60*60,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->operation_stat(24*60*60);
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'operation_stat',
 			'duration'=>24*60*60,
 			'run_starttime' => $starttime,
 			'run_endtime' => date('Y-m-d H:i:s'),
@@ -292,6 +335,21 @@ class task extends bgControl
 		//每半小时执行一次
 		if ($minute == '35' || $minute == '05')
 		{
+			//创建30分钟的流量图
+			$starttime = date('Y-m-d H:i:s');
+			$datadebugger = new debugger();
+			$cacheComponent = new \application\algorithm\cache();
+			$time = $cacheComponent->operation_stat(1800);
+			$datadebugger->stop();
+			$this->model('build_data_log')->insert(array(
+				'name' => 'operation_stat',
+				'duration'=>1800,
+				'run_starttime' => $starttime,
+				'run_endtime' => date('Y-m-d H:i:s'),
+				'data_starttime' => $time['starttime'],
+				'data_endtime' => $time['endtime'],
+				'runtime' => $datadebugger->getTime(),
+			));
 		}
 		
 		//每小时的5分钟执行一次

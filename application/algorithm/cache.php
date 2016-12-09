@@ -20,6 +20,7 @@ class cache extends BaseComponent
 		}
 		
 		$endTime = date('Y-m-d H:i:s');
+		return array($startTime,$endTime);
 	}
 	
 	/**
@@ -59,6 +60,7 @@ class cache extends BaseComponent
 		foreach ($sn as $s)
 		{
 			$traffic_stat = $algorithm->traffic_stat($s);
+			
 			foreach ($traffic_stat['service'] as $time => $service)
 			{
 				$this->model($tableName)
@@ -101,7 +103,7 @@ class cache extends BaseComponent
 		$min_time = date('Y-m-d H:i:s',floor(strtotime($time['max'])/$duration)*$duration);
 		
 		$operation_stat = array();
-		$sn = $this->combineSns($sn);
+		$sn = $this->combineSns();
 		for($t_time = $min_time;strtotime($t_time)<strtotime($max_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
 		{
 			foreach ($sn as $s)
@@ -110,7 +112,7 @@ class cache extends BaseComponent
 				->where('sn like ?',array('%'.substr($s,3)))
 				->where('make_time>=? and make_time<?',array(
 					$t_time,
-					date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration),
+					date('Y-m-d H:i:s',strtotime($t_time) + $duration),
 				))
 				->group(array('class','category'))
 				->find(array(
@@ -121,6 +123,7 @@ class cache extends BaseComponent
 					'proxy_cache_size' => 'sum(proxy_cache_size)'
 				));
 				$operation_stat[] = array(
+					'time' => $t_time,
 					'sn' => $s,
 					'class' => $result['class'],
 					'category' => $result['category'],

@@ -305,7 +305,6 @@ class model extends component
 			$data = $temp;
 		}
 		
-		//$this->_sql->from($this->_table);
 		if ($this->_compress)
 		{
 			static $__strlen = 0;
