@@ -14,8 +14,6 @@ use application\extend\cache;
  */
 class content extends BaseControl
 {
-	private $_sn;
-	
 	function initlize()
 	{
 		parent::initlize();
@@ -40,8 +38,6 @@ class content extends BaseControl
 			}
 		}
 		
-		$this->_sn = $this->combineSns();
-		
 		$start_time = $this->_startTime;
 		$end_time = $this->_endTime;
 		
@@ -62,40 +58,7 @@ class content extends BaseControl
 		{
 			$total_operation_stat_cache[$t_time] = 0;
 			$total_operation_stat_service[$t_time] = 0;
-			
-			if (!empty($this->_sn))
-			{
-				if (is_array($this->_sn))
-				{
-					$where = '';
-					$param = array();
-					foreach ($this->_sn as $sn)
-					{
-						$where .= 'sn like ? or ';
-						$param[] = '%'.substr($sn,3);
-					}
-					$where = substr($where, 0,-4);
-					$this->model('operation_stat')->where($where,$param);
-				}
-				else if (is_scalar($this->_sn))
-				{
-					$this->model('operation_stat')->where('sn like ?','%'.substr($sn,3));
-				}
-			}
-			$result = $this->model('operation_stat')
-			->where('make_time >=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
-			))
-			->group('class,category')
-			->select(array(
-				'class',
-				'category',
-				'service_size' => 'sum(service_size)',
-				'cache_size' => 'sum(cache_size)',
-				'proxy_cache_size' => 'sum(proxy_cache_size)',
-			));
-			
+				
 			$category_cache['http'][$t_time] = 0;
 			$category_cache['mobile'][$t_time] = 0;
 			$category_cache['videoLive'][$t_time] = 0;
@@ -104,52 +67,73 @@ class content extends BaseControl
 			$category_service['mobile'][$t_time] = 0;
 			$category_service['videoLive'][$t_time] = 0;
 			$category_service['videoDemand'][$t_time] = 0;
-			
-			foreach ($result as $r)
+		}
+		
+		switch ($this->_duration_second)
+		{
+			case 300:$tableName = 'operation_stat_5_minute';break;
+			case 3600:$tableName = 'operation_stat_1_hour';break;
+			case 24*3600:$tableName = 'operation_stat_1_day';break;
+		}
+		
+		$result = $this->model($tableName)
+		->where('time>=? and time<?',array(
+			$start_time,$end_time
+		))
+		->group('class,category')
+		->select(array(
+			'time',
+			'class',
+			'category',
+			'service_size',
+			'cache_size',
+			'proxy_cache_size',
+		));
+		foreach ($result as $r)
+		{
+			$t_time = $r['time'];
+			switch ($r['class'])
 			{
-				switch ($r['class'])
-				{
-					case '0':$classname = 'http';break;
-					case '1':$classname = 'mobile';break;
-					case '2':
-						if ($r['category']>=128)
-						{
-							$classname = 'videoLive';
-						}
-						else
-						{
-							$classname = 'videoDemand';
-						}
+				case '0':$classname = 'http';break;
+				case '1':$classname = 'mobile';break;
+				case '2':
+					if ($r['category']>=128)
+					{
+						$classname = 'videoLive';
+					}
+					else
+					{
+						$classname = 'videoDemand';
+					}
 					break;
-				}
-				
-				$total_operation_stat_cache[$t_time] += $r['cache_size'];
-				$total_operation_stat_cache[$t_time] += $r['proxy_cache_size'];
-				$total_operation_stat_service[$t_time] += $r['service_size'];
-				
-				$category_service[$classname][$t_time] += $r['service_size'] * 1;
-				if ($classname == 'videoLive')
-				{
-					$flow[$classname]['cache'] += $r['proxy_cache_size']*1;
-					$category_cache[$classname][$t_time] += $r['proxy_cache_size'] * 1;
-				}
-				else
-				{
-					$flow[$classname]['cache'] += $r['cache_size']*1;
-					$category_cache[$classname][$t_time] += $r['cache_size'] * 1;
-				}
-				
-				$flow[$classname]['service'] += $r['service_size'] * 1;
-				
-				$flow['total']['service'] += $r['service_size']*1;
-				$flow['total']['cache'] += $r['cache_size']*1;
-				$flow['total']['cache'] += $r['proxy_cache_size']*1;
 			}
+			
+			$total_operation_stat_cache[$t_time] += $r['cache_size'];
+			$total_operation_stat_cache[$t_time] += $r['proxy_cache_size'];
+			$total_operation_stat_service[$t_time] += $r['service_size'];
+			
+			$category_service[$classname][$t_time] += $r['service_size'] * 1;
+			if ($classname == 'videoLive')
+			{
+				$flow[$classname]['cache'] += $r['proxy_cache_size']*1;
+				$category_cache[$classname][$t_time] += $r['proxy_cache_size'] * 1;
+			}
+			else
+			{
+				$flow[$classname]['cache'] += $r['cache_size']*1;
+				$category_cache[$classname][$t_time] += $r['cache_size'] * 1;
+			}
+			
+			$flow[$classname]['service'] += $r['service_size'] * 1;
+			
+			$flow['total']['service'] += $r['service_size']*1;
+			$flow['total']['cache'] += $r['cache_size']*1;
+			$flow['total']['cache'] += $r['proxy_cache_size']*1;
 		}
 		
 		//获取traffic_stat  做占比
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat_alone($this->_sn);
+		$traffic_stat = $algorithm->traffic_stat_alone();
 		$service = $traffic_stat['service'];
 		$cache = $traffic_stat['cache'];
 		
@@ -160,7 +144,6 @@ class content extends BaseControl
 				$value = $service[$time] * division($value, $total_operation_stat_service[$time]);
 			}
 		}
-		
 		
 		foreach ($category_cache as $classname => &$v)
 		{
@@ -284,8 +267,6 @@ class content extends BaseControl
 			}
 		}
 		
-		$this->_sn = $this->combineSns();
-		
 		$start_time = $this->_startTime;
 		$end_time = $this->_endTime;
 		
@@ -311,52 +292,53 @@ class content extends BaseControl
 				'cache' => 0,
 			);
 		}
-		
-		$sn = array_map(function($s){
-			return '%'.substr($s, 3);
-		}, $this->_sn);
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
 		{
-			$result = $this->model('operation_stat')
-			->likein('sn',$sn)
-			->where('make_time >=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
-			))
-			->where('class=? and category<?',array(2,128))
-			->group('category')
-			->select(array(
-				'category',
-				'service_size' => 'sum(service_size)',
-				'cache_size' => 'sum(cache_size)',
-				'proxy_cache_size' => 'sum(proxy_cache_size)',
-			));
-			
 			foreach ($category['videoDemand'] as $key=>$name)
 			{
 				$cp_service_flow[$name][$t_time] = 0;
 				$cp_cache_flow[$name][$t_time] = 0;
 			}
-			
-			foreach ($result as $r)
+		}
+		
+		switch ($this->_duration_second)
+		{
+			case 300:$tableName = 'operation_stat_5_minute';break;
+			case 3600:$tableName = 'operation_stat_1_hour';break;
+			case 24*3600:$tableName = 'operation_stat_1_day';break;
+		}
+		
+		$result = $this->model($tableName)
+		->where('time>=? and time<?',array(
+			$start_time,$end_time
+		))
+		->where('class=? and category<?',array(2,128))
+		->select(array(
+			'time',
+			'category',
+			'service_size',
+			'cache_size',
+			'proxy_cache_size',
+		));
+		foreach ($result as $r)
+		{
+			$t_time = $r['time'];
+			if(isset($category['videoDemand'][$r['category']]))
 			{
-				if(isset($category['videoDemand'][$r['category']]))
-				{
-					$categoryname = $category['videoDemand'][$r['category']];
-				}
-				else
-				{
-					$categoryname = '其他';
-				}
-				
-				$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
-				$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
-				
-				$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
-				$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
-				$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
-				$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
+				$categoryname = $category['videoDemand'][$r['category']];
 			}
+			else
+			{
+				$categoryname = '其他';
+			}
+		
+			$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
+			$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
+		
+			$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
+			$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
+			$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
+			$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
 		}
 		
 		uasort($cp_cache_service_sum, function($a,$b){
@@ -431,8 +413,8 @@ class content extends BaseControl
 		
 		//进行占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat_alone($this->_sn);
-		$operation_stat = $algorithm->operation_stat($this->_sn);
+		$traffic_stat = $algorithm->traffic_stat_alone();
+		$operation_stat = $algorithm->operation_stat();
 		foreach ($cp_cache_flow as $classname => &$v)
 		{
 			foreach ($v as $time=>&$value)
@@ -526,8 +508,6 @@ class content extends BaseControl
 			}
 		}
 		
-		$this->_sn = $this->combineSns();
-		
 		$start_time = $this->_startTime;
 		$end_time = $this->_endTime;
 		
@@ -554,28 +534,8 @@ class content extends BaseControl
 				'cache' => 0,
 			);
 		}
-		
-		
-		$sn = array_map(function($s){
-			return '%'.substr($s, 3);
-		}, $this->_sn);
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
 		{
-			$result = $this->model('operation_stat')
-			->likein('sn',$sn)
-			->where('make_time >=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
-			))
-			->where('class=? and category>=?',array(2,128))
-			->group('category')
-			->select(array(
-				'category'=>'category - 128',
-				'service_size' => 'sum(service_size)',
-				'cache_size' => 'sum(proxy_cache_size)+sum(cache_size)',
-			));
-			
-			
 			//变量初始化
 			$cp_service_flow['其他'][$t_time] = 0;
 			$cp_cache_flow['其他'][$t_time] = 0;
@@ -584,32 +544,47 @@ class content extends BaseControl
 				$cp_service_flow[$name][$t_time] = 0;
 				$cp_cache_flow[$name][$t_time] = 0;
 			}
-			
-			
-			foreach ($result as $r)
-			{
-				if (isset($category['videoLive'][$r['category']]))
-				{
-					$categoryname = $category['videoLive'][$r['category']];
-				}
-				else
-				{
-					$categoryname = '其他';
-				}
-				
-				
-				$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
-				$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
-				
-				$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
-				$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
-				
-				$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
-				$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
-			}
 		}
 		
+		switch ($this->_duration_second)
+		{
+			case 300:$tableName = 'operation_stat_5_minute';break;
+			case 3600:$tableName = 'operation_stat_1_hour';break;
+			case 24*3600:$tableName = 'operation_stat_1_day';break;
+		}
 		
+		$result = $this->model($tableName)
+		->where('time>=? and time<?',array(
+			$start_time,$end_time
+		))
+		->where('class=? and category>=?',array(2,128))
+		->select(array(
+			'time',
+			'category' => 'category-128',
+			'service_size',
+			'cache_size' => 'proxy_cache_size + cache_size',
+		));
+		foreach ($result as $r)
+		{
+			$t_time = $r['time'];
+			if (isset($category['videoLive'][$r['category']]))
+			{
+				$categoryname = $category['videoLive'][$r['category']];
+			}
+			else
+			{
+				$categoryname = '其他';
+			}
+		
+			$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
+			$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
+		
+			$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
+			$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
+		
+			$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
+			$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
+		}
 		
 		//排序
 		uasort($cp_cache_service_sum, function($a,$b){
@@ -669,8 +644,8 @@ class content extends BaseControl
 		
 		//占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat_alone($this->_sn);
-		$operation_stat = $algorithm->operation_stat($this->_sn);
+		$traffic_stat = $algorithm->traffic_stat_alone();
+		$operation_stat = $algorithm->operation_stat();
 		foreach ($cp_cache_flow as $classname=>&$v)
 		{
 			foreach ($v as $time => &$value)
@@ -767,8 +742,6 @@ class content extends BaseControl
 			}
 		}
 		
-		$this->_sn = $this->combineSns();
-		
 		$start_time = $this->_startTime;
 		$end_time = $this->_endTime;
 		
@@ -792,14 +765,6 @@ class content extends BaseControl
 				'cache' => 0,
 			)
 		);
-		
-		$category = $this->getConfig('category');
-		
-		
-		
-		$sn = array_map(function($s){
-			return '%'.substr($s, 3);
-		}, $this->_sn);
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
 		{
 			$cp_cache_flow['Android'][$t_time] = 0;
@@ -808,39 +773,47 @@ class content extends BaseControl
 			$cp_service_flow['Android'][$t_time] = 0;
 			$cp_service_flow['IOS'][$t_time] = 0;
 			$cp_service_flow['WP'][$t_time] = 0;
-			
-			$result = $this->model('operation_stat')
-			->likein('sn',$sn)
-			->where('make_time >=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
-			))
-			->group('category')
-			->where('class=?',array(1))
-			->select(array(
-				'category',
-				'service_size' => 'sum(service_size)',
-				'cache_size' => 'sum(cache_size)',
-			));
-				
-			foreach ($result as $r)
-			{
-				$categoryname = $category['mobile'][$r['category']];
+		}
 		
-				$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
-				$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
-				
-				$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
-				$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
-				$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
-				$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
-			}
+		$category = $this->getConfig('category');
+		
+		switch ($this->_duration_second)
+		{
+			case 300:$tableName = 'operation_stat_5_minute';break;
+			case 3600:$tableName = 'operation_stat_1_hour';break;
+			case 24*3600:$tableName = 'operation_stat_1_day';break;
+		}
+		
+		$result = $this->model($tableName)
+		->where('time>=? and time<?',array(
+			$start_time,$end_time
+		))
+		->where('class=?',array(1))
+		->select(array(
+			'time',
+			'category',
+			'service_size',
+			'cache_size',
+			'proxy_cache_size',
+		));
+		foreach ($result as $r)
+		{
+			$t_time = $r['time'];
+			$categoryname = $category['mobile'][$r['category']];
+		
+			$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
+			$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
+		
+			$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
+			$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
+			$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
+			$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
 		}
 		
 		//占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat_alone($this->_sn);
-		$operation_stat = $algorithm->operation_stat($this->_sn);
+		$traffic_stat = $algorithm->traffic_stat_alone();
+		$operation_stat = $algorithm->operation_stat();
 	
 		foreach ($cp_cache_flow as $classname=>&$v)
 		{
@@ -912,8 +885,6 @@ class content extends BaseControl
 			}
 		}
 		
-		$this->_sn = $this->combineSns();
-		
 		$start_time = $this->_startTime;
 		$end_time = $this->_endTime;
 		
@@ -934,11 +905,6 @@ class content extends BaseControl
 			'service' => 0,
 			'cache' => 0,
 		);
-		
-		$sn = array_map(function($s){
-			return '%'.substr($s, 3);
-		}, $this->_sn);
-	
 		for($t_time = $start_time;strtotime($t_time)<strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second))
 		{
 			foreach ($category['http'] as $http)
@@ -946,42 +912,46 @@ class content extends BaseControl
 				$cp_service_flow[$http][$t_time] = 0;
 				$cp_cache_flow[$http][$t_time] = 0;
 			}
-			
-			//计算当前时间段内各个类型的业务流量
-			$this->model('operation_stat')->likein('sn',$this->_sn);
-			$result = $this->model('operation_stat')
-			->where('make_time >=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration_second)
-			))
-			->group('category')
-			->where('class=?',array(0))
-			->select(array(
-				'category',
-				'service_size' => 'sum(service_size)',
-				'cache_size' => 'sum(cache_size)',
-			));
-			
-			foreach ($result as $r)
-			{
-				$categoryname = $category['http'][$r['category']];
-				
-				$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
-				
-				$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
-				
-				$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
-				$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
-				$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
-				$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
-			}
 		}
 		
+		switch ($this->_duration_second)
+		{
+			case 300:$tableName = 'operation_stat_5_minute';break;
+			case 3600:$tableName = 'operation_stat_1_hour';break;
+			case 24*3600:$tableName = 'operation_stat_1_day';break;
+		}
+		
+		$result = $this->model($tableName)
+		->where('time>=? and time<?',array(
+			$start_time,$end_time
+		))
+		->where('class=?',array(0))
+		->select(array(
+			'time',
+			'category',
+			'service_size',
+			'cache_size',
+			'proxy_cache_size',
+		));
+		foreach ($result as $r)
+		{
+			$t_time = $r['time'];
+			$categoryname = $category['http'][$r['category']];
+		
+			$cp_service_flow[$categoryname][$t_time] += $r['service_size'] * 1;
+		
+			$cp_cache_flow[$categoryname][$t_time] += $r['cache_size'] * 1;
+		
+			$cp_cache_service_sum[$categoryname]['service'] += $r['service_size']*1;
+			$cp_cache_service_sum[$categoryname]['cache'] += $r['cache_size']*1;
+			$cp_cache_service_sum['总流量']['service'] += $r['service_size']*1;
+			$cp_cache_service_sum['总流量']['cache'] += $r['cache_size']*1;
+		}
 		
 		//占比计算
 		$algorithm = new algorithm($start_time,$end_time,$this->_duration_second);
-		$traffic_stat = $algorithm->traffic_stat_alone($this->_sn);
-		$operation_stat = $algorithm->operation_stat($this->_sn);
+		$traffic_stat = $algorithm->traffic_stat_alone();
+		$operation_stat = $algorithm->operation_stat();
 		
 		foreach ($cp_cache_flow as $classname=>&$v)
 		{

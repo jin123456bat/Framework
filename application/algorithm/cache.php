@@ -152,6 +152,33 @@ class cache extends BaseComponent
 			$vpe_cache_detail[$r['timenode']] = $vpe_cache*1;
 		}
 		
+		for($t_time = $startTime;strtotime($t_time)<strtotime($endTime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
+		{
+			if (!isset($service_max_detail[$t_time]))
+			{
+				$service_max_detail[$t_time] = 0;
+			}
+			if (!isset($cache_max_detail[$t_time]))
+			{
+				$cache_max_detail[$t_time] = 0;
+			}
+			if (!isset($monitor_max_detail[$t_time]))
+			{
+				$monitor_max_detail[$t_time] = 0;
+			}
+			if (!isset($max_cache_detail[$t_time]))
+			{
+				$max_cache_detail[$t_time] = 0;
+			}
+			if (!isset($icache_cache_detail[$t_time]))
+			{
+				$icache_cache_detail[$t_time] = 0;
+			}
+			if (!isset($vpe_cache_detail[$t_time]))
+			{
+				$vpe_cache_detail[$t_time] = 0;
+			}
+		}
 		
 		$data = array(
 			'service' => $service_max_detail,
@@ -283,11 +310,14 @@ class cache extends BaseComponent
 					'service' => $service,
 					'cache' => $traffic_stat['cache'][$time],
 					'monitor' => $traffic_stat['monitor'][$time],
+					'max_cache' => $traffic_stat['max_cache'][$time],
+					'icache_cache' => $traffic_stat['icache_cache'][$time],
+					'vpe_cache' => $traffic_stat['vpe_cache'][$time],
 				));
 			}
 		}
 		$this->model($tableName)->duplicate(array(
-			'service','cache','monitor'
+			'service','cache','monitor','max_cache','icache_cache','vpe_cache',
 		));
 		$this->model($tableName)->commitCompress();
 	
@@ -361,7 +391,7 @@ class cache extends BaseComponent
 	{
 		if (empty($startTime) && empty($endTime))
 		{
-			list($startTime,$endTime) = $this->getDataTime('operation_stat', $duration);
+			list($startTime,$endTime) = $this->getDataTime(__FUNCTION__, $duration);
 			
 			$time = $this->model('operation_stat')->where('create_time>=? and create_time<?',array(
 				$startTime,$endTime
@@ -382,23 +412,114 @@ class cache extends BaseComponent
 			
 		$operation_stat = $this->operation_stat_algorithm($duration, $min_time, $max_time);
 		
-		switch ($duration)
+		if ($duration == 300 || $duration==3600 || $duration == 86400)
 		{
-			case 24*3600:$tableName = 'operation_stat_1_day';break;
-			case 3600:$tableName = 'operation_stat_1_hour';break;
-			case 300:$tableName = 'operation_stat_5_minute';break;
-			case 30*60:$tableName = 'operation_stat_30_minute';break;
+			$tableName = 'operation_stat_'.$duration;
+			$operation_stat_info = array();
+			foreach ($operation_stat as $stat)
+			{
+				if (isset($operation_stat_info[$stat['time']]['service_size']))
+				{
+					$operation_stat_info[$stat['time']]['service_size'] += $stat['service_size'];
+				}
+				else
+				{
+					$operation_stat_info[$stat['time']]['service_size'] = $stat['service_size'];
+				}
+				
+				if (isset($operation_stat_info[$stat['time']]['cache_size']))
+				{
+					$operation_stat_info[$stat['time']]['cache_size'] += $stat['cache_size'];
+				}
+				else
+				{
+					$operation_stat_info[$stat['time']]['cache_size'] = $stat['cache_size'];
+				}
+				if (isset($operation_stat_info[$stat['time']]['proxy_cache_size']))
+				{
+					$operation_stat_info[$stat['time']]['proxy_cache_size'] += $stat['proxy_cache_size'];
+				}
+			}
+			$this->model($tableName)->startCompress();
+			foreach ($operation_stat_info as $time => $st)
+			{
+				$data = array(
+					'time' => $time,
+					'service_size' => $st['service_size'],
+					'cache_size' => $st['cache_size'],
+					'proxy_cache_size' => $st['proxy_cache_size'],
+				);
+				$this->model($tableName)->insert($data);
+			}
+			$this->model($tableName)->duplicate(array(
+				'service_size','cache_size','proxy_cache_size'
+			));
+			$this->model($tableName)->commitCompress();
+			unset($operation_stat_info);
+			unset($st);
+			unset($stat);
 		}
 		
-		$this->model($tableName)->startCompress();
-		foreach ($operation_stat as $stat)
+		
+		if ($duration == 1800 || $duration == 7200 || $duration == 86400)
 		{
-			$this->model($tableName)->insert($stat);
+			$operation_stat_class_category = array();
+			$tableName_operation_stat_class_category = 'operation_stat_class_category_'.$duration;
+			foreach ($operation_stat as $stat)
+			{
+				if (isset($operation_stat_class_category[$stat['time']][$stat['class']][$stat['category']]['service_size']))
+				{
+					$operation_stat_class_category[$stat['time']][$stat['class']][$stat['category']]['service_size'] += $stat['service_size'];
+				}
+				else
+				{
+					$operation_stat_class_category[$stat['time']][$stat['class']][$stat['category']]['service_size'] = $stat['service_size'];
+				}
+				if (isset($operation_stat_class_category[$stat['time']][$stat['class']][$stat['category']]['cache_size']))
+				{
+					$operation_stat_class_category[$stat['time']][$stat['class']][$stat['category']]['cache_size'] += $stat['cache_size'];
+				}
+				else
+				{
+					$operation_stat_class_category[$stat['time']][$stat['class']][$stat['category']]['cache_size'] = $stat['cache_size'];
+				}
+				if (isset($operation_stat_class_category[$stat['time']][$stat['class']][$stat['category']]['proxy_cache_size']))
+				{
+					$operation_stat_class_category[$stat['time']][$stat['class']][$stat['category']]['proxy_cache_size'] += $stat['proxy_cache_size'];
+				}
+				else
+				{
+					$operation_stat_class_category[$stat['time']][$stat['class']][$stat['category']]['proxy_cache_size'] = $stat['proxy_cache_size'];
+				}
+			}
+			unset($stat);
+			$this->model($tableName_operation_stat_class_category)->startCompress();
+			foreach ($operation_stat_class_category as $time => $v)
+			{
+				foreach ($v as $class => $vv)
+				{
+					foreach ($vv as $category => $st)
+					{
+						$data = array(
+							'time' => $time,
+							'class' => $class,
+							'category' => $category,
+							'service_size' => $st['service_size'],
+							'cache_size' => $st['cache_size'],
+							'proxy_cache_size' => $st['proxy_cache_size'],
+						);
+						$this->model($tableName_operation_stat_class_category)->insert($data);
+					}
+				}
+			}
+			unset($v);
+			unset($vv);
+			unset($st);
+			$this->model($tableName_operation_stat_class_category)->duplicate(array(
+				'service_size','cache_size','proxy_cache_size'
+			));
+			$this->model($tableName_operation_stat_class_category)->commitCompress();
 		}
-		$this->model($tableName)->duplicate(array(
-			'service_size','cache_size','proxy_cache_size'
-		));
-		$this->model($tableName)->commitCompress();
 		return array(
 			'starttime' => $startTime,
 			'endtime' => $endTime,

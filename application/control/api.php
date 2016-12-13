@@ -163,11 +163,14 @@ class api extends apiControl
 		
 		if(fastcgi_finish_request())
 		{
+			//关闭session,防止阻塞
+			session_write_close();
+			
 			//立即创建缓存
 			if (!empty($create_cache_sn))
 			{
 				//生成详情页的缓存
-				foreach ($detail_sn as $sn)
+				/* foreach ($detail_sn as $sn)
 				{
 					$commands = array(
 						'api_detail_hourly_1_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$sn,
@@ -177,7 +180,7 @@ class api extends apiControl
 						'api_detail_daily_5_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$sn,
 						'api_detail_daily_6_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$sn,
 					);
-				}
+				} */
 				
 				//生成概览页的缓存
 				//$create_cache_sn = implode(',', $create_cache_sn);

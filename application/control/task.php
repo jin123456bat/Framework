@@ -15,23 +15,44 @@ class task extends bgControl
 		$cacheComponent = new \application\algorithm\cache();
 		$starttime = '2016-11-01 00:00:00';
 		$endtime = date('Y-m-d H:i:s');
-		for ($t_time = $starttime;strtotime($t_time) < strtotime($endtime);$t_time = date('Y-m-d H:i:s',strtotime("+7 day",strtotime($t_time))))
+		for ($t_time = $starttime;strtotime($t_time) < strtotime($endtime);$t_time = date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))))
 		{
-			$cacheComponent->traffic_stat(1800,$t_time,date('Y-m-d H:i:s',strtotime("+7 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat(7200,$t_time,date('Y-m-d H:i:s',strtotime("+7 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat(86400,$t_time,date('Y-m-d H:i:s',strtotime("+7 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat_sn(300,$t_time,date('Y-m-d H:i:s',strtotime("+7 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat_sn(3600,$t_time,date('Y-m-d H:i:s',strtotime("+7 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat_sn(86400,$t_time,date('Y-m-d H:i:s',strtotime("+7 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(30*60,$t_time,date('Y-m-d H:i:s',strtotime("+7 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(5*60,$t_time,date('Y-m-d H:i:s',strtotime("+7 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(60*60,$t_time,date('Y-m-d H:i:s',strtotime("+7 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(24*60*60,$t_time,date('Y-m-d H:i:s',strtotime("+7 day",strtotime($t_time))));
+			
+			$cacheComponent->traffic_stat(300,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat(1800,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat(7200,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat(86400,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat_sn(300,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat_sn(3600,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat_sn(86400,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(30*60,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(5*60,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(60*60,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(2*60*60,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(24*60*60,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
 		}
 	}
 	
 	function minute5()
 	{
+		$minute5 = new debugger();
+		$minute5->start();
+		
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->traffic_stat(300);;
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'traffic_stat',
+			'duration'=>300,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
+		
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
@@ -62,12 +83,7 @@ class task extends bgControl
 			'data_endtime' => $time['endtime'],
 			'runtime' => $datadebugger->getTime(),
 		));
-	}
-	
-	function minute15()
-	{
-		$minute5 = new debugger();
-		$minute5->start();
+		
 		$commands = array(
 			'node_cds' => 'php '.ROOT.'/index.php -c node -a cds_cache',//CDS列表的数据
 			'main_overview_minutely_1' => 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 1',//首页 最近24小时的数据
@@ -78,6 +94,7 @@ class task extends bgControl
 			'content_http_minutely_1' => 'php '.ROOT.'/index.php -c content -a http -duration minutely -timemode 1',//内容交付常规资源 最近24小时的数据
 		);
 		$this->runTask($commands);
+		
 		$minute5->stop();
 		return $minute5;
 	}
@@ -401,14 +418,9 @@ class task extends bgControl
 		
 		if ($minute%5===0)
 		{
-			$this->minute5();
+			$minute5 = $this->minute5();
 		}
 		
-		//每5分钟执行  暂时调整为30分钟一次
-		if ($minute%15 === 0)
-		{
-			$minute5 = $this->minute15();
-		}
 		
 		//每半小时执行一次
 		if ($minute == '35' || $minute == '05')

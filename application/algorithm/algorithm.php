@@ -138,77 +138,21 @@ class algorithm extends BaseComponent
 		
 		$user_detail = array();
 		
-		switch ($this->_duration)
+		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
 		{
-			case 30*60:
-				$time = 'if( date_format(update_time,"%i")<30,date_format(update_time,"%Y-%m-%d %H:00:00"),date_format(update_time,"%Y-%m-%d %H:30:00") )';
-			break;
-			case 60*60:
-				$time = 'date_format(update_time,"%Y-%m-%d %H:00:00")';
-			break;
-			case 2*60*60:
-				$time = 'concat(date_format(update_time,"%Y-%m-%d")," ",floor(date_format(update_time,"%H")/2)*2,":00:00")';
-			break;
-			case 24*60*60:
-				$time = 'date_format(update_time,"%Y-%m-%d 00:00:00")';
-			break;
-			default:
-				$time = '';
-		}
-		
-		if (!empty($time))
-		{
-			$sql = new sql();
-			$sql->from('_feedback_history');
-			$sql->in('sn',$sn);
-			$sql = $sql->where('update_time >= ? and update_time < ?',array(
-				$this->_starttime,
-				$this->_endtime
+			$max_online_gourp_sn = $this->model('traffic_stat')
+			->in('sn',$sn)
+			->where('create_time>=? and create_time<?',array(
+				$t_time,
+				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration),
 			))
-			->group('time,sn')
-			->select(array(
-				'time' => $time,
-				'online'=>'max(online)'
-			));
-			
-			$result = $this->model('feedbackHistory')->setFrom($sql,'a')->group('time')->select('time,sum(online) as online');
-			
-			//重置
-			$this->model('feedbackHistory')->setFrom('_feedback_history');
-			
-			foreach ($result as $r)
+			->group('sn')
+			->select('max(online_user) as online,sn');
+						
+			$user_detail[$t_time] = 0;
+			foreach ($max_online_gourp_sn as $online)
 			{
-				$user_detail[$r['time']] = $r['online']*1;
-			}
-		}
-		else
-		{
-			for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
-			{
-				if (!empty($sn))
-				{
-					if (is_array($sn))
-					{
-						$this->model('feedbackHistory')->In('sn',$sn);
-					}
-					else if (is_scalar($sn))
-					{
-						$this->model('feedbackHistory')->where('sn=?',array($sn));
-					}
-				}
-				$max_online_gourp_sn = $this->model('feedbackHistory')
-				->group('sn')
-				->where('update_time >= ? and update_time<?',array(
-					$t_time,
-					date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration),
-				))
-				->select('max(online) as online,sn,ctime');
-			
-				$user_detail[$t_time] = 0;
-				foreach ($max_online_gourp_sn as $online)
-				{
-					$user_detail[$t_time] += $online['online'];
-				}
+				$user_detail[$t_time] += $online['online'];
 			}
 		}
 		
@@ -239,20 +183,56 @@ class algorithm extends BaseComponent
 	 * @param array $sn
 	 * @return number[]
 	 */
-	public function ServiceSum($sn = array(),$type = '')
+	public function ServiceSum($sn = array())
 	{
+		if (empty($sn))
+		{
+			switch ($this->_duration)
+			{
+				case 300:$tableName = 'operation_stat_5_minute';break;
+				case 1800:$tableName = 'operation_stat_30_minute';break;
+				case 3600:$tableName = 'operation_stat_1_hour';break;
+				case 24*3600:$tableName = 'operation_stat_1_day';break;
+			}
+			$service_sum_sum = $this->model($tableName)
+			->where('time>=? and time<?',array(
+				$this->_starttime,$this->_endtime
+			))
+			->sum('service_size');
+			return array(
+				'max' => $service_sum_sum,
+				'detail' => array(),
+			);
+		}
+		else if (is_scalar($sn) || (is_array($sn) && count($sn)==1))
+		{
+			if (is_array($sn))
+			{
+				$sn = array_shift($sn);
+			}
+			switch ($this->_duration)
+			{
+				case 300:$tableName = 'operation_stat_5_minute';break;
+				case 1800:$tableName = 'operation_stat_30_minute';break;
+				case 3600:$tableName = 'operation_stat_1_hour';break;
+				case 24*3600:$tableName = 'operation_stat_1_day';break;
+			}
+			$service_sum_sum = $this->model($tableName)
+			->where('sn like ?',array('%'.substr($sn, 3)))
+			->where('time>=? and time<?',array(
+				$this->_starttime,$this->_endtime
+			))
+			->sum('service_size');
+			return array(
+				'max' => $service_sum_sum,
+				'detail' => array(),
+			);
+		}
+		
 		$sn = $this->combineSns($sn);
 		$sn = array_map(function($s){
 			return '%'.substr($s, 4);
 		}, $sn);
-		
-		switch ($type)
-		{
-			case 'http':$this->model('operation_stat')->where('class=?',array(0));break;
-			case 'mobile':$this->model('operation_stat')->where('class=?',array(1));break;
-			case 'videoDemand':$this->model('operation_stat')->where('class=? and category<?',array(2,128));break;
-			case 'videoLive':$this->model('operation_stat')->where('class=? and category>=?',array(2,128));break;
-		}
 		
 		$service_sum_sum = 1*$this->model('operation_stat')
 		->likein('sn',$sn)
@@ -460,14 +440,12 @@ class algorithm extends BaseComponent
 			$data = array();
 			foreach ($traffic_stat as $stat)
 			{
-				$data[$stat['time']] = array(
-					'service' => $stat['service'],
-					'cache' => $stat['cache'],
-					'monitor' => $stat['monitor'],
-					'max_cache' => $stat['max_cache'],
-					'icache_cache' => $stat['icache_cache'],
-					'vpe_cache' => $stat['vpe_cache'],
-				);
+				$data['service'][$stat['time']] = $stat['service'];
+				$data['cache'][$stat['time']] = $stat['cache'];
+				$data['monitor'][$stat['time']] = $stat['monitor'];
+				$data['max_cache'][$stat['time']] = $stat['service'];
+				$data['icache_cache'][$stat['time']] = $stat['icache_cache'];
+				$data['vpe_cache'][$stat['time']] = $stat['vpe_cache'];
 			}
 			return $data;
 		}
@@ -477,6 +455,7 @@ class algorithm extends BaseComponent
 			{
 				$sn = array_shift($sn);
 			}
+			
 			$tableName = 'traffic_stat_sn_'.$this->_duration;
 			$traffic_stat = $this->model($tableName)
 			->where('time>=? and time<?',array(
@@ -487,11 +466,12 @@ class algorithm extends BaseComponent
 			$data = array();
 			foreach ($traffic_stat as $stat)
 			{
-				$data[$stat['time']] = array(
-					'service' => $stat['service'],
-					'cache' => $stat['cache'],
-					'monitor' => $stat['monitor'],
-				);
+				$data['service'][$stat['time']] = $stat['service']*1;
+				$data['cache'][$stat['time']] = $stat['cache']*1;
+				$data['monitor'][$stat['time']] = $stat['monitor']*1;
+				$data['max_cache'][$stat['time']] = $stat['service']*1;
+				$data['icache_cache'][$stat['time']] = $stat['icache_cache']*1;
+				$data['vpe_cache'][$stat['time']] = $stat['vpe_cache']*1;
 			}
 			return $data;
 		}
@@ -556,7 +536,7 @@ class algorithm extends BaseComponent
 				'service'=>'1024*service',
 				'cache' => '1024*cache',
 				'monitor'=>'1024*monitor',
-				'icache_cahce' => '1024*cache',
+				'icache_cache' => '1024*cache',
 				'vpe_cache' => 0,
 			));
 				
@@ -768,8 +748,6 @@ class algorithm extends BaseComponent
 					}
 				}
 				
-				
-				
 				$max = 0;
 				$max_time = '';
 				foreach ($temp_service as $time=>$service)
@@ -799,6 +777,7 @@ class algorithm extends BaseComponent
 				$max_cache_detail[$t_time] = empty($temp_cache)?0:max($temp_cache);
 			}
 		}
+		
 		$data = array(
 			'service' => $service_max_detail,
 			'cache' => $cache_max_detail,
@@ -842,6 +821,59 @@ class algorithm extends BaseComponent
 	 */
 	function operation_stat($sn = array())
 	{
+		if (empty($sn))
+		{
+			switch ($this->_duration)
+			{
+				case 300:$tableName = 'operation_stat_5_minute';break;
+				case 1800:$tableName = 'operation_stat_30_minute';break;
+				case 3600:$tableName = 'operation_stat_1_hour';break;
+				case 24*3600:$tableName = 'operation_stat_1_day';break;
+			}
+			$result = $this->model($tableName)
+			->where('time>=? and time<?',array(
+				$this->_starttime,$this->_endtime
+			))
+			->group('time')
+			->find(array(
+				'time',
+				'sum_service' => 'sum(service_size)',
+				'sum_cache' => 'sum(cache_size+proxy_cache_size)',
+			));
+			$operation_stat = array();
+			foreach ($result as $r)
+			{
+				$operation_stat['service'][$r['time']] = $r['sum_service'];
+				$operation_stat['cache'][$r['time']] = $r['sum_cache'];
+			}
+			return $operation_stat;
+		}
+		else if (is_scalar($sn) || (is_array($sn) && count($sn)==1))
+		{
+			if (is_array($sn))
+			{
+				$sn = array_shift($sn);
+			}
+			switch ($this->_duration)
+			{
+				case 300:$tableName = 'operation_stat_5_minute';break;
+				case 1800:$tableName = 'operation_stat_30_minute';break;
+				case 3600:$tableName = 'operation_stat_1_hour';break;
+				case 24*3600:$tableName = 'operation_stat_1_day';break;
+			}
+			$this->model($tableName)
+			->where('time>=? and time<?',array(
+				$this->_starttime,$this->_endtime
+			))
+			->where('sn like ?',array('%'.substr($sn, 3)))
+			->group('time')
+			->find(array(
+				'time',
+				'sum_service' => 'sum(service_size)',
+				'sum_cache' => 'sum(cache_size+proxy_cache_size)',
+			));
+		}
+		
 		$sn = $this->combineSns($sn);
 		$sn = array_map(function($s){
 			return '%'.substr($s,3);

@@ -2,7 +2,6 @@
 namespace application\algorithm;
 
 use framework\core\base;
-use framework\lib\data;
 
 /**
  * @author fx
