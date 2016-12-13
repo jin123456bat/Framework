@@ -472,7 +472,7 @@ class model extends component
 	{
 		if ($this->_compress && !empty($this->_compress_sql))
 		{
-			if (isset($this->_compress_sql['insert']))
+			if (isset($this->_compress_sql['insert']) && !empty($this->_compress_sql['insert']))
 			{
 				$insert_duplicate_values = isset($this->_compress_sql['insert_duplicate_values'])?$this->_compress_sql['insert_duplicate_values']:'';
 				unset($this->_compress_sql['insert_duplicate_values']);

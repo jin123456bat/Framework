@@ -449,6 +449,53 @@ class algorithm extends BaseComponent
 	 */
 	public function traffic_stat($sn = array())
 	{
+		if (empty($sn))
+		{
+			$tableName = 'traffic_stat_'.$this->_duration;
+			$traffic_stat = $this->model($tableName)
+			->where('time>=? and time<?',array(
+				$this->_starttime,$this->_endtime
+			))
+			->select();
+			$data = array();
+			foreach ($traffic_stat as $stat)
+			{
+				$data[$stat['time']] = array(
+					'service' => $stat['service'],
+					'cache' => $stat['cache'],
+					'monitor' => $stat['monitor'],
+					'max_cache' => $stat['max_cache'],
+					'icache_cache' => $stat['icache_cache'],
+					'vpe_cache' => $stat['vpe_cache'],
+				);
+			}
+			return $data;
+		}
+		else if (is_scalar($sn) || count($sn)==1)
+		{
+			if (is_array($sn))
+			{
+				$sn = array_shift($sn);
+			}
+			$tableName = 'traffic_stat_sn_'.$this->_duration;
+			$traffic_stat = $this->model($tableName)
+			->where('time>=? and time<?',array(
+				$this->_starttime,$this->_endtime
+			))
+			->where('sn=?',array($sn))
+			->select();
+			$data = array();
+			foreach ($traffic_stat as $stat)
+			{
+				$data[$stat['time']] = array(
+					'service' => $stat['service'],
+					'cache' => $stat['cache'],
+					'monitor' => $stat['monitor'],
+				);
+			}
+			return $data;
+		}
+		
 		$sn = $this->combineSns($sn);
 		
 		switch ($this->_duration)
@@ -461,6 +508,9 @@ class algorithm extends BaseComponent
 				break;
 			case 60*60:
 				$time = 'date_format(time,"%Y-%m-%d %H:00:00")';
+				break;
+			case 2*60*60:
+				$time = 'concat(date_format(time,"%Y-%m-%d")," ",LPAD(floor(date_format(time,"%H")/2)*2,2,0),":00:00")';
 				break;
 			case 24*60*60:
 				$time = 'date_format(time,"%Y-%m-%d 00:00:00")';

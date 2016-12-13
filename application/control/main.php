@@ -54,14 +54,10 @@ class main extends BaseControl
 		}
 		
 		$cds = $algorithm->CDSOnlineNum();
-		
 		//user
 		//所有节点的在线人数累加
 		$user = $algorithm->USEROnlineNum();
 		
-		//operation_stat  每小时的颗粒度
-		//service_max
-		//服务流速 同一个时间点的operation中service_size的最大值
 		switch ($this->_duration)
 		{
 			case 'minutely':

@@ -2,11 +2,11 @@
 namespace application\model;
 use application\extend\model;
 
-class traffic_stat_5_minute extends model
+class feedback extends model
 {
 	function __config()
 	{
 		$db = $this->getConfig('db');
-		return $db['cloud_web_v2'];
+		return $db['ordoac'];
 	}
 }

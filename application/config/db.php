@@ -12,6 +12,7 @@ return array(
 		'db_user' => 'cm2_admin',
 		'db_password' => 'fxd^CM2-2016',
 		'db_charset' => 'utf8',
+		'default' => true,
 		'init_command' => $init_command,
 	),
 	'ordoac' => array(
@@ -21,7 +22,6 @@ return array(
 		'db_user' => 'selecter',
 		'db_password' => 'fxdata_Select-2016',
 		'db_charset' => 'utf8',
-		'default' => true,
 		'init_command' => $init_command,
 	),
 	'cds_v2' => array(

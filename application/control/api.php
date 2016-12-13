@@ -33,6 +33,8 @@ class api extends apiControl
 	{
 		$oldsn = $this->post('oldsn',array(),'explode:",","?"','a');
 		$newsn = $this->post('newsn',array(),'explode:",","?"','a');
+		$oldsn = sort($oldsn);
+		$newsn = sort($newsn);
 	
 		if (empty($oldsn) && empty($newsn))
 		{
