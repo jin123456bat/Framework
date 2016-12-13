@@ -280,40 +280,16 @@ class algorithm extends BaseComponent
 	 */
 	public function CPService($sn = array(),$top = 9)
 	{
-		$sn = $this->combineSns($sn);
-		
 		$cp_service = array();
-		if (!empty($sn))
-		{
-			if (is_array($sn))
-			{
-				$sql = '';
-				$param = array();
-				reset($sn);
-				$s = current($sn);
-				while ($s)
-				{
-					$sql .= 'sn like ? or ';
-					$param[] = '%'.substr($s,3);
-					$s = next($sn);
-				}
-				$sql = substr($sql, 0,-4);
-				$this->model('operation_stat')->where($sql,$param);
-			}
-			else if(is_scalar($sn))
-			{
-				$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
-			}
-		}
+		$tableName = 'operation_stat_class_category_'.$this->_duration;
 		//取出service累计最大的前n个分类
-		$categoryTop = $this->model('operation_stat')->where('make_time>=? and make_time<?',array(
+		$categoryTop = $this->model($tableName)->where('time>=? and time<?',array(
 			$this->_starttime,
 			$this->_endtime
 		))
 		->group(array('class','category'))
 		->order('service_sum','desc')
 		->limit($top)
-		->forceIndex('primary')//强制索引
 		->select(array(
 			'category',
 			'class',
@@ -329,93 +305,46 @@ class algorithm extends BaseComponent
 				'class' => $r['class'],
 			);
 		}
-	
-		$total_operation_stat = array();
-		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+		
+		$tableName = 'operation_stat_class_category_'.$this->_duration;
+		$result = $this->model($tableName)->where('time>=? and time<?',array(
+			$this->_starttime,$this->_endtime
+		))
+		->select();
+		foreach ($result as $r)
 		{
-			if (!empty($sn))
-			{
-				if (is_array($sn))
-				{
-					$sql = '';
-					$param = array();
-					reset($sn);
-					$s = current($sn);
-					while ($s)
-					{
-						$sql .= 'sn like ? or ';
-						$param[] = '%'.substr($s,3);
-						$s = next($sn);
-					}
-					$sql = substr($sql, 0,-4);
-					$this->model('operation_stat')->where($sql,$param);
-				}
-				else if(is_scalar($sn))
-				{
-					$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
-				}
-			}
-			$result = $this->model('operation_stat')
-			->where('make_time>=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration)
-			))
-			->group('class,category')
-			->select(array(
-				'class',
-				'category',
-				'service_size' => 'sum(service_size)',
-			));
-			
-			foreach ($top as $r)
+			if (in_array(array(
+				'category' => $r['category'],
+				'class' => $r['class'],
+			), $top))
 			{
 				$classname = $this->getCategoryName($r);
-				$cp_service[$classname][$t_time] = 0;
+				$cp_service[$classname][$r['time']] = $r['service_size'];
 			}
-			$cp_service['其他'][$t_time] = 0;
-			
-			$total_operation_stat[$t_time] = 0;
-			foreach ($result as $r)
+			if (isset($total_operation_stat[$r['time']]))
 			{
-				if (in_array(array(
-					'category'=>$r['category'],
-					'class' => $r['class']
-				), $top,true))
-				{
-					$classname = $this->getCategoryName($r);
-				}
-				else
-				{
-					$classname = '其他';
-				}
-				
-				$total_operation_stat[$t_time] += $r['service_size'];
-				$cp_service[$classname][$t_time] += $r['service_size'];
+				$total_operation_stat[$r['time']] += $r['service_size'];
+			}
+			else
+			{
+				$total_operation_stat[$r['time']] = $r['service_size'];
 			}
 		}
 		
 		reset($sn);
 		$service = $this->ServiceMax($sn);
 		$service = $service['detail'];
-		
-		
+
 		foreach ($cp_service as $classname => &$v)
 		{
-			
 			foreach ($v as $time => &$value)
 			{
 				$value = (isset($service[$time])?$service[$time]:0) * division($value,$total_operation_stat[$time]);
 			}
 		}
 		
-		$max = array();
-		foreach ($cp_service as $classname => $v_t)
-		{
-			$max[$classname] = max($v_t);
-		}
-		
 		return array(
-			'max' => $max,
+			'max' => 0,
 			'detail' => $cp_service
 		);
 	}
