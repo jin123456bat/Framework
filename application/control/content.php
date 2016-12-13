@@ -69,13 +69,7 @@ class content extends BaseControl
 			$category_service['videoDemand'][$t_time] = 0;
 		}
 		
-		switch ($this->_duration_second)
-		{
-			case 300:$tableName = 'operation_stat_5_minute';break;
-			case 3600:$tableName = 'operation_stat_1_hour';break;
-			case 24*3600:$tableName = 'operation_stat_1_day';break;
-		}
-		
+		$tableName = 'operation_stat_class_category_'.$this->_duration_second;
 		$result = $this->model($tableName)
 		->where('time>=? and time<?',array(
 			$start_time,$end_time
@@ -301,13 +295,8 @@ class content extends BaseControl
 			}
 		}
 		
-		switch ($this->_duration_second)
-		{
-			case 300:$tableName = 'operation_stat_5_minute';break;
-			case 3600:$tableName = 'operation_stat_1_hour';break;
-			case 24*3600:$tableName = 'operation_stat_1_day';break;
-		}
 		
+		$tableName = 'operation_stat_class_category_'.$this->_duration_second;
 		$result = $this->model($tableName)
 		->where('time>=? and time<?',array(
 			$start_time,$end_time
@@ -546,13 +535,7 @@ class content extends BaseControl
 			}
 		}
 		
-		switch ($this->_duration_second)
-		{
-			case 300:$tableName = 'operation_stat_5_minute';break;
-			case 3600:$tableName = 'operation_stat_1_hour';break;
-			case 24*3600:$tableName = 'operation_stat_1_day';break;
-		}
-		
+		$tableName = 'operation_stat_class_category_'.$this->_duration_second;
 		$result = $this->model($tableName)
 		->where('time>=? and time<?',array(
 			$start_time,$end_time
@@ -777,13 +760,7 @@ class content extends BaseControl
 		
 		$category = $this->getConfig('category');
 		
-		switch ($this->_duration_second)
-		{
-			case 300:$tableName = 'operation_stat_5_minute';break;
-			case 3600:$tableName = 'operation_stat_1_hour';break;
-			case 24*3600:$tableName = 'operation_stat_1_day';break;
-		}
-		
+		$tableName = 'operation_stat_class_category_'.$this->_duration_second;
 		$result = $this->model($tableName)
 		->where('time>=? and time<?',array(
 			$start_time,$end_time
@@ -914,13 +891,7 @@ class content extends BaseControl
 			}
 		}
 		
-		switch ($this->_duration_second)
-		{
-			case 300:$tableName = 'operation_stat_5_minute';break;
-			case 3600:$tableName = 'operation_stat_1_hour';break;
-			case 24*3600:$tableName = 'operation_stat_1_day';break;
-		}
-		
+		$tableName = 'operation_stat_class_category_'.$this->_duration_second;
 		$result = $this->model($tableName)
 		->where('time>=? and time<?',array(
 			$start_time,$end_time

@@ -823,55 +823,17 @@ class algorithm extends BaseComponent
 	{
 		if (empty($sn))
 		{
-			switch ($this->_duration)
-			{
-				case 300:$tableName = 'operation_stat_5_minute';break;
-				case 1800:$tableName = 'operation_stat_30_minute';break;
-				case 3600:$tableName = 'operation_stat_1_hour';break;
-				case 24*3600:$tableName = 'operation_stat_1_day';break;
-			}
-			$result = $this->model($tableName)
-			->where('time>=? and time<?',array(
+			$tableName = 'operation_stat_'.$this->_duration;
+			$result = $this->model($tableName)->where('time>=? and time<?',array(
 				$this->_starttime,$this->_endtime
 			))
-			->group('time')
-			->find(array(
-				'time',
-				'sum_service' => 'sum(service_size)',
-				'sum_cache' => 'sum(cache_size+proxy_cache_size)',
-			));
-			$operation_stat = array();
+			->select();
 			foreach ($result as $r)
 			{
-				$operation_stat['service'][$r['time']] = $r['sum_service'];
-				$operation_stat['cache'][$r['time']] = $r['sum_cache'];
+				$operation_stat['service'][$r['time']] = $r['service_size'] * 1;
+				$operation_stat['cache'][$r['time']] = $r['cache_size'] + $r['proxy_cache_size'];
 			}
 			return $operation_stat;
-		}
-		else if (is_scalar($sn) || (is_array($sn) && count($sn)==1))
-		{
-			if (is_array($sn))
-			{
-				$sn = array_shift($sn);
-			}
-			switch ($this->_duration)
-			{
-				case 300:$tableName = 'operation_stat_5_minute';break;
-				case 1800:$tableName = 'operation_stat_30_minute';break;
-				case 3600:$tableName = 'operation_stat_1_hour';break;
-				case 24*3600:$tableName = 'operation_stat_1_day';break;
-			}
-			$this->model($tableName)
-			->where('time>=? and time<?',array(
-				$this->_starttime,$this->_endtime
-			))
-			->where('sn like ?',array('%'.substr($sn, 3)))
-			->group('time')
-			->find(array(
-				'time',
-				'sum_service' => 'sum(service_size)',
-				'sum_cache' => 'sum(cache_size+proxy_cache_size)',
-			));
 		}
 		
 		$sn = $this->combineSns($sn);
