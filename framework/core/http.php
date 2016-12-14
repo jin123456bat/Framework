@@ -62,7 +62,7 @@ class http extends base
 	 * @param unknown $url
 	 * @param unknown $data
 	 */
-	function post($url,$data = [])
+	static function post($url,$data = [])
 	{
 		if (function_exists('curl_init'))
 		{
@@ -112,7 +112,7 @@ class http extends base
 	/**
 	 * 发送get请求
 	 */
-	function get($url,array $data = [])
+	static function get($url,array $data = [])
 	{
 		$url = $url.'?'.http_build_query($data);
 		if (function_exists('curl_init'))

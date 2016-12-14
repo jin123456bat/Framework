@@ -113,10 +113,13 @@ class header extends base
 	 */
 	static function send($key, $value = NULL)
 	{
-		if (empty($value)) {
-			header($key, true);
-		} else {
-			header($key . ': ' . $value, true);
+		if (request::php_sapi_name() == 'web')
+		{
+			if (empty($value)) {
+				header($key, true);
+			} else {
+				header($key . ': ' . $value, true);
+			}
 		}
 	}
 
@@ -125,8 +128,11 @@ class header extends base
 	 */
 	function sendAll()
 	{
-		foreach (self::$_header as $key => $value) {
-			header($key . ': ' . $value, true);
+		if (request::php_sapi_name() == 'web')
+		{
+			foreach (self::$_header as $key => $value) {
+				header($key . ': ' . $value, true);
+			}
 		}
 	}
 }

@@ -17,9 +17,9 @@ class task extends bgControl
 		$endtime = date('Y-m-d H:i:s');
 		for ($t_time = $starttime;strtotime($t_time) < strtotime($endtime);$t_time = date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))))
 		{
-			
 			$cacheComponent->traffic_stat(300,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
 			$cacheComponent->traffic_stat(1800,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat(3600,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
 			$cacheComponent->traffic_stat(7200,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
 			$cacheComponent->traffic_stat(86400,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
 			$cacheComponent->traffic_stat_sn(300,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
@@ -157,6 +157,21 @@ class task extends bgControl
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->traffic_stat(3600);;
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'traffic_stat',
+			'duration'=>3600,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
+		
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
 		$time = $cacheComponent->operation_stat(3600);;
 		$datadebugger->stop();
 		$this->model('build_data_log')->insert(array(
@@ -198,6 +213,9 @@ class task extends bgControl
 	 */
 	function hour2()
 	{
+		$hour2 = new debugger();
+		$hour2->start();
+		
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
@@ -213,8 +231,20 @@ class task extends bgControl
 			'runtime' => $datadebugger->getTime(),
 		));
 		
-		$hour2 = new debugger();
-		$hour2->start();
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->operation_stat(7200);
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'operation_stat',
+			'duration'=>7200,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
 		
 		$hour2->stop();
 		return $hour2;

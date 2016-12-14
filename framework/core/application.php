@@ -257,16 +257,19 @@ class application extends component
 			}
 			else if ($response instanceof response)
 			{
-				//设置status_code
-				if (function_exists('http_response_code'))
+				if (request::php_sapi_name() == 'web')
 				{
-					http_response_code($response->getHttpStatus());
+					//设置status_code
+					if (function_exists('http_response_code'))
+					{
+						http_response_code($response->getHttpStatus());
+					}
+					else
+					{
+						header('OK',true,$response->getHttpStatus());
+					}
+					$response->getHeader()->sendAll();
 				}
-				else
-				{
-					header('OK',true,$response->getHttpStatus());
-				}
-				$response->getHeader()->sendAll();
 				echo $response->getBody();
 				exit();
 			}

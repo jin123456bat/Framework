@@ -187,13 +187,7 @@ class algorithm extends BaseComponent
 	{
 		if (empty($sn))
 		{
-			switch ($this->_duration)
-			{
-				case 300:$tableName = 'operation_stat_5_minute';break;
-				case 1800:$tableName = 'operation_stat_30_minute';break;
-				case 3600:$tableName = 'operation_stat_1_hour';break;
-				case 24*3600:$tableName = 'operation_stat_1_day';break;
-			}
+			$tableName = 'operation_stat_'.$this->_duration;
 			$service_sum_sum = $this->model($tableName)
 			->where('time>=? and time<?',array(
 				$this->_starttime,$this->_endtime
@@ -210,13 +204,7 @@ class algorithm extends BaseComponent
 			{
 				$sn = array_shift($sn);
 			}
-			switch ($this->_duration)
-			{
-				case 300:$tableName = 'operation_stat_5_minute';break;
-				case 1800:$tableName = 'operation_stat_30_minute';break;
-				case 3600:$tableName = 'operation_stat_1_hour';break;
-				case 24*3600:$tableName = 'operation_stat_1_day';break;
-			}
+			$tableName = 'operation_stat_'.$this->_duration;
 			$service_sum_sum = $this->model($tableName)
 			->where('sn like ?',array('%'.substr($sn, 3)))
 			->where('time>=? and time<?',array(
@@ -366,7 +354,14 @@ class algorithm extends BaseComponent
 				$this->_starttime,$this->_endtime
 			))
 			->select();
-			$data = array();
+			$data = array(
+				'service' => array(),
+				'cache' => array(),
+				'monitor' => array(),
+				'max_cache' => array(),
+				'icache_cache' => array(),
+				'vpe_cache' => array(),
+			);
 			foreach ($traffic_stat as $stat)
 			{
 				$data['service'][$stat['time']] = $stat['service'];
@@ -376,6 +371,12 @@ class algorithm extends BaseComponent
 				$data['icache_cache'][$stat['time']] = $stat['icache_cache'];
 				$data['vpe_cache'][$stat['time']] = $stat['vpe_cache'];
 			}
+			$data['service'] = $this->formatTimenode($data['service'], $this->_starttime, $this->_endtime, $this->_duration);
+			$data['cache'] = $this->formatTimenode($data['cache'], $this->_starttime, $this->_endtime, $this->_duration);
+			$data['monitor'] = $this->formatTimenode($data['monitor'], $this->_starttime, $this->_endtime, $this->_duration);
+			$data['max_cache'] = $this->formatTimenode($data['max_cache'], $this->_starttime, $this->_endtime, $this->_duration);
+			$data['icache_cache'] = $this->formatTimenode($data['icache_cache'], $this->_starttime, $this->_endtime, $this->_duration);
+			$data['vpe_cache'] = $this->formatTimenode($data['vpe_cache'], $this->_starttime, $this->_endtime, $this->_duration);
 			return $data;
 		}
 		else if (is_scalar($sn) || count($sn)==1)
@@ -392,7 +393,14 @@ class algorithm extends BaseComponent
 			))
 			->where('sn=?',array($sn))
 			->select();
-			$data = array();
+			$data = array(
+				'service' => array(),
+				'cache' => array(),
+				'monitor' => array(),
+				'max_cache' => array(),
+				'icache_cache' => array(),
+				'vpe_cache' => array(),
+			);
 			foreach ($traffic_stat as $stat)
 			{
 				$data['service'][$stat['time']] = $stat['service']*1;
@@ -402,6 +410,12 @@ class algorithm extends BaseComponent
 				$data['icache_cache'][$stat['time']] = $stat['icache_cache']*1;
 				$data['vpe_cache'][$stat['time']] = $stat['vpe_cache']*1;
 			}
+			$data['service'] = $this->formatTimenode($data['service'], $this->_starttime, $this->_endtime, $this->_duration);
+			$data['cache'] = $this->formatTimenode($data['cache'], $this->_starttime, $this->_endtime, $this->_duration);
+			$data['monitor'] = $this->formatTimenode($data['monitor'], $this->_starttime, $this->_endtime, $this->_duration);
+			$data['max_cache'] = $this->formatTimenode($data['max_cache'], $this->_starttime, $this->_endtime, $this->_duration);
+			$data['icache_cache'] = $this->formatTimenode($data['icache_cache'], $this->_starttime, $this->_endtime, $this->_duration);
+			$data['vpe_cache'] = $this->formatTimenode($data['vpe_cache'], $this->_starttime, $this->_endtime, $this->_duration);
 			return $data;
 		}
 		
@@ -762,6 +776,8 @@ class algorithm extends BaseComponent
 				$operation_stat['service'][$r['time']] = $r['service_size'] * 1;
 				$operation_stat['cache'][$r['time']] = $r['cache_size'] + $r['proxy_cache_size'];
 			}
+			$operation_stat['service'] = $this->formatTimenode($operation_stat['service'], $this->_starttime, $this->_endtime, $this->_duration);
+			$operation_stat['cache'] = $this->formatTimenode($operation_stat['cache'], $this->_starttime, $this->_endtime, $this->_duration);
 			return $operation_stat;
 		}
 		

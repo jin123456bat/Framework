@@ -74,7 +74,6 @@ class content extends BaseControl
 		->where('time>=? and time<?',array(
 			$start_time,$end_time
 		))
-		->group('class,category')
 		->select(array(
 			'time',
 			'class',
@@ -931,6 +930,7 @@ class content extends BaseControl
 				$value = division($value, $operation_stat['cache'][$time]) * $traffic_stat['cache'][$time];
 			}
 		}
+		
 		foreach ($cp_service_flow as $classname=>&$v)
 		{
 			foreach ($v as $time => &$value)

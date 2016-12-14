@@ -207,6 +207,7 @@ class cache extends BaseComponent
 			case 300:$time = 'concat(date_format(make_time,"%Y-%m-%d %H"),":",LPAD(floor(date_format(make_time,"%i")/5)*5,2,0),":00")';break;
 			case 30*60:$time = 'if( date_format(make_time,"%i")<30,date_format(make_time,"%Y-%m-%d %H:00:00"),date_format(make_time,"%Y-%m-%d %H:30:00") )';break;
 			case 60*60:$time = 'date_format(make_time,"%Y-%m-%d %H:00:00")';break;
+			case 7200:$time = 'concat(date_format(make_time,"%Y-%m-%d "),lpad(floor(date_format(make_time,"%H")/2)*2,2,0),":00:00")';break;
 			case 24*60*60:$time = 'date_format(make_time,"%Y-%m-%d 00:00:00")';break;
 			default:echo "operation_stat_algorithm中duration错误";
 		}
@@ -412,7 +413,7 @@ class cache extends BaseComponent
 			
 		$operation_stat = $this->operation_stat_algorithm($duration, $min_time, $max_time);
 		
-		if ($duration == 300 || $duration==3600 || $duration == 86400)
+		if ($duration == 300 || $duration==3600 || $duration == 7200 || $duration == 86400)
 		{
 			$tableName = 'operation_stat_'.$duration;
 			$operation_stat_info = array();
@@ -439,6 +440,10 @@ class cache extends BaseComponent
 				{
 					$operation_stat_info[$stat['time']]['proxy_cache_size'] += $stat['proxy_cache_size'];
 				}
+				else
+				{
+					$operation_stat_info[$stat['time']]['proxy_cache_size'] = $stat['proxy_cache_size'];
+				}
 			}
 			$this->model($tableName)->startCompress();
 			foreach ($operation_stat_info as $time => $st)
@@ -461,7 +466,7 @@ class cache extends BaseComponent
 		}
 		
 		
-		if ($duration == 1800 || $duration == 7200 || $duration == 86400)
+		if ($duration == 1800 || $duration == 3600 || $duration == 7200 || $duration == 86400 || $duration == 300)
 		{
 			$operation_stat_class_category = array();
 			$tableName_operation_stat_class_category = 'operation_stat_class_category_'.$duration;
