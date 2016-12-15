@@ -403,7 +403,7 @@ class cache extends BaseComponent
 			));
 			
 			$max_time = date('Y-m-d H:i:s',ceil(strtotime($time['max'])/$duration)*$duration);
-			$min_time = date('Y-m-d H:i:s',floor(strtotime($time['max'])/$duration)*$duration);
+			$min_time = date('Y-m-d H:i:s',floor(strtotime($time['min'])/$duration)*$duration);
 		}
 		else
 		{
