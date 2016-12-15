@@ -15,21 +15,21 @@ class task extends bgControl
 		$cacheComponent = new \application\algorithm\cache();
 		$starttime = '2016-11-01 00:00:00';
 		$endtime = date('Y-m-d H:i:s');
-		for ($t_time = $starttime;strtotime($t_time) < strtotime($endtime);$t_time = date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))))
+		for ($t_time = $starttime;strtotime($t_time) < strtotime($endtime);$t_time = date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))))
 		{
-			$cacheComponent->traffic_stat(300,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat(1800,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat(3600,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat(7200,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat(86400,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat_sn(300,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat_sn(3600,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat_sn(86400,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(30*60,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(5*60,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(60*60,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(2*60*60,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(24*60*60,$t_time,date('Y-m-d H:i:s',strtotime("+5 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat(300,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat(1800,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat(3600,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat(7200,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat(86400,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat_sn(300,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat_sn(3600,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->traffic_stat_sn(86400,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(30*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(5*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(60*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(2*60*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(24*60*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
 		}
 	}
 	

@@ -8,13 +8,13 @@ class BaseComponent extends component
 	static function getSnList()
 	{
 		$url = 'https://cloud.fxdata.cn/fxtv/cds_show.php';
-		$response = json_decode(http::get($url));
+		$response = json_decode(http::get($url,array(),false),true);
 		if (!empty($response))
 		{
 			$temp = array();
 			foreach ($response as $r)
 			{
-				if ($r['version'] >= '9.1.0')
+				if (version_compare($r['version'], '9.1.0') != -1)
 				{
 					$temp[] = $r['sn'];
 				}

@@ -51,7 +51,7 @@ class actionFilter extends component
 			{
 				foreach($accesses as $access)
 				{
-					if ($access['express'])
+					if ((isset($access['express']) && $access['express']) || !isset($access['express']))
 					{
 						if (is_array($access['actions']))
 						{
@@ -60,8 +60,11 @@ class actionFilter extends component
 								if (trim(strtolower($access[0])) == 'deny')
 								{
 									$this->_message = isset($access['message'])?$access['message']:new response('forbidden',403);
-									
 									return false;
+								}
+								else if (trim(strtolower($access[0])) == 'allow')
+								{
+									return true;
 								}
 							}
 						}
@@ -73,6 +76,10 @@ class actionFilter extends component
 								{
 									$this->_message = isset($access['message'])?$access['message']:new response('forbidden',403);
 									return false;
+								}
+								else if (trim(strtolower($access[0])) == 'allow')
+								{
+									return true;
 								}
 							}
 						}

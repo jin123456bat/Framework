@@ -5,7 +5,7 @@ class http extends base
 	/**
 	 * 创建一个url
 	 */
-	function url($c,$a,array $options = [])
+	function url($c,$a,array $options = array())
 	{
 		$scheme = request::isHttps()?'https://':'http://';
 		if (isset($options['scheme']))
@@ -62,7 +62,7 @@ class http extends base
 	 * @param unknown $url
 	 * @param unknown $data
 	 */
-	static function post($url,$data = [])
+	static function post($url,$data = array())
 	{
 		if (function_exists('curl_init'))
 		{
@@ -76,7 +76,7 @@ class http extends base
 				}
 			}
 			$curl = curl_init();
-			curl_setopt_array($curl, [
+			curl_setopt_array($curl, array(
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_FOLLOWLOCATION => true,
 				CURLOPT_CONNECTTIMEOUT => 60,
@@ -86,7 +86,7 @@ class http extends base
 				CURLOPT_SSL_VERIFYHOST => 0,
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-			]);
+			));
 			$response = curl_exec($curl);
 			curl_close($curl);
 			return $response;
@@ -112,29 +112,30 @@ class http extends base
 	/**
 	 * 发送get请求
 	 */
-	static function get($url,array $data = [])
+	static function get($url,array $data = array(),$use_curl = true)
 	{
 		$url = $url.'?'.http_build_query($data);
-		if (function_exists('curl_init'))
+		if (function_exists('curl_init') && $use_curl)
 		{
 			$curl = curl_init($url);
-			curl_setopt_array($curl, [
+			curl_setopt_array($curl, array(
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_FOLLOWLOCATION => true,
 				CURLOPT_CONNECTTIMEOUT => 60,
 				CURLOPT_TIMEOUT => 60,
 				CURLOPT_POST => false,
-				CURLOPT_SSL_VERIFYHOST => 0,
+				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-			]);
+			));
 			$response = curl_exec($curl);
 			curl_close($curl);
 			return $response;
 		}
 		else
 		{
-			return file_get_contents($url);
+			$result = file_get_contents($url);
+			return $result;
 		}
 	}
 }

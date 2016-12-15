@@ -17,6 +17,16 @@ use application\extend\cache;
 class node extends BaseControl
 {
 	/**
+	 * 允许绑定sn的设备
+	 * @return \framework\core\response\json
+	 */
+	function avaliable_sn()
+	{
+		$sn = $this->combineSns();
+		return new json(json::OK,NULL,$sn);
+	}
+	
+	/**
 	 * 创建CDS列表的缓存数据
 	 */
 	function cds_cache()
@@ -594,6 +604,10 @@ class node extends BaseControl
 	function __access()
 	{
 		return array(
+			array(
+				'allow',
+				'actions' => 'avaliable_sn',
+			),
 			array(
 				'deny',
 				'express' => request::php_sapi_name()=='web'?\application\entity\user::getLoginUserId()===NULL:false,
