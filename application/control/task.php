@@ -93,7 +93,17 @@ class task extends bgControl
 			'content_mobile_minutely_1' => 'php '.ROOT.'/index.php -c content -a mobile -duration minutely -timemode 1',//内容交付移动应用 最近24小时的数据
 			'content_http_minutely_1' => 'php '.ROOT.'/index.php -c content -a http -duration minutely -timemode 1',//内容交付常规资源 最近24小时的数据
 		);
+		
+		//cds详情
+		/* $sn = $this->combineSns();
+		foreach ($sn as $s)
+		{
+			$commands['node_detail_'.$s] = 'php '.ROOT.'/index.php -c node -a detail -sn '.$s;
+		} */
+		
 		$this->runTask($commands);
+		
+		
 		
 		$minute5->stop();
 		return $minute5;

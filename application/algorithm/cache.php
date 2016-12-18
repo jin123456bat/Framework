@@ -314,6 +314,8 @@ class cache extends BaseComponent
 					'max_cache' => $traffic_stat['max_cache'][$time],
 					'icache_cache' => $traffic_stat['icache_cache'][$time],
 					'vpe_cache' => $traffic_stat['vpe_cache'][$time],
+					//'mem' => $traffic_stat['mem'][$time],
+					//'cpu' => $traffic_stat['cpu'][$time],
 				));
 			}
 		}

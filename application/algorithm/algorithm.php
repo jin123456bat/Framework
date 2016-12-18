@@ -198,24 +198,6 @@ class algorithm extends BaseComponent
 				'detail' => array(),
 			);
 		}
-		else if (is_scalar($sn) || (is_array($sn) && count($sn)==1))
-		{
-			if (is_array($sn))
-			{
-				$sn = array_shift($sn);
-			}
-			$tableName = 'operation_stat_'.$this->_duration;
-			$service_sum_sum = $this->model($tableName)
-			->where('sn like ?',array('%'.substr($sn, 3)))
-			->where('time>=? and time<?',array(
-				$this->_starttime,$this->_endtime
-			))
-			->sum('service_size');
-			return array(
-				'max' => $service_sum_sum,
-				'detail' => array(),
-			);
-		}
 		
 		$sn = $this->combineSns($sn);
 		$sn = array_map(function($s){

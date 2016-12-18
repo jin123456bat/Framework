@@ -254,6 +254,17 @@ class node extends BaseControl
 	function detail()
 	{
 		$sn = request::param('sn',NULL,'trim','s');
+		 $cache_key = 'node_detail_'.$sn;
+		/*
+		if (request::php_sapi_name()=='web')
+		{
+			$cache = \application\extend\cache::get($cache_key);
+			if (!empty($cache))
+			{
+				return new json(json::OK,NULL,$cache);
+			}
+		} */
+		
 		$info = $this->model('feedback')->where('sn=?',array($sn))->find(array(
 			//CDS在线状态(在线，离线)
 			'status'=>'if(UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(feedback.update_time)<60*30,"在线","离线")',
@@ -519,6 +530,8 @@ class node extends BaseControl
 			'speed' => $speed,
 			'run_report' => $run_report,
 		);
+		
+		\application\extend\cache::set($cache_key, $data);
 		
 		return new json(json::OK,'ok',$data);
 	}
