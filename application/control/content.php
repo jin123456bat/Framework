@@ -31,6 +31,7 @@ class content extends BaseControl
 			if (request::php_sapi_name()=='web')
 			{
 				$response = cache::get($cache_key);
+				
 				if (!empty($response))
 				{
 					return new json(json::OK,NULL,$response);

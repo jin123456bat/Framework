@@ -23,6 +23,18 @@ class node extends BaseControl
 	function avaliable_sn()
 	{
 		$sn = $this->combineSns();
+		$snlist = $this->model('snlist')->where('value=?',array(1))->select('sn');
+		foreach ($snlist as $s)
+		{
+			$sn[] = $s['sn'];
+		}
+		$diff = array();
+		$snlist = $this->model('snlist')->where('value=?',array(0))->select('sn');
+		foreach ($snlist as $s)
+		{
+			$diff[] = $s['sn'];
+		}
+		$sn = array_diff($sn, $diff);
 		return new json(json::OK,NULL,$sn);
 	}
 	
