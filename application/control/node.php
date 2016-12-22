@@ -76,6 +76,7 @@ class node extends BaseControl
 		$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
 		$start_time = date('Y-m-d H:i:s',strtotime('-24 hour',$timestamp));
 		$end_time = date('Y-m-d H:i:s',$timestamp);
+		$duration = 5*60;
 		foreach ($result as &$r)
 		{
 			$r['disk_detail'] = json_decode($r['disk_detail'],true);
@@ -105,13 +106,10 @@ class node extends BaseControl
 				$r['rhelp'] = explode(':', $r['rhelp']);
 			}
 				
-			$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
-			$endtime = date('Y-m-d H:i:s',$timestamp);
-			$starttime = date('Y-m-d H:i:s',strtotime('-24 hour',strtotime($endtime)));
-			$duration = 5*60;
-			$algorithm = new algorithm($starttime,$endtime,$duration);
-				
+			
+			$algorithm = new algorithm($start_time,$end_time,$duration);
 			$traffic_stat = $algorithm->traffic_stat_alone($r['sn']);
+			
 			$r['max_service'] = empty($traffic_stat['service'])?0:round(max($traffic_stat['service'])/1024);
 			$r['max_cache'] = empty($traffic_stat['cache'])?0:round(max($traffic_stat['cache'])/1024);
 				

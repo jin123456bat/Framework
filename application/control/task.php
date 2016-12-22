@@ -33,6 +33,12 @@ class task extends bgControl
 		}
 	}
 	
+	function test()
+	{
+		$cacheComponent = new \application\algorithm\cache();
+		$cacheComponent->traffic_stat_sn(1800);
+	}
+	
 	function minute5()
 	{
 		$minute5 = new debugger();

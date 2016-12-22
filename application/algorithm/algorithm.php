@@ -134,28 +134,61 @@ class algorithm extends BaseComponent
 	 */
 	public function USEROnlineNum($sn = array())
 	{
-		$sn = $this->combineSns($sn);
-		
 		$user_detail = array();
-		
-		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+		if (empty($sn))
 		{
-			$max_online_gourp_sn = $this->model('traffic_stat')
-			->in('sn',$sn)
-			->where('create_time>=? and create_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration),
+			$tableName = 'user_online_'.$this->_duration;
+			$result = $this->model($tableName)
+			->where('time>=? and time<?',array(
+				$this->_starttime,$this->_endtime
 			))
-			->group('sn')
-			->select('max(online_user) as online,sn');
-						
-			$user_detail[$t_time] = 0;
-			foreach ($max_online_gourp_sn as $online)
+			->select(array(
+				'time','online',
+			));
+			foreach ($result as $r)
 			{
-				$user_detail[$t_time] += $online['online'];
+				$user_detail[$r['time']] = $r['online'];
 			}
 		}
-		
+		else if (is_scalar($sn) || (is_array($sn) && count($sn) == 1))
+		{
+			if (is_array($sn))
+			{
+				$sn = array_shift($sn);
+			}
+			$tableName = 'user_online_sn_'.$this->_duration;
+			$this->model($tableName)->where('sn=? and time>=? and time<?',array(
+				$sn,$this->_starttime,$this->_endtime
+			))
+			->select(array(
+				'time','online',
+			));
+			foreach ($result as $r)
+			{
+				$user_detail[$r['time']] = $r['online'];
+			}
+		}
+		else
+		{
+			$sn = $this->combineSns($sn);
+			for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+			{
+				$max_online_gourp_sn = $this->model('traffic_stat')
+				->in('sn',$sn)
+				->where('create_time>=? and create_time<?',array(
+					$t_time,
+					date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration),
+				))
+				->group('sn')
+				->select('max(online_user) as online,sn');
+							
+				$user_detail[$t_time] = 0;
+				foreach ($max_online_gourp_sn as $online)
+				{
+					$user_detail[$t_time] += $online['online'];
+				}
+			}
+		}
 		return array(
 			'max' => empty($user_detail)?0:max($user_detail),
 			'detail' => $user_detail,

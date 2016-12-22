@@ -61,6 +61,8 @@ class cache extends BaseComponent
 		$max_cache_detail = array();
 		$icache_cache_detail = array();
 		$vpe_cache_detail = array();
+		$online_detail = array();
+		$hit_detail = array();
 		
 		$traffic_stat = new sql();
 		$cdn_traffic_stat = new sql();
@@ -78,6 +80,8 @@ class cache extends BaseComponent
 			'monitor' => 0,
 			'icache_cache' => 0,
 			'vpe_cache' => 0,
+			'online' => 0,
+			'hit' => 0,
 		));
 			
 		$traffic_stat->from('ordoac.traffic_stat')
@@ -92,6 +96,8 @@ class cache extends BaseComponent
 			'monitor'=>'1024*monitor',
 			'icache_cahce' => '1024*cache',
 			'vpe_cache' => 0,
+			'online' => 'online_user',
+			'hit' => 'hit_user',
 		));
 			
 		$sn = array_map(function($s){
@@ -109,6 +115,8 @@ class cache extends BaseComponent
 			'monitor',
 			'icache_cache' => 0,
 			'vpe_cache' => 'cache',
+			'online' => 0,
+			'hit' => 0,
 		));
 	
 		$xvirt_traffic_stat->union(true, $cdn_traffic_stat, $traffic_stat);
@@ -123,6 +131,8 @@ class cache extends BaseComponent
 			'monitor' => 'sum(monitor)',
 			'icache_cache' => 'sum(icache_cache)',
 			'vpe_cache' => 'sum(vpe_cache)',
+			'online' => 'sum(online)',
+			'hit' => 'sum(hit)',
 		));
 	
 		$result = $this->model('traffic_stat')
@@ -134,6 +144,8 @@ class cache extends BaseComponent
 			'max_cache' => 'max(cache)',
 			'icache_cache' => 'max(concat(lpad(service,20,0),"-",lpad(icache_cache,20,0)))',
 			'vpe_cache' => 'max(concat(lpad(service,20,0),"-",lpad(vpe_cache,20,0)))',
+			'online' => 'max(online)',
+			'hit' => 'max(hit)',
 		));
 		
 		//重置from
@@ -150,6 +162,8 @@ class cache extends BaseComponent
 			$max_cache_detail[$r['timenode']] = $r['max_cache']*1;
 			$icache_cache_detail[$r['timenode']] = $icache_cache*1;
 			$vpe_cache_detail[$r['timenode']] = $vpe_cache*1;
+			$online_detail[$r['timenode']] = $r['online'] * 1;
+			$hit_detail[$r['timenode']] = $r['hit'] * 1;
 		}
 		
 		for($t_time = $startTime;strtotime($t_time)<strtotime($endTime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
@@ -178,6 +192,14 @@ class cache extends BaseComponent
 			{
 				$vpe_cache_detail[$t_time] = 0;
 			}
+			if (!isset($online_detail[$t_time]))
+			{
+				$online_detail[$t_time] = 0;
+			}
+			if (!isset($hit_detail[$t_time]))
+			{
+				$hit_detail[$t_time] = 0;
+			}
 		}
 		
 		$data = array(
@@ -187,6 +209,8 @@ class cache extends BaseComponent
 			'max_cache' => $max_cache_detail,
 			'icache_cache' => $icache_cache_detail,
 			'vpe_cache' => $vpe_cache_detail,
+			'online' => $online_detail,
+			'hit' => $hit_detail,
 		);
 		return $data;
 	}
@@ -297,32 +321,54 @@ class cache extends BaseComponent
 		$tableName = __FUNCTION__.'_'.$duration;
 	
 		$sn = $this->combineSns();
-		$this->model($tableName)->startCompress();
 		foreach ($sn as $s)
 		{
 			$traffic_stat = $this->traffic_stat_algorithm($duration,$min_time,$max_time,$s);
-				
-			foreach ($traffic_stat['service'] as $time => $service)
+			
+			if (in_array($duration, array(300,3600,86400)))
 			{
-				$this->model($tableName)
-				->insert(array(
-					'time' => $time,
-					'sn' => $s,
-					'service' => $service,
-					'cache' => $traffic_stat['cache'][$time],
-					'monitor' => $traffic_stat['monitor'][$time],
-					'max_cache' => $traffic_stat['max_cache'][$time],
-					'icache_cache' => $traffic_stat['icache_cache'][$time],
-					'vpe_cache' => $traffic_stat['vpe_cache'][$time],
-					//'mem' => $traffic_stat['mem'][$time],
-					//'cpu' => $traffic_stat['cpu'][$time],
+				$this->model($tableName)->startCompress();
+				foreach ($traffic_stat['service'] as $time => $service)
+				{
+					$this->model($tableName)
+					->insert(array(
+						'time' => $time,
+						'sn' => $s,
+						'service' => $service,
+						'cache' => $traffic_stat['cache'][$time],
+						'monitor' => $traffic_stat['monitor'][$time],
+						'max_cache' => $traffic_stat['max_cache'][$time],
+						'icache_cache' => $traffic_stat['icache_cache'][$time],
+						'vpe_cache' => $traffic_stat['vpe_cache'][$time],
+						//'mem' => $traffic_stat['mem'][$time],
+						//'cpu' => $traffic_stat['cpu'][$time],
+					));
+				}
+				$this->model($tableName)->duplicate(array(
+					'service','cache','monitor','max_cache','icache_cache','vpe_cache',
 				));
+				$this->model($tableName)->commitCompress();
+			}
+			
+			//顺便写入用户在线数据的临时数据
+			if (in_array($duration, array(1800,7200,86400)))
+			{
+				$user_online_tableName = 'user_online_sn_'.$duration;
+				$this->model($user_online_tableName)->startCompress();
+				foreach ($traffic_stat['online'] as $time => $online)
+				{
+					$this->model($user_online_tableName)->insert(array(
+						'time' => $time,
+						'sn' => $s,
+						'online' => $online,
+						'hit' => $traffic_stat['hit'][$time]
+					));
+				}
+				$this->model($user_online_tableName)->duplicate(array('online','hit'));
+				$this->model($user_online_tableName)->commitCompress();
 			}
 		}
-		$this->model($tableName)->duplicate(array(
-			'service','cache','monitor','max_cache','icache_cache','vpe_cache',
-		));
-		$this->model($tableName)->commitCompress();
+		
 	
 		return array(
 			'starttime' => $startTime,
@@ -383,6 +429,23 @@ class cache extends BaseComponent
 			'service','cache','monitor','max_cache','icache_cache','vpe_cache'
 		));
 		$this->model($tableName)->commitCompress();
+		
+		//顺便写入用户在线数据的临时数据
+		if (in_array($duration, array(1800,7200,86400)))
+		{
+			$user_online_tableName = 'user_online_'.$duration;
+			$this->model($user_online_tableName)->startCompress();
+			foreach ($traffic_stat['online'] as $time => $online)
+			{
+				$this->model($user_online_tableName)->insert(array(
+					'time' => $time,
+					'online' => $online,
+					'hit' => $traffic_stat['hit'][$time]
+				));
+			}
+			$this->model($user_online_tableName)->duplicate(array('online','hit'));
+			$this->model($user_online_tableName)->commitCompress();
+		}
 		
 		return array(
 			'starttime' => $startTime,
