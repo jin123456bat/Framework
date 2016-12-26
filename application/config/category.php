@@ -1,6 +1,6 @@
 <?php
 return array(
-	'http' => array('音乐图书', '软件升级', '压缩文档', '文档管理', '图片','音频文件'),
+	'http' => array('自定义', '软件升级', '压缩文档', '文档资料', '图片','音频文件',10=>'未归类'),
 	'mobile' => array('Android', 'IOS', 'WP'),
 	'videoDemand' => array(
 		0 => '点播-未归类',

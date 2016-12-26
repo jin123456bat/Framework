@@ -33,12 +33,6 @@ class task extends bgControl
 		}
 	}
 	
-	function test()
-	{
-		$cacheComponent = new \application\algorithm\cache();
-		$cacheComponent->traffic_stat_sn(1800);
-	}
-	
 	function minute5()
 	{
 		$minute5 = new debugger();
@@ -91,6 +85,7 @@ class task extends bgControl
 		));
 		
 		$commands = array(
+			'node_cacheSnList' => 'php '.ROOT.'/index.php -c node -a cacheSnList',
 			'node_cds' => 'php '.ROOT.'/index.php -c node -a cds_cache',//CDS列表的数据
 			'main_overview_minutely_1' => 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 1',//首页 最近24小时的数据
 			'content_overview_minutely_1' => 'php '.ROOT.'/index.php -c content -a overview -duration minutely -timemode 1',//内容交付概览  最近24小时的数据
@@ -203,7 +198,7 @@ class task extends bgControl
 		$hour1 = new debugger();
 		$hour1->start();
 		//生成api的缓存数据
-		$commands = array();
+		/* $commands = array();
 		$data = $this->model('sn_in_cache')->select();
 		$build_sn_list = array();
 		foreach ($data as $sns)
@@ -218,7 +213,7 @@ class task extends bgControl
 					$commands['api_detail_hourly_1_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$s;
 				}
 			}
-		}
+		} */
 		$this->runTask($commands);
 		$hour1->stop();
 		return $hour1;
@@ -340,7 +335,7 @@ class task extends bgControl
 		);
 			
 		//生成api的缓存数据
-		$data = $this->model('sn_in_cache')->select();
+		/* $data = $this->model('sn_in_cache')->select();
 		$build_sn_list = array();
 		foreach ($data as $sns)
 		{
@@ -359,7 +354,7 @@ class task extends bgControl
 					$commands['api_detail_daily_5_'.$s]	= 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$s;
 				}
 			}
-		}
+		} */
 		$this->runTask($commands);
 		$day1->stop();
 		return $day1;
@@ -382,7 +377,7 @@ class task extends bgControl
 		);
 			
 		//生成api的缓存数据
-		$data = $this->model('sn_in_cache')->select();
+		/* $data = $this->model('sn_in_cache')->select();
 		$build_sn_list = array();
 		foreach ($data as $sns)
 		{
@@ -397,7 +392,7 @@ class task extends bgControl
 					$commands['api_detail_daily_4_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$s;
 				}
 			}
-		}
+		} */
 		$this->runTask($commands);
 		$week1->stop();
 		return $week1;
@@ -417,7 +412,7 @@ class task extends bgControl
 		);
 		
 		//生成api的缓存数据
-		$data = $this->model('sn_in_cache')->select();
+		/* $data = $this->model('sn_in_cache')->select();
 		$build_sn_list = array();
 		foreach ($data as $sns)
 		{
@@ -432,7 +427,7 @@ class task extends bgControl
 					$commands['api_detail_daily_6_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$s;
 				}
 			}
-		}
+		} */
 		$this->runTask($commands);
 		$month1->stop();
 		return $month1;

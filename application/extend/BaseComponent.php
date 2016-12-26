@@ -24,6 +24,16 @@ class BaseComponent extends component
 		return array();
 	}
 	
+	function getSnListFromCache()
+	{
+		$sn = \application\extend\cache::get('cacheSnList');
+		if (empty($sn))
+		{
+			return self::getSnList();
+		}
+		return $sn;
+	}
+	
 	function combineSns($sn = array())
 	{
 		if (empty($sn))
@@ -31,7 +41,7 @@ class BaseComponent extends component
 			static $cache = NULL;
 			if (empty($cache))
 			{
-				$cache = self::getSnList();
+				$cache = $this->getSnListFromCache();
 			}
 			return $cache;
 		}

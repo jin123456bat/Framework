@@ -122,10 +122,16 @@ abstract class BaseControl extends control
 			static $cache = NULL;
 			if (empty($cache))
 			{
-				$cache = BaseComponent::getSnList();
+				$cache = $this->getSnListFromCache();
 			}
 			return $cache;
 		}
+		return $sn;
+	}
+	
+	function getSnListFromCache()
+	{
+		$sn = \application\extend\cache::get('cacheSnList');
 		return $sn;
 	}
 	

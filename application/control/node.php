@@ -8,6 +8,7 @@ use framework\core\model;
 use application\entity\user;
 use application\algorithm\algorithm;
 use application\extend\cache;
+use application\extend\BaseComponent;
 
 /**
  * 节点管理相关接口
@@ -16,6 +17,16 @@ use application\extend\cache;
  */
 class node extends BaseControl
 {
+	/**
+	 * 缓存从云平台来源的sn号
+	 */
+	function cacheSnList()
+	{
+		$sn = BaseComponent::getSnList();
+		\application\extend\cache::set('cacheSnList', $sn);
+		return new json(json::OK,NULL,$sn);
+	}
+	
 	/**
 	 * 允许绑定sn的设备
 	 * @return \framework\core\response\json
