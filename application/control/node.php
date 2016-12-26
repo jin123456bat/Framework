@@ -116,7 +116,6 @@ class node extends BaseControl
 			{
 				$r['rhelp'] = explode(':', $r['rhelp']);
 			}
-				
 			
 			$algorithm = new algorithm($start_time,$end_time,$duration);
 			$traffic_stat = $algorithm->traffic_stat_alone($r['sn']);
@@ -258,6 +257,16 @@ class node extends BaseControl
 		$start = request::param('start',0,'intval');
 		$length = request::param('length',10,'intval');
 		$cds_list = array_slice($cds_list, $start,$length);
+		
+		//重新获取一次rhelp，防止缓存之后更细了rhelp
+		foreach ($cds_list as &$cds)
+		{
+			$rhelp = $this->model('feedback')->where('sn=?',array($cds['sn']))->scalar('rhelp');
+			if (!empty($rhelp))
+			{
+				$cds['rhelp'] = explode(':', $rhelp);
+			}
+		}
 		
 		$data = array(
 			'total' => $total,
