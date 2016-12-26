@@ -327,6 +327,7 @@ class node extends BaseControl
 		$online_user = $algorithm->USEROnlineNum($sn);
 		$online_user = $online_user['detail'];
 		
+		
 		//最近24小时的服务，回源，镜像速率
 		$timestamp = (floor(time() / (5*60)) - 1) * 5*60;
 		$end_time = date('Y-m-d H:i:s',$timestamp);
@@ -341,6 +342,8 @@ class node extends BaseControl
 			'sys_disk_used' => array(),
 			'data_disk_used' => array(),
 		));
+		
+		
 		
 		$m = date('i');
 		$m = floor($m/30) * 30;
@@ -409,131 +412,29 @@ class node extends BaseControl
 			}
 		}
 		
+		
+		
 		//运行报表  最近30天的
 		$start_time = date('Y-m-d 00:00:00',strtotime('-30 day'));
 		$end_time = date('Y-m-d 00:00:00');
 		$duration = 3600*24;//一天为单位
 		$run_report = array();
 		$result = array();
-		
 		$algorithm = new algorithm($start_time,$end_time,$duration);
 		$operation_stat = $algorithm->operation_stat($sn);
 		
+		$traffic_stat = $algorithm->traffic_stat($sn);
+		$user = $algorithm->user($sn);
 		for($t_time = $start_time;strtotime($t_time) < strtotime($end_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$duration))
 		{
-			$temp_service = array();
-			$temp_cache = array();
-			$temp_hit_user = array();
-			$temp_online = array();
+			$result['max_service'] = isset($traffic_stat['service'][$t_time])?$traffic_stat['service'][$t_time]:0;
+			$result['max_cache'] = isset($traffic_stat['cache'][$t_time])?$traffic_stat['cache'][$t_time]:0;
 			
-			//traffic_stat表取的按create_time分组之后的最大值，因为CDS的traffic_stat一分钟只有一条，假如有多条，是生产数据的时间间隔问题
-			$traffic_stat = $this->model('traffic_stat')
-			->where('create_time>=? and create_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
-			))
-			->where('sn=?',array($sn))
-			->group('time')
-			->select(array(
-				'time'=>'DATE_FORMAT(create_time,"%Y-%m-%d %H:%i:00")',
-				'service'=>'sum(service) * 1024',
-				'cache'=>'sum(cache) * 1024',
-				'hit_user'=>'max(hit_user)',//服务用户
-				'online_user'=>'max(online_user)',//活跃用户
-			));
+			$result['sum_service'] = isset($operation_stat['service'][$t_time])?$operation_stat['service'][$t_time]:0;
+			$result['sum_cache'] = isset($operation_stat['cache'][$t_time])?$operation_stat['cache'][$t_time]:0;
 			
-			//service和cache是考虑到有多台VPE可能会同一个时间有多条数据，所以使用sum
-			$cdn_traffic_stat = $this->model('cdn_traffic_stat')
-			->where('make_time>=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
-			))
-			->where('sn like ?',array('V_S'.substr($sn, 3)))
-			->group('time')
-			->select(array(
-				'time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
-				'service' => 'sum(service)',
-				'cache' => 'sum(cache)',
-			));
-			
-			
-			$xvirt_traffic_stat = $this->model('xvirt_traffic_stat')
-			->where('make_time>=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time)+$duration)
-			))
-			->where('sn like ?',array('%'.substr($sn, 3)))
-			->group('time')
-			->select(array(
-				'time'=>'DATE_FORMAT(make_time,"%Y-%m-%d %H:%i:00")',
-				'service' => 'sum(service)',
-				'cache' => 'sum(cache)',
-			));
-			
-			foreach ($traffic_stat as $stat)
-			{
-				$temp_cache[$stat['time']] = $stat['cache']*1;
-				$temp_service[$stat['time']] = $stat['service']*1;
-				$temp_hit_user[$stat['time']] = $stat['hit_user'];
-				$temp_online[$stat['time']] = $stat['online_user'];
-			}
-			
-			foreach ($cdn_traffic_stat as $stat)
-			{
-				if (isset($temp_cache[$stat['time']]))
-				{
-					$temp_cache[$stat['time']] += $stat['cache'];
-				}
-				else
-				{
-					$temp_cache[$stat['time']] = $stat['cache']*1;
-				}
-				
-				if (isset($temp_service[$stat['time']]))
-				{
-					$temp_service[$stat['time']] += $stat['service'];
-				}
-				else
-				{
-					$temp_service[$stat['time']] = $stat['service']*1;
-				}
-			}
-			unset($cdn_traffic_stat);
-			
-			foreach ($xvirt_traffic_stat as $stat)
-			{
-				if (isset($temp_cache[$stat['time']]) && $temp_cache[$stat['time']]>=$stat['cache'])
-				{
-					$temp_cache[$stat['time']] -= $stat['cache'];
-				}
-				
-				if (isset($temp_service[$stat['time']]) && $temp_service[$stat['time']]>=$stat['service'])
-				{
-					$temp_service[$stat['time']] -= $stat['service'];
-				}
-			}
-			unset($xvirt_traffic_stat);
-			
-			$max = 0;
-			$max_time = '';
-			
-			foreach ($temp_service as $time => $value)
-			{
-				if ($value >= $max)
-				{
-					$max = $value;
-					$max_time = $time;
-				}
-			}
-			
-			$result['max_service'] = $max;
-			$result['max_cache'] = isset($temp_cache[$max_time])?$temp_cache[$max_time]:0;
-			
-			$result['sum_service'] = $operation_stat['service'][$t_time];
-			$result['sum_cache'] = $operation_stat['cache'][$t_time];
-			
-			$result['hit_user'] = isset($temp_hit_user[$max_time])?$temp_hit_user[$max_time]:0;
-			$result['online_user'] = isset($temp_online[$max_time])?$temp_online[$max_time]:0;
+			$result['hit_user'] = isset($user[$t_time]['hit'])?$user[$t_time]['hit']:0;
+			$result['online_user'] = isset($user[$t_time]['online'])?$user[$t_time]['online']:0;
 			
 			
 			$result['user_percent'] = 100*number_format(division($result['hit_user'],$result['online_user']),4,'.','');
@@ -649,7 +550,7 @@ class node extends BaseControl
 		return array(
 			array(
 				'allow',
-				'actions' => 'avaliable_sn',
+				'actions' => array('avaliable_sn','detail'),
 			),
 			array(
 				'deny',

@@ -466,6 +466,48 @@ class cache extends BaseComponent
 			unset($stat);
 		}
 		
+		if (in_array($duration, array(86400)))
+		{
+			$operation_stat_sn = array();
+			$tableName = 'operation_stat_sn_'.$duration;
+			foreach ($operation_stat as $stat)
+			{
+				$sn = substr($stat['sn'], 3);
+				if (!isset($operation_stat_sn[$stat['time']][$sn]))
+				{
+					$operation_stat_sn[$stat['time']][$sn] = array(
+						'service_size' => 0,
+						'cache_size' => 0,
+						'proxy_cache_size' => 0,
+					);
+				}
+				$operation_stat_sn[$stat['time']][$sn]['service_size'] += $stat['service_size'];
+				$operation_stat_sn[$stat['time']][$sn]['cache_size'] += $stat['cache_size'];
+				$operation_stat_sn[$stat['time']][$sn]['proxy_cache_size'] += $stat['proxy_cache_size'];
+			}
+			unset($stat);
+			$this->model($tableName)->startCompress();
+			foreach ($operation_stat_sn as $time => $stat)
+			{
+				foreach ($stat as $sn => $value)
+				{
+					$this->model($tableName)->insert(array(
+						'time' => $time,
+						'sn' => $sn,
+						'service_size' => $value['service_size'],
+						'cache_size' => $value['cache_size'],
+						'proxy_cache_size' => $value['proxy_cache_size'],
+					));
+				}
+			}
+			$this->model($tableName)->duplicate(array(
+				'service_size','cache_size','proxy_cache_size'
+			));
+			$this->model($tableName)->commitCompress();
+			unset($operation_stat_sn);
+			unset($value);
+			unset($stat);
+		}
 		
 		if ($duration == 1800 || $duration == 3600 || $duration == 7200 || $duration == 86400 || $duration == 300)
 		{

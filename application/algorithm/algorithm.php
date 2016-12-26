@@ -130,45 +130,52 @@ class algorithm extends BaseComponent
 	}
 	
 	/**
-	 * 在线用户数量
+	 * 在线用户和服务用户数量
 	 */
-	public function USEROnlineNum($sn = array())
+	public function user($sn = array())
 	{
-		$user_detail = array();
 		if (empty($sn))
 		{
 			$tableName = 'user_online_'.$this->_duration;
-			$result = $this->model($tableName)
-			->where('time>=? and time<?',array(
+			$result = $this->model($tableName)->where('time>=? and time<?',array(
 				$this->_starttime,$this->_endtime
 			))
-			->select(array(
-				'time','online',
-			));
+			->select();
 			foreach ($result as $r)
 			{
-				$user_detail[$r['time']] = $r['online'];
+				$temp[$r['time']] = array(
+					'online' => $r['online'],
+					'hit' => $r['hit'],
+				);
 			}
+			return $temp;
 		}
-		else if (is_scalar($sn) || (is_array($sn) && count($sn) == 1))
+		else if ((is_array($sn) && count($sn) == 1) || is_scalar($sn))
 		{
 			if (is_array($sn))
 			{
 				$sn = array_shift($sn);
 			}
 			$tableName = 'user_online_sn_'.$this->_duration;
-			$this->model($tableName)->where('sn=? and time>=? and time<?',array(
-				$sn,$this->_starttime,$this->_endtime
+			$result = $this->model($tableName)->where('time>=? and time<?',array(
+				$this->_starttime,$this->_endtime
 			))
+			->where('sn=?',array($sn))
 			->select(array(
-				'time','online',
+				'time',
+				'online',
+				'hit'
 			));
 			foreach ($result as $r)
 			{
-				$user_detail[$r['time']] = $r['online'];
+				$temp[$r['time']] = array(
+					'online' => $r['online'],
+					'hit' => $r['hit'],
+				);
 			}
+			return $temp;
 		}
-		else
+		else 
 		{
 			$sn = $this->combineSns($sn);
 			for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
@@ -180,14 +187,32 @@ class algorithm extends BaseComponent
 					date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration),
 				))
 				->group('sn')
-				->select('max(online_user) as online,sn');
-							
-				$user_detail[$t_time] = 0;
+				->select('sn,max(online_user) as online,max(hit_user) as hit');
+
+				$user_detail[$t_time] = array(
+					'online' => 0,
+					'hit' => 0,
+				);
 				foreach ($max_online_gourp_sn as $online)
 				{
-					$user_detail[$t_time] += $online['online'];
+					$user_detail[$t_time]['online'] += $online['online'];
+					$user_detail[$t_time]['hit'] += $online['hit'];
 				}
 			}
+			return $user_detail;
+		}
+	}
+	
+	/**
+	 * 在线用户数量
+	 */
+	public function USEROnlineNum($sn = array())
+	{
+		$user_detail = array();
+		$user = $this->user($sn);
+		foreach ($user_detail as $time => $stat)
+		{
+			$user_detail[$time] = $stat['online'];
 		}
 		return array(
 			'max' => empty($user_detail)?0:max($user_detail),
@@ -394,7 +419,7 @@ class algorithm extends BaseComponent
 			$data['vpe_cache'] = $this->formatTimenode($data['vpe_cache'], $this->_starttime, $this->_endtime, $this->_duration);
 			return $data;
 		}
-		else if (is_scalar($sn) || count($sn)==1)
+		else if (is_scalar($sn) || (is_array($sn) && count($sn)==1))
 		{
 			if (is_array($sn))
 			{
@@ -781,6 +806,10 @@ class algorithm extends BaseComponent
 	{
 		if (empty($sn))
 		{
+			$operation_stat = array(
+				'service' => array(),
+				'cache' => array(),
+			);
 			$tableName = 'operation_stat_'.$this->_duration;
 			$result = $this->model($tableName)->where('time>=? and time<?',array(
 				$this->_starttime,$this->_endtime
@@ -795,26 +824,69 @@ class algorithm extends BaseComponent
 			$operation_stat['cache'] = $this->formatTimenode($operation_stat['cache'], $this->_starttime, $this->_endtime, $this->_duration);
 			return $operation_stat;
 		}
-		
-		$sn = $this->combineSns($sn);
-		$sn = array_map(function($s){
-			return '%'.substr($s,3);
-		}, $sn);
-		for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+		else if ((is_array($sn) && count($sn) == 1) || is_scalar($sn))
 		{
-			$result = $this->model('operation_stat')
-			->likein('sn',$sn)
-			->where('make_time>=? and make_time<?',array(
-				$t_time,
-				date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration),
+			if (is_array($sn))
+			{
+				$sn = array_shift($sn);
+			}
+			$tableName = 'operation_stat_sn_'.$this->_duration;
+			$result = $this->model($tableName)->where('time>=? and time<?',array(
+				$this->_starttime,$this->_endtime
 			))
-			->find(array(
-				'sum_service'=>'sum(service_size)',
-				'sum_cache'=>'sum(cache_size+proxy_cache_size)'
+			->where('sn=?',array(substr($sn, 3)))
+			->select(array(
+				'time',
+				'service_size',
+				'cache_size',
+				'proxy_cache_size',
 			));
-			$operation_stat['service'][$t_time] = $result['sum_service']*1;
-			$operation_stat['cache'][$t_time] = $result['sum_cache']*1;
+			$operation_stat = array(
+				'service' => array(),
+				'cache' => array(),
+			);
+			foreach ($result as $r)
+			{
+				if (!isset($operation_stat['service'][$r['time']]))
+				{
+					$operation_stat['service'][$r['time']] = 0;
+				}
+				$operation_stat['service'][$r['time']] += $r['service_size'];
+				if (!isset($operation_stat['cache'][$r['time']]))
+				{
+					$operation_stat['cache'][$r['time']] = 0;
+				}
+				$operation_stat['cache'][$r['time']] += $r['cache_size'];
+				$operation_stat['cache'][$r['time']] += $r['proxy_cache_size'];
+			}
+			return $operation_stat;
 		}
-		return $operation_stat;
+		else
+		{
+			$sn = $this->combineSns($sn);
+			$sn = array_map(function($s){
+				return '%'.substr($s,3);
+			}, $sn);
+			$operation_stat = array(
+				'service' => array(),
+				'cache' => array(),
+			);
+			for($t_time = $this->_starttime;strtotime($t_time)<strtotime($this->_endtime);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+$this->_duration))
+			{
+				$result = $this->model('operation_stat')
+				->likein('sn',$sn)
+				->where('make_time>=? and make_time<?',array(
+					$t_time,
+					date('Y-m-d H:i:s',strtotime($t_time) + $this->_duration),
+				))
+				->find(array(
+					'sum_service'=>'sum(service_size)',
+					'sum_cache'=>'sum(cache_size+proxy_cache_size)'
+				));
+				$operation_stat['service'][$t_time] = $result['sum_service']*1;
+				$operation_stat['cache'][$t_time] = $result['sum_cache']*1;
+			}
+			return $operation_stat;
+		}
 	}
 }
