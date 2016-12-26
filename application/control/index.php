@@ -7,8 +7,11 @@ class index extends BaseControl
 {
 	function index()
 	{
-		$cacheAlgorithm = new cacheAlgorithm(300, '2016-12-22 12:00:00', '2016-12-23 12:30:00');
+		$starttime = time();
+		$cacheAlgorithm = new cacheAlgorithm(300, '2016-12-23 12:00:00', '2016-12-23 12:30:00');
 		$result = $cacheAlgorithm->traffic_stat();
-		var_dump($result);
+		$endtime = time();
+		//var_dump($endtime - $starttime);
+		echo json_encode($result);
 	}
 }

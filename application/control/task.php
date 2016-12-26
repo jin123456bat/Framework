@@ -22,9 +22,6 @@ class task extends bgControl
 			$cacheComponent->traffic_stat(3600,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
 			$cacheComponent->traffic_stat(7200,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
 			$cacheComponent->traffic_stat(86400,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat_sn(300,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat_sn(3600,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
-			$cacheComponent->traffic_stat_sn(86400,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
 			$cacheComponent->operation_stat(30*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
 			$cacheComponent->operation_stat(5*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
 			$cacheComponent->operation_stat(60*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
@@ -52,22 +49,6 @@ class task extends bgControl
 			'data_endtime' => $time['endtime'],
 			'runtime' => $datadebugger->getTime(),
 		));
-		
-		$starttime = date('Y-m-d H:i:s');
-		$datadebugger = new debugger();
-		$cacheComponent = new \application\algorithm\cache();
-		$time = $cacheComponent->traffic_stat_sn(300);;
-		$datadebugger->stop();
-		$this->model('build_data_log')->insert(array(
-			'name' => 'traffic_stat_sn',
-			'duration'=>300,
-			'run_starttime' => $starttime,
-			'run_endtime' => date('Y-m-d H:i:s'),
-			'data_starttime' => $time['starttime'],
-			'data_endtime' => $time['endtime'],
-			'runtime' => $datadebugger->getTime(),
-		));
-		
 		
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
@@ -150,21 +131,6 @@ class task extends bgControl
 	 */
 	function hour()
 	{
-		$starttime = date('Y-m-d H:i:s');
-		$datadebugger = new debugger();
-		$cacheComponent = new \application\algorithm\cache();
-		$time = $cacheComponent->traffic_stat_sn(3600);;
-		$datadebugger->stop();
-		$this->model('build_data_log')->insert(array(
-			'name' => 'traffic_stat_sn',
-			'duration'=>3600,
-			'run_starttime' => $starttime,
-			'run_endtime' => date('Y-m-d H:i:s'),
-			'data_starttime' => $time['starttime'],
-			'data_endtime' => $time['endtime'],
-			'runtime' => $datadebugger->getTime(),
-		));
-		
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
@@ -266,21 +232,6 @@ class task extends bgControl
 	 */
 	function day()
 	{
-		$starttime = date('Y-m-d H:i:s');
-		$datadebugger = new debugger();
-		$cacheComponent = new \application\algorithm\cache();
-		$time = $cacheComponent->traffic_stat_sn(86400);;
-		$datadebugger->stop();
-		$this->model('build_data_log')->insert(array(
-			'name' => 'traffic_stat_sn',
-			'duration'=>86400,
-			'run_starttime' => $starttime,
-			'run_endtime' => date('Y-m-d H:i:s'),
-			'data_starttime' => $time['starttime'],
-			'data_endtime' => $time['endtime'],
-			'runtime' => $datadebugger->getTime(),
-		));
-		
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
