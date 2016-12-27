@@ -141,6 +141,7 @@ class algorithm extends BaseComponent
 			$result = $this->model($tableName)->where('time>=? and time<?',array(
 				$this->_starttime,$this->_endtime
 			))
+			->order('time','asc')
 			->select();
 			foreach ($result as $r)
 			{
@@ -166,6 +167,7 @@ class algorithm extends BaseComponent
 			$result = $this->model($tableName)->where('time>=? and time<?',array(
 				$this->_starttime,$this->_endtime
 			))
+			->order('time','asc')
 			->where('sn=?',array($sn))
 			->select(array(
 				'time',

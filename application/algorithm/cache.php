@@ -361,7 +361,7 @@ class cache extends BaseComponent
 		
 		
 		//user_online_sn数据
-		if (in_array($duration, array(1800,7200,86400)))
+		if (in_array($duration, array(1800,3600,7200,86400)))
 		{
 			$tableName = 'user_online_sn_'.$duration;
 			$this->model($tableName)->startCompress();

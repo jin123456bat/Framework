@@ -164,6 +164,15 @@ class task extends bgControl
 			'runtime' => $datadebugger->getTime(),
 		));
 		
+		
+		//生成所有api_detail的数据
+		$sns = $this->combineSns();
+		$commands = array();
+		foreach ($sns as $sn)
+		{
+			$commands['api_detail_hourly_1_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$sn;
+		}
+		
 		//生成api的缓存数据
 		/* $commands = array();
 		$data = $this->model('sn_in_cache')->select();
@@ -181,8 +190,8 @@ class task extends bgControl
 				}
 			}
 		} 
-		$this->runTask($commands);
 		*/
+		$this->runTask($commands);
 		$hour1->stop();
 		return $hour1;
 	}
@@ -287,6 +296,15 @@ class task extends bgControl
 			'content_mobile_daily_5' => 'php '.ROOT.'/index.php -c content -a mobile -duration daily -timemode 5',//内容交付移动应用 30天的数据
 			'content_http_daily_5' => 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 5',//内容交付常规资源 30天的数据
 		);
+		
+		$sns = $this->combineSns();
+		$commands = array();
+		foreach ($sns as $sn)
+		{
+			$commands['api_detail_hourly_2_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$sn;
+			$commands['api_detail_hourly_3_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 3 -sn '.$sn;
+			$commands['api_detail_hourly_5_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$sn;
+		}
 			
 		//生成api的缓存数据
 		/* $data = $this->model('sn_in_cache')->select();
@@ -329,7 +347,13 @@ class task extends bgControl
 			'content_mobile_hourly_4' => 'php '.ROOT.'/index.php -c content -a mobile -duration hourly -timemode 4',//内容交付移动应用 上周的数据
 			'content_http_hourly_4' => 'php '.ROOT.'/index.php -c content -a http -duration hourly -timemode 4',//内容交付常规资源 上周的数据
 		);
-			
+		
+		$sns = $this->combineSns();
+		$commands = array();
+		foreach ($sns as $sn)
+		{
+			$commands['api_detail_hourly_4_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$sn;
+		}
 		//生成api的缓存数据
 		/* $data = $this->model('sn_in_cache')->select();
 		$build_sn_list = array();
@@ -365,6 +389,12 @@ class task extends bgControl
 			'content_http_daily_6' => 'php '.ROOT.'/index.php -c content -a http -duration daily -timemode 6',//内容交付常规资源 上月的数据
 		);
 		
+		$sns = $this->combineSns();
+		$commands = array();
+		foreach ($sns as $sn)
+		{
+			$commands['api_detail_hourly_6_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$sn;
+		}
 		//生成api的缓存数据
 		/* $data = $this->model('sn_in_cache')->select();
 		$build_sn_list = array();
