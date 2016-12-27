@@ -15,6 +15,6 @@ class index extends BaseControl
 		echo json_encode($result); */
 		
 		$cache = new \application\algorithm\cache();
-		$cache->operation_stat(86400,'2016-11-26 00:00:00','2016-12-26 00:00:00');
+		$cache->traffic_stat(1800,'2016-12-26 15:00:00','2016-12-26 17:00:00');
 	}
 }

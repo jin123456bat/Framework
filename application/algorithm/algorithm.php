@@ -210,7 +210,7 @@ class algorithm extends BaseComponent
 	{
 		$user_detail = array();
 		$user = $this->user($sn);
-		foreach ($user_detail as $time => $stat)
+		foreach ($user as $time => $stat)
 		{
 			$user_detail[$time] = $stat['online'];
 		}
