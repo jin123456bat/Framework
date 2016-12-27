@@ -131,6 +131,9 @@ class task extends bgControl
 	 */
 	function hour()
 	{
+		$hour1 = new debugger();
+		$hour1->start();
+		
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
@@ -161,8 +164,6 @@ class task extends bgControl
 			'runtime' => $datadebugger->getTime(),
 		));
 		
-		$hour1 = new debugger();
-		$hour1->start();
 		//生成api的缓存数据
 		/* $commands = array();
 		$data = $this->model('sn_in_cache')->select();
@@ -179,8 +180,9 @@ class task extends bgControl
 					$commands['api_detail_hourly_1_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$s;
 				}
 			}
-		} */
+		} 
 		$this->runTask($commands);
+		*/
 		$hour1->stop();
 		return $hour1;
 	}
@@ -232,6 +234,9 @@ class task extends bgControl
 	 */
 	function day()
 	{
+		$day1 = new debugger();
+		$day1->start();
+		
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
@@ -262,8 +267,6 @@ class task extends bgControl
 			'runtime' => $datadebugger->getTime(),
 		));
 		
-		$day1 = new debugger();
-		$day1->start();
 		$commands = array(
 			'main_overview_minutely_2' => 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 2',//首页 昨天的数据
 			'main_overview_hourly_3' => 'php '.ROOT.'/index.php -c main -a overview -duration hourly -timemode 3',//首页近7天的数据

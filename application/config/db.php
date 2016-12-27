@@ -2,7 +2,7 @@
 $sql_mode = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
 $init_command = array(
 	'set sql_mode = "'.$sql_mode.'"',
-	//'set max_allowed_packet = 512*1024*1024'
+	//'set max_allowed_packet = 20*1024*1024'
 );
 return array(
 	'cloud_web_v2' => array(

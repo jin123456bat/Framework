@@ -147,7 +147,9 @@ class node extends BaseControl
 				$r['max_sys_disk_used'] = $max['max_sys_disk_used']<$r['sys_disk_used']?$r['sys_disk_used']:$max['max_sys_disk_used'];
 				$r['max_data_disk_used'] = $max['max_data_disk_used']<$r['data_disk_used']?$r['data_disk_used']:$max['max_data_disk_used'];
 			}
-				
+			
+			
+			
 			//子节点信息
 			$sub_vpe = $this->model('cdn_node_stat')
 			->where('sn like ?',array('%'.substr($r['sn'], 3)))

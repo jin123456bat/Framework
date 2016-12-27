@@ -148,7 +148,8 @@ class content extends BaseControl
 		}
 		
 		$topfile = array();
-		$topfile['http'] = $this->modelWithSn('top_stat')
+		$topfile['http'] = $this->model('top_stat')
+		->in('sn',$this->combineSns())
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -170,7 +171,8 @@ class content extends BaseControl
 			$file['category'] = isset($category['http'][$file['category']])?$category['http'][$file['category']]:'其他';
 		}
 		
-		$topfile['mobile'] = $this->modelWithSn('top_stat')
+		$topfile['mobile'] = $this->model('top_stat')
+		->in('sn',$this->combineSns())
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -191,7 +193,8 @@ class content extends BaseControl
 			$file['category'] = isset($category['mobile'][$file['category']])?$category['mobile'][$file['category']]:'其他';
 		}
 		
-		$topfile['videoDemand'] = $this->modelWithSn('top_stat')
+		$topfile['videoDemand'] = $this->model('top_stat')
+		->in('sn',$this->combineSns())
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -208,7 +211,8 @@ class content extends BaseControl
 		));
 		
 		//直播的话文件大小按照累加的cache_size ,其他资源全部取max(cache_size)
-		$topfile['videoLive'] = $this->modelWithSn('top_stat')
+		$topfile['videoLive'] = $this->model('top_stat')
+		->in('sn',$this->combineSns())
 		->where('create_time >= ? and create_time<?',array(
 			$start_time,
 			$end_time
@@ -425,7 +429,8 @@ class content extends BaseControl
 		{
 			if (in_array($name, $top5_category))
 			{
-				$topfile[$name] = $this->modelWithSn('top_stat')
+				$topfile[$name] = $this->model('top_stat')
+				->in('sn',$this->combineSns())
 				->where('create_time>=? and create_time<?',array(
 					$start_time,
 					$end_time,
@@ -444,7 +449,8 @@ class content extends BaseControl
 			}
 		}
 	
-		$topfile['其他'] = $this->modelWithSn('top_stat')
+		$topfile['其他'] = $this->model('top_stat')
+		->in('sn',$this->combineSns())
 		->where('create_time>=? and create_time<?',array(
 			$start_time,
 			$end_time,
@@ -651,7 +657,8 @@ class content extends BaseControl
 		{
 			if (in_array($name, $top5_category))
 			{
-				$topfile[$name] = $this->modelWithSn('top_stat')
+				$topfile[$name] = $this->model('top_stat')
+				->in('sn',$this->combineSns())
 				->where('create_time>=? and create_time<?',array(
 					$start_time,
 					$end_time,
@@ -671,7 +678,8 @@ class content extends BaseControl
 			}
 		}
 		
-		$topfile['其他'] = $this->modelWithSn('top_stat')
+		$topfile['其他'] = $this->model('top_stat')
+		->in('sn',$this->combineSns())
 		->where('create_time>=? and create_time<?',array(
 			$start_time,
 			$end_time,
@@ -810,7 +818,8 @@ class content extends BaseControl
 		$topfile = array();
 		foreach ($category['mobile'] as $key=>$name)
 		{
-			$topfile[$name] = $this->modelWithSn('top_stat')
+			$topfile[$name] = $this->model('top_stat')
+			->in('sn',$this->combineSns())
 			->where('create_time>=? and create_time<?',array(
 				$start_time,
 				$end_time,
@@ -943,7 +952,8 @@ class content extends BaseControl
 		$topfile = array();
 		foreach ($category['http'] as $key=>$name)
 		{
-			$topfile[$name] = $this->modelWithSn('top_stat')
+			$topfile[$name] = $this->model('top_stat')
+			->in('sn',$this->combineSns())
 			->where('create_time>=? and create_time<?',array(
 				$start_time,
 				$end_time,

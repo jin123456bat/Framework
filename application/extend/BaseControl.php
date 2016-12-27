@@ -134,23 +134,4 @@ abstract class BaseControl extends control
 		$sn = \application\extend\cache::get('cacheSnList');
 		return $sn;
 	}
-	
-	function modelWithSn($name)
-	{
-		$sn = $this->combineSns();
-		$model = parent::model($name);
-		$sql = '';
-		$param = array();
-		if (is_array($sn))
-		{
-			foreach ($sn as $s)
-			{
-				$sql .= 'sn like ? or ';
-				$param[] = '%'.substr($s, 3);
-			}
-		}
-		$sql = substr($sql, 0,-4);
-		$model->where($sql,$param);
-		return $model;
-	}
 }

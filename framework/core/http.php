@@ -111,8 +111,11 @@ class http extends base
 	
 	/**
 	 * 发送get请求
+	 * @param string $url 请求的地址
+	 * @param array $data 请求的额外参数 默认是添加到?号后面
+	 * @param bool $use_curl 是否使用curl,默认是不使用
 	 */
-	static function get($url,array $data = array(),$use_curl = true)
+	static function get($url,array $data = array(),$use_curl = true,$callback = NULL)
 	{
 		$url = $url.'?'.http_build_query($data);
 		if (function_exists('curl_init') && $use_curl)
@@ -134,7 +137,20 @@ class http extends base
 		}
 		else
 		{
-			$result = file_get_contents($url);
+			$context = stream_context_create(array(
+				'http' => array(
+					'method' => 'GET',
+					'timeout' => 60,
+					'follow_location' => 1,
+					'max_redirects' => 3,
+					'ignore_errors' => true,
+				)
+			));
+			if (!empty($callback) && is_callable($callback))
+			{
+				stream_context_set_params($context,array('notification' => $callback));
+			}
+			$result = file_get_contents($url,false,$context);
 			return $result;
 		}
 	}
