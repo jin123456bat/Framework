@@ -280,7 +280,6 @@ class cacheAlgorithm extends BaseComponent
 				}
 			}
 			//unset($v);
-			
 			if ($i == $this->_duraiton)
 			{
 				$max_traffic_stat['max_cache'] = $max_traffic_stat_cache;
@@ -288,23 +287,13 @@ class cacheAlgorithm extends BaseComponent
 				$max_traffic_stat['hit'] = $max_traffic_stat_hit;
 				$temp_traffic_stat[$t] = $max_traffic_stat;
 				
-				foreach ($max_traffic_stat_sn as $sn => &$v)
+				foreach ($max_traffic_stat_sn as $sn => $v)
 				{
-					$v['max_cache'] = $max_traffic_stat_sn_cache[$sn];
-					$v['online'] = $max_traffic_stat_sn_online[$sn];
-					$v['hit'] = $max_traffic_stat_sn_hit[$sn];
+					$temp_traffic_stat_sn[$t][$sn] = $v;
+					$temp_traffic_stat_sn[$t][$sn]['max_cache'] = $max_traffic_stat_sn_cache[$sn];
+					$temp_traffic_stat_sn[$t][$sn]['online'] = $max_traffic_stat_sn_online[$sn];
+					$temp_traffic_stat_sn[$t][$sn]['hit'] = $max_traffic_stat_sn_hit[$sn];
 				}
-				
-				$temp_traffic_stat_sn[$t] = $max_traffic_stat_sn;
-				//var_dump($temp_traffic_stat_sn['2016-12-26 15:00:00']['VAS0530000173']);
-				//if ($t == '2016-12-26 15:00:00')
-				//{
-					//VAS0530000173
-					//var_dump($t);
-					//var_dump($temp_traffic_stat_sn['2016-12-26 15:00:00']['VAS0530000173']);
-				//}
-				
-				
 				
 				$t = '';
 				$i = 0;
@@ -327,9 +316,7 @@ class cacheAlgorithm extends BaseComponent
 				$max_traffic_stat_sn_online = array();
 			}
 		}
-		//echo json_encode($temp_traffic_stat_sn);
-		//exit();
-		//var_dump($temp_traffic_stat_sn['2016-12-26 15:00:00']['VAS0530000173']);
+		
 		return array(
 			'traffic_stat' => $temp_traffic_stat,
 			'traffic_stat_sn' => $temp_traffic_stat_sn,
