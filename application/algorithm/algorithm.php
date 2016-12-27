@@ -413,7 +413,7 @@ class algorithm extends BaseComponent
 				$data['service'][$stat['time']] = $stat['service'];
 				$data['cache'][$stat['time']] = $stat['cache'];
 				$data['monitor'][$stat['time']] = $stat['monitor'];
-				$data['max_cache'][$stat['time']] = $stat['service'];
+				$data['max_cache'][$stat['time']] = $stat['max_cache'];
 				$data['icache_cache'][$stat['time']] = $stat['icache_cache'];
 				$data['vpe_cache'][$stat['time']] = $stat['vpe_cache'];
 			}
