@@ -43,6 +43,7 @@ class cacheAlgorithm extends BaseComponent
 			if (in_array($r['sn'], $sn,true))
 			{
 				$time = $this->formatTime($r['create_time']);
+				$short_sn = substr($r['sn'],3);
 				if (!isset($traffic_stat[$time]))
 				{
 					$traffic_stat[$time] = array(
@@ -55,9 +56,9 @@ class cacheAlgorithm extends BaseComponent
 						'hit' => 0,
 					);
 				}
-				if (!isset($traffic_stat_sn[$r['sn']][$time]))
+				if (!isset($traffic_stat_sn[$short_sn][$time]))
 				{
-					$traffic_stat_sn[$r['sn']][$time] = array(
+					$traffic_stat_sn[$short_sn][$time] = array(
 						'service' => 0,
 						'cache' => 0,
 						'monitor' => 0,
@@ -74,12 +75,12 @@ class cacheAlgorithm extends BaseComponent
 				$traffic_stat[$time]['online'] += $r['online_user'];
 				$traffic_stat[$time]['hit'] += $r['hit_user'];
 				
-				$traffic_stat_sn[$r['sn']][$time]['service'] += $r['service']*1024;
-				$traffic_stat_sn[$r['sn']][$time]['cache'] += $r['cache']*1024;
-				$traffic_stat_sn[$r['sn']][$time]['monitor'] += $r['monitor']*1024;
-				$traffic_stat_sn[$r['sn']][$time]['icache_cache'] += $r['cache']*1024;
-				$traffic_stat_sn[$r['sn']][$time]['online'] += $r['online_user'];
-				$traffic_stat_sn[$r['sn']][$time]['hit'] += $r['hit_user'];
+				$traffic_stat_sn[$short_sn][$time]['service'] += $r['service']*1024;
+				$traffic_stat_sn[$short_sn][$time]['cache'] += $r['cache']*1024;
+				$traffic_stat_sn[$short_sn][$time]['monitor'] += $r['monitor']*1024;
+				$traffic_stat_sn[$short_sn][$time]['icache_cache'] += $r['cache']*1024;
+				$traffic_stat_sn[$short_sn][$time]['online'] += $r['online_user'];
+				$traffic_stat_sn[$short_sn][$time]['hit'] += $r['hit_user'];
 			}
 		}
 		
@@ -96,6 +97,7 @@ class cacheAlgorithm extends BaseComponent
 		{
 			if (in_array($r['sn'], $sn,true))
 			{
+				$short_sn = substr($r['sn'], 3);
 				$time = $this->formatTime($r['make_time']);
 				if (!isset($traffic_stat[$time]))
 				{
@@ -109,9 +111,9 @@ class cacheAlgorithm extends BaseComponent
 						'hit' => 0,
 					);
 				}
-				if (!isset($traffic_stat_sn[$r['sn']][$time]))
+				if (!isset($traffic_stat_sn[$short_sn][$time]))
 				{
-					$traffic_stat_sn[$r['sn']][$time] = array(
+					$traffic_stat_sn[$short_sn][$time] = array(
 						'service' => 0,
 						'cache' => 0,
 						'monitor' => 0,
@@ -122,7 +124,7 @@ class cacheAlgorithm extends BaseComponent
 					);
 				}
 				$traffic_stat[$time]['service'] -= $r['service'];
-				$traffic_stat_sn[$r['sn']][$time]['service'] -= $r['service'];
+				$traffic_stat_sn[$short_sn][$time]['service'] -= $r['service'];
 			}
 		}
 		
@@ -142,7 +144,8 @@ class cacheAlgorithm extends BaseComponent
 		));
 		foreach ($result as $r)
 		{
-			if (in_array(substr($r['sn'],3),$sn))
+			$short_sn = substr($r['sn'],3);
+			if (in_array($short_sn,$sn))
 			{
 				$time = $this->formatTime($r['make_time']);
 				if (!isset($traffic_stat[$time]))
@@ -157,9 +160,9 @@ class cacheAlgorithm extends BaseComponent
 						'hit' => 0,
 					);
 				}
-				if (!isset($traffic_stat_sn[$r['sn']][$time]))
+				if (!isset($traffic_stat_sn[$short_sn][$time]))
 				{
-					$traffic_stat_sn[$r['sn']][$time] = array(
+					$traffic_stat_sn[$short_sn][$time] = array(
 						'service' => 0,
 						'cache' => 0,
 						'monitor' => 0,
@@ -174,10 +177,10 @@ class cacheAlgorithm extends BaseComponent
 				$traffic_stat[$time]['monitor'] += $r['monitor'];
 				$traffic_stat[$time]['vpe_cache'] += $r['cache'];
 				
-				$traffic_stat_sn[$r['sn']][$time]['service'] += $r['service'];
-				$traffic_stat_sn[$r['sn']][$time]['cache'] += $r['cache'];
-				$traffic_stat_sn[$r['sn']][$time]['monitor'] += $r['monitor'];
-				$traffic_stat_sn[$r['sn']][$time]['vpe_cache'] += $r['cache'];
+				$traffic_stat_sn[$short_sn][$time]['service'] += $r['service'];
+				$traffic_stat_sn[$short_sn][$time]['cache'] += $r['cache'];
+				$traffic_stat_sn[$short_sn][$time]['monitor'] += $r['monitor'];
+				$traffic_stat_sn[$short_sn][$time]['vpe_cache'] += $r['cache'];
 			}
 		}
 		
@@ -276,7 +279,7 @@ class cacheAlgorithm extends BaseComponent
 					}
 				}
 			}
-			unset($v);
+			//unset($v);
 			
 			if ($i == $this->_duraiton)
 			{
@@ -291,7 +294,17 @@ class cacheAlgorithm extends BaseComponent
 					$v['online'] = $max_traffic_stat_sn_online[$sn];
 					$v['hit'] = $max_traffic_stat_sn_hit[$sn];
 				}
+				
 				$temp_traffic_stat_sn[$t] = $max_traffic_stat_sn;
+				//var_dump($temp_traffic_stat_sn['2016-12-26 15:00:00']['VAS0530000173']);
+				//if ($t == '2016-12-26 15:00:00')
+				//{
+					//VAS0530000173
+					//var_dump($t);
+					//var_dump($temp_traffic_stat_sn['2016-12-26 15:00:00']['VAS0530000173']);
+				//}
+				
+				
 				
 				$t = '';
 				$i = 0;
@@ -314,7 +327,9 @@ class cacheAlgorithm extends BaseComponent
 				$max_traffic_stat_sn_online = array();
 			}
 		}
-		
+		//echo json_encode($temp_traffic_stat_sn);
+		//exit();
+		//var_dump($temp_traffic_stat_sn['2016-12-26 15:00:00']['VAS0530000173']);
 		return array(
 			'traffic_stat' => $temp_traffic_stat,
 			'traffic_stat_sn' => $temp_traffic_stat_sn,

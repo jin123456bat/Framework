@@ -136,6 +136,7 @@ class algorithm extends BaseComponent
 	{
 		if (empty($sn))
 		{
+			$temp = array();
 			$tableName = 'user_online_'.$this->_duration;
 			$result = $this->model($tableName)->where('time>=? and time<?',array(
 				$this->_starttime,$this->_endtime
@@ -156,6 +157,7 @@ class algorithm extends BaseComponent
 			{
 				$sn = array_shift($sn);
 			}
+			$temp = array();
 			$tableName = 'user_online_sn_'.$this->_duration;
 			$result = $this->model($tableName)->where('time>=? and time<?',array(
 				$this->_starttime,$this->_endtime
