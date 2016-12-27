@@ -155,7 +155,11 @@ class algorithm extends BaseComponent
 		{
 			if (is_array($sn))
 			{
-				$sn = array_shift($sn);
+				$sn = substr(array_shift($sn), 3);
+			}
+			else
+			{
+				$sn = substr($sn, 3);
 			}
 			$temp = array();
 			$tableName = 'user_online_sn_'.$this->_duration;
@@ -425,7 +429,11 @@ class algorithm extends BaseComponent
 		{
 			if (is_array($sn))
 			{
-				$sn = array_shift($sn);
+				$sn = substr(array_shift($sn),3);
+			}
+			else
+			{
+				$sn = substr($sn, 3);
 			}
 			
 			$tableName = 'traffic_stat_sn_'.$this->_duration;
@@ -830,7 +838,11 @@ class algorithm extends BaseComponent
 		{
 			if (is_array($sn))
 			{
-				$sn = array_shift($sn);
+				$sn = substr(array_shift($sn),3);
+			}
+			else
+			{
+				$sn = substr($sn, 3);
 			}
 			$tableName = 'operation_stat_sn_'.$this->_duration;
 			$result = $this->model($tableName)->where('time>=? and time<?',array(
