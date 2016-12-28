@@ -245,12 +245,12 @@ class api extends apiControl
 		
 		$algorithm = new algorithm($this->_startTime,$this->_endTime,$this->_duration_second);
 		$cds = $algorithm->CDSOnlineNum($sn);
-		$online = $algorithm->USEROnlineNum($sn);
-		$serviceMax = $algorithm->ServiceMax($sn);
 		var_dump(date('Y-m-d H:i:s'));
-		$serviceSum = $algorithm->ServiceSum($sn);
+		$online = $algorithm->USEROnlineNum($sn);
 		var_dump(date('Y-m-d H:i:s'));
 		exit();
+		$serviceMax = $algorithm->ServiceMax($sn);
+		$serviceSum = $algorithm->ServiceSum($sn);
 		
 		$ratio = new ratio($this->_timemode);
 		$ratio->setDuration($this->_duration_second);
@@ -271,7 +271,6 @@ class api extends apiControl
 				'max_online' => $online_detail['max'],
 			);
 		}
-		
 		
 		$data = array(
 			'cds' => array(

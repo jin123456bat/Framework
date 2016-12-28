@@ -21,7 +21,7 @@ class mysql
 	
 	private $_transaction_level = 0;
 
-	private function __construct($config = NULL)
+	private function __construct($config)
 	{
 		$this->config = $config;
 		$this->connect();
@@ -30,7 +30,7 @@ class mysql
 	/**
 	 * 获取mysql进程
 	 */
-	public static function getInstance($config = NULL)
+	public static function getInstance($config)
 	{
 		$configKey = md5(json_encode($config));
 		if (!isset(self::$mysql[$configKey]) || empty(self::$mysql[$configKey]))

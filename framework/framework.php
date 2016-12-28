@@ -57,7 +57,6 @@ class framework
 		{
 			$this->_application[$appkey]->initlize($this->_argc,$this->_argv);
 		}
-		
 		return $this->_application[$appkey];
 	}
 	

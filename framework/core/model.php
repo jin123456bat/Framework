@@ -60,19 +60,7 @@ class model extends component
 		}
 		else
 		{
-			$db = $this->getConfig('db');
-			
-			if (!isset($db['db_type']))
-			{
-				foreach ($db as $d)
-				{
-					if (isset($d['default']) && $d['default'])
-					{
-						$db = $d;
-						break;
-					}
-				}
-			}
+			$db = self::getDefaultDbConfig();
 		}
 		
 		$this->_db = mysql::getInstance($db);
@@ -84,6 +72,34 @@ class model extends component
 		
 		$this->setTable($this->_table);
 		parent::initlize();
+	}
+	
+	/**
+	 * 获取DB配置
+	 * @return NULL|mixed
+	 */
+	private static function getDefaultDbConfig()
+	{
+		$db = self::getConfig('db');
+		
+		//判断是否是多个db配置  多个db配置查询带default=true的 没有default=true的使用第一个
+		if (!isset($db['db_type']))
+		{
+			$firstDb = NULL;
+			foreach ($db as $d)
+			{
+				if (empty($firstDb))
+				{
+					$firstDb = $d;
+				}
+				if (isset($d['default']) && $d['default'])
+				{
+					return $d;
+				}
+			}
+			return $firstDb;
+		}
+		return $db;
 	}
 	
 	/**
@@ -497,5 +513,10 @@ class model extends component
 			return $result;
 		}
 		return false;
+	}
+	
+	function optimize()
+	{
+		return $this->query('optimize table '.$this->getTable());
 	}
 }

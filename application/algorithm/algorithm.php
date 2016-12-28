@@ -271,7 +271,7 @@ class algorithm extends BaseComponent
 				$sn = array_shift($sn);
 			}
 			$tableName = 'operation_stat_sn_'.$this->_duration;
-			$this->model($tableName)
+			$service_sum_sum = 1*$this->model($tableName)
 			->where('time>=? and time<?',array(
 				$this->_starttime,$this->_endtime
 			))

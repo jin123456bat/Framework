@@ -3,6 +3,7 @@ namespace application\control;
 
 use application\extend\bgControl;
 use framework\core\debugger;
+use framework\core\model;
 
 /**
  * 生成各个接口的文件数据
@@ -413,6 +414,12 @@ class task extends bgControl
 			}
 		} */
 		$this->runTask($commands);
+		
+		$tables = $this->model('accounts')->query('show tables');
+		foreach ($tables as $table)
+		{
+			$this->model($table['Tables_in_cloud_web_v2'])->optimize();
+		}
 		$month1->stop();
 		return $month1;
 	}
