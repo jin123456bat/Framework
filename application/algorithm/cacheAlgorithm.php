@@ -91,7 +91,8 @@ class cacheAlgorithm extends BaseComponent
 		->select(array(
 			'make_time',
 			'sn',
-			'service'
+			'service',
+			'cache',
 		));
 		foreach ($result as $r)
 		{
@@ -124,7 +125,11 @@ class cacheAlgorithm extends BaseComponent
 					);
 				}
 				$traffic_stat[$time]['service'] -= $r['service'];
+				$traffic_stat[$time]['cache'] -= $r['cache'];
+				$traffic_stat[$time]['icache_cache'] -= $r['cache'];
 				$traffic_stat_sn[$short_sn][$time]['service'] -= $r['service'];
+				$traffic_stat_sn[$short_sn][$time]['cache'] -= $r['cache'];
+				$traffic_stat_sn[$short_sn][$time]['icache_cache'] -= $r['cache'];
 			}
 		}
 		

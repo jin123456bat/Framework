@@ -11,11 +11,11 @@ class index extends BaseControl
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
-		$time = $cacheComponent->traffic_stat(86400);
+		$time = $cacheComponent->operation_stat(3600);;
 		$datadebugger->stop();
 		$this->model('build_data_log')->insert(array(
-			'name' => 'traffic_stat',
-			'duration'=>86400,
+			'name' => 'operation_stat',
+			'duration'=>3600,
 			'run_starttime' => $starttime,
 			'run_endtime' => date('Y-m-d H:i:s'),
 			'data_starttime' => $time['starttime'],

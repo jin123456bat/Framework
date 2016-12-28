@@ -519,6 +519,65 @@ class cache extends BaseComponent
 			unset($stat);
 		}
 		
+		//operation_stat_sn_class_category
+		if (in_array($duration, array(3600,86400)))
+		{
+			$operation_stat_sn_class_category = array();
+			$tableName = 'operation_stat_sn_class_category_'.$duration;
+			foreach ($operation_stat as $stat)
+			{
+				$sn = substr($stat['sn'],3);
+				$time = $stat['time'];
+				$class = $stat['class'];
+				$category = $stat['category'];
+				if (!isset($operation_stat_sn_class_category[$time][$sn][$class][$category]))
+				{
+					$operation_stat_sn_class_category[$time][$sn][$class][$category] = array(
+						'service_size' => 0,
+						'cache_size' => 0,
+						'proxy_cache_size' => 0,
+					);
+				}
+				$operation_stat_sn_class_category[$time][$sn][$class][$category]['service_size'] += $stat['service_size'];
+				$operation_stat_sn_class_category[$time][$sn][$class][$category]['cache_size'] += $stat['cache_size'];
+				$operation_stat_sn_class_category[$time][$sn][$class][$category]['proxy_cache_size'] += $stat['proxy_cache_size'];
+			}
+			unset($sn);
+			unset($time);
+			unset($class);
+			unset($category);
+			unset($stat);
+			$this->model($tableName)->startCompress();
+			foreach ($operation_stat_sn_class_category as $time => $v)
+			{
+				foreach ($v as $sn => $vv)
+				{
+					foreach ($vv as $class => $vvv)
+					{
+						foreach ($vvv as $category => $value)
+						{
+							$this->model($tableName)->insert(array(
+								'time' => $time,
+								'sn' => $sn,
+								'class' => $class,
+								'category' => $category,
+								'service_size' => $value['service_size'],
+								'cache_size' => $value['cache_size'],
+								'proxy_cache_size' => $value['proxy_cache_size'],
+							));
+						}
+					}
+				}
+			}
+			$this->model($tableName)->duplicate(array('service_size','cache_size','proxy_cache_size'));
+			$this->model($tableName)->commitCompress();
+			unset($operation_stat_sn_class_category);
+			unset($v);
+			unset($vv);
+			unset($vvv);
+			unset($value);
+		}
+		
 		if ($duration == 1800 || $duration == 3600 || $duration == 7200 || $duration == 86400 || $duration == 300)
 		{
 			$operation_stat_class_category = array();
@@ -577,6 +636,7 @@ class cache extends BaseComponent
 				'service_size','cache_size','proxy_cache_size'
 			));
 			$this->model($tableName_operation_stat_class_category)->commitCompress();
+			unset($operation_stat_class_category);
 		}
 		return array(
 			'starttime' => $startTime,

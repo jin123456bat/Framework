@@ -316,69 +316,97 @@ class algorithm extends BaseComponent
 	 */
 	public function CPService($sn = array(),$top = 9)
 	{
-		$cp_service = array();
-		$tableName = 'operation_stat_class_category_'.$this->_duration;
-		//取出service累计最大的前n个分类
-		$categoryTop = $this->model($tableName)->where('time>=? and time<?',array(
-			$this->_starttime,
-			$this->_endtime
-		))
-		->group(array('class','category'))
-		->order('service_sum','desc')
-		->limit($top)
-		->select(array(
-			'category',
-			'class',
-			'sum(service_size) as service_sum',
-		));
-		
-		
-		$top = array();
-		foreach ($categoryTop as $r)
+		if (is_scalar($sn) || (is_array($sn) && count($sn) == 1))
 		{
-			$top[] = array(
-				'category' => $r['category'],
-				'class' => $r['class'],
-			);
+			$cp_service = array();
+			$categoryTop = $this->model('operation_stat')->where('make_time>? and make_time<?',array(
+				$this->_starttime,$this->_endtime,
+			))
+			->group(array('class','category'))
+			->order('service_sum','desc')
+			->limit($top)
+			->select(array(
+				'category',
+				'class',
+				'sum(service_size) as service_sum',
+			));
+			
+			$top = array();
+			foreach ($categoryTop as $r)
+			{
+				$top[] = array(
+					'category' => $r['category'],
+					'class' => $r['class'],
+				);
+			}
+			
+			
 		}
-		
-		$tableName = 'operation_stat_class_category_'.$this->_duration;
-		$result = $this->model($tableName)->where('time>=? and time<?',array(
-			$this->_starttime,$this->_endtime
-		))
-		->select();
-		foreach ($result as $r)
+		else if (empty($sn))
 		{
-			if (in_array(array(
-				'category' => $r['category'],
-				'class' => $r['class'],
-			), $top))
+			$cp_service = array();
+			$tableName = 'operation_stat_class_category_'.$this->_duration;
+			//取出service累计最大的前n个分类
+			$categoryTop = $this->model($tableName)->where('time>=? and time<?',array(
+				$this->_starttime,
+				$this->_endtime
+			))
+			->group(array('class','category'))
+			->order('service_sum','desc')
+			->limit($top)
+			->select(array(
+				'category',
+				'class',
+				'sum(service_size) as service_sum',
+			));
+			
+			
+			$top = array();
+			foreach ($categoryTop as $r)
 			{
-				$classname = $this->getCategoryName($r);
-				$cp_service[$classname][$r['time']] = $r['service_size'];
+				$top[] = array(
+					'category' => $r['category'],
+					'class' => $r['class'],
+				);
 			}
-			if (isset($total_operation_stat[$r['time']]))
+			
+			$tableName = 'operation_stat_class_category_'.$this->_duration;
+			$result = $this->model($tableName)->where('time>=? and time<?',array(
+				$this->_starttime,$this->_endtime
+			))
+			->select();
+			foreach ($result as $r)
 			{
-				$total_operation_stat[$r['time']] += $r['service_size'];
+				if (in_array(array(
+					'category' => $r['category'],
+					'class' => $r['class'],
+				), $top))
+				{
+					$classname = $this->getCategoryName($r);
+					$cp_service[$classname][$r['time']] = $r['service_size'];
+				}
+				if (isset($total_operation_stat[$r['time']]))
+				{
+					$total_operation_stat[$r['time']] += $r['service_size'];
+				}
+				else
+				{
+					$total_operation_stat[$r['time']] = $r['service_size'];
+				}
 			}
-			else
+			
+			reset($sn);
+			$service = $this->ServiceMax($sn);
+			$service = $service['detail'];
+	
+			foreach ($cp_service as $classname => &$v)
 			{
-				$total_operation_stat[$r['time']] = $r['service_size'];
+				foreach ($v as $time => &$value)
+				{
+					$value = (isset($service[$time])?$service[$time]:0) * division($value,$total_operation_stat[$time]);
+				}
 			}
 		}
-		
-		reset($sn);
-		$service = $this->ServiceMax($sn);
-		$service = $service['detail'];
-
-		foreach ($cp_service as $classname => &$v)
-		{
-			foreach ($v as $time => &$value)
-			{
-				$value = (isset($service[$time])?$service[$time]:0) * division($value,$total_operation_stat[$time]);
-			}
-		}
-		
 		return array(
 			'max' => 0,
 			'detail' => $cp_service

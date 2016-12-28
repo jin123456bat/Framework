@@ -344,6 +344,8 @@ class api extends apiControl
 		$service = $algorithm->ServiceMax($sn);
 		$service_ratio = $ratio->service_max($sn);
 		
+		
+		
 		$cds_velocity_gain = array();
 		$traffic_stat = $algorithm->traffic_stat($sn);
 		foreach ($traffic_stat['service'] as $time => $stat)
@@ -355,7 +357,6 @@ class api extends apiControl
 		$traffic_stat_cache_proxy = $algorithm->traffic_stat_service_cache_proxy($sn);
 		
 		$cp_service = $algorithm->CPService($sn,5);
-		
 		//resource
 		if (is_array($sn))
 		{
