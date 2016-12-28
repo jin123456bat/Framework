@@ -318,10 +318,16 @@ class algorithm extends BaseComponent
 	{
 		if (is_scalar($sn) || (is_array($sn) && count($sn) == 1))
 		{
+			if (is_array($sn))
+			{
+				$sn = array_shift($sn);
+			}
 			$cp_service = array();
-			$categoryTop = $this->model('operation_stat')->where('make_time>? and make_time<?',array(
+			$tableName = 'operation_stat_sn_class_category_'.$this->_duration;
+			$categoryTop = $this->model($tableName)->where('time>=? and time<?',array(
 				$this->_starttime,$this->_endtime,
 			))
+			->where('sn=?',array(substr($sn, 3)))
 			->group(array('class','category'))
 			->order('service_sum','desc')
 			->limit($top)
@@ -339,8 +345,50 @@ class algorithm extends BaseComponent
 					'class' => $r['class'],
 				);
 			}
+			$total_operation_stat = array();
+			$result = $this->model($tableName)->where('time>=? and time<?',array(
+				$this->_starttime,$this->_endtime
+			))
+			->where('sn=?',array(substr($sn, 3)))
+			->select(array(
+				'time',
+				'class',
+				'category',
+				'service_size',
+			));
+			foreach ($result as $r)
+			{
+				if (in_array(array(
+					'category' => $r['category'],
+					'class' => $r['class'],
+				), $top))
+				{
+					$classname = $this->getCategoryName($r);
+					if (!isset($cp_service[$classname][$r['time']]))
+					{
+						$cp_service[$classname][$r['time']] = 0;
+					}
+					$cp_service[$classname][$r['time']] += $r['service_size'];
+				}
+				if (isset($total_operation_stat[$r['time']]))
+				{
+					$total_operation_stat[$r['time']] += $r['service_size'];
+				}
+				else
+				{
+					$total_operation_stat[$r['time']] = $r['service_size'];
+				}
+			}
+			$service = $this->ServiceMax();
+			$service = $service['detail'];
 			
-			
+			foreach ($cp_service as $classname => &$v)
+			{
+				foreach ($v as $time => &$value)
+				{
+					$value = (isset($service[$time])?$service[$time]:0) * division($value,$total_operation_stat[$time]);
+				}
+			}
 		}
 		else if (empty($sn))
 		{
@@ -395,8 +443,7 @@ class algorithm extends BaseComponent
 				}
 			}
 			
-			reset($sn);
-			$service = $this->ServiceMax($sn);
+			$service = $this->ServiceMax();
 			$service = $service['detail'];
 	
 			foreach ($cp_service as $classname => &$v)
