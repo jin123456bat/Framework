@@ -175,23 +175,12 @@ class task extends bgControl
 		}
 		
 		//生成api的缓存数据
-		/* $commands = array();
 		$data = $this->model('sn_in_cache')->select();
 		$build_sn_list = array();
 		foreach ($data as $sns)
 		{
 			$commands['api_overview_hourly_1_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 1 -sn '.$sns['sns'];
-			$sn = explode(',', $sns['sns']);
-			foreach ($sn as $s)
-			{
-				if (!in_array($s, $build_sn_list,true))
-				{
-					$build_sn_list[] = $s;
-					$commands['api_detail_hourly_1_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$s;
-				}
-			}
 		} 
-		*/
 		$this->runTask($commands);
 		$hour1->stop();
 		return $hour1;
@@ -299,7 +288,6 @@ class task extends bgControl
 		);
 		
 		$sns = $this->combineSns();
-		$commands = array();
 		foreach ($sns as $sn)
 		{
 			$commands['api_detail_hourly_2_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$sn;
@@ -308,26 +296,13 @@ class task extends bgControl
 		}
 			
 		//生成api的缓存数据
-		/* $data = $this->model('sn_in_cache')->select();
-		$build_sn_list = array();
+		$data = $this->model('sn_in_cache')->select();
 		foreach ($data as $sns)
 		{
 			$commands['api_overview_hourly_2_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 2 -sn '.$sns['sns'];
 			$commands['api_overview_daily_3_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 3 -sn '.$sns['sns'];
 			$commands['api_overview_daily_5_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 5 -sn '.$sns['sns'];
-		
-			$sn = explode(',', $sns['sns']);
-			foreach ($sn as $s)
-			{
-				if (!in_array($s, $build_sn_list,true))
-				{
-					$build_sn_list[] = $s;
-					$commands['api_detail_hourly_2_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$s;
-					$commands['api_detail_daily_3_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 3 -sn '.$s;
-					$commands['api_detail_daily_5_'.$s]	= 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$s;
-				}
-			}
-		} */
+		}
 		$this->runTask($commands);
 		$day1->stop();
 		return $day1;
@@ -350,28 +325,16 @@ class task extends bgControl
 		);
 		
 		$sns = $this->combineSns();
-		$commands = array();
 		foreach ($sns as $sn)
 		{
 			$commands['api_detail_hourly_4_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$sn;
 		}
 		//生成api的缓存数据
-		/* $data = $this->model('sn_in_cache')->select();
-		$build_sn_list = array();
+		$data = $this->model('sn_in_cache')->select();
 		foreach ($data as $sns)
 		{
 			$commands['api_overview_daily_4_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 4 -sn '.$sns['sns'];
-		
-			$sn = explode(',', $sns['sns']);
-			foreach ($sn as $s)
-			{
-				if (!in_array($s, $build_sn_list,true))
-				{
-					$build_sn_list[] = $s;
-					$commands['api_detail_daily_4_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$s;
-				}
-			}
-		} */
+		}
 		$this->runTask($commands);
 		$week1->stop();
 		return $week1;
@@ -391,30 +354,19 @@ class task extends bgControl
 		);
 		
 		$sns = $this->combineSns();
-		$commands = array();
 		foreach ($sns as $sn)
 		{
 			$commands['api_detail_hourly_6_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$sn;
 		}
 		//生成api的缓存数据
-		/* $data = $this->model('sn_in_cache')->select();
-		$build_sn_list = array();
+		$data = $this->model('sn_in_cache')->select();
 		foreach ($data as $sns)
 		{
-			//上个月的数据
 			$commands['api_overview_daily_6_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$sns['sns'];
-			$sn = explode(',', $sns['sns']);
-			foreach ($sn as $s)
-			{
-				if (!in_array($s, $build_sn_list,true))
-				{
-					$build_sn_list[] = $s;
-					$commands['api_detail_daily_6_'.$s] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$s;
-				}
-			}
-		} */
+		}
 		$this->runTask($commands);
 		
+		//optimize所有表
 		$tables = $this->model('accounts')->query('show tables');
 		foreach ($tables as $table)
 		{
