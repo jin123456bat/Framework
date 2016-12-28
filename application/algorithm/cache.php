@@ -275,7 +275,7 @@ class cache extends BaseComponent
 			
 			$max_time = max($time_cdn_traffic_stat['max'],$time_cdn_traffic_stat['max'],$time_xvirt_traffic_stat['max']);
 			$min_time = min($time_cdn_traffic_stat['min'],$time_cdn_traffic_stat['min'],$time_xvirt_traffic_stat['min']);
-			
+	
 			$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/$duration)*$duration);
 			$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/$duration)*$duration);
 		}
@@ -285,102 +285,112 @@ class cache extends BaseComponent
 			$max_time = $endTime;
 		}
 		
-		
-		
-		$cacheAlgorithm = new cacheAlgorithm($duration, $min_time, $max_time);
-		$traffic_stat = $cacheAlgorithm->traffic_stat();
-		//$traffic_stat = $this->traffic_stat_algorithm($duration,$min_time,$max_time);
-		
-		//traffic_stat数据
-		if (in_array($duration, array(300,1800,3600,7200,86400)))
+		for ($t_time = $min_time;strtotime($t_time) < strtotime($max_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+86400))
 		{
-			$tableName = __FUNCTION__.'_'.$duration;
-			$this->model($tableName)->startCompress();
-			foreach ($traffic_stat['traffic_stat'] as $time => $stat)
+			
+			//防止时间跨度太大，限制最大时间跨度为一天
+			$startTimeStage = $t_time;
+			$endTimeStage = date('Y-m-d H:i:s',strtotime($t_time)+86400);
+			if (strtotime($endTimeStage) > strtotime($max_time))
 			{
-				$this->model($tableName)
-				->insert(array(
-					'time' => $time,
-					'service' => $stat['service'],
-					'cache' => $stat['cache'],
-					'monitor' => $stat['monitor'],
-					'max_cache' => $stat['max_cache'],
-					'icache_cache' => $stat['icache_cache'],
-					'vpe_cache' => $stat['vpe_cache'],
-				));
+				$endTimeStage = $max_time;
 			}
-			$this->model($tableName)->duplicate(array(
-				'service','cache','monitor','max_cache','icache_cache','vpe_cache'
-			));
-			$this->model($tableName)->commitCompress();
-		}
-		
-		//user_online数据
-		if (in_array($duration, array(1800,7200,86400)))
-		{
-			$user_online_tableName = 'user_online_'.$duration;
-			$this->model($user_online_tableName)->startCompress();
-			foreach ($traffic_stat['traffic_stat'] as $time => $stat)
+			
+			$cacheAlgorithm = new cacheAlgorithm($duration, $startTimeStage, $endTimeStage);
+			$traffic_stat = $cacheAlgorithm->traffic_stat();
+			//$traffic_stat = $this->traffic_stat_algorithm($duration,$min_time,$max_time);
+			
+			//traffic_stat数据
+			if (in_array($duration, array(300,1800,3600,7200,86400)))
 			{
-				$this->model($user_online_tableName)->insert(array(
-					'time' => $time,
-					'online' => $stat['online'],
-					'hit' => $stat['hit']
-				));
-			}
-			$this->model($user_online_tableName)->duplicate(array('online','hit'));
-			$this->model($user_online_tableName)->commitCompress();
-		}
-		
-		//traffic_stat_sn数据
-		if (in_array($duration, array(300,3600,86400)))
-		{
-			$tableName = 'traffic_stat_sn_'.$duration;
-			$this->model($tableName)->startCompress();
-			foreach ($traffic_stat['traffic_stat_sn'] as $time => $stat)
-			{
-				foreach ($stat as $sn => $value)
+				$tableName = __FUNCTION__.'_'.$duration;
+				$this->model($tableName)->startCompress();
+				foreach ($traffic_stat['traffic_stat'] as $time => $stat)
 				{
-					$this->model($tableName)->insert(array(
+					$this->model($tableName)
+					->insert(array(
 						'time' => $time,
-						'sn' => $sn,
-						'service' => $value['service'],
-						'cache' => $value['cache'],
-						'monitor' => $value['monitor'],
-						'max_cache' => $value['max_cache'],
-						'icache_cache' => $value['icache_cache'],
-						'vpe_cache' => $value['vpe_cache'],
+						'service' => $stat['service'],
+						'cache' => $stat['cache'],
+						'monitor' => $stat['monitor'],
+						'max_cache' => $stat['max_cache'],
+						'icache_cache' => $stat['icache_cache'],
+						'vpe_cache' => $stat['vpe_cache'],
 					));
 				}
+				$this->model($tableName)->duplicate(array(
+					'service','cache','monitor','max_cache','icache_cache','vpe_cache'
+				));
+				$this->model($tableName)->commitCompress();
 			}
-			$this->model($tableName)->duplicate(array(
-				'service','cache','monitor','max_cache','icache_cache','vpe_cache'
-			));
-			$this->model($tableName)->commitCompress();
-		}
-		
-		
-		//user_online_sn数据
-		if (in_array($duration, array(1800,3600,7200,86400)))
-		{
-			$tableName = 'user_online_sn_'.$duration;
-			$this->model($tableName)->startCompress();
-			foreach ($traffic_stat['traffic_stat_sn'] as $time => $stat)
+			
+			//user_online数据
+			if (in_array($duration, array(1800,7200,86400)))
 			{
-				foreach ($stat as $sn => $value)
+				$user_online_tableName = 'user_online_'.$duration;
+				$this->model($user_online_tableName)->startCompress();
+				foreach ($traffic_stat['traffic_stat'] as $time => $stat)
 				{
-					$this->model($tableName)->insert(array(
+					$this->model($user_online_tableName)->insert(array(
 						'time' => $time,
-						'sn' => $sn,
-						'online' => $value['online'],
-						'hit' => $value['hit'],
+						'online' => $stat['online'],
+						'hit' => $stat['hit']
 					));
 				}
+				$this->model($user_online_tableName)->duplicate(array('online','hit'));
+				$this->model($user_online_tableName)->commitCompress();
 			}
-			$this->model($tableName)->duplicate(array(
-				'online','hit'
-			));
-			$this->model($tableName)->commitCompress();
+			
+			//traffic_stat_sn数据
+			if (in_array($duration, array(300,3600,86400)))
+			{
+				$tableName = 'traffic_stat_sn_'.$duration;
+				$this->model($tableName)->startCompress();
+				foreach ($traffic_stat['traffic_stat_sn'] as $time => $stat)
+				{
+					foreach ($stat as $sn => $value)
+					{
+						$this->model($tableName)->insert(array(
+							'time' => $time,
+							'sn' => $sn,
+							'service' => $value['service'],
+							'cache' => $value['cache'],
+							'monitor' => $value['monitor'],
+							'max_cache' => $value['max_cache'],
+							'icache_cache' => $value['icache_cache'],
+							'vpe_cache' => $value['vpe_cache'],
+						));
+					}
+				}
+				$this->model($tableName)->duplicate(array(
+					'service','cache','monitor','max_cache','icache_cache','vpe_cache'
+				));
+				$this->model($tableName)->commitCompress();
+			}
+			
+			
+			//user_online_sn数据
+			if (in_array($duration, array(1800,3600,7200,86400)))
+			{
+				$tableName = 'user_online_sn_'.$duration;
+				$this->model($tableName)->startCompress();
+				foreach ($traffic_stat['traffic_stat_sn'] as $time => $stat)
+				{
+					foreach ($stat as $sn => $value)
+					{
+						$this->model($tableName)->insert(array(
+							'time' => $time,
+							'sn' => $sn,
+							'online' => $value['online'],
+							'hit' => $value['hit'],
+						));
+					}
+				}
+				$this->model($tableName)->duplicate(array(
+					'online','hit'
+				));
+				$this->model($tableName)->commitCompress();
+			}
 		}
 		
 		return array(

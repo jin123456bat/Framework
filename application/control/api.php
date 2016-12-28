@@ -169,19 +169,6 @@ class api extends apiControl
 			//立即创建缓存
 			if (!empty($create_cache_sn))
 			{
-				//生成详情页的缓存
-				/* foreach ($detail_sn as $sn)
-				{
-					$commands = array(
-						'api_detail_hourly_1_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$sn,
-						'api_detail_hourly_2_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 2 -sn '.$sn,
-						'api_detail_daily_3_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 3 -sn '.$sn,
-						'api_detail_daily_4_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 4 -sn '.$sn,
-						'api_detail_daily_5_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$sn,
-						'api_detail_daily_6_'.$sn => 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 6 -sn '.$sn,
-					);
-				} */
-				
 				//生成概览页的缓存
 				//$create_cache_sn = implode(',', $create_cache_sn);
 				$commands['api_overview_hourly_1_'.$overview_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 1 -sn '.$overview_sn;
@@ -204,6 +191,10 @@ class api extends apiControl
 	{
 		if (is_string($command))
 		{
+			//把原来的删除掉
+			//$close_shell = "ps -ef | grep '{$command}' | grep -v grep | cut -c 9-15 | xargs kill -9";
+			//exec($close_shell);
+			
 			$createtime = date('Y-m-d H:i:s',time());
 			$debugger = new debugger();
 			$response = exec($command,$output);

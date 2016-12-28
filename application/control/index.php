@@ -3,10 +3,24 @@ namespace application\control;
 
 use application\extend\BaseControl;
 use application\algorithm\cacheAlgorithm;
+use framework\core\debugger;
 class index extends BaseControl
 {
 	function index()
 	{
-		
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->traffic_stat(86400);
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'traffic_stat',
+			'duration'=>86400,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
 	}
 }
