@@ -247,7 +247,10 @@ class api extends apiControl
 		$cds = $algorithm->CDSOnlineNum($sn);
 		$online = $algorithm->USEROnlineNum($sn);
 		$serviceMax = $algorithm->ServiceMax($sn);
+		var_dump(date('Y-m-d H:i:s'));
 		$serviceSum = $algorithm->ServiceSum($sn);
+		var_dump(date('Y-m-d H:i:s'));
+		exit();
 		
 		$ratio = new ratio($this->_timemode);
 		$ratio->setDuration($this->_duration_second);
@@ -268,6 +271,7 @@ class api extends apiControl
 				'max_online' => $online_detail['max'],
 			);
 		}
+		
 		
 		$data = array(
 			'cds' => array(
@@ -313,10 +317,12 @@ class api extends apiControl
 			return new json(json::FAILED,'sn不能为空');
 		}
 		
+		$sn = array_shift($sn);
+		
 		
 		if (!empty($this->_timemode))
 		{
-			$cache_key = 'api_detail_'.$this->_duration.'_'.$this->_timemode.'_'.implode(',', $sn);
+			$cache_key = 'api_detail_'.$this->_duration.'_'.$this->_timemode.'_'.$sn;
 			if (request::php_sapi_name()=='web')
 			{
 				$response = cache::get($cache_key);
@@ -357,31 +363,13 @@ class api extends apiControl
 		$traffic_stat_cache_proxy = $algorithm->traffic_stat_service_cache_proxy($sn);
 		
 		$cp_service = $algorithm->CPService($sn,5);
-		//resource
-		if (is_array($sn))
-		{
-			$sql = '';
-			$param = array();
-			reset($sn);
-			$s = array_shift($sn);
-			while ($s)
-			{
-				$sql .= 'sn like ? or ';
-				$param[] = '%'.substr($s,3);
-				$s = next($sn);
-			}
-			$sql = substr($sql, 0,-4);
-			$this->model('operation_stat')->where($sql,$param);
-		}
-		else if(is_scalar($sn))
-		{
-			$this->model('operation_stat')->where('sn like ?',array('%'.substr($sn, 3)));
-		}
-		$operation_stat = $this->model('operation_stat')
-		->where('make_time>=? and make_time<?',array(
+		
+		$tableName = 'operation_stat_sn_class_category_'.$this->_duration_second;
+		$operation_stat = $this->model($tableName)->where('time>=? and time<?',array(
 			$this->_startTime,
 			$this->_endTime,
 		))
+		->where('sn=?',array(substr($sn, 3)))
 		->order('service','desc')
 		->group('class,category')
 		->select(array(

@@ -476,7 +476,8 @@ class cache extends BaseComponent
 			unset($stat);
 		}
 		
-		if (in_array($duration, array(86400)))
+		//operation_stat_sn
+		if (in_array($duration, array(3600,86400)))
 		{
 			$operation_stat_sn = array();
 			$tableName = 'operation_stat_sn_'.$duration;
