@@ -275,15 +275,15 @@ class cache extends BaseComponent
 			
 			$max_time = max($time_cdn_traffic_stat['max'],$time_cdn_traffic_stat['max'],$time_xvirt_traffic_stat['max']);
 			$min_time = min($time_cdn_traffic_stat['min'],$time_cdn_traffic_stat['min'],$time_xvirt_traffic_stat['min']);
-	
-			$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/$duration)*$duration);
-			$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/$duration)*$duration);
 		}
 		else
 		{
 			$min_time = $startTime;
 			$max_time = $endTime;
 		}
+		$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/$duration)*$duration);
+		$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/$duration)*$duration);
+		
 		
 		for ($t_time = $min_time;strtotime($t_time) < strtotime($max_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+86400))
 		{
@@ -413,14 +413,16 @@ class cache extends BaseComponent
 				'min' => 'min(make_time)',
 			));
 			
-			$max_time = date('Y-m-d H:i:s',ceil(strtotime($time['max'])/$duration)*$duration);
-			$min_time = date('Y-m-d H:i:s',floor(strtotime($time['min'])/$duration)*$duration);
+			$max_time = $time['max'];
+			$min_time = $time['min'];
 		}
 		else
 		{
 			$min_time = $startTime;
 			$max_time = $endTime;
 		}
+		$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/$duration)*$duration);
+		$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/$duration)*$duration);
 			
 		$operation_stat = $this->operation_stat_algorithm($duration, $min_time, $max_time);
 		
@@ -642,6 +644,173 @@ class cache extends BaseComponent
 		return array(
 			'starttime' => $startTime,
 			'endtime' => $endTime,
+		);
+	}
+	
+	
+	/**
+	 * 生成api_overview使用的cds在线情况数据
+	 * @param unknown $duration
+	 * @param unknown $startTime
+	 * @param unknown $endTime
+	 * @param string $sns
+	 * @return string[]
+	 */
+	function api_cds_online($duration,$startTime = NULL,$endTime = NULL,$sns = '')
+	{
+		if (empty($startTime) && empty($endTime))
+		{
+			list($min_time,$max_time) = $this->getDataTime(__FUNCTION__, $duration);
+		}
+		else
+		{
+			$min_time = $startTime;
+			$max_time = $endTime;
+		}
+		$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/$duration)*$duration);
+		$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/$duration)*$duration);
+		
+		//$algorithm = new algorithm($startTime,$endTime,$duration);
+		$cacheAlgorithm = new cacheAlgorithm($duration, $startTime, $endTime);
+		
+		if (empty($sns))
+		{
+			$sns = $this->model('sn_in_cache')->select();
+		}
+		else
+		{
+			if (is_string($sns))
+			{
+				$sns = array(array('sns'=>$sns));
+			}
+			else if (is_array($sns))
+			{
+				$sns = array(array('sns'=>implode(',', $sns)));
+			}
+		}
+		$tableName = 'combined_sn_data_container_'.$duration;
+		foreach ($sns as $sn)
+		{
+			$sn_array = explode(',', $sn['sns']);
+			if (count($sn_array) > 1)
+			{
+				$cds_online = $cacheAlgorithm->cds_online($sn_array);
+				$this->model($tableName)->startCompress();
+				sort($sn_array);
+				$sn_md5 = md5(implode(',', $sn_array));
+				foreach ($cds_online as $time => $online)
+				{
+					$this->model($tableName)->insert(array(
+						'sn_md5' => $sn_md5,
+						'name' => __FUNCTION__,
+						'time' => $time,
+						'value' => $online,
+						'sn' => implode(',', $sn_array)
+					));
+				}
+				$this->model($tableName)->duplicate(array('value'));
+				$this->model($tableName)->commitCompress();
+			}
+		}
+		return array(
+			'startTime'=> $startTime,
+			'endTime'=>$endTime
+		);
+	}
+	
+	/**
+	 * 生成api_overview使用的流速和用户在线情况的数据
+	 */
+	function api_user_online_traffic_stat($duration,$startTime = NULL,$endTime = NULL,$sns = '')
+	{
+		if (empty($startTime) && empty($endTime))
+		{
+			list($startTime,$endTime) = $this->getDataTime(__FUNCTION__, $duration);
+			
+			$time_traffic_stat = $this->model('traffic_stat')->where('add_time >=? and add_time<?',array(
+				$startTime,$endTime
+			))->find('max(create_time) as max,min(create_time) as min');
+			$time_cdn_traffic_stat = $this->model('cdn_traffic_stat')->where('create_time>=? and create_time<?',array(
+				$startTime,$endTime
+			))->find('max(make_time) as max,min(make_time) as min');
+			$time_xvirt_traffic_stat = $this->model('xvirt_traffic_stat')->where('create_time>=? and create_time<?',array(
+				$startTime,$endTime
+			))->find('max(make_time) as max,min(make_time) as min');
+				
+			$max_time = max($time_cdn_traffic_stat['max'],$time_cdn_traffic_stat['max'],$time_xvirt_traffic_stat['max']);
+			$min_time = min($time_cdn_traffic_stat['min'],$time_cdn_traffic_stat['min'],$time_xvirt_traffic_stat['min']);
+		}
+		else
+		{
+			$min_time = $startTime;
+			$max_time = $endTime;
+		}
+		$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/$duration)*$duration);
+		$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/$duration)*$duration);
+		
+		for ($t_time = $min_time;strtotime($t_time) < strtotime($max_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+86400))
+		{
+			//防止时间跨度太大，限制最大时间跨度为一天
+			$startTimeStage = $t_time;
+			$endTimeStage = date('Y-m-d H:i:s',strtotime($t_time)+86400);
+			if (strtotime($endTimeStage) > strtotime($max_time))
+			{
+				$endTimeStage = $max_time;
+			}
+			
+			if (empty($sns))
+			{
+				$sns_data = $this->model('sn_in_cache')->select();
+			}
+			else
+			{
+				if (is_string($sns))
+				{
+					$sns_data = array(array('sns'=>$sns));
+				}
+				else if (is_array($sns))
+				{
+					$sns_data = array(array('sns'=>implode(',', $sns)));
+				}
+			}
+			$cacheAlgorithm = new cacheAlgorithm($duration, $startTimeStage, $endTimeStage);
+			$tableName = 'combined_sn_data_container_'.$duration;
+			foreach ($sns_data as $sn)
+			{
+				$sn_array = explode(',', $sn['sns']);
+				if (count($sn_array)>1)
+				{
+					$traffic_stat = $cacheAlgorithm->traffic_stat($sn_array);
+					
+					$this->model($tableName)->startCompress();
+					sort($sn_array);
+					$sn_md5 = md5(implode(',', $sn_array));
+					foreach ($traffic_stat['traffic_stat'] as $time => $stat)
+					{
+						$this->model($tableName)->insert(array(
+							'sn_md5' => $sn_md5,
+							'name' => 'user_online',
+							'time' => $time,
+							'value' => $stat['online'],
+							'sn' => implode(',', $sn_array)
+						));
+						$this->model($tableName)->insert(array(
+							'sn_md5' => $sn_md5,
+							'name' => 'traffic_stat_service',
+							'time' => $time,
+							'value' => $stat['service'],
+							'sn' => implode(',', $sn_array)
+						));
+					}
+					$this->model($tableName)->duplicate(array('value'));
+					$this->model($tableName)->commitCompress();
+				}
+			}
+		}
+		
+		return array(
+			'startTime' => $startTime,
+			'endTime' => $endTime,
 		);
 	}
 }

@@ -8,6 +8,7 @@ use application\algorithm\ratio;
 use framework\core\request;
 use application\extend\cache;
 use framework\core\debugger;
+use application\algorithm\api_overview;
 
 class api extends apiControl
 {
@@ -243,14 +244,17 @@ class api extends apiControl
 			}
 		}
 		
-		$algorithm = new algorithm($this->_startTime,$this->_endTime,$this->_duration_second);
-		$cds = $algorithm->CDSOnlineNum($sn);
-		var_dump(date('Y-m-d H:i:s'));
-		$online = $algorithm->USEROnlineNum($sn);
-		var_dump(date('Y-m-d H:i:s'));
-		exit();
-		$serviceMax = $algorithm->ServiceMax($sn);
-		$serviceSum = $algorithm->ServiceSum($sn);
+		$api_overview = new api_overview($this->_duration_second, $this->_startTime, $this->_endTime);
+		$cds = $api_overview->cds($sn);
+		$cds_max = empty($cds)?0:max($cds);
+		
+		$user = $api_overview->user($sn);
+		$user_max = empty($user)?0:max($user);
+		
+		$traffic_stat_service = $api_overview->traffic_stat_service($sn);
+		$traffic_stat_service_max = empty($traffic_stat_service)?0:max($traffic_stat_service);
+		
+		$operation_stat_sum = $api_overview->operation_stat_sum($sn);
 		
 		$ratio = new ratio($this->_timemode);
 		$ratio->setDuration($this->_duration_second);
@@ -259,6 +263,7 @@ class api extends apiControl
 		$serviceMax_ratio = $ratio->service_max($sn);
 		$serviceSum_ratio = $ratio->service_sum($sn);
 		
+		$algorithm = new algorithm($this->_startTime,$this->_endTime,$this->_duration_second);
 		$detail = array();
 		foreach ($sn as $s)
 		{
@@ -274,24 +279,24 @@ class api extends apiControl
 		
 		$data = array(
 			'cds' => array(
-				'max' => $cds['max'],
-				'link' => $cds_ratio['link']===NULL?NULL:1*number_format(division($cds['max'] - $cds_ratio['link'],$cds_ratio['link']),4,'.',''),
-				'same' => $cds_ratio['same']===NULL?NULL:1*number_format(division($cds['max'] - $cds_ratio['same'],$cds_ratio['same']),4,'.',''),
+				'max' => $cds_max,
+				'link' => $cds_ratio['link']===NULL?NULL:1*number_format(division($cds_max - $cds_ratio['link'],$cds_ratio['link']),4,'.',''),
+				'same' => $cds_ratio['same']===NULL?NULL:1*number_format(division($cds_max - $cds_ratio['same'],$cds_ratio['same']),4,'.',''),
 			),
 			'online' => array(
-				'max' => $online['max'],
-				'link' => $online_ratio['link']===NULL?NULL:1*number_format(division($online['max'] - $online_ratio['link'],$online_ratio['link']),4,'.',''),
-				'same' => $online_ratio['same']===NULL?NULL:1*number_format(division($online['max'] - $online_ratio['same'],$online_ratio['same']),4,'.',''),
+				'max' => $user_max,
+				'link' => $online_ratio['link']===NULL?NULL:1*number_format(division($user_max - $online_ratio['link'],$online_ratio['link']),4,'.',''),
+				'same' => $online_ratio['same']===NULL?NULL:1*number_format(division($user_max - $online_ratio['same'],$online_ratio['same']),4,'.',''),
 			),
 			'serviceMax' => array(
-				'max' => $serviceMax['max'],
-				'link' => $serviceMax_ratio['link']===NULL?NULL:1*number_format(division($serviceMax['max'] - $serviceMax_ratio['link'],$serviceMax_ratio['link']),4,'.',''),
-				'same' => $serviceMax_ratio['same']===NULL?NULL:1*number_format(division($serviceMax['max'] - $serviceMax_ratio['same'],$serviceMax_ratio['same']),4,'.',''),
+				'max' => $traffic_stat_service_max,
+				'link' => $serviceMax_ratio['link']===NULL?NULL:1*number_format(division($traffic_stat_service_max - $serviceMax_ratio['link'],$serviceMax_ratio['link']),4,'.',''),
+				'same' => $serviceMax_ratio['same']===NULL?NULL:1*number_format(division($traffic_stat_service_max - $serviceMax_ratio['same'],$serviceMax_ratio['same']),4,'.',''),
 			),
 			'serviceSum' => array(
-				'max' => $serviceSum['max'],
-				'link' => $serviceSum_ratio['link']===NULL?NULL:1*number_format(division($serviceSum['max'] - $serviceSum_ratio['link'],$serviceSum_ratio['link']),4,'.',''),
-				'same' => $serviceSum_ratio['same']===NULL?NULL:1*number_format(division($serviceSum['max'] - $serviceSum_ratio['same'],$serviceSum_ratio['same']),4,'.',''),
+				'max' => $operation_stat_sum,
+				'link' => $serviceSum_ratio['link']===NULL?NULL:1*number_format(division($operation_stat_sum - $serviceSum_ratio['link'],$serviceSum_ratio['link']),4,'.',''),
+				'same' => $serviceSum_ratio['same']===NULL?NULL:1*number_format(division($operation_stat_sum - $serviceSum_ratio['same'],$serviceSum_ratio['same']),4,'.',''),
 			),
 			'detail' => $detail,
 		);

@@ -20,6 +20,51 @@ class cacheAlgorithm extends BaseComponent
 		return date('Y-m-d H:i:00',strtotime($time));
 	}
 	
+	function cds_online($sn = array())
+	{
+		$sn = $this->combineSns($sn);
+		
+		$cds_detail = array();
+		
+		switch ($this->_duration)
+		{
+			case 30*60:
+				$time = 'if( date_format(ctime,"%i")<30,date_format(ctime,"%Y-%m-%d %H:00:00"),date_format(ctime,"%Y-%m-%d %H:30:00") )';
+				break;
+			case 60*60:
+				$time = 'date_format(ctime,"%Y-%m-%d %H:00:00")';
+				break;
+			case 2*60*60:
+				$time = 'concat(date_format(ctime,"%Y-%m-%d")," ",floor(date_format(ctime,"%H")/2)*2,":00:00")';
+				break;
+			case 24*60*60:
+				$time = 'date_format(ctime,"%Y-%m-%d 00:00:00")';
+				break;
+			default:
+				$time = '';
+		}
+		if (!empty($time))
+		{
+			$result = $this->model('feedbackHistory')
+			->where('ctime >= ? and ctime < ?',array(
+				$this->_starttime,$this->_endtime
+			))
+			->group('time')
+			->order('time','asc')
+			->in('sn',$sn)
+			->select(array(
+				'time' => $time,
+				'count' => 'count(distinct(sn))'
+			));
+			foreach ($result as $r)
+			{
+				$cds_detail[$r['time']] = $r['count'];
+			}
+			$cds_max = empty($cds_detail)?0:max($cds_detail);
+		}
+		return $cds_detail;
+	}
+	
 	function traffic_stat($sn = array())
 	{
 		$sn = $this->combineSns($sn);

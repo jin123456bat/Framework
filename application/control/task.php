@@ -166,7 +166,6 @@ class task extends bgControl
 			'runtime' => $datadebugger->getTime(),
 		));
 		
-		
 		//生成所有api_detail的数据
 		$sns = $this->combineSns();
 		$commands = array();
@@ -174,6 +173,11 @@ class task extends bgControl
 		{
 			$commands['api_detail_hourly_1_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration hourly -timemode 1 -sn '.$sn;
 		}
+		
+		
+		$cache = new \application\algorithm\cache();
+		$cache->api_cds_online(3600);
+		$cache->api_user_online_traffic_stat(3600);
 		
 		//生成api的缓存数据
 		$data = $this->model('sn_in_cache')->select();
@@ -295,7 +299,11 @@ class task extends bgControl
 			$commands['api_detail_hourly_3_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 3 -sn '.$sn;
 			$commands['api_detail_hourly_5_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$sn;
 		}
-			
+		
+		$cache = new \application\algorithm\cache();
+		$cache->api_cds_online(86400);
+		$cache->api_user_online_traffic_stat(86400);
+		
 		//生成api的缓存数据
 		$data = $this->model('sn_in_cache')->select();
 		foreach ($data as $sns)

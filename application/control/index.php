@@ -4,6 +4,7 @@ namespace application\control;
 use application\extend\BaseControl;
 use framework\core\database\driver\mysql;
 use framework\core\model;
+use application\algorithm\apiCache;
 class index extends BaseControl
 {
 	function index()
@@ -23,10 +24,10 @@ class index extends BaseControl
 			'runtime' => $datadebugger->getTime(),
 		)); */
 		
-		$tables = $this->model('accounts')->query('show tables');
-		foreach ($tables as $table)
-		{
-			var_dump($table['Tables_in_cloud_web_v2']);
-		}
+		$cache = new \application\algorithm\cache();
+		$cache->api_cds_online(3600,'2016-12-01 00:00:00','2016-12-29 00:00:00','CAS0530000232,CAS0530000244');
+		$cache->api_user_online_traffic_stat(3600,'2016-12-01 00:00:00','2016-12-29 00:00:00','CAS0530000232,CAS0530000244');
+		$cache->api_cds_online(86400,'2016-11-01 00:00:00','2016-12-29 00:00:00','CAS0530000232,CAS0530000244');
+		$cache->api_user_online_traffic_stat(86400,'2016-11-01 00:00:00','2016-12-29 00:00:00','CAS0530000232,CAS0530000244');
 	}
 }
