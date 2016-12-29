@@ -13,6 +13,7 @@ class task extends bgControl
 {
 	function buildHistory()
 	{
+			
 		$cacheComponent = new \application\algorithm\cache();
 		$starttime = '2016-11-01 00:00:00';
 		$endtime = date('Y-m-d H:i:s');
@@ -23,11 +24,11 @@ class task extends bgControl
 			$cacheComponent->traffic_stat(3600,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
 			$cacheComponent->traffic_stat(7200,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
 			$cacheComponent->traffic_stat(86400,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(30*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(5*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(60*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(2*60*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
-			$cacheComponent->operation_stat(24*60*60,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(300,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(1800,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(3600,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(7200,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
+			$cacheComponent->operation_stat(86400,$t_time,date('Y-m-d H:i:s',strtotime("+2 day",strtotime($t_time))));
 		}
 	}
 	
@@ -302,9 +303,16 @@ class task extends bgControl
 			$commands['api_overview_hourly_2_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 2 -sn '.$sns['sns'];
 			$commands['api_overview_daily_3_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 3 -sn '.$sns['sns'];
 			$commands['api_overview_daily_5_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 5 -sn '.$sns['sns'];
-		}
+		} 
 		$this->runTask($commands);
 		$day1->stop();
+		
+		//optimize所有表
+		$tables = $this->model('accounts')->query('show tables');
+		foreach ($tables as $table)
+		{
+			$this->model($table['Tables_in_cloud_web_v2'])->optimize();
+		}
 		return $day1;
 	}
 	
@@ -366,12 +374,7 @@ class task extends bgControl
 		}
 		$this->runTask($commands);
 		
-		//optimize所有表
-		$tables = $this->model('accounts')->query('show tables');
-		foreach ($tables as $table)
-		{
-			$this->model($table['Tables_in_cloud_web_v2'])->optimize();
-		}
+		
 		$month1->stop();
 		return $month1;
 	}

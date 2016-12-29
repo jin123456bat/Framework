@@ -23,7 +23,10 @@ class node extends BaseControl
 	function cacheSnList()
 	{
 		$sn = BaseComponent::getSnList();
-		\application\extend\cache::set('cacheSnList', $sn);
+		if (!empty($sn))
+		{
+			\application\extend\cache::set('cacheSnList', $sn);
+		}
 		return new json(json::OK,NULL,$sn);
 	}
 	

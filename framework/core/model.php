@@ -500,6 +500,10 @@ class model extends component
 				$this->_compress_sql = array_merge($this->_compress_sql,$insert_sql);
 				unset($this->_compress_sql['insert']);
 			}
+			else
+			{
+				unset($this->_compress_sql['insert_duplicate_values']);
+			}
 			$sql = array_shift($this->_compress_sql);
 			$sql = trim($sql,' ;');//去除前后空格和分号
 			$sql = str_replace('  ', ' ', $sql);//把2个空格转化为1个空格
