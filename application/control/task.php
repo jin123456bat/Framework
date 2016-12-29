@@ -175,9 +175,34 @@ class task extends bgControl
 		}
 		
 		
-		$cache = new \application\algorithm\cache();
-		$cache->api_cds_online(3600);
-		$cache->api_user_online_traffic_stat(3600);
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->api_cds_online(3600);;
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'api_cds_online',
+			'duration'=>3600,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->api_user_online_traffic_stat(3600);;
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'api_user_online_traffic_stat',
+			'duration'=>3600,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
 		
 		//生成api的缓存数据
 		$data = $this->model('sn_in_cache')->select();
@@ -300,9 +325,34 @@ class task extends bgControl
 			$commands['api_detail_hourly_5_'.$sn] = 'php '.ROOT.'/index.php -c api -a detail -duration daily -timemode 5 -sn '.$sn;
 		}
 		
-		$cache = new \application\algorithm\cache();
-		$cache->api_cds_online(86400);
-		$cache->api_user_online_traffic_stat(86400);
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->api_cds_online(86400);
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'api_cds_online',
+			'duration'=>86400,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
+		$starttime = date('Y-m-d H:i:s');
+		$datadebugger = new debugger();
+		$cacheComponent = new \application\algorithm\cache();
+		$time = $cacheComponent->api_user_online_traffic_stat(86400);
+		$datadebugger->stop();
+		$this->model('build_data_log')->insert(array(
+			'name' => 'api_user_online_traffic_stat',
+			'duration'=>86400,
+			'run_starttime' => $starttime,
+			'run_endtime' => date('Y-m-d H:i:s'),
+			'data_starttime' => $time['starttime'],
+			'data_endtime' => $time['endtime'],
+			'runtime' => $datadebugger->getTime(),
+		));
 		
 		//生成api的缓存数据
 		$data = $this->model('sn_in_cache')->select();

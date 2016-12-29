@@ -170,6 +170,11 @@ class api extends apiControl
 			//立即创建缓存
 			if (!empty($create_cache_sn))
 			{
+				$cache = new \application\algorithm\cache();
+				$cache->api_cds_online(3600,date('Y-m-d H:i:s',strtotime('-14 day')),date('Y-m-d H:i:s'),$overview_sn);
+				$cache->api_user_online_traffic_stat(3600,date('Y-m-d H:i:s',strtotime('-14 day')),date('Y-m-d H:i:s'),$overview_sn);
+				$cache->api_cds_online(86400,date('Y-m-d H:i:s',strtotime('-2 month')),date('Y-m-d H:i:s'),$overview_sn);
+				$cache->api_user_online_traffic_stat(86400,date('Y-m-d H:i:s',strtotime('-2 month')),date('Y-m-d H:i:s'),$overview_sn);
 				//生成概览页的缓存
 				//$create_cache_sn = implode(',', $create_cache_sn);
 				$commands['api_overview_hourly_1_'.$overview_sn] = 'php '.ROOT.'/index.php -c api -a overview -duration hourly -timemode 1 -sn '.$overview_sn;
