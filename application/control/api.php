@@ -308,7 +308,16 @@ class api extends apiControl
 		
 		if (!empty($this->_timemode))
 		{
-			cache::set($cache_key, $data);
+			switch ($this->_timemode)
+			{
+				case 1:$expires = 0;break;
+				case 2:
+				case 3:
+				case 5:$expires = strtotime(date('Y-m-d',strtotime('+1 day'))) - time();break;
+				case 4:$expires = strtotime(date('Y-m-d',strtotime('next Monday'))) - time();break;
+				case 6:$expires = strtotime(date('Y-m-01',strtotime('+1 month'))) - time();break;
+			}
+			cache::set($cache_key, $data,$expires);
 		}
 		
 		return new json(json::OK,'ok',$data);
@@ -537,7 +546,16 @@ class api extends apiControl
 		
 		if (!empty($cache_key))
 		{
-			cache::set($cache_key, $data);
+			switch ($this->_timemode)
+			{
+				case 1:$expires = 0;break;
+				case 2:
+				case 3:
+				case 5:$expires = strtotime(date('Y-m-d',strtotime('+1 day'))) - time();break;
+				case 4:$expires = strtotime(date('Y-m-d',strtotime('next Monday'))) - time();break;
+				case 6:$expires = strtotime(date('Y-m-01',strtotime('+1 month'))) - time();break;
+			}
+			cache::set($cache_key, $data,$expires);
 		}
 		
 		return new json(json::OK,'ok',$data);

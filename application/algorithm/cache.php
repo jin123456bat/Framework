@@ -729,8 +729,8 @@ class cache extends BaseComponent
 			}
 		}
 		return array(
-			'startTime'=> $startTime,
-			'endTime'=>$endTime
+			'starttime'=> $startTime,
+			'endtime'=>$endTime
 		);
 	}
 	
@@ -826,8 +826,8 @@ class cache extends BaseComponent
 		}
 		
 		return array(
-			'startTime' => $startTime,
-			'endTime' => $endTime,
+			'starttime' => $startTime,
+			'endtime' => $endTime,
 		);
 	}
 }
