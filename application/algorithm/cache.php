@@ -669,8 +669,8 @@ class cache extends BaseComponent
 			$max_time = $endTime;
 		}
 		
-		$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/$duration)*$duration);
-		$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/$duration)*$duration);
+		$min_time = $this->getFloorTime($min_time, $duration);
+		$max_time = $this->getCeilTime($max_time, $duration);
 		
 		//$algorithm = new algorithm($startTime,$endTime,$duration);
 		$cacheAlgorithm = new cacheAlgorithm($duration, $startTime, $endTime);
