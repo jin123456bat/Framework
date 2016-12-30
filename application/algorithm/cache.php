@@ -11,14 +11,28 @@ class cache extends BaseComponent
 		
 	}
 	
-	private function getDataTime($name,$duration)
+	private function getDataTime($name,$duration,$defaultStartTime = NULL)
 	{
 		$startTime = $this->model('build_data_log')
 		->where('name=? and duration=?',array($name,$duration))
 		->scalar('max(data_endtime)');
 		if (empty($startTime))
 		{
-			$startTime = date('Y-m-d H:i:s',strtotime('-7 day'));
+			if (empty($defaultStartTime))
+			{
+				switch ($duration)
+				{
+					case 300:$startTime = date('Y-m-d H:i:s',strtotime('-14 day'));break;
+					case 1800:
+					case 3600:
+					case 7200:$startTime = date('Y-m-d H:i:s',strtotime('-1 month'));break;
+					case 86400:$startTime = date('Y-m-d H:i:s',strtotime('-2 month'));break;
+				}
+			}
+			else
+			{
+				$startTime = $defaultStartTime;
+			}
 		}
 		
 		$endTime = date('Y-m-d H:i:s');

@@ -468,7 +468,7 @@ class model extends component
 	 */
 	function truncate()
 	{
-		return $this->_db->exec('TRUNCATE `'.$this->_table.'`');
+		return $this->_db->exec('TRUNCATE `'.$this->getTable().'`');
 	}
 	
 	/**
