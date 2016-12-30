@@ -97,6 +97,7 @@ class application extends component
 		{
 			foreach ($env as $name => $variable)
 			{
+				//对于date.timezone特殊处理
 				if (is_array($variable) && !empty($variable))
 				{
 					foreach ($variable as $prefix => $value)

@@ -281,9 +281,9 @@ class cache extends BaseComponent
 			$min_time = $startTime;
 			$max_time = $endTime;
 		}
-		$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/$duration)*$duration);
-		$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/$duration)*$duration);
 		
+		$min_time = $this->getFloorTime($min_time, $duration);
+		$max_time = $this->getCeilTime($max_time, $duration);
 		
 		for ($t_time = $min_time;strtotime($t_time) < strtotime($max_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+86400))
 		{
@@ -421,8 +421,9 @@ class cache extends BaseComponent
 			$min_time = $startTime;
 			$max_time = $endTime;
 		}
-		$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/$duration)*$duration);
-		$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/$duration)*$duration);
+		
+		$min_time = $this->getFloorTime($min_time, $duration);
+		$max_time = $this->getCeilTime($max_time, $duration);
 			
 		$operation_stat = $this->operation_stat_algorithm($duration, $min_time, $max_time);
 		
@@ -667,6 +668,7 @@ class cache extends BaseComponent
 			$min_time = $startTime;
 			$max_time = $endTime;
 		}
+		
 		$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/$duration)*$duration);
 		$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/$duration)*$duration);
 		
@@ -700,7 +702,6 @@ class cache extends BaseComponent
 				$sn_md5 = md5(implode(',', $sn_array));
 				foreach ($cds_online as $time => $online)
 				{
-					var_dump($time);
 					$this->model($tableName)->insert(array(
 						'sn_md5' => $sn_md5,
 						'name' => __FUNCTION__,
@@ -746,8 +747,9 @@ class cache extends BaseComponent
 			$min_time = $startTime;
 			$max_time = $endTime;
 		}
-		$min_time = date('Y-m-d H:i:s',floor(strtotime($min_time)/$duration)*$duration);
-		$max_time = date('Y-m-d H:i:s',ceil(strtotime($max_time)/$duration)*$duration);
+		
+		$min_time = $this->getFloorTime($min_time, $duration);
+		$max_time = $this->getCeilTime($max_time, $duration);
 		
 		for ($t_time = $min_time;strtotime($t_time) < strtotime($max_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+86400))
 		{
