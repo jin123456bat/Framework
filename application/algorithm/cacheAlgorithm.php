@@ -4,13 +4,13 @@ use application\extend\BaseComponent;
 
 class cacheAlgorithm extends BaseComponent
 {
-	private $_duraiton;
+	private $_duration;
 	private $_starttime;
 	private $_endtime;
 	
 	function __construct($duration,$starttime,$endtime)
 	{
-		$this->_duraiton = $duration;
+		$this->_duration = $duration;
 		$this->_starttime = date('Y-m-d H:i:s',strtotime($starttime));
 		$this->_endtime = date('Y-m-d H:i:s',strtotime($endtime));
 	}
@@ -330,7 +330,7 @@ class cacheAlgorithm extends BaseComponent
 				}
 			}
 			//unset($v);
-			if ($i == $this->_duraiton)
+			if ($i == $this->_duration)
 			{
 				$max_traffic_stat['max_cache'] = $max_traffic_stat_cache;
 				$max_traffic_stat['online'] = $max_traffic_stat_online;

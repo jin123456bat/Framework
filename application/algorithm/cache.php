@@ -700,6 +700,7 @@ class cache extends BaseComponent
 				$sn_md5 = md5(implode(',', $sn_array));
 				foreach ($cds_online as $time => $online)
 				{
+					var_dump($time);
 					$this->model($tableName)->insert(array(
 						'sn_md5' => $sn_md5,
 						'name' => __FUNCTION__,
