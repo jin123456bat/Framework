@@ -232,6 +232,7 @@ class api extends apiControl
 		{
 			return new json(json::FAILED,'sn不能为空');
 		}
+		sort($sn);
 
 		if (!empty($this->_timemode))
 		{
