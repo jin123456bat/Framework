@@ -9,6 +9,7 @@ use framework\core\request;
 use application\extend\cache;
 use framework\core\debugger;
 use application\algorithm\api_overview;
+use application\algorithm\api_overview_ratio;
 
 class api extends apiControl
 {
@@ -34,8 +35,8 @@ class api extends apiControl
 	{
 		$oldsn = $this->post('oldsn',array(),'explode:",","?"','a');
 		$newsn = $this->post('newsn',array(),'explode:",","?"','a');
-		$oldsn = sort($oldsn);
-		$newsn = sort($newsn);
+		sort($oldsn);
+		sort($newsn);
 	
 		if (empty($oldsn) && empty($newsn))
 		{
@@ -162,7 +163,7 @@ class api extends apiControl
 			echo $response->getBody();
 		}
 		
-		if(fastcgi_finish_request())
+		if(\fastcgi_finish_request())
 		{
 			//关闭session,防止阻塞
 			session_write_close();
@@ -249,26 +250,46 @@ class api extends apiControl
 			}
 		}
 		
-		$api_overview = new api_overview($this->_duration_second, $this->_startTime, $this->_endTime);
-		$cds = $api_overview->cds($sn);
-		$cds_max = empty($cds)?0:max($cds);
-		
-		$user = $api_overview->user($sn);
-		$user_max = empty($user)?0:max($user);
-		
-		$traffic_stat_service = $api_overview->traffic_stat_service($sn);
-		$traffic_stat_service_max = empty($traffic_stat_service)?0:max($traffic_stat_service);
-		
-		$operation_stat_sum = $api_overview->operation_stat_sum($sn);
-		
-		$ratio = new ratio($this->_timemode);
-		$ratio->setDuration($this->_duration_second);
-		$cds_ratio = $ratio->cds($sn);
-		$online_ratio = $ratio->user($sn);
-		$serviceMax_ratio = $ratio->service_max($sn);
-		$serviceSum_ratio = $ratio->service_sum($sn);
-		
 		$algorithm = new algorithm($this->_startTime,$this->_endTime,$this->_duration_second);
+		
+		
+		if (count($sn)>1)
+		{
+			$api_overview = new api_overview($this->_duration_second, $this->_startTime, $this->_endTime);
+			$cds = $api_overview->cds($sn);
+			$cds_max = empty($cds)?0:max($cds);
+			$user = $api_overview->user($sn);
+			$user_max = empty($user)?0:max($user);
+			$traffic_stat_service = $api_overview->traffic_stat_service($sn);
+			$traffic_stat_service_max = empty($traffic_stat_service)?0:max($traffic_stat_service);
+			$operation_stat_sum = $api_overview->operation_stat_sum($sn);
+			
+			$ratio = new api_overview_ratio($this->_timemode);
+			$ratio->setDuration($this->_duration_second);
+			$cds_ratio = $ratio->cds($sn);
+			$online_ratio = $ratio->user($sn);
+			$serviceMax_ratio = $ratio->service_max($sn);
+			$serviceSum_ratio = $ratio->service_sum($sn);
+		}
+		else if (count($sn)==1)
+		{
+			$cds = $algorithm->CDSOnlineNum($sn);
+			$cds_max = $cds['max'];
+			$user = $algorithm->USEROnlineNum($sn);
+			$user_max = $user['max'];
+			$traffic_stat_service = $algorithm->ServiceMax($sn);
+			$traffic_stat_service_max = $traffic_stat_service['max'];
+			$operation_stat_sum = $algorithm->ServiceSum($sn);
+			$operation_stat_sum = $operation_stat_sum['max'];
+			
+			$ratio = new ratio($this->_timemode);
+			$ratio->setDuration($this->_duration_second);
+			$cds_ratio = $ratio->cds($sn);
+			$online_ratio = $ratio->user($sn);
+			$serviceMax_ratio = $ratio->service_max($sn);
+			$serviceSum_ratio = $ratio->service_sum($sn);
+		}
+		
 		$detail = array();
 		foreach ($sn as $s)
 		{

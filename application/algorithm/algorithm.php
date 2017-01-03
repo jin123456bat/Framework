@@ -396,7 +396,7 @@ class algorithm extends BaseComponent
 					$total_operation_stat[$r['time']] = $r['service_size'];
 				}
 			}
-			$service = $this->ServiceMax();
+			$service = $this->ServiceMax($sn);
 			$service = $service['detail'];
 			
 			foreach ($cp_service as $classname => &$v)
@@ -460,7 +460,7 @@ class algorithm extends BaseComponent
 				}
 			}
 			
-			$service = $this->ServiceMax();
+			$service = $this->ServiceMax($sn);
 			$service = $service['detail'];
 	
 			foreach ($cp_service as $classname => &$v)
@@ -471,6 +471,12 @@ class algorithm extends BaseComponent
 				}
 			}
 		}
+		
+		foreach ($cp_service as $classname => &$v)
+		{
+			$v = $this->formatTimenode($v, $this->_starttime, $this->_endtime, $this->_duration);
+		}
+		
 		return array(
 			'max' => 0,
 			'detail' => $cp_service

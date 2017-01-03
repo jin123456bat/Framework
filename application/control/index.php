@@ -2,7 +2,6 @@
 namespace application\control;
 
 use application\extend\BaseControl;
-use framework\core\debugger;
 class index extends BaseControl
 {
 	function index()
