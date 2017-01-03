@@ -154,8 +154,7 @@ class api extends apiControl
 				}
 			}
 		}
-		
-		
+	
 		if ($result)
 		{
 			$response = new json(json::OK,'ok');
@@ -168,8 +167,9 @@ class api extends apiControl
 			//关闭session,防止阻塞
 			session_write_close();
 			
+			
 			//立即创建缓存
-			if (!empty($create_cache_sn))
+			if (!empty($overview_sn))
 			{
 				$cache = new \application\algorithm\cache();
 				$cache->api_cds_online(3600,date('Y-m-d H:i:s',strtotime('-14 day')),date('Y-m-d H:i:s'),$overview_sn);
