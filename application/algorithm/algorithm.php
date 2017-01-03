@@ -275,6 +275,7 @@ class algorithm extends BaseComponent
 			->where('time>=? and time<?',array(
 				$this->_starttime,$this->_endtime
 			))
+			->where('sn=?',array(substr($sn,3)))
 			->sum('service_size');
 			return array(
 				'max' => $service_sum_sum,
