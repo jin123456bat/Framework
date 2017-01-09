@@ -23,9 +23,7 @@ class cacheAlgorithm extends BaseComponent
 	function cds_online($sn = array())
 	{
 		$sn = $this->combineSns($sn);
-		
 		$cds_detail = array();
-		
 		switch ($this->_duration)
 		{
 			case 30*60:

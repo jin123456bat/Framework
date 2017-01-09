@@ -687,7 +687,7 @@ class cache extends BaseComponent
 		$max_time = $this->getCeilTime($max_time, $duration);
 		
 		//$algorithm = new algorithm($startTime,$endTime,$duration);
-		$cacheAlgorithm = new cacheAlgorithm($duration, $startTime, $endTime);
+		$cacheAlgorithm = new cacheAlgorithm($duration, $min_time, $max_time);
 		
 		if (empty($sns))
 		{

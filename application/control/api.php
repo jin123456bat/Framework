@@ -253,7 +253,6 @@ class api extends apiControl
 		
 		$algorithm = new algorithm($this->_startTime,$this->_endTime,$this->_duration_second);
 		
-		
 		if (count($sn)>1)
 		{
 			$api_overview = new api_overview($this->_duration_second, $this->_startTime, $this->_endTime);

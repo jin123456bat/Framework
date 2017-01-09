@@ -1,6 +1,7 @@
 <?php
 namespace application\algorithm;
 use application\extend\BaseComponent;
+use framework\core\model;
 
 /**
  * 这些接口只为api_overview页面提供
