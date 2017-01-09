@@ -24,7 +24,6 @@ class api_overview_ratio extends ratio
 		{
 			$same = NULL;
 		}
-	
 		if (!empty($this->_link))
 		{
 			$this->_algorithm->setTime($this->_link['starttime'], $this->_link['endtime']);

@@ -9,15 +9,15 @@ use framework\core\base;
  */
 class ratio extends base
 {
-	private $_timenode = NULL;
+	protected $_timenode = NULL;
 	
-	private $_same = array();
+	protected $_same = array();
 	
-	private $_link = array();
+	protected $_link = array();
 	
-	private $_duration_second = 0;
+	protected $_duration_second = 0;
 	
-	private $_algorithm = NULL;
+	protected  $_algorithm = NULL;
 	
 	function __construct($timenode)
 	{

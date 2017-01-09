@@ -28,8 +28,8 @@ class api_overview extends BaseComponent
 	
 	function setTime($startTime,$endTime)
 	{
-		$this->_startTime;
-		$this->_endTime;
+		$this->_startTime = $startTime;
+		$this->_endTime = $endTime;
 	}
 	
 	function cds($sn = array())
