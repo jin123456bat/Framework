@@ -239,7 +239,7 @@ class api extends apiControl
 			$cache_key = 'api_overview_'.$this->_duration.'_'.$this->_timemode.'_'.implode(',', $sn);
 			if (request::php_sapi_name()=='web')
 			{
-				$response = cache::get($cache_key);
+				/* $response = cache::get($cache_key);
 				if (!empty($response))
 				{
 					return new json(json::OK,NULL,$response);
@@ -247,7 +247,7 @@ class api extends apiControl
 				else
 				{
 					return new json(3,'生成报表大约需要10分钟,请稍后...');
-				}
+				} */
 			}
 		}
 		
@@ -510,18 +510,13 @@ class api extends apiControl
 				}
 			}
 			
-			if ($className == 'videoDemand' && isset($cp_resource['videoDemand']) && count($cp_resource['videoDemand'])>=5)
-			{
-				$categoryName = '其它';
-			}
-			
 			if (isset($cp_resource[$className][$categoryName]['cache']))
 			{
 				$cp_resource[$className][$categoryName]['cache'] += $stat['cache'];
 			}
 			else
 			{
-				$cp_resource[$className][$categoryName]['cache'] = $stat['cache'];
+				$cp_resource[$className][$categoryName]['cache'] = $stat['cache']*1;
 			}
 			
 			if (isset($cp_resource[$className][$categoryName]['service']))
@@ -530,7 +525,7 @@ class api extends apiControl
 			}
 			else
 			{
-				$cp_resource[$className][$categoryName]['service'] = $stat['service'];
+				$cp_resource[$className][$categoryName]['service'] = $stat['service']*1;
 			}
 			
 			if (isset($cp_resource[$className][$categoryName]['proxy_cache']))
@@ -539,7 +534,37 @@ class api extends apiControl
 			}
 			else
 			{
-				$cp_resource[$className][$categoryName]['proxy_cache'] = $stat['proxy_cache'];
+				$cp_resource[$className][$categoryName]['proxy_cache'] = $stat['proxy_cache']*1;
+			}
+		}
+		
+		foreach ($cp_resource as &$v)
+		{
+			uasort($v, function($a,$b){
+				if ($a['service'] == $b['service'])
+					return 0;
+				return $a['service']>$b['service']?-1:1;
+			});
+		}
+		unset($v);
+		
+		foreach ($cp_resource as $className => &$v)
+		{
+			if (count($v)>5)
+			{
+				$other = array(
+					'cache'=>0,
+					'service'=>0,
+					'proxy_cache'=>0,
+				);
+				while (count($v)>5)
+				{
+					$flag = array_pop($v);
+					$other['cache'] += $flag['cache'];
+					$other['service'] += $flag['service'];
+					$other['proxy_cache'] += $flag['proxy_cache'];
+				}
+				$v['其它'] = $other;
 			}
 		}
 		
