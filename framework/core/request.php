@@ -1,5 +1,6 @@
 <?php
 namespace framework\core;
+
 class request extends base
 {
 	static function php_sapi_name()
@@ -43,15 +44,58 @@ class request extends base
 	
 	/**
 	 * 读取file变量
-	 * @param unknown $name
+	 * @param string $name 文件上传名
+	 * @param string $config 使用指定配置上传文件，不填写使用默认配置
 	 */
-	static public function file($name)
+	static public function file($name,$config = NULL)
 	{
-		if (isset($_FILES[$name]))
+		$uploader = new upload();
+		$files = $uploader->receive($name);
+		$class = '\framework\vendor\file';
+		if (is_scalar($files))
 		{
-			return $_FILES[$name];
+			if (class_exists($class,true))
+			{
+				$object = new $class($files);
+				if ($object->hasError())
+				{
+					return $files;
+				}
+				else
+				{
+					return $object;
+				}
+			}
+			else
+			{
+				return $files;
+			}
 		}
-		return false;
+		else if (is_array($files))
+		{
+			$temp = array();
+			
+			foreach ($files as $filename => $file)
+			{
+				if (class_exists($class,true))
+				{
+					$object = new $class($file);
+					if ($object->hasError())
+					{
+						$temp[$filename] = $file;
+					}
+					else
+					{
+						$temp[$filename] = $object;
+					}
+				}
+				else
+				{
+					$temp[$filename] = $files;
+				}
+			}
+			return $temp;
+		}
 	}
 	
 	/**

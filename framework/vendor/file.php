@@ -1,6 +1,5 @@
 <?php
-namespace vendor;
-use core\base;
+namespace framework\vendor;
 use lib\error;
 
 /**
@@ -8,7 +7,7 @@ use lib\error;
  * @author fx
  *
  */
-class file extends error
+class file extends \framework\lib\error
 {
 	private $_atime;
 	
@@ -88,22 +87,25 @@ class file extends error
 	 */
 	private function parse()
 	{
-		//清空文件缓存
-		clearstatcache();
-		
-		$this->_mimtType = finfo_file(finfo_open(FILEINFO_MIME_TYPE, NULL), $this->_path);
-		
-		$pathinfo = pathinfo($this->_path);
-		$this->_extension = $pathinfo['extension'];
-		$this->_filename = $pathinfo['filename'];
-		$this->_basename = $pathinfo['basename'];
-		$this->_dirname = $pathinfo['dirname'];
-		
-		$fstat = stat($this->_path);
-		$this->_atime = $fstat['atime'];
-		$this->_ctime = $fstat['ctime'];
-		$this->_mtime = $fstat['mtime'];
-		$this->_size = $fstat['size'];
+		if (!empty($this->_path))
+		{
+			//清空文件缓存
+			clearstatcache();
+			
+			$this->_mimtType = finfo_file(finfo_open(FILEINFO_MIME_TYPE, NULL), $this->_path);
+			
+			$pathinfo = pathinfo($this->_path);
+			$this->_extension = $pathinfo['extension'];
+			$this->_filename = $pathinfo['filename'];
+			$this->_basename = $pathinfo['basename'];
+			$this->_dirname = $pathinfo['dirname'];
+			
+			$fstat = stat($this->_path);
+			$this->_atime = $fstat['atime'];
+			$this->_ctime = $fstat['ctime'];
+			$this->_mtime = $fstat['mtime'];
+			$this->_size = $fstat['size'];
+		}
 	}
 	
 	/**
@@ -257,7 +259,6 @@ class file extends error
 	 */
 	function touch()
 	{
-		
 	}
 	
 	/**

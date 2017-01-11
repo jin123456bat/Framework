@@ -1,11 +1,13 @@
 <?php
 namespace framework\core;
 
+use framework\lib\error;
+
 /**
  * 组件基类
  * @author fx
  */
-class component extends base
+class component extends error
 {
 	private static $_config = array();
 	

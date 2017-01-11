@@ -53,6 +53,7 @@ class user extends control
 	function logout()
 	{
 		session::destory();
+		return new json(json::OK);
 	}
 	
 	/**
@@ -77,6 +78,18 @@ class user extends control
 		{
 			if($user->save())
 			{
+				if ($type == 0)
+				{
+					$cds_group_id = request::post('cds_group_id',array(),NULL,'a');
+					foreach ($cds_group_id as $id)
+					{
+						$this->model('admin_cds_group')->insert(array(
+							'uid' => $user->id,
+							'cds_group_id' => $id
+						));
+					}
+				}
+				
 				$this->model('log')->add(user::getLoginUserId(),"添加了用户".$username);
 				return new json(json::OK);
 			}
@@ -93,7 +106,14 @@ class user extends control
 	 */
 	function lists()
 	{
-		$user = $this->model('accounts')->select();
+		$start = request::post('start',0,'');
+		$length = request::post('length',10,'');
+		
+		$user = $this->model('accounts')
+		->limit($start,$length)
+		->select(array(
+			'id','username','email','type'
+		));
 		return new json(json::OK,NULL,$user);
 	}
 	
@@ -118,6 +138,53 @@ class user extends control
 		{
 			return new json(json::FAILED,'参数错误');
 		}
+	}
+	
+	/**
+	 * 修改保存用户信息
+	 */
+	function save()
+	{
+		$id = request::post('id');
+		$username = request::post('username');
+		$password = request::post('password');
+		$email = request::post('email');
+		$type = request::post('type');
+		
+		$user = new \application\entity\user(array(
+			'id' => $id,
+			'username' => $username,
+			'password' => $password,
+			'email' => $email,
+			'type' => $type,
+		),'save');
+		
+		if($user->validate())
+		{
+			if($user->save())
+			{
+				$this->model('admin_cds_group')->where('uid=?',array($id))->delete();
+				if ($type == 0)
+				{
+					$cds_group_id = request::post('cds_group_id',array(),NULL,'a');
+					foreach ($cds_group_id as $id)
+					{
+						$this->model('admin_cds_group')->insert(array(
+							'uid' => $user->id,
+							'cds_group_id' => $id
+						));
+					}
+				}
+				
+				$this->model('log')->add(user::getLoginUserId(),"修改了用户信息".$username);
+				return new json(json::OK);
+			}
+			else
+			{
+				return new json(json::FAILED);
+			}
+		}
+		return new json(json::FAILED,$user->getError());
 	}
 	
 	/**
@@ -150,7 +217,7 @@ class user extends control
 		return array(
 			array(
 				'deny',
-				'actions' => array('register','remove','changePwd','lists'),
+				'actions' => array('register','remove','changePwd'),
 				'express' => \application\entity\user::getLoginUserId()===NULL,
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
 			)
