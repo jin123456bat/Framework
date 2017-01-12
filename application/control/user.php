@@ -6,6 +6,7 @@ use framework\core\request;
 use framework\core\response\json;
 use framework\core\session;
 use application;
+use application\entity\user;
 
 /**
  * 用户相关
@@ -106,15 +107,48 @@ class user extends control
 	 */
 	function lists()
 	{
-		$start = request::post('start',0,'');
-		$length = request::post('length',10,'');
+		$uid = user::getLoginUserId();
+		$pageNum = $this->model('accounts')->where('id=?',array($uid))->scalar('pageNum');
+		if (empty($pageNum))
+		{
+			$pageNum = 10;
+		}
+		
+		$page = request::post('page',1,'','i');
+		if ($page<1)
+		{
+			$page = 1;
+		}
+		
+		$start = ($page-1)*$pageNum;
+		$length = $pageNum;
 		
 		$user = $this->model('accounts')
 		->limit($start,$length)
 		->select(array(
 			'id','username','email','type'
 		));
-		return new json(json::OK,NULL,$user);
+		
+		foreach ($user as &$u)
+		{
+			$u['cds_group_id'] = array();
+			if ($u['type']==0)
+			{
+				$cds_group_id = $this->model('admin_cds_group')->where('uid=?',array($u['id']))->select('cds_group_id');
+				foreach ($cds_group_id as $id)
+				{
+					$u['cds_group_id'][] = $id['cds_group_id'];
+				}
+			}
+		}
+		
+		$total = $this->model('accounts')->count();
+		
+		return new json(json::OK,NULL,array(
+			'total' => $total,
+			'data' => $user,
+			'pageNum' => $pageNum,
+		));
 	}
 	
 	/**
@@ -151,13 +185,16 @@ class user extends control
 		$email = request::post('email');
 		$type = request::post('type');
 		
-		$user = new \application\entity\user(array(
-			'id' => $id,
-			'username' => $username,
-			'password' => $password,
-			'email' => $email,
-			'type' => $type,
-		),'save');
+		$user = $this->model('accounts')->where('id=?',array($id))->find();
+		
+		$user = new \application\entity\user($user,'save');
+		$user->username = $username;
+		if (!empty($password))
+		{
+			$user->password = $user->encrypt($password);
+		}
+		$user->email = $email;
+		$user->type = $type;
 		
 		if($user->validate())
 		{

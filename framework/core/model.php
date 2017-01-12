@@ -181,21 +181,36 @@ class model extends component
 	 * @param unknown $field
 	 * @return NULL|mixed
 	 */
-	function count($field)
+	function count($field = '*')
 	{
 		return $this->scalar('count('.$field.')');
 	}
 	
+	/**
+	 * 某字段的最大值
+	 * @param unknown $field
+	 * @return NULL|mixed
+	 */
 	function max($field)
 	{
 		return $this->scalar('max('.$field.')');
 	}
 	
+	/**
+	 * 某字段累加值
+	 * @param unknown $field
+	 * @return NULL|mixed
+	 */
 	function sum($field)
 	{
 		return $this->scalar('sum('.$field.')');
 	}
 	
+	/**
+	 * 某字段的平均值
+	 * @param unknown $field
+	 * @return NULL|mixed
+	 */
 	function avg($field)
 	{
 		return $this->scalar('avg('.$field.')');

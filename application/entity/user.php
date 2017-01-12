@@ -29,7 +29,7 @@ class user extends data
 		return array(
 			array('required' => 'username,password','message'=>'请填写{field}'),
 			array('unique' => 'username','message'=>'用户名已经存在','on'=>'insert'),
-			array('enum' => 'type','values' => array(0,1),'message' => '只能是普通用户或者超级管理员','on'=>'insert,update,save'),
+			array('enum' => 'type','values' => array(1,2,3,4),'message' => '只能是普通用户或者超级管理员','on'=>'insert,update,save'),
 			array('email'=>'email','message' => '请填写正确的邮箱','on'=>'insert,update,save'),
 		);
 	}
@@ -70,7 +70,7 @@ class user extends data
 	
 	function save()
 	{
-		if ($this->_scene == 'insert' || $this->_scene == 'save')
+		if ($this->_scene == 'insert')
 		{
 			$this->password = self::encrypt($this->password);
 		}
