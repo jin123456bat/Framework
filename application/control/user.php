@@ -106,7 +106,7 @@ class user extends control
 	 */
 	function lists()
 	{
-		$uid = \application\entity\user::getLoginUserId();
+		/* $uid = \application\entity\user::getLoginUserId();
 		$pageNum = $this->model('accounts')->where('id=?',array($uid))->scalar('pageNum');
 		if (empty($pageNum))
 		{
@@ -120,7 +120,10 @@ class user extends control
 		}
 		
 		$start = ($page-1)*$pageNum;
-		$length = $pageNum;
+		$length = $pageNum; */
+		
+		$start = request::param('start',0,'','i');
+		$length = request::param('length',10,'','i');
 		
 		$user = $this->model('accounts')
 		->limit($start,$length)
@@ -277,7 +280,7 @@ class user extends control
 		return array(
 			array(
 				'deny',
-				'actions' => array('register','lists','remove','save','logout'),
+				'actions' => array('register','lists','remove','save','logout','pageNum'),
 				'express' => \application\entity\user::getLoginUserId()===NULL,
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
 			)
