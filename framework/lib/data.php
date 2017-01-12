@@ -43,7 +43,7 @@ class data extends error implements \ArrayAccess
 		$data = array();
 		foreach ($this as $index => $value)
 		{
-			if ($index !== $pk)
+			if ($index !== $pk && $index[0] != '_')
 			{
 				$data[$index] = $value;
 			}

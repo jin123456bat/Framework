@@ -6,7 +6,6 @@ use framework\core\request;
 use framework\core\response\json;
 use framework\core\session;
 use application;
-use application\entity\user;
 
 /**
  * 用户相关
@@ -91,7 +90,7 @@ class user extends control
 					}
 				}
 				
-				$this->model('log')->add(user::getLoginUserId(),"添加了用户".$username);
+				$this->model('log')->add(\application\entity\user::getLoginUserId(),"添加了用户".$username);
 				return new json(json::OK);
 			}
 			else
@@ -107,14 +106,14 @@ class user extends control
 	 */
 	function lists()
 	{
-		$uid = user::getLoginUserId();
+		$uid = \application\entity\user::getLoginUserId();
 		$pageNum = $this->model('accounts')->where('id=?',array($uid))->scalar('pageNum');
 		if (empty($pageNum))
 		{
 			$pageNum = 10;
 		}
 		
-		$page = request::post('page',1,'','i');
+		$page = request::param('pageNum',1,'','i');
 		if ($page<1)
 		{
 			$page = 1;
@@ -132,7 +131,7 @@ class user extends control
 		foreach ($user as &$u)
 		{
 			$u['cds_group_id'] = array();
-			if ($u['type']==0)
+			if ($u['type']!=1)
 			{
 				$cds_group_id = $this->model('admin_cds_group')->where('uid=?',array($u['id']))->select('cds_group_id');
 				foreach ($cds_group_id as $id)
@@ -147,8 +146,26 @@ class user extends control
 		return new json(json::OK,NULL,array(
 			'total' => $total,
 			'data' => $user,
-			'pageNum' => $pageNum,
+			'length' => count($user),
 		));
+	}
+	
+	/**
+	 * 获取或设置当前页码
+	 * @return \framework\core\response\json
+	 */
+	function pageNum()
+	{
+		$pageNum = request::param('pageNum',0,'','i');
+		$uid = \application\entity\user::getLoginUserId();
+		if (empty($pageNum))
+		{
+			return new json(json::OK,NULL,$this->model('accounts')->where('id=?',array($uid))->scalar('pageNum'));
+		}
+		else
+		{
+			$this->model('accounts')->where('id=?',array($uid))->limit(1)->update('pageNum',$pageNum);
+		}
 	}
 	
 	/**
@@ -184,42 +201,48 @@ class user extends control
 		$password = request::post('password');
 		$email = request::post('email');
 		$type = request::post('type');
-		
+		if (empty($id))
+		{
+			return new json(json::FAILED,'id不能为空');
+		}
 		$user = $this->model('accounts')->where('id=?',array($id))->find();
 		
 		$user = new \application\entity\user($user,'save');
-		$user->username = $username;
+		if (!empty($username))
+		{
+			$user->username = $username;
+		}
 		if (!empty($password))
 		{
 			$user->password = $user->encrypt($password);
 		}
-		$user->email = $email;
-		$user->type = $type;
+		if (!empty($email))
+		{
+			$user->email = $email;
+		}
+		if (!empty($type))
+		{
+			$user->type = $type;
+		}
 		
 		if($user->validate())
 		{
-			if($user->save())
+			$user->save();
+			$this->model('admin_cds_group')->where('uid=?',array($id))->delete();
+			if ($type!=1)
 			{
-				$this->model('admin_cds_group')->where('uid=?',array($id))->delete();
-				if ($type == 0)
+				$cds_group_id = request::post('cds_group_id',array(),NULL,'a');
+				foreach ($cds_group_id as $id)
 				{
-					$cds_group_id = request::post('cds_group_id',array(),NULL,'a');
-					foreach ($cds_group_id as $id)
-					{
-						$this->model('admin_cds_group')->insert(array(
-							'uid' => $user->id,
-							'cds_group_id' => $id
-						));
-					}
+					$this->model('admin_cds_group')->insert(array(
+						'uid' => $user->id,
+						'cds_group_id' => $id
+					));
 				}
-				
-				$this->model('log')->add(user::getLoginUserId(),"修改了用户信息".$username);
-				return new json(json::OK);
 			}
-			else
-			{
-				return new json(json::FAILED);
-			}
+			
+			$this->model('log')->add(\application\entity\user::getLoginUserId(),"修改了用户信息".$username);
+			return new json(json::OK);
 		}
 		return new json(json::FAILED,$user->getError());
 	}
@@ -254,7 +277,7 @@ class user extends control
 		return array(
 			array(
 				'deny',
-				'actions' => array('register','remove','changePwd'),
+				'actions' => array('register','lists','remove','save','logout'),
 				'express' => \application\entity\user::getLoginUserId()===NULL,
 				'message' => new json(array('code'=>2,'result'=>'尚未登陆')),
 			)
