@@ -58,8 +58,14 @@ class mysql
 			}
 		}
 		
+		$db_port = 3306;
+		if (isset($this->config['db_port']))
+		{
+			$db_port = $this->config['db_port'];
+		}
+		
 		$this->pdo = new PDO(
-			$this->config['db_type'] . ':host=' . $this->config['db_server'] . ';dbname=' . $this->config['db_dbname'], 
+			$this->config['db_type'] . ':host=' . $this->config['db_server'] . ';port='.$db_port.';dbname=' . $this->config['db_dbname'], 
 			$this->config['db_user'], 
 			$this->config['db_password'], 
 			array(

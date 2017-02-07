@@ -11,4 +11,5 @@ class index extends BaseControl
 		$file = request::file('file');
 		var_dump($file);
 	}
+	
 }

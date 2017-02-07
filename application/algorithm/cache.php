@@ -306,7 +306,6 @@ class cache extends BaseComponent
 		
 		for ($t_time = $min_time;strtotime($t_time) < strtotime($max_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+86400))
 		{
-			
 			//防止时间跨度太大，限制最大时间跨度为一天
 			$startTimeStage = $t_time;
 			$endTimeStage = date('Y-m-d H:i:s',strtotime($t_time)+86400);
