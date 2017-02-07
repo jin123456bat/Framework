@@ -39,8 +39,8 @@ class content extends BaseControl
 			}
 		}
 		
-		$start_time = $this->_startTime;
-		$end_time = $this->_endTime;
+		$start_time = date('Y-m-d H:i:s',strtotime($this->_startTime));
+		$end_time = date('Y-m-d H:i:s',strtotime($this->_endTime));
 		
 		$category_service = array();
 		$category_cache = array();
@@ -265,8 +265,8 @@ class content extends BaseControl
 			}
 		}
 		
-		$start_time = $this->_startTime;
-		$end_time = $this->_endTime;
+		$start_time = date('Y-m-d H:i:s',strtotime($this->_startTime));
+		$end_time = date('Y-m-d H:i:s',strtotime($this->_endTime));
 		
 		$category = $this->getConfig('category');
 		
@@ -503,8 +503,8 @@ class content extends BaseControl
 			}
 		}
 		
-		$start_time = $this->_startTime;
-		$end_time = $this->_endTime;
+		$start_time = date('Y-m-d H:i:s',strtotime($this->_startTime));
+		$end_time = date('Y-m-d H:i:s',strtotime($this->_endTime));
 		
 		$category = $this->getConfig('category');
 		
@@ -733,8 +733,8 @@ class content extends BaseControl
 			}
 		}
 		
-		$start_time = $this->_startTime;
-		$end_time = $this->_endTime;
+		$start_time = date('Y-m-d H:i:s',strtotime($this->_startTime));
+		$end_time = date('Y-m-d H:i:s',strtotime($this->_endTime));
 		
 		$cp_service_flow = array();
 		$cp_cache_flow = array();
@@ -871,8 +871,8 @@ class content extends BaseControl
 			}
 		}
 		
-		$start_time = $this->_startTime;
-		$end_time = $this->_endTime;
+		$start_time = date('Y-m-d H:i:s',strtotime($this->_startTime));
+		$end_time = date('Y-m-d H:i:s',strtotime($this->_endTime));
 		
 		$cp_service_flow = array();
 		$cp_cache_flow = array();

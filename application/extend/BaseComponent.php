@@ -75,6 +75,7 @@ class BaseComponent extends component
 				$data[$t_time] = $defaultValue;
 			}
 		}
+		ksort($data);
 		return $data;
 	}
 	

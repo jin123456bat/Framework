@@ -11,9 +11,53 @@ use framework\core\model;
  */
 class task extends bgControl
 {
+	private $_locked_file = './locked';
+	
+	function startting()
+	{
+		echo dirname($this->_locked_file);
+		//创建锁
+		if(!file_put_contents($this->_locked_file, 'locked'))
+		{
+			exit("create locked failed");
+		}
+		
+		$config = self::getConfig('app');
+		if (!$config['cache'])
+		{
+			return ;
+		}
+		
+		$debugger = new debugger();
+		$minute5 = new debugger();
+		$hour1 = new debugger();
+		$hour2 = new debugger();
+		$day1 = new debugger();
+		$week1 = new debugger();
+		$month1 = new debugger();
+		
+		
+		$minute = date('i');
+		$hour = date('H');
+		$week = date('N');
+		$day = date('d');
+		
+		$minute5 = $this->minute5();
+		$this->minute30();
+		$hour1 = $this->hour();
+		$hour2 = $this->hour2();
+		$day1 = $this->day();
+		$week1 = $this->week();
+		$month1 = $this->month();
+		$debugger->stop();
+		
+		$this->log($debugger,$minute5,$hour1,$hour2,$day1,$week1,$month1);
+		
+		unlink($this->_locked_file);
+	}
+	
 	function buildHistory()
 	{
-			
 		$cacheComponent = new \application\algorithm\cache();
 		$starttime = '2016-11-01 00:00:00';
 		$endtime = date('Y-m-d H:i:s');
@@ -40,7 +84,7 @@ class task extends bgControl
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
-		$time = $cacheComponent->traffic_stat(300);;
+		$time = $cacheComponent->traffic_stat(300);
 		$datadebugger->stop();
 		$this->model('build_data_log')->insert(array(
 			'name' => 'traffic_stat',
@@ -55,7 +99,7 @@ class task extends bgControl
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
-		$time = $cacheComponent->operation_stat(300);;
+		$time = $cacheComponent->operation_stat(300);
 		$datadebugger->stop();
 		$this->model('build_data_log')->insert(array(
 			'name' => 'operation_stat',
@@ -442,6 +486,11 @@ class task extends bgControl
 	 */
 	function run()
 	{
+		if (file_exists($this->_locked_file))
+		{
+			unlink($this->_locked_file);
+		}
+		
 		$config = self::getConfig('app');
 		if (!$config['cache'])
 		{

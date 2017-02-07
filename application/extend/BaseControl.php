@@ -51,8 +51,8 @@ abstract class BaseControl extends control
 				break;
 			case '6':
 				//上月
-				$this->_endTime = date('Y-m-1 00:00:00');
-				$this->_startTime = date('Y-m-1 00:00:00',strtotime('last month'));
+				$this->_endTime = date('Y-m-01 00:00:00');
+				$this->_startTime = date('Y-m-01 00:00:00',strtotime('last month'));
 				break;
 			default:
 				//自定义时间

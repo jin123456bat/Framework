@@ -399,7 +399,6 @@ class algorithm extends BaseComponent
 			}
 			$service = $this->ServiceMax($sn);
 			$service = $service['detail'];
-			
 			foreach ($cp_service as $classname => &$v)
 			{
 				foreach ($v as $time => &$value)
@@ -463,7 +462,6 @@ class algorithm extends BaseComponent
 			
 			$service = $this->ServiceMax($sn);
 			$service = $service['detail'];
-	
 			foreach ($cp_service as $classname => &$v)
 			{
 				foreach ($v as $time => &$value)
@@ -476,6 +474,7 @@ class algorithm extends BaseComponent
 		foreach ($cp_service as $classname => &$v)
 		{
 			$v = $this->formatTimenode($v, $this->_starttime, $this->_endtime, $this->_duration);
+			ksort($v);
 		}
 		
 		return array(
