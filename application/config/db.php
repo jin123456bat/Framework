@@ -28,7 +28,7 @@ return array(
 		'db_type' => 'mysql',
 		'db_server' => '192.168.1.12',
 		'db_dbname' => 'cds_v2',
-		'db_user' => 'selecter',
+		'db_user' => 'selector',
 		'db_port' => 3321,
 		'db_password' => 'fxdata_Select-2016',
 		'db_charset' => 'utf8',

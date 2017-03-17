@@ -96,6 +96,8 @@ class task extends bgControl
 			'runtime' => $datadebugger->getTime(),
 		));
 		
+		
+		
 		$starttime = date('Y-m-d H:i:s');
 		$datadebugger = new debugger();
 		$cacheComponent = new \application\algorithm\cache();
@@ -113,13 +115,13 @@ class task extends bgControl
 		
 		$commands = array(
 			'node_cacheSnList' => 'php '.ROOT.'/index.php -c node -a cacheSnList',
-			'node_cds' => 'php '.ROOT.'/index.php -c node -a cds_cache',//CDS列表的数据
 			'main_overview_minutely_1' => 'php '.ROOT.'/index.php -c main -a overview -duration minutely -timemode 1',//首页 最近24小时的数据
 			'content_overview_minutely_1' => 'php '.ROOT.'/index.php -c content -a overview -duration minutely -timemode 1',//内容交付概览  最近24小时的数据
 			'content_videoDemand_minutely_1' => 'php '.ROOT.'/index.php -c content -a videoDemand -duration minutely -timemode 1',//内容交付视频点播 最近24小时的数据
 			'content_videoLive_minutely_1' => 'php '.ROOT.'/index.php -c content -a videoLive -duration minutely -timemode 1',//内容交付视频直播 最近24小时的数据
 			'content_mobile_minutely_1' => 'php '.ROOT.'/index.php -c content -a mobile -duration minutely -timemode 1',//内容交付移动应用 最近24小时的数据
 			'content_http_minutely_1' => 'php '.ROOT.'/index.php -c content -a http -duration minutely -timemode 1',//内容交付常规资源 最近24小时的数据
+			'node_cds' => 'php '.ROOT.'/index.php -c node -a cds_cache',//CDS列表的数据
 		);
 		
 		//cds详情
@@ -409,12 +411,26 @@ class task extends bgControl
 		$this->runTask($commands);
 		$day1->stop();
 		
+		
+		//清理空间
+		$this->model('feedbackHistory')->where('TIMESTAMPDIFF(MONTH,ctime,now())>=1')->delete();
+		$this->model('feedbackHistory')->optimize();
+		$this->model('task_detail')->where('TIMESTAMPDIFF(DAY,createtime,now())>=1')->delete();
+		$this->model('task_detail')->optimize();
+		$this->model('cache')->where('TIMESTAMPDIFF(MONTH,createtime,now())>=2')->delete();
+		$this->model('cache')->optimize();
+		$this->model('build_data_log')->where('TIMESTAMPDIFF(day,run_starttime,now())>=7')->delete();
+		$this->model('build_data_log')->optimize();
+		$this->model('task_run_log')->where('TIMESTAMPDIFF(day,starttime,now())>=7')->delete();
+		$this->model('task_run_log')->optimize();
+		
 		//optimize所有表
-		$tables = $this->model('accounts')->query('show tables');
+		/* $tables = $this->model('accounts')->query('show tables');
 		foreach ($tables as $table)
 		{
 			$this->model($table['Tables_in_cloud_web_v2'])->optimize();
-		}
+		} */
+		
 		return $day1;
 	}
 	
@@ -475,7 +491,6 @@ class task extends bgControl
 			$commands['api_overview_daily_6_'.$sns['sns']] = 'php '.ROOT.'/index.php -c api -a overview -duration daily -timemode 6 -sn '.$sns['sns'];
 		}
 		$this->runTask($commands);
-		
 		
 		$month1->stop();
 		return $month1;

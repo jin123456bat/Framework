@@ -123,6 +123,8 @@ class algorithm extends BaseComponent
 			}
 		}
 		
+		$cds_detail = $this->formatTimenode($cds_detail, $this->_starttime, $this->_endtime, $this->_duration);
+		
 		return array(
 			'max' => $cds_max,
 			'detail' => $cds_detail,
@@ -150,6 +152,7 @@ class algorithm extends BaseComponent
 					'hit' => $r['hit'],
 				);
 			}
+			$temp = $this->formatTimenode($temp, $this->_starttime, $this->_endtime, $this->_duration,array('online'=>0,'hit'=>0));
 			return $temp;
 		}
 		else if ((is_array($sn) && count($sn) == 1) || is_scalar($sn))
@@ -181,6 +184,7 @@ class algorithm extends BaseComponent
 					'hit' => $r['hit'],
 				);
 			}
+			$temp = $this->formatTimenode($temp, $this->_starttime, $this->_endtime, $this->_duration,array('online'=>0,'hit'=>0));
 			return $temp;
 		}
 		else 
@@ -207,6 +211,7 @@ class algorithm extends BaseComponent
 					$user_detail[$t_time]['hit'] += $online['hit'];
 				}
 			}
+			$user_detail = $this->formatTimenode($user_detail, $this->_starttime, $this->_endtime, $this->_duration,array('online'=>0,'hit'=>0));
 			return $user_detail;
 		}
 	}

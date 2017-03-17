@@ -279,7 +279,7 @@ class cache extends BaseComponent
 			
 			$time_traffic_stat = $this->model('traffic_stat')->where('add_time >=? and add_time<?',array(
 				$startTime,$endTime
-			))->find('max(create_time) as max,min(create_time) as min');
+			))->find('max(create_time) as max,min(create_time) as min,sn');
 			$time_cdn_traffic_stat = $this->model('cdn_traffic_stat')->where('create_time>=? and create_time<?',array(
 				$startTime,$endTime
 			))->find('max(make_time) as max,min(make_time) as min');
@@ -289,6 +289,12 @@ class cache extends BaseComponent
 			
 			$max = array($time_traffic_stat['max'],$time_cdn_traffic_stat['max'],$time_xvirt_traffic_stat['max']);
 			$min = array($time_traffic_stat['min'],$time_cdn_traffic_stat['min'],$time_xvirt_traffic_stat['min']);
+			
+			$result = $this->model('traffic_stat')->where('create_time=? and add_time>=? and add_time<?',array($time_traffic_stat['min'],$startTime,$endTime))->find();
+			
+			$result = $this->model('cdn_traffic_stat')->where('make_time=? and create_time>=? and create_time<?',array(
+				$time_cdn_traffic_stat['min'],$startTime,$endTime
+			))->find();
 			
 			$max = array_filter($max);
 			$min = array_filter($min);
@@ -301,8 +307,14 @@ class cache extends BaseComponent
 			$max_time = $endTime;
 		}
 		
+		
 		$min_time = $this->getFloorTime($min_time, $duration);
 		$max_time = $this->getCeilTime($max_time, $duration);
+		
+		if (strtotime($max_time) - strtotime($min_time)>24*3600)
+		{
+			$min_time = date('Y-m-d H:i:s',strtotime('-1 day',strtotime($max_time)));
+		}
 		
 		for ($t_time = $min_time;strtotime($t_time) < strtotime($max_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+86400))
 		{
@@ -314,9 +326,9 @@ class cache extends BaseComponent
 				$endTimeStage = $max_time;
 			}
 			
+			
 			$cacheAlgorithm = new cacheAlgorithm($duration, $startTimeStage, $endTimeStage);
 			$traffic_stat = $cacheAlgorithm->traffic_stat();
-			//$traffic_stat = $this->traffic_stat_algorithm($duration,$min_time,$max_time);
 			
 			//traffic_stat数据
 			if (in_array($duration, array(300,1800,3600,7200,86400)))
@@ -443,9 +455,14 @@ class cache extends BaseComponent
 		$min_time = $this->getFloorTime($min_time, $duration);
 		$max_time = $this->getCeilTime($max_time, $duration);
 		
+		//当时间跨度太大的时候最多计算一天之内的数据
+		if (strtotime($max_time) - strtotime($min_time)>24*3600)
+		{
+			$min_time = date('Y-m-d H:i:s',strtotime('-1 day',strtotime($max_time)));
+		}
+		
 		for ($t_time = $min_time;strtotime($t_time) < strtotime($max_time);$t_time = date('Y-m-d H:i:s',strtotime($t_time)+86400))
 		{
-				
 			//防止时间跨度太大，限制最大时间跨度为一天
 			$startTimeStage = $t_time;
 			$endTimeStage = date('Y-m-d H:i:s',strtotime($t_time)+86400);
