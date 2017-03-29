@@ -8,7 +8,7 @@ namespace framework\core\cache;
  */
 interface cache
 {
-	function set($name,$value,$expires = 0);
-	
-	function get($name);
+    function set($name, $value, $expires = 0);
+    
+    function get($name);
 }

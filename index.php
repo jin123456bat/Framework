@@ -7,10 +7,10 @@ define('DEBUG', false);
 include ROOT.'/xhprof.php';
 
 //定义框架的目录
-!defined('SYSTEM_ROOT') & define("SYSTEM_ROOT",ROOT.'/framework');
+!defined('SYSTEM_ROOT') & define("SYSTEM_ROOT", ROOT.'/framework');
 
 //定义APP的目录
-!defined('APP_ROOT') & define("APP_ROOT",ROOT.'/application');
+!defined('APP_ROOT') & define("APP_ROOT", ROOT.'/application');
 //定义app的名称  app的代码必须放在app名称对应的文件夹里面
 !define("APP_NAME", "application");
 
@@ -23,6 +23,6 @@ include SYSTEM_ROOT.'/framework.php';
 $argc = isset($argc)?$argc:0;
 $argv = isset($argv)?$argv:array();
 
-$framework = new framework($argc,$argv);
-$app = $framework->createApplication(APP_NAME,APP_ROOT);
+$framework = new framework($argc, $argv);
+$app = $framework->createApplication(APP_NAME, APP_ROOT);
 $app->run();

@@ -15,7 +15,7 @@ namespace framework\core\log;
  */
 interface LoggerInterface
 {
-	/**
+    /**
      * 系统不可用
      *
      * @param string $message

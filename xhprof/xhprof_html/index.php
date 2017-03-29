@@ -56,13 +56,13 @@ xhprof_param_init($params);
    to be preserved for the next page. unset all unwanted keys in $params.
  */
 foreach ($params as $k => $v) {
-  $params[$k] = $$k;
+    $params[$k] = $$k;
 
   // unset key from params that are using default values. So URLs aren't
   // ridiculously long.
-  if ($params[$k] == $v[1]) {
-    unset($params[$k]);
-  }
+    if ($params[$k] == $v[1]) {
+        unset($params[$k]);
+    }
 }
 
 echo "<html>";
@@ -82,8 +82,17 @@ $vgbar = ' class="vgbar"';
 
 $xhprof_runs_impl = new XHProfRuns_Default();
 
-displayXHProfReport($xhprof_runs_impl, $params, $source, $run, $wts,
-                    $symbol, $sort, $run1, $run2);
+displayXHProfReport(
+    $xhprof_runs_impl,
+    $params,
+    $source,
+    $run,
+    $wts,
+    $symbol,
+    $sort,
+    $run1,
+    $run2
+);
 
 
 echo "</body>";

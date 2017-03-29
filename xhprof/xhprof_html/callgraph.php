@@ -70,22 +70,35 @@ xhprof_param_init($params);
 
 // if invalid value specified for threshold, then use the default
 if ($threshold < 0 || $threshold > 1) {
-  $threshold = $params['threshold'][1];
+    $threshold = $params['threshold'][1];
 }
 
 // if invalid value specified for type, use the default
 if (!array_key_exists($type, $xhprof_legal_image_types)) {
-  $type = $params['type'][1]; // default image type.
+    $type = $params['type'][1]; // default image type.
 }
 
 $xhprof_runs_impl = new XHProfRuns_Default();
 
 if (!empty($run)) {
   // single run call graph image generation
-  xhprof_render_image($xhprof_runs_impl, $run, $type,
-                      $threshold, $func, $source, $critical);
+    xhprof_render_image(
+        $xhprof_runs_impl,
+        $run,
+        $type,
+        $threshold,
+        $func,
+        $source,
+        $critical
+    );
 } else {
   // diff report call graph image generation
-  xhprof_render_diff_image($xhprof_runs_impl, $run1, $run2,
-                           $type, $threshold, $source);
+    xhprof_render_diff_image(
+        $xhprof_runs_impl,
+        $run1,
+        $run2,
+        $type,
+        $threshold,
+        $source
+    );
 }
