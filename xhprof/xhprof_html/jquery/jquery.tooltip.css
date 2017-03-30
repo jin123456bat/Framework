@@ -12,8 +12,7 @@
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
  */
-
- #tooltip {
+#tooltip {
 	position: absolute;
 	z-index: 3000;
 	border: 1px solid #111;
@@ -21,4 +20,7 @@
 	padding: 5px;
 	opacity: 0.9;
 }
-#tooltip h3, #tooltip div { margin: 0; }
+
+#tooltip h3, #tooltip div {
+	margin: 0;
+}

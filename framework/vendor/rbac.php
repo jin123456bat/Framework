@@ -5,5 +5,4 @@ use core\base;
 
 class page extends base
 {
-    
 }

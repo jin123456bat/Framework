@@ -5,5 +5,4 @@ use application\extend\BaseComponent;
 
 class apiCache extends BaseComponent
 {
-    
 }
