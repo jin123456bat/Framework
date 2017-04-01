@@ -9,7 +9,7 @@ abstract class socket extends component
 {
 	private $_port = 2000;
 	
-	private $_timeout = NULL;
+	private $_timeout = 60;
 	
 	private $_max_connection = 3;
 	
@@ -21,7 +21,7 @@ abstract class socket extends component
 	 */
 	private $_message_length = 2048;
 	
-	private $_sockets = array();
+	static private $_sockets = array();
 	
 	function initlize()
 	{
@@ -36,7 +36,7 @@ abstract class socket extends component
 			call_user_func(array($this,'error'),'error',socket_last_error($this->_master),socket_strerror(socket_last_error($this->_master)));
 		}
 		
-		$this->_sockets[] = $this->_master;
+		self::$_sockets[] = $this->_master;
 		call_user_func(array($this,'open'),$this->_master);
 		
 		console::log('Server Start on '.$this->_port.'!');
@@ -52,13 +52,13 @@ abstract class socket extends component
 	public function run()
 	{
 		console::log('['.date('Y-m-d H:i:s').'][notice] socket running');
-		//$read = NULL;
+		$read = self::$_sockets;
 		$write = NULL;
 		$except = NULL;
 		
 		//socket_select  必须收到一个socket信息才会执行下一步，否则会一直在这里阻塞
-		socket_select($this->_sockets, $write, $except, $this->_timeout);
-		foreach ($this->_sockets as $socket)
+		socket_select($read, $write, $except, $this->_timeout);
+		foreach ($read as $socket)
 		{
 			if ($socket == $this->_master)
 			{
@@ -71,10 +71,10 @@ abstract class socket extends component
 				}
 				else
 				{
-					if (count($this->_sockets)> $this->_max_connection){
+					if (count(self::$_sockets)> $this->_max_connection){
 						continue;
 					}
-					$this->_sockets[] = $client;
+					self::$_sockets[] = $client;
 					call_user_func(array($this,'open'),$client);
 				}
 			}
@@ -91,9 +91,13 @@ abstract class socket extends component
 				}
 			}
 		}
-		sleep(1);
 	}
 	
+	/**
+	 * 从socket中读取数据
+	 * @param unknown $socket
+	 * @return string
+	 */
 	function read($socket)
 	{
 		return socket_read($socket, $this->_message_length);
@@ -125,10 +129,10 @@ abstract class socket extends component
 	 */
 	public function close($socket)
 	{
-		$index = array_search( $socket, $this->_sockets );
+		$index = array_search( $socket, self::$_sockets );
 		socket_close( $socket );
 		call_user_func(array($this,'disconnect'),$socket);
-		array_splice($this->_sockets, $index, 1 );
+		array_splice(self::$_sockets, $index, 1 );
 	}
 	
 	/**
@@ -149,7 +153,7 @@ abstract class socket extends component
 		if (empty($socket))
 		{
 			$num = 0;
-			foreach ($this->_sockets as $socket)
+			foreach (self::$_sockets as $socket)
 			{
 				if ($socket!=$this->_master)
 				{

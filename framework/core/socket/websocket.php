@@ -16,11 +16,11 @@ abstract class websocket extends socket
 	}
 	
 	/**
-	 * 重写socket的receive函数
+	 * 重写socket的receive函数 这个函数到这里就为止了 不允许在继续重写
 	 * {@inheritDoc}
 	 * @see \framework\core\socket::receive()
 	 */
-	public function receive($message,$socket)
+	final public function receive($message,$socket)
 	{
 		$socketid = (int)$socket;
 		if (!isset($this->_handshake[$socketid]) || $this->_handshake[$socketid]===false)
@@ -30,6 +30,7 @@ abstract class websocket extends socket
 		}
 		else
 		{
+			var_dump($this->_handshake);
 			$this->message($this->decode($message),$socket);
 		}
 	}
@@ -112,10 +113,25 @@ abstract class websocket extends socket
 		return $this->getKey('Connection') == 'Upgrade' && $this->getKey('Upgrade') == 'websocket';
 	}
 	
+	/**
+	 * 当socket断开链接的时候触发
+	 * {@inheritDoc}
+	 * @see \framework\core\socket::disconnect()
+	 */
 	public function disconnect($socket)
 	{
-		$this->_handshake[(int)$socket] = false;
+		unset($this->_handshake[(int)$socket]);
 		parent::disconnect($socket);
+	}
+	
+	/**
+	 * 当新链接链接到服务器的时候触发函数
+	 * {@inheritDoc}
+	 * @see \framework\core\socket::open()
+	 */
+	public function open($client)
+	{
+		parent::open($client);
 	}
 	
 	/**

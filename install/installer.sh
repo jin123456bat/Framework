@@ -28,8 +28,8 @@ rm -f ./README
 cd ..
 
 #fxdata@2222CDS
-scp -v -r ./* root@192.168.1.225:/home/nginx/cm2
-#scp -v -r ./* root@192.168.0.73:/var/www/html
+#scp -v -r ./* root@192.168.1.225:/home/nginx/cm2
+scp -v -r ./* root@192.168.2.73:/var/www/html
 
 cd ..
 
