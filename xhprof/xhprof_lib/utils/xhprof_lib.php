@@ -951,7 +951,7 @@ function xhprof_get_bool_param($param, $default = false)
  * If a param is not specified in the
  * query string the default value is
  * used.
- * 
+ *
  * @author Kannan
  */
 function xhprof_param_init($params)

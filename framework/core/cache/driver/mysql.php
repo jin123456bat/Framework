@@ -10,7 +10,7 @@ class mysql extends base implements cache
 
 	/**
 	 * 设置缓存数据，假如数据的key已经存在了则更新
-	 * 
+	 *
 	 * {@inheritdoc}
 	 *
 	 * @see \framework\core\cache\cache::set()
@@ -35,7 +35,7 @@ class mysql extends base implements cache
 
 	/**
 	 * 获取缓存数据，自动判断数据是否有效
-	 * 
+	 *
 	 * {@inheritdoc}
 	 *
 	 * @see \framework\core\cache\cache::get()
@@ -54,7 +54,7 @@ class mysql extends base implements cache
 
 	/**
 	 * 获取key对应的数据，不判断数据是否有效
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @return unknown
 	 */

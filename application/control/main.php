@@ -12,7 +12,7 @@ use framework\lib\data;
 
 /**
  * 首页相关接口
- * 
+ *
  * @author fx
  *        
  */
@@ -137,8 +137,8 @@ class main extends BaseControl
 					'current' => $cds['max'],
 					'linkRatio' => $cds_ratio['link'] === null ? null : 1 * number_format(division($cds['max'] - $cds_ratio['link'], $cds_ratio['link']), 2, '.', ''), // 环比
 					'sameRatio' => $cds_ratio['same'] === null ? null : 1 * number_format(division($cds['max'] - $cds_ratio['same'], $cds_ratio['same']), 2, '.', '')
-				) // 同比
-, // CDS在线节点数
+				), // 同比
+				  // CDS在线节点数
 				'detail' => $cds['detail']
 			),
 			'user' => array(
@@ -146,8 +146,8 @@ class main extends BaseControl
 					'current' => $user['max'],
 					'linkRatio' => $user_ratio['link'] === null ? null : 1 * number_format(division($user['max'] - $user_ratio['link'], $user_ratio['link']), 2, '.', ''), // 环比
 					'sameRatio' => $user_ratio['same'] === null ? null : 1 * number_format(division($user['max'] - $user_ratio['same'], $user_ratio['same']), 2, '.', '')
-				) // 同比
-, // 用户数
+				), // 同比
+				  // 用户数
 				'detail' => $user['detail']
 			),
 			'service_max' => array(
@@ -155,26 +155,26 @@ class main extends BaseControl
 					'current' => $service_max['max'],
 					'linkRatio' => $service_max_ratio['link'] === null ? null : 1 * number_format(division($service_max['max'] - $service_max_ratio['link'], $service_max_ratio['link']), 2, '.', ''), // 环比
 					'sameRatio' => $service_max_ratio['same'] === null ? null : 1 * number_format(division($service_max['max'] - $service_max_ratio['same'], $service_max_ratio['same']), 2, '.', '')
-				) // 同比
-, // 服务流速峰值（时间点内的最大值）
+				), // 同比
+				  // 服务流速峰值（时间点内的最大值）
 				'detail' => $service_max['detail']
-			) // 服务流速按照时间节点的详情
-,
+			), // 服务流速按照时间节点的详情
 			'cp_service' => array(
 				'detail' => $cp_service['detail']
-			) // 分CP流量堆叠
-,
+			), // 分CP流量堆叠
 			'service_sum' => array(
 				'max' => array(
 					'current' => $service_sum['max'],
 					'linkRatio' => $service_sum_ratio['link'] === null ? null : 1 * number_format(division($service_sum['max'] - $service_sum_ratio['link'], $service_sum_ratio['link']), 2, '.', ''), // 环比
 					'sameRatio' => $service_sum_ratio['same'] === null ? null : 1 * number_format(division($service_sum['max'] - $service_sum_ratio['same'], $service_sum_ratio['same']), 2, '.', '')
-				) // 同比
+				)
+			) // 同比
 
-			) // 服务流量(时间点内的累加值)
-			   // 'detail' => $service_sum_detail,//服务流量
 			
-		);
+		) // 服务流量(时间点内的累加值)
+		  // 'detail' => $service_sum_detail,//服务流量
+		
+		;
 		
 		if (! empty($this->_timemode))
 		{

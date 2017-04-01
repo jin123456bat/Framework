@@ -3,7 +3,7 @@ namespace framework\core\cache;
 
 /**
  * cache的接口
- * 
+ *
  * @author fx
  *        
  */

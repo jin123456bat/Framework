@@ -10,7 +10,7 @@ class upload extends component
 
 	/**
 	 * 获取文件上传的配置信息
-	 * 
+	 *
 	 * @param unknown $config        	
 	 * @return mixed
 	 */
@@ -82,7 +82,7 @@ class upload extends component
 
 	/**
 	 * 获取上传的文件路径
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $config        	
 	 * @return 上传失败返回错误代码否则返回文件路径

@@ -6,35 +6,35 @@ class view extends response
 
 	/**
 	 * 模板文件路径
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_template;
 
 	/**
 	 * 布局名
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_layout;
 
 	/**
 	 * 模板文件字符编码
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_charset;
 
 	/**
 	 * 模板中的变量
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_variables = array();
 
 	/**
 	 * 模板中的函数
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_functions = array();
@@ -57,7 +57,7 @@ class view extends response
 
 	/**
 	 * 设置模板文件夹
-	 * 
+	 *
 	 * @param unknown $layout        	
 	 */
 	function setLayout($layout)
@@ -72,7 +72,7 @@ class view extends response
 
 	/**
 	 * 在模板中添加变量
-	 * 
+	 *
 	 * @param unknown $var        	
 	 * @param unknown $val        	
 	 */
@@ -91,7 +91,7 @@ class view extends response
 
 	/**
 	 * 重写getBody返回响应内容
-	 * 
+	 *
 	 * {@inheritdoc}
 	 *
 	 * @see \framework\core\response::getBody()

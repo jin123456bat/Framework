@@ -30,7 +30,7 @@ class cache extends component
 
 	/**
 	 * 数据有效期
-	 * 
+	 *
 	 * @param unknown $expires        	
 	 */
 	static function setExpires($expires)
@@ -40,7 +40,7 @@ class cache extends component
 
 	/**
 	 * 设置或者更新数据
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $value        	
 	 * @param number $cache        	
@@ -60,7 +60,7 @@ class cache extends component
 
 	/**
 	 * 获取数据
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @return mixed|unknown
 	 */

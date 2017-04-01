@@ -6,6 +6,7 @@ use framework\core\request;
 use framework\core\debugger;
 use framework\data\collection;
 use application\extend\model;
+use framework\core\view;
 
 class index extends BaseControl
 {
@@ -59,9 +60,8 @@ class index extends BaseControl
 		}
 	}
 
-	function test()
+	function page()
 	{
-		$ordoac = model::getConnection('ordoac');
-		var_dump($ordoac->showVariables('character_set_database'));
+		return new view('test/page.html');
 	}
 }

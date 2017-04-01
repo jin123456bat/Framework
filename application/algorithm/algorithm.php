@@ -17,7 +17,7 @@ class algorithm extends BaseComponent
 
 	/**
 	 * constructor
-	 * 
+	 *
 	 * @param unknown $starttime
 	 *        	开始时间点
 	 * @param unknown $endtime
@@ -34,7 +34,7 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 设置时间间隔
-	 * 
+	 *
 	 * @param unknown $duration        	
 	 */
 	public function setDuration($duration)
@@ -44,7 +44,7 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 设置开始时间和结束时间
-	 * 
+	 *
 	 * @param unknown $starttime        	
 	 * @param unknown $endtime        	
 	 */
@@ -259,7 +259,7 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 服务流速
-	 * 
+	 *
 	 * @return number[]|number[][]
 	 */
 	public function ServiceMax($sn = array())
@@ -276,7 +276,7 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 计算累计流量，不分时间段
-	 * 
+	 *
 	 * @param array $sn        	
 	 * @return number[]
 	 */
@@ -339,7 +339,7 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 获取分类名称
-	 * 
+	 *
 	 * @param array $r
 	 *        	一个包含class和category的数组
 	 * @return string
@@ -373,7 +373,7 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 分CP服务流速
-	 * 
+	 *
 	 * @param number $top        	
 	 * @return NULL[]|unknown[]
 	 */
@@ -547,7 +547,7 @@ class algorithm extends BaseComponent
 	/**
 	 * 网卡流速
 	 * 计算最大Service和对应的cache
-	 * 
+	 *
 	 * @return number[][]|number[]|boolean[]
 	 */
 	public function traffic_stat($sn = array())
@@ -982,7 +982,7 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 分时间段，累计流量
-	 * 
+	 *
 	 * @return number
 	 */
 	function operation_stat($sn = array())

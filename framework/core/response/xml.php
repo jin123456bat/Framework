@@ -49,7 +49,7 @@ class xml extends response
 
 	/**
 	 * 设置输出结果是否缓存
-	 * 
+	 *
 	 * @param unknown $cache        	
 	 */
 	function cache($cache)
@@ -59,7 +59,7 @@ class xml extends response
 
 	/**
 	 * 返回是否缓存输出结果
-	 * 
+	 *
 	 * @return unknown
 	 */
 	function isCache()
@@ -69,7 +69,7 @@ class xml extends response
 
 	/**
 	 * 获得mimetype
-	 * 
+	 *
 	 * @return string
 	 */
 	function getContentType()
@@ -79,7 +79,7 @@ class xml extends response
 
 	/**
 	 * 设置contentType
-	 * 
+	 *
 	 * @param unknown $contentType        	
 	 */
 	function setContentType($contentType)
@@ -94,7 +94,7 @@ class xml extends response
 
 	/**
 	 * 从字符串载入
-	 * 
+	 *
 	 * @param unknown $string        	
 	 */
 	function loadString($string)
@@ -104,7 +104,7 @@ class xml extends response
 
 	/**
 	 * 将数组转化为xml字符串
-	 * 
+	 *
 	 * @param unknown $array        	
 	 */
 	function loadArray($array)
@@ -117,7 +117,7 @@ class xml extends response
 
 	/**
 	 * 计算hash
-	 * 
+	 *
 	 * @return string
 	 */
 	function hash()
@@ -127,7 +127,7 @@ class xml extends response
 
 	/**
 	 * 将数组转化为xml字符串 无头
-	 * 
+	 *
 	 * @param unknown $array        	
 	 * @return string
 	 */

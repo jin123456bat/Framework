@@ -7,7 +7,7 @@ interface database
 	/**
 	 * 执行需要参数的sql
 	 * 通常用于pdo的prepare
-	 * 
+	 *
 	 * @param unknown $sql        	
 	 * @param array $array        	
 	 */
@@ -15,7 +15,7 @@ interface database
 
 	/**
 	 * 执行sql语句
-	 * 
+	 *
 	 * @param string $sql        	
 	 * @param array $array        	
 	 */
@@ -23,7 +23,7 @@ interface database
 
 	/**
 	 * 获取所有表名
-	 * 
+	 *
 	 * @return array()
 	 */
 	function showTables();
@@ -35,7 +35,7 @@ interface database
 
 	/**
 	 * 设置数据库配置变量
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $value        	
 	 */
@@ -43,7 +43,7 @@ interface database
 
 	/**
 	 * 获取mysql进程
-	 * 
+	 *
 	 * @param array $config        	
 	 */
 	static function getInstance($config);

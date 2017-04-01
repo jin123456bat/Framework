@@ -73,8 +73,8 @@ class mysql implements database
 			PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false, // 不使用buffer，防止数据量过大导致php内存溢出，但是这个东西貌似需要直接操作pdo效果才会体现
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT, // 抛出异常模式
 			PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $charset
-		)) // 设置字符集
-;
+		)); // 设置字符集
+
 		foreach ($init_command as $command)
 		{
 			$this->pdo->exec($command);
@@ -236,7 +236,7 @@ class mysql implements database
 
 	/**
 	 * 错误代码
-	 * 
+	 *
 	 * {@inheritdoc}
 	 *
 	 * @see \framework\core\database\database::errno()

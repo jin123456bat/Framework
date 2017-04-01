@@ -236,7 +236,7 @@ class api extends apiControl
 
 	/**
 	 * 运行单条命令
-	 * 
+	 *
 	 * @param unknown $command        	
 	 * @param unknown $name        	
 	 */
@@ -406,7 +406,7 @@ class api extends apiControl
 
 	/**
 	 * 移动端CDS详情接口
-	 * 
+	 *
 	 * @return \framework\core\response\json
 	 */
 	function detail()
@@ -650,8 +650,8 @@ class api extends apiControl
 			'resource' => $resource, // 资源引入情况
 			'class_resource' => $class_resource, // 分类型资源引入 分类型服务流量
 			'cp_resource' => $cp_resource
-		) // 分cp资源引入详情
-;
+		); // 分cp资源引入详情
+
 		
 		if (! empty($cache_key))
 		{

@@ -7,7 +7,7 @@ namespace framework\data;
  * (1) 确定性：对于任意一个元素,要么它属于某个指定集合,要么它不属于该集合,二者必居其一.
  * (2) 互异性：同一个集合中的元素是互不相同的.
  * (3) 无序性：任意改变集合中元素的排列次序,它们仍然表示同一个集合.
- * 
+ *
  * @author fx
  */
 class collection implements \Iterator
@@ -15,48 +15,48 @@ class collection implements \Iterator
 
 	/**
 	 * 头指针
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_top = null;
 
 	/**
 	 * 尾指针
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_tail = null;
 
 	/**
 	 * 长度
-	 * 
+	 *
 	 * @var integer
 	 */
 	private $_length = 0;
 
 	/**
 	 * 内部遍历器指针
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_position = null;
 
 	/**
 	 * 内部指针距离top的长度
-	 * 
+	 *
 	 * @var integer
 	 */
 	private $_position_length = 0;
 
 	/**
 	 * 一些模式变量
-	 * 
+	 *
 	 * @var array
 	 */
 	private $_mode = array(
 		self::CASE_INSENSITIVE => true
-	) // 区分大小写
-;
+	); // 区分大小写
+
 
 	const CASE_INSENSITIVE = 1000;
 
@@ -82,7 +82,7 @@ class collection implements \Iterator
 
 	/**
 	 * 设置模式
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $value        	
 	 */
@@ -94,7 +94,7 @@ class collection implements \Iterator
 	/**
 	 * 获取元素的位置，不存在返回false
 	 * 注意返回有可能是0，因为是在第一个
-	 * 
+	 *
 	 * @param unknown $value        	
 	 * @return unknown|boolean
 	 */
@@ -112,7 +112,7 @@ class collection implements \Iterator
 
 	/**
 	 * 在末尾追加一个元素
-	 * 
+	 *
 	 * @param unknown $value        	
 	 */
 	function append($value)
@@ -202,7 +202,7 @@ class collection implements \Iterator
 
 /**
  * 集合中的节点
- * 
+ *
  * @author fx
  */
 class node

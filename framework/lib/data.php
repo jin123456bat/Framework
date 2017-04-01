@@ -272,7 +272,7 @@ class data extends error implements \ArrayAccess
 
 	/**
 	 * 获取错误信息
-	 * 
+	 *
 	 * @param unknown $rule        	
 	 */
 	private function message($rule, $value)
@@ -287,7 +287,7 @@ class data extends error implements \ArrayAccess
 
 	/**
 	 * 判断变量是否为空
-	 * 
+	 *
 	 * @param unknown $value        	
 	 */
 	private function isEmpty($value)

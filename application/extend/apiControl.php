@@ -7,7 +7,7 @@ use framework\core\application;
 
 /**
  * api请求基础control
- * 
+ *
  * @author fx
  *        
  */
@@ -73,7 +73,7 @@ class apiControl extends BaseControl
 
 	/**
 	 * 获取通过接口传递的内容
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $default        	
 	 * @param unknown $filter        	

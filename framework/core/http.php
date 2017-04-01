@@ -61,7 +61,7 @@ class http extends base
 
 	/**
 	 * 发送post请求
-	 * 
+	 *
 	 * @param unknown $url        	
 	 * @param unknown $data        	
 	 */
@@ -116,7 +116,7 @@ class http extends base
 
 	/**
 	 * 发送get请求
-	 * 
+	 *
 	 * @param string $url
 	 *        	请求的地址
 	 * @param array $data

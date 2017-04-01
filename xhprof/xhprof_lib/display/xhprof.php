@@ -1499,12 +1499,12 @@ function displayXHProfReport($xhprof_runs_impl, $url_params, $source, $run, $wts
 {
 	if ($run)
 	{ // specific run to display?
-	            
+	  
 		// run may be a single run or a comma separate list of runs
-	            // that'll be aggregated. If "wts" (a comma separated list
-	            // of integral weights is specified), the runs will be
-	            // aggregated in that ratio.
-	            //
+	  // that'll be aggregated. If "wts" (a comma separated list
+	  // of integral weights is specified), the runs will be
+	  // aggregated in that ratio.
+	  //
 		$runs_array = explode(",", $run);
 		
 		if (count($runs_array) == 1)

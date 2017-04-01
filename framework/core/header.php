@@ -18,7 +18,7 @@ class header extends base
 
 	/**
 	 * 添加一个header
-	 * 
+	 *
 	 * @param unknown $key        	
 	 * @param string $value        	
 	 * @example add("Location: http://www.baidu.com");
@@ -99,7 +99,7 @@ class header extends base
 
 	/**
 	 * 设置一个头信息，已经设置的会被覆盖
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $value        	
 	 */
@@ -110,7 +110,7 @@ class header extends base
 
 	/**
 	 * 获取已经设置的头信息
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @return mixed
 	 */

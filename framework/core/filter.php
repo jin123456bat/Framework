@@ -6,7 +6,7 @@ class filter extends base
 
 	/**
 	 * integer的别名
-	 * 
+	 *
 	 * @see filter::integer
 	 * @param unknown $string        	
 	 * @return boolean
@@ -18,7 +18,7 @@ class filter extends base
 
 	/**
 	 * 纯数字过滤器
-	 * 
+	 *
 	 * @param string|array $string        	
 	 * @return boolean
 	 */
@@ -39,7 +39,7 @@ class filter extends base
 
 	/**
 	 * 浮点数过滤器
-	 * 
+	 *
 	 * @param unknown $number        	
 	 * @return mixed
 	 */
@@ -67,7 +67,7 @@ class filter extends base
 
 	/**
 	 * 字母或数字或下划线
-	 * 
+	 *
 	 * @param unknown $string        	
 	 * @return string|number
 	 */
@@ -83,7 +83,7 @@ class filter extends base
 
 	/**
 	 * 去除空白
-	 * 
+	 *
 	 * @param unknown $string        	
 	 */
 	static function anyspace($string)

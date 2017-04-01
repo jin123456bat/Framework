@@ -40,7 +40,7 @@ class router extends component
 
 	/**
 	 * 对于要分析的数据追加
-	 * 
+	 *
 	 * @param array $array        	
 	 */
 	public function appendParameter(array $array)

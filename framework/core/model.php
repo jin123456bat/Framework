@@ -28,7 +28,7 @@ class model extends component
 
 	/**
 	 * show variables like $name
-	 * 
+	 *
 	 * @param string $name        	
 	 * @return NULL|boolean
 	 */
@@ -51,7 +51,7 @@ class model extends component
 
 	/**
 	 * when this class is initlized,this function will be execute
-	 * 
+	 *
 	 * {@inheritdoc}
 	 *
 	 * @see \core\component::initlize()
@@ -101,7 +101,7 @@ class model extends component
 
 	/**
 	 * 获取DB配置
-	 * 
+	 *
 	 * @return NULL|mixed
 	 */
 	private static function getDefaultDbConfig()
@@ -130,7 +130,7 @@ class model extends component
 
 	/**
 	 * only for sql
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $args        	
 	 * @return \framework\core\model
@@ -146,7 +146,7 @@ class model extends component
 
 	/**
 	 * set database table's name
-	 * 
+	 *
 	 * @param unknown $table        	
 	 */
 	function setTable($table)
@@ -158,7 +158,7 @@ class model extends component
 
 	/**
 	 * get this database table's name
-	 * 
+	 *
 	 * @return unknown|string
 	 */
 	function getTable()
@@ -209,7 +209,7 @@ class model extends component
 
 	/**
 	 * get row num from table
-	 * 
+	 *
 	 * @param string $field        	
 	 * @return number
 	 */
@@ -220,7 +220,7 @@ class model extends component
 
 	/**
 	 * the max value of fields
-	 * 
+	 *
 	 * @param unknown $field        	
 	 * @return NULL|mixed
 	 */
@@ -231,7 +231,7 @@ class model extends component
 
 	/**
 	 * sum the value of fields
-	 * 
+	 *
 	 * @param unknown $field        	
 	 * @return NULL|mixed
 	 */
@@ -242,7 +242,7 @@ class model extends component
 
 	/**
 	 * 某字段的平均值
-	 * 
+	 *
 	 * @param unknown $field        	
 	 * @return NULL|mixed
 	 */
@@ -253,7 +253,7 @@ class model extends component
 
 	/**
 	 * 更新数据表
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param string $value        	
 	 * @return boolean
@@ -406,7 +406,7 @@ class model extends component
 	/**
 	 * insert into on duplicate
 	 * 目前增加了在compress状态下的使用条件，对于多个insert的duplicate
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param string $value        	
 	 * @return \framework\core\database\sql
@@ -441,7 +441,7 @@ class model extends component
 
 	/**
 	 * 删除
-	 * 
+	 *
 	 * @return boolean
 	 */
 	function delete()
@@ -452,7 +452,7 @@ class model extends component
 
 	/**
 	 * 执行自定义sql
-	 * 
+	 *
 	 * @param unknown $sql        	
 	 * @param array $array        	
 	 * @return boolean
@@ -507,7 +507,7 @@ class model extends component
 
 	/**
 	 * 上一个插入的ID
-	 * 
+	 *
 	 * @param unknown $name        	
 	 */
 	function lastInsertId($name = null)
@@ -517,7 +517,7 @@ class model extends component
 
 	/**
 	 * 清空表
-	 * 
+	 *
 	 * @return boolean
 	 */
 	function truncate()

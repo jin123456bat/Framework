@@ -10,7 +10,7 @@ use application\extend\cache;
 
 /**
  * 内容交付相关接口
- * 
+ *
  * @author fx
  *        
  */

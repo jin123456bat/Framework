@@ -20,11 +20,8 @@ class application extends component
 		parent::__construct();
 	}
 
-	function initlize($argc = 0, $argv = array())
+	function initlize()
 	{
-		$this->_argc = $argc;
-		$this->_argv = $argv;
-		
 		// 载入系统默认配置
 		$this->setConfig('framework');
 		// 载入app的配置
@@ -132,7 +129,9 @@ class application extends component
 
 	/**
 	 * 对命令行参数经行分析
-	 * 
+	 * -a index => $_GET['a'] = 'index'
+	 * --b index => $_POST['b'] = 'index'
+	 * --a a --a b => $_GET['a'] = array('a','b')
 	 * @param unknown $argc        	
 	 * @param unknown $argv        	
 	 */
@@ -202,12 +201,11 @@ class application extends component
 				}
 				else
 				{
-					$get[substr($value, 2)] = true;
+					$get[substr($value, 1)] = true;
 				}
 				unset($argv[$index]);
 			}
 		}
-		
 		return array(
 			'GET' => $get,
 			'POST' => $post
@@ -219,7 +217,7 @@ class application extends component
 	 */
 	function run()
 	{
-		$argment = $this->parseArgment($this->_argc, $this->_argv);
+		$argment = $this->parseArgment($_SERVER['argc'], $_SERVER['argv']);
 		$_GET = array_merge($_GET, $argment['GET']);
 		$_POST = array_merge($_POST, $argment['POST']);
 		$_REQUEST = array_merge($_REQUEST, $argment['GET'], $argment['POST']);
@@ -240,38 +238,51 @@ class application extends component
 			$this->doResponse($response);
 		}
 		
-		$filter = $this->load('actionFilter');
-		$filter->load($controller, $action);
-		if (! $filter->allow())
+		if ($controller instanceof socket)
 		{
-			$this->doResponse($filter->getMessage());
-		}
-		else
-		{
-			// control的初始化返回内容
-			if (method_exists($controller, 'initlize') && is_callable(array(
-				$controller,
-				'initlize'
-			)))
+			//对于socket链接这个是必须的
+			set_time_limit(0);
+			$controller->initlize();
+			while (!$controller->isClose())
 			{
-				$response = call_user_func(array(
+				$controller->run();
+			}
+		}
+		else if ($controller instanceof control)
+		{
+			$filter = $this->load('actionFilter');
+			$filter->load($controller, $action);
+			if (! $filter->allow())
+			{
+				$this->doResponse($filter->getMessage());
+			}
+			else
+			{
+				// control的初始化返回内容
+				if (method_exists($controller, 'initlize') && is_callable(array(
 					$controller,
 					'initlize'
+				)))
+				{
+					$response = call_user_func(array(
+						$controller,
+						'initlize'
+					));
+					$this->doResponse($response);
+				}
+				
+				$response = call_user_func(array(
+					$controller,
+					$action
 				));
 				$this->doResponse($response);
 			}
-			
-			$response = call_user_func(array(
-				$controller,
-				$action
-			));
-			$this->doResponse($response);
 		}
 	}
 
 	/**
 	 * 如何输出response对象
-	 * 
+	 *
 	 * @param unknown $response        	
 	 */
 	protected function doResponse($response)
@@ -328,9 +339,17 @@ class application extends component
 		return null;
 	}
 
+	public function onRequestStart()
+	{
+	}
+
+	public function onRequestEnd()
+	{
+	}
+
 	/**
 	 * 载入系统类
-	 * 
+	 *
 	 * @param unknown $classname        	
 	 * @return unknown
 	 */

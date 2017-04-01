@@ -94,7 +94,7 @@ abstract class BaseControl extends control
 
 	/**
 	 * 获取分类名称
-	 * 
+	 *
 	 * @param array('class','category') $class_category        	
 	 * @return NULL
 	 */
@@ -122,7 +122,7 @@ abstract class BaseControl extends control
 
 	/**
 	 * 获取有效的sn
-	 * 
+	 *
 	 * @return unknown[]
 	 */
 	function combineSns($sn = array())

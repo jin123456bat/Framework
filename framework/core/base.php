@@ -25,7 +25,7 @@ class base
 
 	/**
 	 * 变量类型强制转换
-	 * 
+	 *
 	 * @param unknown $variable        	
 	 * @param string $type        	
 	 * @return string|array|boolean|number|StdClass|unknown
@@ -59,7 +59,7 @@ class base
 
 	/**
 	 * 载入数据模型
-	 * 
+	 *
 	 * @param string $name
 	 *        	模块名
 	 * @return model

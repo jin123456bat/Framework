@@ -8,28 +8,28 @@ class response extends component
 
 	/**
 	 * http code
-	 * 
+	 *
 	 * @var integer
 	 */
 	private $_status = 200;
 
 	/**
 	 * http response header
-	 * 
+	 *
 	 * @var header
 	 */
 	private $_header = null;
 
 	/**
 	 * http body
-	 * 
+	 *
 	 * @var string
 	 */
 	private $_body = '';
 
 	/**
 	 * response content charset
-	 * 
+	 *
 	 * @var string
 	 */
 	private $_charset = 'utf-8';
@@ -57,7 +57,7 @@ class response extends component
 
 	/**
 	 * 设置字符集
-	 * 
+	 *
 	 * @param unknown $charset        	
 	 */
 	function setCharset($charset)
@@ -67,7 +67,7 @@ class response extends component
 
 	/**
 	 * 获取当前使用的字符集
-	 * 
+	 *
 	 * @return string
 	 */
 	function getCharset()
@@ -87,7 +87,7 @@ class response extends component
 
 	/**
 	 * get http body
-	 * 
+	 *
 	 * @return string
 	 */
 	function getBody()
@@ -110,7 +110,7 @@ class response extends component
 
 	/**
 	 * set http code
-	 * 
+	 *
 	 * @param unknown $status        	
 	 */
 	function setHttpStatus($status)
@@ -120,7 +120,7 @@ class response extends component
 
 	/**
 	 * get http code
-	 * 
+	 *
 	 * @return int
 	 */
 	function getHttpStatus()
@@ -130,7 +130,7 @@ class response extends component
 
 	/**
 	 * set http header or add http header
-	 * 
+	 *
 	 * @param unknown $header
 	 *        	header's name
 	 * @param

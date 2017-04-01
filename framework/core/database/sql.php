@@ -25,7 +25,7 @@ class sql extends base
 	/**
 	 * 强制索引
 	 * force index
-	 * 
+	 *
 	 * @param unknown $index        	
 	 */
 	function forceIndex($index)
@@ -42,7 +42,7 @@ class sql extends base
 
 	/**
 	 * do select
-	 * 
+	 *
 	 * @param unknown $field        	
 	 */
 	function select($fields = '*')
@@ -138,7 +138,7 @@ class sql extends base
 	 * $this->insert('a',1)->insert('b',2);
 	 * $this->insert(['a'=>1,'b'=>2]);
 	 * insert into
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $value        	
 	 * @return \framework\core\database\sql
@@ -172,7 +172,7 @@ class sql extends base
 
 	/**
 	 * on duplicate key update
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $value        	
 	 */
@@ -220,7 +220,7 @@ class sql extends base
 
 	/**
 	 * 添加额外的表
-	 * 
+	 *
 	 * @param unknown $table        	
 	 * @return \framework\core\database\sql
 	 */
@@ -239,7 +239,7 @@ class sql extends base
 
 	/**
 	 * 重新设定from
-	 * 
+	 *
 	 * @param unknown $table        	
 	 * @param string $as        	
 	 * @return \framework\core\database\sql
@@ -293,7 +293,7 @@ class sql extends base
 
 	/**
 	 * like in 扩展方法
-	 * 
+	 *
 	 * @param unknown $field        	
 	 * @param array $array        	
 	 */
@@ -490,7 +490,7 @@ class sql extends base
 
 	/**
 	 * between(a,1,10,'and')
-	 * 
+	 *
 	 * @param unknown $field        	
 	 * @param unknown $a        	
 	 * @param unknown $b        	
@@ -518,7 +518,7 @@ class sql extends base
 	/**
 	 * field in (data1,data2...)
 	 * 当data的数据只有一个的时候会自动转化为field = data
-	 * 
+	 *
 	 * @param unknown $field        	
 	 * @param array $data        	
 	 * @param string $combine        	
@@ -548,7 +548,7 @@ class sql extends base
 	/**
 	 * field not in (data1,data2...)
 	 * 当data的数据只有一个的时候会自动转化为field = data
-	 * 
+	 *
 	 * @param unknown $field        	
 	 * @param array $data        	
 	 * @param string $combine        	
@@ -904,7 +904,7 @@ class sql extends base
 
 	/**
 	 * sql查询的类型
-	 * 
+	 *
 	 * @return string
 	 */
 	function getType()

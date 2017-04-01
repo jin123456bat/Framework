@@ -5,7 +5,7 @@ use framework\lib\error;
 
 /**
  * 组件基类
- * 
+ *
  * @author fx
  */
 class component extends error
@@ -25,7 +25,7 @@ class component extends error
 
 	/**
 	 * 添加临时配置全局配置变量，这个变量当程序运行完毕后自动注销
-	 * 
+	 *
 	 * @param unknown $key        	
 	 * @param unknown $value        	
 	 */
@@ -36,7 +36,7 @@ class component extends error
 
 	/**
 	 * 获取临时配置变量
-	 * 
+	 *
 	 * @param unknown $key        	
 	 * @return mixed
 	 */
@@ -73,7 +73,7 @@ class component extends error
 
 	/**
 	 * 替换配置
-	 * 
+	 *
 	 * @param unknown $key        	
 	 * @param unknown $value        	
 	 * @param string $file        	

@@ -18,7 +18,7 @@ class request extends base
 
 	/**
 	 * 当前请求方式
-	 * 
+	 *
 	 * @return unknown
 	 */
 	static function method()
@@ -28,7 +28,7 @@ class request extends base
 
 	/**
 	 * 判断是否是https链接
-	 * 
+	 *
 	 * @return boolean
 	 */
 	static function isHttps()
@@ -38,7 +38,7 @@ class request extends base
 
 	/**
 	 * 判断是ajax请求
-	 * 
+	 *
 	 * @return boolean
 	 */
 	static function isAjax()
@@ -48,7 +48,7 @@ class request extends base
 
 	/**
 	 * 读取file变量
-	 * 
+	 *
 	 * @param string $name
 	 *        	文件上传名
 	 * @param string $config
@@ -107,7 +107,7 @@ class request extends base
 
 	/**
 	 * 读取post变量
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $defaultValue        	
 	 * @param unknown $filter        	
@@ -180,7 +180,7 @@ class request extends base
 
 	/**
 	 * 读取get变量
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $defaultValue        	
 	 * @param unknown $filter        	
@@ -252,7 +252,7 @@ class request extends base
 
 	/**
 	 * 读取request变量
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $defaultValue        	
 	 * @param unknown $filter        	
@@ -325,7 +325,7 @@ class request extends base
 
 	/**
 	 * 获取请求的header
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @return NULL|unknown
 	 */

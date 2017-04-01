@@ -6,49 +6,49 @@ class debugger extends component
 
 	/**
 	 * 包含微秒的开始时间
-	 * 
+	 *
 	 * @var float
 	 */
 	private $_micro_starttime;
 
 	/**
 	 * 调试结束时间
-	 * 
+	 *
 	 * @var float
 	 */
 	private $_micro_endtime;
 
 	/**
 	 * 执行时间
-	 * 
+	 *
 	 * @var float
 	 */
 	private $_time;
 
 	/**
 	 * cpu时间
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_cpu;
 
 	/**
 	 * 开始计数的内存占用
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_start_memory;
 
 	/**
 	 * 结束计数内存占用
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_end_memory;
 
 	/**
 	 * 内存占用
-	 * 
+	 *
 	 * @var float
 	 */
 	private $_memory;
@@ -83,7 +83,7 @@ class debugger extends component
 
 	/**
 	 * 获取开始计时时间
-	 * 
+	 *
 	 * @return float
 	 */
 	function getStarttime()
@@ -93,7 +93,7 @@ class debugger extends component
 
 	/**
 	 * 获取结束计时时间
-	 * 
+	 *
 	 * @return float
 	 */
 	function getEndtime()
@@ -103,7 +103,7 @@ class debugger extends component
 
 	/**
 	 * 获取计时时间
-	 * 
+	 *
 	 * @return float
 	 */
 	function getTime()
@@ -113,7 +113,7 @@ class debugger extends component
 
 	/**
 	 * 获取内存占用量
-	 * 
+	 *
 	 * @return number
 	 */
 	function getMemory()

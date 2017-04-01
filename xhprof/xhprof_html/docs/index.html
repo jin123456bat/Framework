@@ -97,6 +97,7 @@
 					<p>Provides function-level summary information such number of
 						calls, inclusive/exclusive wall time, memory usage, and CPU time.
 
+
 					
 					<p>
 				<li><b>Hierarchical profile (Parent/Child View)</b> (<a
@@ -158,7 +159,7 @@
 					the file being included is used to generate the name for these <a
 					href="#include_funcs">"fake" functions</a>.
 			</ul> <a name="Terminology"></a>
-		<h2>Terminology</h2>
+			<h2>Terminology</h2>
 			<ol>
 
 				<a name="inclusive"></a>
@@ -171,7 +172,7 @@
 				<li><b>CPU Time</b>: CPU time in user space + CPU time in
 					kernel space
 			</ol> <a name="Naming_convention_for_special_functions"></a>
-		<h2>Naming convention for special functions</h2>
+			<h2>Naming convention for special functions</h2>
 
 			<ol>
 				<p>
@@ -201,6 +202,7 @@
 							compile/load the file. [Note: If you are using a PHP opcode cache
 							like APC, then the compile only happens on a cache miss in APC.]
 
+
 						
 						<li><code>
 								<b>run_init::lib/common.php</b>
@@ -217,7 +219,7 @@
 					or indirect (such as due to </code>foo()</code> --&gt; <code>goo()</code> --&gt;
 					foo()).
 			</ol> <a name="Limitations"></a>
-		<h2>Limitations</h2>
+			<h2>Limitations</h2>
 
 			<p>True hierarchical profilers keep track of a full call stack at
 				every data gathering point, and are later able to answer questions
@@ -584,6 +586,7 @@ xhprof_enable(XHPROF_FLAGS_MEMORY,
 						This default implementation stores runs in the directory specified
 						by <a href="#ini_file"><b>xhprof.output_dir</b></a> INI parameter.
 
+
 					
 					<p>A XHProf run must be uniquely identified by a namespace and
 						a run id.
@@ -697,6 +700,7 @@ $xhprof_runs_impl = new XHProfRuns_Default();
 						aggregated view/report.
 					<p>Say you have three XHProf runs with ids 1, 2 & 3 in
 						namespace "benchmark". To view an aggregate report of these runs:
+
 
 					
 					<ul>

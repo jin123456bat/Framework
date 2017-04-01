@@ -9,29 +9,27 @@ class framework
 
 	/**
 	 * 存储了所有app进程
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_application;
 
 	/**
 	 * 命令行参数个数
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_argc;
 
 	/**
 	 * 命令行参数
-	 * 
+	 *
 	 * @var unknown
 	 */
 	private $_argv;
 
-	function __construct($argc = 0, $argv = array())
+	function __construct()
 	{
-		$this->_argc = $argc;
-		$this->_argv = $argv;
 		spl_autoload_register(array(
 			$this,
 			'autoload'
@@ -40,7 +38,7 @@ class framework
 
 	/**
 	 * 创建应用程序
-	 * 
+	 *
 	 * @param unknown $name        	
 	 * @param unknown $path        	
 	 */
@@ -64,7 +62,7 @@ class framework
 		
 		if (method_exists($this->_application[$appkey], 'initlize'))
 		{
-			$this->_application[$appkey]->initlize($this->_argc, $this->_argv);
+			$this->_application[$appkey]->initlize();
 		}
 		return $this->_application[$appkey];
 	}
