@@ -56,34 +56,37 @@ abstract class socket extends component
 		$write = NULL;
 		$except = NULL;
 		
-		if (!empty($this->_sockets))
+		//socket_select  必须收到一个socket信息才会执行下一步，否则会一直在这里阻塞
+		socket_select($this->_sockets, $write, $except, $this->_timeout);
+		foreach ($this->_sockets as $socket)
 		{
-			//socket_select  必须收到一个socket信息才会执行下一步，否则会一直在这里阻塞
-			socket_select($this->_sockets, $write, $except, $this->_timeout);
-			foreach ($this->_sockets as $socket)
+			if ($socket == $this->_master)
 			{
-				if ($socket == $this->_master)
+				$client = socket_accept($this->_master);//接收新的链接
+				if ($client === false)
 				{
-					$client = socket_accept($this->_master);//接收新的链接
-					if ($client === false)
-					{
-						console::log('connect failed',console::TEXT_COLOR_RED);
-						call_user_func(array($this,'error'),'error',socket_last_error($this->_master),socket_strerror(socket_last_error($this->_master)));
-						continue;
-					}
-					else
-					{
-						if (count($this->_sockets)> $this->_max_connection){
-							continue;
-						}
-						$this->_sockets[] = $client;
-						call_user_func(array($this,'open'),$client);
-					}
+					console::log('connect failed',console::TEXT_COLOR_RED);
+					call_user_func(array($this,'error'),'error',socket_last_error($this->_master),socket_strerror(socket_last_error($this->_master)));
+					continue;
 				}
 				else
 				{
-					$buffer = $this->read($socket);
-					var_dump($buffer);
+					if (count($this->_sockets)> $this->_max_connection){
+						continue;
+					}
+					$this->_sockets[] = $client;
+					call_user_func(array($this,'open'),$client);
+				}
+			}
+			else
+			{
+				$buffer = $this->read($socket);
+				if ($buffer===false || empty($buffer))
+				{
+					$this->close($socket);
+				}
+				else
+				{
 					call_user_func(array($this,'receive'),$buffer,$socket);
 				}
 			}
