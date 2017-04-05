@@ -1,19 +1,16 @@
 <?php
 namespace application\control;
 
-use framework\core\socket\websocket;
-use framework\core\console;
+use framework\core\socketControl;
+use framework\core\response\json;
 
-class test extends websocket
+class test extends socketControl
 {
-	/**
-	 * {@inheritDoc}
-	 * @see \framework\core\socket\websocket::message()
-	 */
-	public function message($message,$socket)
+	public function message()
 	{
-		$message = json_decode($message,true);
-		$message['content'] = '你是不是在说:'.$message['content'];
-		$this->write(json_encode($message),$socket);
+		$message = $this->getParam('message');
+		return new json(array(
+			'message' => strrev($message),
+		));
 	}
 }

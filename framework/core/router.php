@@ -8,7 +8,7 @@ class router extends component
 
 	private $_action_name;
 
-	public static $_data = array();
+	private $_data = array();
 
 	function __construct()
 	{
@@ -27,8 +27,8 @@ class router extends component
 		
 		if ($config['mode'] == 'normal')
 		{
-			$this->_control_name = isset(self::$_data['c']) ? trim(self::$_data['c']) : $config['default']['control'];
-			$this->_action_name = isset(self::$_data['a']) ? trim(self::$_data['a']) : $config['default']['action'];
+			$this->_control_name = isset($this->_data['c']) ? trim($this->_data['c']) : $config['default']['control'];
+			$this->_action_name = isset($this->_data['a']) ? trim($this->_data['a']) : $config['default']['action'];
 			
 			if (! $config['case_sensitive'])
 			{
@@ -45,7 +45,7 @@ class router extends component
 	 */
 	public function appendParameter(array $array)
 	{
-		self::$_data = array_merge(self::$_data, $array);
+		$this->_data = array_merge($this->_data, $array);
 	}
 
 	public function getControlName()

@@ -37,18 +37,22 @@ class webSocket extends component
 	 */
 	private $_message_length = 2048;
 	
-	static private $_sockets = array();
+	static public $_sockets = array();
 	
 	private $_callback = array(
 		'open' => NULL,//当链接打开的时候触发函数
 		'error' => NULL,//socket错误函数
 		'disconnect' => NULL,//断开链接函数
-		''
 	);
 	
 	function initlize()
 	{
-		$this->_master = socket_create_listen( $this->_port );
+		$this->_master = socket_create_listen( $this->_port ,SOMAXCONN );
+		if ($this->_master === false)
+		{
+			console::log('['.date('Y-m-d H:i:s').'] Socket Create Listen Error: ['.socket_last_error($this->_master).'] '.socket_strerror(socket_last_error($this->_master)),console::TEXT_COLOR_RED);
+			exit();
+		}
 		self::$_sockets[] = $this->_master;
 		console::log('Server Startted on '.$this->_port.'!');
 		parent::initlize();
@@ -92,7 +96,7 @@ class webSocket extends component
 					if (!isset($this->_handshake[$socketid]) || $this->_handshake[$socketid]===false)
 					{
 						$this->_http_request = $buffer;
-						return $this->handShanke($socket);
+						$this->handShanke($socket);
 					}
 					else
 					{
@@ -100,12 +104,19 @@ class webSocket extends component
 						if (is_callable($onmessage))
 						{
 							$request = json_decode($buffer,true);
-							$router = application::load('router');
-							$router->appendParameter($request);
-							$router->parse();
-							$control = $router->getControlName();
-							$action = $router->getActionName();
-							return $onmessage($control,$action);
+							if (!empty($request) && is_array($request))
+							{
+								$GLOBALS['WEBSOCKET'] = $request;
+								$GLOBALS['SOCKET_CLIENT'] = $socket;//当前客户端
+								
+								$router = application::load('router');
+								$router->appendParameter($request);
+								$router->parse();
+								$control = $router->getControlName();
+								$action = $router->getActionName();
+								$response = $onmessage($control,$action);
+								return $response;
+							}
 						}
 					}
 				}
@@ -140,21 +151,19 @@ class webSocket extends component
 	 * @param unknown $message
 	 * @param unknown $socket = NULL 当为空的时候为向所有客户端发送
 	 */
-	public function write($message,$socket = NULL)
+	public static function write($message,$socket = NULL)
 	{
-		$message = $this->encode($message);
-		
 		if (empty($socket))
 		{
 			$num = 0;
 			foreach (self::$_sockets as $socket)
 			{
-				if ($socket!=$this->_master)
+				if ($socket!=$GLOBALS['SOCKET_CLIENT'])
 				{
 					$result = socket_write($socket, $message,strlen($message));
 					if ($result === fasle)
 					{
-						call_user_func(array($this,'error'),'error',socket_last_error($socket),socket_strerror(socket_last_error($socket)));
+						//发送失败
 					}
 					else
 					{
@@ -167,17 +176,8 @@ class webSocket extends component
 		else
 		{
 			$bytes = socket_write($socket,$message, strlen($message));
-			if(false === $bytes)
-			{
-				call_user_func(array($this,'error'),'error',socket_last_error($socket),socket_strerror(socket_last_error($socket)));
-			}
 			return $bytes;
 		}
-	}
-	
-	public function receive($message,$socket)
-	{
-		
 	}
 	
 	/**
@@ -210,7 +210,7 @@ class webSocket extends component
 	 * @param string $string
 	 * @return string
 	 */
-	protected function encode($string)
+	public static function encode($string)
 	{
 		$a = str_split($string, 125);
 		if (count($a) == 1) {
@@ -236,7 +236,7 @@ class webSocket extends component
 		"Connection: Upgrade\r\n" .
 		"Sec-WebSocket-Accept: " . $acceptKey . "\r\n" .
 		"\r\n";
-		return $message;
+		self::write($message,$socket);
 	}
 	
 	/**

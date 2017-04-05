@@ -2,6 +2,61 @@
 namespace framework\core;
 class socketControl extends control
 {
+	
+	/**
+	 * 获取前端传递的参数
+	 * @param unknown $name
+	 * @param unknown $default
+	 * @param unknown $filter
+	 * @return unknown|string
+	 */
+	function getParam($name,$default = NULL,$filter = NULL)
+	{
+		if (isset($GLOBALS['WEBSOCKET'][$name]))
+		{
+			return $GLOBALS['WEBSOCKET'][$name];
+		}
+		return $default;
+	}
+	
+	/**
+	 * 获取当前发送消息的客户端
+	 * @return unknown
+	 */
+	function getSocket()
+	{
+		return $GLOBALS['SOCKET_CLIENT'];
+	}
+	
+	/**
+	 * 获取当前链接的所有的客户端
+	 */
+	function getSockets()
+	{
+		return webSocket::$_sockets;
+	}
+	
+	/**
+	 * 发送给所有客户端
+	 * @param unknown $msg
+	 */
+	function sendAllClient($msg)
+	{
+		$msg = webSocket::encode($msg.'');
+		webSocket::write($msg);
+	}
+	
+	/**
+	 * 重写control中的echo socket通信不依赖于echo
+	 * {@inheritDoc}
+	 * @see \framework\core\control::__output()
+	 */
+	function __output($msg)
+	{
+		$msg = webSocket::encode($msg.'');
+		webSocket::write($msg,$this->getSocket());
+	}
+	
 	/**
 	 * 当链接开始的时候会触发这个函数
 	 * @param unknown $client

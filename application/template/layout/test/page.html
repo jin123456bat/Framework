@@ -37,7 +37,9 @@
                 var content = document.getElementById("content").value;
                 if(content){
                 	content = JSON.stringify({
-                		content:content,
+                		c:'test',
+                		a:'message',
+                		message:content,
                 	});
                     ws.send(content);
                 }

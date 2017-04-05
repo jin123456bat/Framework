@@ -14,7 +14,7 @@ class console
 	
 	static function log($message,$color = self::TEXT_COLOR_GREEN)
 	{
-		if (request::php_sapi_name() == 'cli')
+		if (request::php_sapi_name() == 'cli' || request::php_sapi_name()=='socket')
 		{
 			echo chr(27).$color.$message.chr(27)."[0m".self::SEPARATOR;
 		}

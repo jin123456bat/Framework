@@ -197,11 +197,7 @@ class application extends component
 			{
 				request::$_php_sapi_name = 'socket';
 				//$this->runControl($control, $action);
-				$websocket = new webSocket();
-				if (method_exists($websocket, 'initlize'))
-				{
-					$websocket->initlize();
-				}
+				$websocket = self::load('webSocket');
 				while (true)
 				{
 					$response = $websocket->run(array($this,'runControl'));
@@ -235,7 +231,7 @@ class application extends component
 		}
 		if ($response !== null)
 		{
-			if (is_string($response))
+			if (is_scalar($response))
 			{
 				if (is_callable($callback))
 				{
