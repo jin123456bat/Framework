@@ -131,23 +131,24 @@ class application extends component
 	function runControl($control,$action)
 	{
 		$controller = self::control(base::$APP_NAME, $control);
-		
-		if (method_exists($this, 'onRequestStart'))
-		{
-			$response = call_user_func(array(
-				$this,
-				'onRequestStart'
-			), $controller, $action);
-			$this->doResponse($response);
-		}
-		
 		if ($controller instanceof control)
 		{
+			$callback = array($controller,'__output');
+			
+			if (method_exists($this, 'onRequestStart'))
+			{
+				$response = call_user_func(array(
+					$this,
+					'onRequestStart'
+				), $controller, $action);
+				$this->doResponse($response,true,$callback);
+			}
+			
 			$filter = $this->load('actionFilter');
 			$filter->load($controller, $action);
 			if (! $filter->allow())
 			{
-				$this->doResponse($filter->getMessage());
+				$this->doResponse($filter->getMessage(),true,$callback);
 			}
 			else
 			{
@@ -161,14 +162,14 @@ class application extends component
 						$controller,
 						'initlize'
 					));
-					$this->doResponse($response);
+					$this->doResponse($response,true,$callback);
 				}
 		
 				$response = call_user_func(array(
 					$controller,
 					$action
 				));
-				$this->doResponse($response);
+				$this->doResponse($response,true,$callback);
 			}
 		}
 	}
@@ -197,9 +198,14 @@ class application extends component
 				request::$_php_sapi_name = 'socket';
 				//$this->runControl($control, $action);
 				$websocket = new webSocket();
+				if (method_exists($websocket, 'initlize'))
+				{
+					$websocket->initlize();
+				}
 				while (true)
 				{
-					$websocket->run(array($this,'runControl'));
+					$response = $websocket->run(array($this,'runControl'));
+					$this->doResponse($response,false);
 				}
 			}
 		}
@@ -214,20 +220,31 @@ class application extends component
 	 *
 	 * @param unknown $response        	
 	 */
-	protected function doResponse($response,$exit = true)
+	protected function doResponse($response,$exit = true,$callback = NULL)
 	{
 		if (method_exists($this, 'onRequestEnd'))
 		{
-			call_user_func(array(
+			$newResponse = call_user_func(array(
 				$this,
 				'onRequestEnd'
 			), $response);
+			if ($newResponse!==NULL)
+			{
+				$response = $newResponse;
+			}
 		}
 		if ($response !== null)
 		{
 			if (is_string($response))
 			{
-				echo $response;
+				if (is_callable($callback))
+				{
+					call_user_func($callback,$response);
+				}
+				else
+				{
+					echo $response;
+				}
 			}
 			else if ($response instanceof response)
 			{
@@ -245,11 +262,25 @@ class application extends component
 					}
 					$response->getHeader()->sendAll();
 				}
-				echo $response->getBody();
+				if (is_callable($callback))
+				{
+					call_user_func($callback,$response);
+				}
+				else
+				{
+					echo $response->getBody();
+				}
 			}
 			else
 			{
-				echo json_encode($response);
+				if (is_callable($callback))
+				{
+					call_user_func($callback,$response);
+				}
+				else
+				{
+					echo json_encode($response);
+				}
 			}
 			if ($exit)
 			{

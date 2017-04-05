@@ -6,13 +6,37 @@ class header extends base
 
 	private static $_header = array();
 
-	function __construct()
+	/**
+	 * constructor
+	 * 
+	 * @param array $array = array()
+	 * @example 
+	 * new header(array(
+	 *	'Content-Type: application/json',
+	 * ));
+	 * or
+	 * new header(array(
+	 * 	'Content-Type' => 'application/json',
+	 * ));
+	 */
+	function __construct($array = array())
 	{
 		$headers = headers_list();
 		foreach ($headers as $header)
 		{
 			$header = explode(":", $header);
 			self::$_header[trim(array_shift($header))] = trim(implode(":", $header));
+		}
+		foreach ($array as $key => $value)
+		{
+			if (is_int($key))
+			{
+				$this->add($value);
+			}
+			else
+			{
+				self::$_header[$key] = $value;
+			}
 		}
 	}
 
@@ -30,6 +54,7 @@ class header extends base
 		{
 			$header = explode(":", $key);
 			
+			//防止value中出现冒号
 			$name = trim(array_shift($header));
 			$value = trim(implode(":", $header));
 			

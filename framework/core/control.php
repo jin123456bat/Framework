@@ -21,4 +21,12 @@ class control extends component
 	{
 		return array();
 	}
+	
+	/**
+	 * 如何将要输出的内容发送到输出设备
+	 */
+	function __output($msg)
+	{
+		echo $msg;
+	}
 }
