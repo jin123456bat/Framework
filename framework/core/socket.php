@@ -5,7 +5,7 @@ namespace framework\core;
  * @author fx
  *
  */
-abstract class socket extends component
+class socket extends component
 {
 	private $_port = 2000;
 	
@@ -25,11 +25,6 @@ abstract class socket extends component
 	
 	function initlize()
 	{
-		if (request::php_sapi_name() != 'cli')
-		{
-			exit('this program must be running in cli mode');
-		}
-		
 		$this->_master = socket_create_listen( $this->_port );
 		if (!$this->_master)
 		{

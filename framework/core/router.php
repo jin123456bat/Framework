@@ -17,7 +17,7 @@ class router extends component
 
 	function initlize()
 	{
-		self::$_data = array_merge(self::$_data, $_GET);
+		//self::$_data = array_merge(self::$_data, $_GET);
 		parent::initlize();
 	}
 

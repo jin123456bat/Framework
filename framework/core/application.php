@@ -52,6 +52,7 @@ class application extends component
 			}
 		}
 		
+		//设置默认编码
 		$charset = 'UTF-8';
 		if (isset($app['charset']) && ! empty($app['charset']))
 		{
@@ -126,107 +127,9 @@ class application extends component
 			}
 		}
 	}
-
-	/**
-	 * 对命令行参数经行分析
-	 * -a index => $_GET['a'] = 'index'
-	 * --b index => $_POST['b'] = 'index'
-	 * --a a --a b => $_GET['a'] = array('a','b')
-	 * @param unknown $argc        	
-	 * @param unknown $argv        	
-	 */
-	public function parseArgment($argc, $argv)
+	
+	function runControl($control,$action)
 	{
-		array_shift($argv);
-		$argc --;
-		
-		$get = array();
-		$post = array();
-		
-		foreach ($argv as $index => $value)
-		{
-			if (substr($value, 0, 2) == '--')
-			{
-				if (isset($argv[$index + 1]))
-				{
-					if (isset($post[substr($value, 2)]))
-					{
-						if (is_array($post[substr($value, 2)]))
-						{
-							$post[substr($value, 2)][] = $argv[$index + 1];
-						}
-						else if (is_string($post[substr($value, 2)]))
-						{
-							$post[substr($value, 2)] = array(
-								$post[substr($value, 2)],
-								$argv[$index + 1]
-							);
-						}
-					}
-					else
-					{
-						$post[substr($value, 2)] = $argv[$index + 1];
-					}
-					unset($argv[$index + 1]);
-				}
-				else
-				{
-					$post[substr($value, 2)] = true;
-				}
-				unset($argv[$index]);
-			}
-			else if (substr($value, 0, 1) == '-')
-			{
-				if (isset($argv[$index + 1]))
-				{
-					if (isset($get[substr($value, 1)]))
-					{
-						if (is_array($get[substr($value, 1)]))
-						{
-							$get[substr($value, 1)][] = $argv[$index + 1];
-						}
-						else if (is_string($get[substr($value, 1)]))
-						{
-							$get[substr($value, 1)] = array(
-								$get[substr($value, 1)],
-								$argv[$index + 1]
-							);
-						}
-					}
-					else
-					{
-						$get[substr($value, 1)] = $argv[$index + 1];
-					}
-					unset($argv[$index + 1]);
-				}
-				else
-				{
-					$get[substr($value, 1)] = true;
-				}
-				unset($argv[$index]);
-			}
-		}
-		return array(
-			'GET' => $get,
-			'POST' => $post
-		);
-	}
-
-	/**
-	 * 运行application
-	 */
-	function run()
-	{
-		$argment = $this->parseArgment($_SERVER['argc'], $_SERVER['argv']);
-		$_GET = array_merge($_GET, $argment['GET']);
-		$_POST = array_merge($_POST, $argment['POST']);
-		$_REQUEST = array_merge($_REQUEST, $argment['GET'], $argment['POST']);
-		
-		$router = $this->load('router');
-		$router->parse();
-		$control = $router->getControlName();
-		$action = $router->getActionName();
-		
 		$controller = self::control(base::$APP_NAME, $control);
 		
 		if (method_exists($this, 'onRequestStart'))
@@ -238,17 +141,7 @@ class application extends component
 			$this->doResponse($response);
 		}
 		
-		if ($controller instanceof socket)
-		{
-			//对于socket链接这个是必须的
-			set_time_limit(0);
-			$controller->initlize();
-			while (!$controller->isClose())
-			{
-				$controller->run();
-			}
-		}
-		else if ($controller instanceof control)
+		if ($controller instanceof control)
 		{
 			$filter = $this->load('actionFilter');
 			$filter->load($controller, $action);
@@ -270,7 +163,7 @@ class application extends component
 					));
 					$this->doResponse($response);
 				}
-				
+		
 				$response = call_user_func(array(
 					$controller,
 					$action
@@ -281,11 +174,47 @@ class application extends component
 	}
 
 	/**
+	 * 运行application
+	 */
+	function run()
+	{
+		$router = $this->load('router');
+		if (request::php_sapi_name() == 'web')
+		{
+			$router->appendParameter($_GET);
+		}
+		elseif (request::php_sapi_name() == 'cli')
+		{
+			array_shift($_SERVER['argv']);
+			$_SERVER['argc'] --;
+			if (!empty($_SERVER['argv']) && !empty($_SERVER['argc']))
+			{
+				$argment = cliControl::parseArgment($_SERVER['argc'], $_SERVER['argv']);
+				$router->appendParameter($argment);
+			}
+			else
+			{
+				request::$_php_sapi_name = 'socket';
+				//$this->runControl($control, $action);
+				$websocket = new webSocket();
+				while (true)
+				{
+					$websocket->run(array($this,'runControl'));
+				}
+			}
+		}
+		$router->parse();
+		$control = $router->getControlName();
+		$action = $router->getActionName();
+		$this->runControl($control,$action);
+	}
+
+	/**
 	 * 如何输出response对象
 	 *
 	 * @param unknown $response        	
 	 */
-	protected function doResponse($response)
+	protected function doResponse($response,$exit = true)
 	{
 		if (method_exists($this, 'onRequestEnd'))
 		{
@@ -322,7 +251,10 @@ class application extends component
 			{
 				echo json_encode($response);
 			}
-			exit(0);
+			if ($exit)
+			{
+				exit(0);
+			}
 		}
 	}
 

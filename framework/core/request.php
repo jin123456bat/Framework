@@ -3,16 +3,18 @@ namespace framework\core;
 
 class request extends base
 {
-
+	static public $_php_sapi_name = 'cli';
+	
 	static function php_sapi_name()
 	{
 		if (stripos(php_sapi_name(), 'cli') !== false)
 		{
-			return 'cli';
+			return self::$_php_sapi_name;
 		}
 		else
 		{
-			return 'web';
+			self::$_php_sapi_name = 'web';
+			return self::$_php_sapi_name;
 		}
 	}
 
