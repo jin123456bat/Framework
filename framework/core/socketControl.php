@@ -23,7 +23,7 @@ class socketControl extends control
 	 * 获取当前发送消息的客户端
 	 * @return unknown
 	 */
-	function getSocket()
+	static function getSocket()
 	{
 		return $GLOBALS['SOCKET_CLIENT'];
 	}
@@ -31,7 +31,7 @@ class socketControl extends control
 	/**
 	 * 获取当前链接的所有的客户端
 	 */
-	function getSockets()
+	static function getSockets()
 	{
 		return webSocket::$_sockets;
 	}
@@ -40,7 +40,7 @@ class socketControl extends control
 	 * 发送给所有客户端
 	 * @param unknown $msg
 	 */
-	function sendAllClient($msg)
+	static function sendAllClient($msg)
 	{
 		$msg = webSocket::encode($msg.'');
 		webSocket::write($msg);
@@ -54,7 +54,7 @@ class socketControl extends control
 	function __output($msg)
 	{
 		$msg = webSocket::encode($msg.'');
-		webSocket::write($msg,$this->getSocket());
+		webSocket::write($msg,self::getSocket());
 	}
 	
 	/**

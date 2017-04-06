@@ -128,27 +128,55 @@ class application extends component
 		}
 	}
 	
-	function runControl($control,$action)
+	/**
+	 * 执行控制器中的方法
+	 * @param string $control 控制器名称
+	 * @param string $action 控制器方法
+	 * @param string $doResponse 是否输出方法的返回值， 这个是回调函数 假如没有回调函数，则返回方法的返回值
+	 * @example function($response,$exit = false,$callback = NULL){}  参考application::doResponse方法
+	 * @return NULL|response
+	 */
+	function runControl($control,$action,$doResponse = NULL)
 	{
 		$controller = self::control(base::$APP_NAME, $control);
 		if ($controller instanceof control)
 		{
 			$callback = array($controller,'__output');
-			
 			if (method_exists($this, 'onRequestStart'))
 			{
 				$response = call_user_func(array(
 					$this,
 					'onRequestStart'
 				), $controller, $action);
-				$this->doResponse($response,true,$callback);
+				if ($response!==NULL)
+				{
+					if (is_callable($doResponse))
+					{
+						call_user_func($doResponse,$response,true,$callback);
+					}
+					else
+					{
+						return $response;
+					}
+				}
 			}
 			
 			$filter = $this->load('actionFilter');
 			$filter->load($controller, $action);
 			if (! $filter->allow())
 			{
-				$this->doResponse($filter->getMessage(),true,$callback);
+				$response = $filter->getMessage();
+				if ($response!==NULL)
+				{
+					if (is_callable($doResponse))
+					{
+						call_user_func($doResponse,$response,true,$callback);
+					}
+					else
+					{
+						return $response;
+					}
+				}
 			}
 			else
 			{
@@ -162,14 +190,34 @@ class application extends component
 						$controller,
 						'initlize'
 					));
-					$this->doResponse($response,true,$callback);
+					if ($response!==NULL)
+					{
+						if (is_callable($doResponse))
+						{
+							call_user_func($doResponse,$response,true,$callback);
+						}
+						else
+						{
+							return $response;
+						}
+					}
 				}
 		
 				$response = call_user_func(array(
 					$controller,
 					$action
 				));
-				$this->doResponse($response,true,$callback);
+				if ($response!==NULL)
+				{
+					if (is_callable($doResponse))
+					{
+						call_user_func($doResponse,$response,true,$callback);
+					}
+					else
+					{
+						return $response;
+					}
+				}
 			}
 		}
 	}
@@ -196,25 +244,25 @@ class application extends component
 			else
 			{
 				request::$_php_sapi_name = 'socket';
-				//$this->runControl($control, $action);
 				$websocket = self::load('webSocket');
 				while (true)
 				{
-					$response = $websocket->run(array($this,'runControl'));
-					$this->doResponse($response,false);
+					$websocket->run(array($this,'runControl'));
 				}
 			}
 		}
 		$router->parse();
 		$control = $router->getControlName();
 		$action = $router->getActionName();
-		$this->runControl($control,$action);
+		$this->runControl($control,$action,array($this,'doResponse'));
 	}
 
 	/**
-	 * 如何输出response对象
-	 *
-	 * @param unknown $response        	
+	 * 输出response
+	 * @param mixed $response  输出的对象
+	 * @param bool $exit 输出完毕后是否exit()
+	 * @param callback $callback 对输出对像使用什么样的方法输出，默认为echo的方式
+	 * @example $this->doResponse('123',true,function($msg){echo $msg;})     	
 	 */
 	protected function doResponse($response,$exit = true,$callback = NULL)
 	{

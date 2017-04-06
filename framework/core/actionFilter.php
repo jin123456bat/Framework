@@ -24,7 +24,7 @@ class actionFilter extends component
 	 *
 	 * @var response
 	 */
-	private $_message;
+	private $_message = null;
 
 	function load(control $control, $action)
 	{

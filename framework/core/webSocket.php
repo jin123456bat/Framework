@@ -1,6 +1,8 @@
 <?php
 namespace framework\core;
 
+use framework\vender\encryption;
+
 /**
  * @author fx
  *
@@ -53,12 +55,26 @@ class webSocket extends component
 			console::log('['.date('Y-m-d H:i:s').'] Socket Create Listen Error: ['.socket_last_error($this->_master).'] '.socket_strerror(socket_last_error($this->_master)),console::TEXT_COLOR_RED);
 			exit();
 		}
-		self::$_sockets[] = $this->_master;
+		$id = $this->inPool($this->_master);
 		console::log('Server Startted on '.$this->_port.'!');
 		parent::initlize();
 	}
 	
-	public function run($onmessage = NULL)
+	/**
+	 * 把socket连接加入到连接池,返回SOCKET的ID，这个ID是唯一的
+	 * @param resource $socket
+	 * @return string
+	 */
+	private function inPool($socket)
+	{
+		do{
+			$id = encryption::unique_id();
+		}while (!isset(self::$_sockets[$id]));
+		self::$_sockets[$id] = $socket;
+		return $id;
+	}
+	
+	public function run($runControl = NULL)
 	{
 		$read = self::$_sockets;
 		$write = NULL;
@@ -101,7 +117,7 @@ class webSocket extends component
 					else
 					{
 						$buffer = $this->decode($buffer);
-						if (is_callable($onmessage))
+						if (is_callable($runControl))
 						{
 							$request = json_decode($buffer,true);
 							if (!empty($request) && is_array($request))
@@ -114,8 +130,21 @@ class webSocket extends component
 								$router->parse();
 								$control = $router->getControlName();
 								$action = $router->getActionName();
-								$response = $onmessage($control,$action);
-								return $response;
+								//$response = $onmessage($control,$action,function($response,false){});
+								call_user_func($runControl,$control,$action,function($response,$exit,$callback){
+									if ($response!==NULL)
+									{
+										if (is_callable($callback))
+										{
+											call_user_func($callback,$response);
+										}
+										else
+										{
+											webSocket::write($response,socketControl::getSocket());
+										}
+									}
+								});
+								//return $response;
 							}
 						}
 					}
@@ -138,7 +167,7 @@ class webSocket extends component
 	 * 关闭socket链接
 	 * @param unknown $socket
 	 */
-	private function close($socket)
+	public static function close($socket)
 	{
 		$this->call('disconnect',$socket);
 		$index = array_search( $socket, self::$_sockets );
@@ -161,13 +190,19 @@ class webSocket extends component
 				if ($socket!=$GLOBALS['SOCKET_CLIENT'])
 				{
 					$result = socket_write($socket, $message,strlen($message));
-					if ($result === fasle)
+					if ($result === false)
 					{
-						//发送失败
+						console::log('['.date('Y-m-d H:i:s').'] Socket Write Error: ['.$message.'] ['.socket_last_error($socket).'] '.socket_strerror(socket_last_error($socket)),console::TEXT_COLOR_RED);
+						continue;
+					}
+					else if ($result == strlen($message))
+					{
+						$num++;
 					}
 					else
 					{
-						$num++;
+						console::log('没发送完毕呢还',console::TEXT_COLOR_YELLOW);
+						//socket没有全部发送出去 只发送了一部分
 					}
 				}
 			}
