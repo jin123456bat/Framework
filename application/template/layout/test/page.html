@@ -1,65 +1,48 @@
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Web sockets test</title>
-    <script src="//cdn.bootcss.com/jquery/3.2.0/jquery.min.js" type="text/javascript"></script>
-    <script type="text/javascript">
+<meta charset="UTF-8">
+<title>Web sockets test</title>
+<script src="//cdn.bootcss.com/jquery/3.2.0/jquery.min.js"
+	type="text/javascript"></script>
+<script type="text/javascript">
         var ws;
+        ToggleConnectionClicked();
         
         function ToggleConnectionClicked() {          
-                try {
-                    ws = new WebSocket("ws://192.168.2.73:2000");//连接服务器        
-                    ws.onopen = function(event){alert("已经与服务器建立了连接\r\n当前连接状态："+this.readyState);};
-                    ws.onmessage = function(event){
-                    	console.log(event);
-                    	alert("接收到服务器发送的数据：\r\n"+event.data);
-                    };
-                    ws.onclose = function(event){
-                    	//ToggleConnectionClicked();//当服务器链接超时之后重新链接
-                    	setTimeout(function(){
-                    		ToggleConnectionClicked();
-					    },5000);
-                    	
-                    	alert("已经与服务器断开连接\r\n当前连接状态："+this.readyState);
-                    };
-                    ws.onerror = function(event){
-                    	console.log(event);
-                    	console.log(ws);
-                    	alert("WebSocket异常！");
-                    };
-                } catch (ex) {
-                    alert(ex.message);
-                }
+			ws = new WebSocket("ws://192.168.2.73:2000");//连接服务器        
+			ws.onopen = function(event){alert("已经与服务器建立了连接\r\n当前连接状态："+this.readyState);};
+			ws.onmessage = function(event){
+				alert("接收到服务器发送的数据：\r\n"+event.data);
+			};
+			ws.onclose = function(event){
+				
+			};
+			ws.onerror = function(event){
+			};    
         };
  
-        function SendData() {
-            try{
-                var content = document.getElementById("content").value;
-                if(content){
-                	content = JSON.stringify({
-                		c:'test',
-                		a:'message',
-                		message:content,
-                	});
-                    ws.send(content);
-                }
-                
-            }catch(ex){
-                alert(ex.message);
-            }
+        function SendData(action) {
+			var content = document.getElementById("content").value;
+			if(content){
+				content = JSON.stringify({
+					c:'test',
+					a:action,
+					message:content,
+				});
+			    ws.send(content);
+			}
         };
- 
-        function seestate(){
-            alert(ws.readyState);
-        }
-       
     </script>
 </head>
 <body>
-   <button id='ToggleConnection' type="button" onclick='ToggleConnectionClicked();'>连接服务器</button><br /><br />
-   <textarea id="content" ></textarea>
-    <button id='ToggleConnection' type="button" onclick='SendData();'>发送我的名字：beston</button><br /><br />
-    <button id='ToggleConnection' type="button" onclick='seestate();'>查看状态</button><br /><br />
-
+	<textarea id="content"></textarea>
+	<button id='ToggleConnection' type="button" onclick='SendData("message");'>发送</button>
+	<br />
+	<br />
+	<button id='ToggleConnection' type="button" onclick='SendData("logout");'>退出</button>
+	<br />
+	<br />
+	<div id="content">
+	</div>
 </body>
 </html>

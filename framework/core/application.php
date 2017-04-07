@@ -1,6 +1,8 @@
 <?php
 namespace framework\core;
 
+use framework;
+
 class application extends component
 {
 
@@ -142,6 +144,20 @@ class application extends component
 		if ($controller instanceof control)
 		{
 			$callback = array($controller,'__output');
+			
+			if ($controller instanceof socketControl && request::php_sapi_name()!='socket')
+			{
+				if (method_exists($controller, '__runningMode'))
+				{
+					$response = call_user_func(array($controller,'__runningMode'),request::php_sapi_name());
+					if (!$response!==NULL)
+					{
+						$this->doResponse($response,true);
+					}
+				}
+			}
+			
+			
 			if (method_exists($this, 'onRequestStart'))
 			{
 				$response = call_user_func(array(
@@ -236,18 +252,26 @@ class application extends component
 		{
 			array_shift($_SERVER['argv']);
 			$_SERVER['argc'] --;
-			if (!empty($_SERVER['argv']) && !empty($_SERVER['argc']))
+			$argment = cliControl::parseArgment($_SERVER['argc'], $_SERVER['argv']);
+			if (isset($argment['c']) && isset($argment['a']))
 			{
-				$argment = cliControl::parseArgment($_SERVER['argc'], $_SERVER['argv']);
 				$router->appendParameter($argment);
 			}
 			else
 			{
 				request::$_php_sapi_name = 'socket';
-				$websocket = self::load('webSocket');
-				while (true)
+				$socekt = isset($argment['websocket']) && !empty($argment['websocket'])?$argment['websocket']:'webSocket';
+				$websocket = self::load($socekt,'framework\core\webSocket');
+				if (empty($websocket))
 				{
-					$websocket->run(array($this,'runControl'));
+					exit('don\'t exist websocket: '.$socekt."\r\n");
+				}
+				else
+				{
+					while (true)
+					{
+						$websocket->run(array($this,'runControl'));
+					}
 				}
 			}
 		}
@@ -356,12 +380,17 @@ class application extends component
 
 	/**
 	 * 载入系统类
-	 *
-	 * @param unknown $classname        	
-	 * @return unknown
-	 */
-	public static function load($classname)
+	 * @param string $classname 类名 
+	 * @param string $instance 继承的类
+	 * @return object
+	 * @example 
+	 * application::load('control')
+	 * application::load('framework\core\model')
+	*/
+	public static function load($classname,$instanceof = '')
 	{
+		static $instance;
+		
 		$classnames = explode('\\', $classname);
 		if (count($classnames) == 1)
 		{
@@ -373,36 +402,51 @@ class application extends component
 				'framework\\lib',
 				'framework\\vendor'
 			);
-		}
-		else
-		{
-			array_pop($classnames);
-			$namespaces = array(
-				implode('\\', $classnames)
-			);
-		}
-		
-		static $instance;
-		
-		foreach ($namespaces as $namespace)
-		{
-			$class = $namespace . '\\' . $classname;
-			if (isset($instance[$class]))
+			
+			foreach ($namespaces as $namespace)
 			{
-				return $instance[$class];
-			}
-			else
-			{
-				if (class_exists($class, true))
+				$class = $namespace . '\\' . $classname;
+				
+				if (isset($instance[$class]))
 				{
-					$instance[$class] = new $class();
-					if (method_exists($instance[$class], 'initlize'))
-					{
-						$instance[$class]->initlize();
-					}
+					
 					return $instance[$class];
+				}
+				else
+				{
+					if (class_exists($class, true))
+					{
+						$temp = new $class();
+						if (!empty($instanceof) && class_exists($instanceof,true))
+						{
+							if (!($temp instanceof $instanceof))
+							{
+								return null;
+							}
+						}
+						$instance[$class] = $temp;
+						if (method_exists($instance[$class], 'initlize'))
+						{
+							$instance[$class]->initlize();
+						}
+						return $instance[$class];
+					}
 				}
 			}
 		}
+		else
+		{
+			if (class_exists($classname,true))
+			{
+				$instance[$classname] = new $classname();
+				if (method_exists($instance[$classname], 'initlize'))
+				{
+					$instance[$classname]->initlize();
+				}
+				return $instance[$classname];
+			}
+		}
+		
+		
 	}
 }

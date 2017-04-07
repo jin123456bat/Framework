@@ -1,14 +1,14 @@
 <?php
 namespace framework\core;
 
-use framework\vender\encryption;
-
 /**
  * @author fx
  *
  */
 class webSocket extends component
 {
+	public $_name = 'webSocket';
+	
 	/**
 	 * 监听端口号
 	 * @var integer
@@ -39,39 +39,45 @@ class webSocket extends component
 	 */
 	private $_message_length = 2048;
 	
-	static public $_sockets = array();
-	
-	private $_callback = array(
-		'open' => NULL,//当链接打开的时候触发函数
-		'error' => NULL,//socket错误函数
-		'disconnect' => NULL,//断开链接函数
-	);
+	public static $_sockets = array();
 	
 	function initlize()
 	{
+		//设置名称
+		$this->_name = ucwords(end(explode('\\', get_class($this))));
+		//设置端口号
+		if (method_exists($this, '__port'))
+		{
+			$this->_port = call_user_func(array($this,'__port'));
+		}
+		//超时时间
+		if (method_exists($this, '__timeout'))
+		{
+			$this->_timeout = call_user_func(array($this,'__timeout'));
+		}
+		//最大连接数
+		if (method_exists($this, '__max_connection'))
+		{
+			$this->_max_connection = call_user_func(array($this,'__max_connection'));
+		}
+		
 		$this->_master = socket_create_listen( $this->_port ,SOMAXCONN );
 		if ($this->_master === false)
 		{
-			console::log('['.date('Y-m-d H:i:s').'] Socket Create Listen Error: ['.socket_last_error($this->_master).'] '.socket_strerror(socket_last_error($this->_master)),console::TEXT_COLOR_RED);
 			exit();
 		}
-		$id = $this->inPool($this->_master);
-		console::log('Server Startted on '.$this->_port.'!');
+		$this->inPool($this->_master);
+		console::log('Server '.$this->_name.' Startted on '.$this->_port.'!');
 		parent::initlize();
 	}
 	
 	/**
-	 * 把socket连接加入到连接池,返回SOCKET的ID，这个ID是唯一的
+	 * 把socket连接加入到连接池
 	 * @param resource $socket
-	 * @return string
 	 */
 	private function inPool($socket)
 	{
-		do{
-			$id = encryption::unique_id();
-		}while (!isset(self::$_sockets[$id]));
-		self::$_sockets[$id] = $socket;
-		return $id;
+		self::$_sockets[] = $socket;
 	}
 	
 	public function run($runControl = NULL)
@@ -79,7 +85,6 @@ class webSocket extends component
 		$read = self::$_sockets;
 		$write = NULL;
 		$except = NULL;
-		//socket_select  必须收到一个socket信息才会执行下一步，否则会一直在这里阻塞
 		socket_select($read, $write, $except, $this->_timeout);
 		foreach ($read as $socket)
 		{
@@ -89,14 +94,16 @@ class webSocket extends component
 				if ($client === false)
 				{
 					console::log('connect failed',console::TEXT_COLOR_RED);
+					$this->call('error', socket_last_error($this->_master),socket_strerror(socket_last_error($this->_master)));
 					continue;
 				}
 				else
 				{
 					if (count(self::$_sockets)> $this->_max_connection){
+						$this->call('error', 0,'超过最大链接数');
 						continue;
 					}
-					self::$_sockets[] = $client;
+					$this->inPool($client);
 				}
 			}
 			else
@@ -116,9 +123,9 @@ class webSocket extends component
 					}
 					else
 					{
-						$buffer = $this->decode($buffer);
 						if (is_callable($runControl))
 						{
+							$buffer = $this->decode($buffer);
 							$request = json_decode($buffer,true);
 							if (!empty($request) && is_array($request))
 							{
@@ -130,7 +137,6 @@ class webSocket extends component
 								$router->parse();
 								$control = $router->getControlName();
 								$action = $router->getActionName();
-								//$response = $onmessage($control,$action,function($response,false){});
 								call_user_func($runControl,$control,$action,function($response,$exit,$callback){
 									if ($response!==NULL)
 									{
@@ -144,7 +150,6 @@ class webSocket extends component
 										}
 									}
 								});
-								//return $response;
 							}
 						}
 					}
@@ -167,7 +172,7 @@ class webSocket extends component
 	 * 关闭socket链接
 	 * @param unknown $socket
 	 */
-	public static function close($socket)
+	private function close($socket)
 	{
 		$this->call('disconnect',$socket);
 		$index = array_search( $socket, self::$_sockets );
@@ -263,22 +268,26 @@ class webSocket extends component
 	 */
 	protected function handShanke($socket)
 	{
-		$acceptKey = $this->getAccpetKey();
-		$this->_handshake[(int)$socket] = true;
-		$message = 
-		"HTTP/1.1 101 Switching Protocols\r\n" .
-		"Upgrade: websocket\r\n" .
-		"Connection: Upgrade\r\n" .
-		"Sec-WebSocket-Accept: " . $acceptKey . "\r\n" .
-		"\r\n";
-		self::write($message,$socket);
+		if ($this->isWebSocket())
+		{
+			$acceptKey = $this->getAccpetKey();
+			$this->_handshake[(int)$socket] = true;
+			$message = 
+			"HTTP/1.1 101 Switching Protocols\r\n" .
+			"Upgrade: websocket\r\n" .
+			"Connection: Upgrade\r\n" .
+			"Sec-WebSocket-Accept: " . $acceptKey . "\r\n" .
+			"\r\n";
+			self::write($message,$socket);
+			$this->call('open',$socket);
+		}
 	}
 	
 	/**
 	 * 判断当前请求是否是websocket链接
 	 * @return boolean
 	 */
-	protected function isWebSocket()
+	private function isWebSocket()
 	{
 		return $this->getKey('Connection') == 'Upgrade' && $this->getKey('Upgrade') == 'websocket';
 	}
@@ -312,8 +321,33 @@ class webSocket extends component
 		return '';
 	}
 	
-	private function call($type)
+	/**
+	 * @param unknown $type 事件名称
+	 * @param unknown $args 事件参数
+	 */
+	public function call($type,$args)
 	{
-		
+		$args = func_get_args();
+		$type = array_shift($args);
+		if(is_callable(array($this,'on'.$type)))
+		{
+			return call_user_func_array(array($this,'on'.$type),$args);
+		}
+		return false;
+	}
+	
+	function onopen($socket)
+	{
+		console::log('Socket Connected '.$socket,console::TEXT_COLOR_BLUE);
+	}
+	
+	function onerror($socket,$errno,$error)
+	{
+		console::log('Socket Error '.$socket,console::TEXT_COLOR_BLUE);
+	}
+	
+	function ondisconnect($socket)
+	{
+		console::log('Socket DisConnected '.$socket,console::TEXT_COLOR_BLUE);
 	}
 }

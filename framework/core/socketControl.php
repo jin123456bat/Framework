@@ -2,7 +2,6 @@
 namespace framework\core;
 class socketControl extends control
 {
-	
 	/**
 	 * 获取前端传递的参数
 	 * @param unknown $name
@@ -55,6 +54,11 @@ class socketControl extends control
 	{
 		$msg = webSocket::encode($msg.'');
 		webSocket::write($msg,self::getSocket());
+	}
+	
+	function close($socket)
+	{
+		socket_close($socket);
 	}
 	
 	/**
