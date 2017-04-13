@@ -5,9 +5,22 @@ use framework\lib\error;
 
 class data extends error implements \ArrayAccess
 {
-
+	/**
+	 * 原始数据存储
+	 * @var array
+	 */
+	private $_data = array();
+	
+	/**
+	 * 场景
+	 * @var string
+	 */
 	protected $_scene = '';
 
+	/**
+	 * validate的时候,不验证的字段
+	 * @var array
+	 */
 	private $_safe_fileds = array();
 
 	function __construct($data = array(), $scene = '')
@@ -23,6 +36,23 @@ class data extends error implements \ArrayAccess
 	{
 		parent::initlize();
 	}
+	
+	/**
+	 * 默认的情况下使用ID字段作为主键
+	 * @return string
+	 */
+	function __primaryKey()
+	{
+		return 'id';
+	}
+	
+	/**
+	 * 数据模型名称
+	 */
+	function __model()
+	{
+		return get_class($this);
+	}
 
 	/**
 	 * 默认的delete
@@ -34,8 +64,7 @@ class data extends error implements \ArrayAccess
 		return $this->model($model)
 			->where($pk . '=?', array(
 			$this->$pk
-		))
-			->delete();
+		))->delete();
 	}
 
 	/**
@@ -45,30 +74,89 @@ class data extends error implements \ArrayAccess
 	{
 		$pk = $this->__primaryKey();
 		$model = $this->__model();
-		$data = array();
-		foreach ($this as $index => $value)
+		
+		$data = $this->_data;
+		
+		$relation_data = array();
+		foreach ($data as $key => $value)
 		{
-			if ($index !== $pk && $index[0] != '_')
+			$relation = $this->__relation($key, $this->pk, $value);
+			if (!empty($relation))
 			{
-				$data[$index] = $value;
+				$relation_data[$key] = $relation;
+				unset($data[$key]);
 			}
 		}
+		
 		if (! empty($pk) && ! empty($this->$pk))
 		{
-			return $this->model($model)
+			$this->model($model)->transaction();
+			
+			$this->model($model)
 				->where($pk . '=?', array(
 				$this->$pk
-			))
-				->limit(1)
-				->update($data);
+			))->limit(1)->update($data);
+			
+			//更新关联数据  更新关系数据必须在update后执行 防止外键索引导致添加失败
+			foreach ($relation_data as $data)
+			{
+				foreach ($data as $tableName => $d_data)
+				{
+					//先删除数据
+					if (isset($d_data['delete']) && !empty($d_data['delete']) && is_array($d_data['delete']))
+					{
+						foreach ($d_data['delete'] as $key => $value)
+						{
+							$this->model($model)->where($key.'=?',[$value]);
+						}
+						$this->model($model)->delete();
+					}
+					//在添加关系
+					if (isset($d_data['insert']) && !empty($d_data['insert']) && is_array($d_data['insert']))
+					{
+						foreach ($d_data['insert'] as $insert)
+						{
+							if(!$this->model($tableName)->insert($insert))
+							{
+								$this->model($model)->rollback();
+								return false;
+							}
+						}
+					}
+				}
+			}
+			
+			$this->model($model)->commit();
+			return true;
 		}
 		else
 		{
+			$this->model($model)->transaction();
 			if ($this->model($model)->insert($data))
 			{
 				$this->$pk = $this->model($model)->lastInsertId();
+				//这里把其它的相关数据插入进去
+				foreach ($relation_data as $key => $data)
+				{
+					foreach ($data as $tableName => $d_data)
+					{
+						if (isset($d_data['insert']) && !empty($d_data['insert']) && is_array($d_data['insert']))
+						{
+							foreach ($d_data['insert'] as $insert)
+							{
+								if(!$this->model($tableName)->insert($insert))
+								{
+									$this->model($model)->rollback();
+									return false;
+								}
+							}
+						}
+					}
+				}
+				$this->model($model)->commit();
 				return true;
 			}
+			$this->model($model)->rollback();
 			return false;
 		}
 	}
@@ -359,6 +447,30 @@ class data extends error implements \ArrayAccess
 	{
 		return array();
 	}
+	
+	/**
+	 * 
+	 * @param unknown $primaryKey 主键
+	 * @param unknown $data 添加或者删除的时候的相关数据
+	 * @example
+	 * return array(
+	 *		'field' => array(
+	 *			'tableName' => array(
+	 *				'insert' => array(
+	 *					array(),
+	 *					array(),
+	 *				),
+	 *				'delete' => array(
+	 *					'field' => $primaryKey,
+	 *				),
+	 *			),
+	 *		)
+	 *	);
+	 */
+	function __relation($field,$primaryKey,$data)
+	{
+		return array();
+	}
 
 	/**
 	 *
@@ -368,7 +480,7 @@ class data extends error implements \ArrayAccess
 	 */
 	public function offsetExists($offset)
 	{
-		return isset($this->$offset);
+		return isset($this->_data[$offset]);
 	}
 
 	/**
@@ -379,7 +491,7 @@ class data extends error implements \ArrayAccess
 	 */
 	public function offsetGet($offset)
 	{
-		return isset($this->$offset) ? $this->$offset : null;
+		return isset($this->_data[$offset]) ? $this->_data[$offset] : null;
 	}
 
 	/**
@@ -390,7 +502,7 @@ class data extends error implements \ArrayAccess
 	 */
 	public function offsetSet($offset, $value)
 	{
-		$this->$offset = $value;
+		$this->_data[$offset] = $value;
 	}
 
 	/**
@@ -401,6 +513,6 @@ class data extends error implements \ArrayAccess
 	 */
 	public function offsetUnset($offset)
 	{
-		unset($this->$offset);
+		unset($this->_data[$offset]);
 	}
 }
