@@ -13,7 +13,7 @@ class index extends BaseControl
 
 	function index()
 	{
-		$c = new collection(array(
+		/* $c = new collection(array(
 			1,
 			2,
 			3
@@ -44,7 +44,7 @@ class index extends BaseControl
 			var_dump($v);
 		}
 		var_dump($c);
-		
+		 */
 		// $c->append(4);
 		
 		/*
@@ -54,10 +54,12 @@ class index extends BaseControl
 		 * }
 		 */
 		
-		foreach ($c as $v)
+		/* foreach ($c as $v)
 		{
 			var_dump($v);
-		}
+		}  */
+		 
+		return new view('index/index.php');
 	}
 
 	function page()

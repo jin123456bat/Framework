@@ -1,6 +1,8 @@
 <?php
 namespace framework\core;
 
+use framework\view\dom;
+
 class view extends response
 {
 
@@ -104,10 +106,22 @@ class view extends response
 			ob_start();
 			extract($this->_variables);
 			extract($this->_functions);
-			include $file;
-			$body = ob_get_contents();
+			$object = include $file;
+			if (!empty($object) && $object instanceof dom)
+			{
+				$body = $object->__toString();
+			}
+			else
+			{
+				$body = ob_get_contents();
+			}
+			$body .= ob_get_contents();
 			ob_end_clean();
 			return $body;
+		}
+		else
+		{
+			exit('file not exist');
 		}
 	}
 }
