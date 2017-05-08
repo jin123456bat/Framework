@@ -14,13 +14,13 @@ class index extends BaseControl
 
 	function index()
 	{
-		//return new view('index/index.php');
+		return new view('index/index.php');
 		
 		//echo compress::css('./test.css');
 		//file_put_contents('./test.min.css', compress::css('./test.css'));
 		
-		echo compress::js('./test.js');
-		file_put_contents('./test.min.js', compress::js('./test.js'));
+		//echo compress::js('./test.js');
+		//file_put_contents('./test.min.js', compress::js('./test.js'));
 	}
 
 	function page()
