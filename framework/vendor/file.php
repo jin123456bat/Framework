@@ -34,7 +34,7 @@ class file extends \framework\lib\error
 
 	private $_path;
 
-	function __construct($file)
+	function __construct($file,$create_not_exist = true)
 	{
 		if (is_string($file))
 		{
@@ -42,7 +42,7 @@ class file extends \framework\lib\error
 			{
 				$this->_path = $file;
 			}
-			else
+			else if ($create_not_exist)
 			{
 				if (($file[strlen($file) - 1] == '/' || $file[strlen($file) - 1] == '\\'))
 				{
@@ -160,11 +160,18 @@ class file extends \framework\lib\error
 	/**
 	 * 获取文件内容
 	 */
-	function content($start = 0, $length = null)
+	function content($start = null, $length = null)
 	{
 		if ($this->readable())
 		{
-			return file_get_contents($this->_path, null, null, $start, $length);
+			if (!empty($length))
+			{
+				return file_get_contents($this->_path, null, null, $start,$length);
+			}
+			else
+			{
+				return file_get_contents($this->_path, null, null, $start);
+			}
 		}
 		return false;
 	}

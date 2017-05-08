@@ -7,59 +7,20 @@ use framework\core\debugger;
 use framework\data\collection;
 use application\extend\model;
 use framework\core\view;
+use framework\vendor\compress;
 
 class index extends BaseControl
 {
 
 	function index()
 	{
-		/* $c = new collection(array(
-			1,
-			2,
-			3
-		));
-		if ($c->isExist(1) === false)
-		{
-			var_dump('isExist test 1=> Error');
-		}
+		//return new view('index/index.php');
 		
-		if ($c->isExist(2) === false)
-		{
-			var_dump('isExist 2=> Error');
-		}
+		//echo compress::css('./test.css');
+		//file_put_contents('./test.min.css', compress::css('./test.css'));
 		
-		if ($c->isExist(3) === false)
-		{
-			var_dump('isExist 3=> Error');
-		}
-		
-		if ($c->isExist(4) !== false)
-		{
-			var_dump('isExist 4 => Error');
-		}
-		
-		var_dump($c);
-		foreach ($c as $v)
-		{
-			var_dump($v);
-		}
-		var_dump($c);
-		 */
-		// $c->append(4);
-		
-		/*
-		 * if ($c->isExist(4) === false)
-		 * {
-		 * var_dump('append 4 => error');
-		 * }
-		 */
-		
-		/* foreach ($c as $v)
-		{
-			var_dump($v);
-		}  */
-		 
-		return new view('index/index.php');
+		echo compress::js('./test.js');
+		file_put_contents('./test.min.js', compress::js('./test.js'));
 	}
 
 	function page()
