@@ -1,7 +1,7 @@
 <?php
 namespace framework\core;
 
-use framework\view\dom;
+use framework\view\engine;
 
 class view extends response
 {
@@ -26,20 +26,12 @@ class view extends response
 	 * @var unknown
 	 */
 	private $_charset;
-
+	
 	/**
-	 * 模板中的变量
-	 *
-	 * @var unknown
+	 * 模板引擎
+	 * @var engine
 	 */
-	private $_variables = array();
-
-	/**
-	 * 模板中的函数
-	 *
-	 * @var unknown
-	 */
-	private $_functions = array();
+	private $_engine;
 
 	function __construct($template, $layout = null)
 	{
@@ -54,6 +46,10 @@ class view extends response
 		}
 		
 		$this->_template = $template;
+		
+		$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
+		$this->_engine = new engine($file);
+		
 		parent::__construct();
 	}
 
@@ -65,11 +61,21 @@ class view extends response
 	function setLayout($layout)
 	{
 		$this->_layout = $layout;
+		
+		$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
+		$this->_engine = new engine($file);
 	}
 
+	/**
+	 * 设置模板文件
+	 * @param unknown $template
+	 */
 	function setTemplate($template)
 	{
 		$this->_template = $template;
+		
+		$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
+		$this->_engine = new engine($file);
 	}
 
 	/**
@@ -80,15 +86,7 @@ class view extends response
 	 */
 	function assign($var, $val)
 	{
-		$this->_variables[$var] = $val;
-	}
-
-	function functions($var, $callback)
-	{
-		if (is_callable($callback))
-		{
-			$this->_functions[$var] = $callback;
-		}
+		$this->_engine->assign($var,$val);
 	}
 
 	/**
@@ -103,12 +101,7 @@ class view extends response
 		$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
 		if (file_exists($file))
 		{
-			ob_start();
-			extract($this->_variables);
-			extract($this->_functions);
-			include $file;
-			$body = ob_get_contents();
-			ob_end_clean();
+			$body = $this->_engine->fetch();
 			return $body;
 		}
 		else

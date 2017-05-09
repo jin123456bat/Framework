@@ -14,8 +14,20 @@ class index extends BaseControl
 
 	function index()
 	{
-		return new view('index/index.php');
 		
+		
+		$view = new view('index/index.php');
+		$view->assign('name1', '张三');
+		$view->assign('name2', '李四');
+		$view->assign('name3', 'ABC');
+		$view->assign('age', function($name,$age = 18){
+			if (strlen($name)==0)
+			{
+				return $age;
+			}
+			return strlen($name);
+		});
+		return $view;
 		//echo compress::css('./test.css');
 		//file_put_contents('./test.min.css', compress::css('./test.css'));
 		
