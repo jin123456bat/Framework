@@ -47,8 +47,9 @@ class view extends response
 		
 		$this->_template = $template;
 		
-		$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
-		$this->_engine = new engine($file);
+		$this->_engine = new engine();
+		$this->_engine->setTemplatePath(APP_ROOT . '/template/' . trim($this->_layout, '/\\'));
+		$this->_engine->setTempalteName($this->_template);
 		
 		parent::__construct();
 	}
@@ -62,8 +63,9 @@ class view extends response
 	{
 		$this->_layout = $layout;
 		
-		$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
-		$this->_engine = new engine($file);
+		//$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
+		//$this->_engine = new engine($file);
+		$this->_engine->setTemplatePath(APP_ROOT . '/template/' . trim($this->_layout, '/\\'));
 	}
 
 	/**
@@ -73,9 +75,9 @@ class view extends response
 	function setTemplate($template)
 	{
 		$this->_template = $template;
-		
-		$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
-		$this->_engine = new engine($file);
+		$this->_engine->setTempalteName($template);
+		//$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
+		//$this->_engine = new engine($file);
 	}
 
 	/**

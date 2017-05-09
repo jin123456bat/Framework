@@ -17,7 +17,7 @@ class index extends BaseControl
 		
 		
 		$view = new view('index/index.php');
-		$view->assign('name1', '张三');
+		$view->assign('name1', '[3,4]');
 		$view->assign('name2', '李四');
 		$view->assign('name3', 'ABC');
 		$view->assign('age', function($name,$age = 18){
