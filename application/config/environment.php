@@ -2,9 +2,9 @@
 return array(
 	'display_errors' => 'On',
 	'error_reporting' => E_ALL,
-	'memory_limit' => '2048M',
+	'memory_limit' => '128M',
 	
-	'max_execution_time' => 0,
+	'max_execution_time' => 10,
 	'session' => array(
 		'cookie_lifetime' => 0,
 		'gc_maxlifetime' => 3600,
