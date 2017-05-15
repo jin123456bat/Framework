@@ -8,13 +8,17 @@
 {%(6*strlen($name1.'123'.'456'))+6%}
 {%strtoupper(strtolower($name3))%}
 
-{%section from=[1,2,3] key=key value=value%}
-今天是个好天气啊1{%$value%}
+
+{%section from=$name value=persion%}
+
+{%section from=$fruit value=what%}
+{%$persion%}吃{%$what%}
 {%/section%}
 
+{%/section%}
 
-{%section from=[1,2,3] key=key value=value%}
-今天是个好天气啊2{%$value%}
+{%section from=$name%}
+{%$value%}
 {%/section%}
 
 </body>

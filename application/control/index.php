@@ -21,6 +21,16 @@ class index extends BaseControl
 			),
 			'age' => 108,
 		));
+		$view->assign('name', array(
+			'a',
+			'b',
+			'c'
+		));
+		$view->assign('fruit', array(
+			'apple',
+			'banana',
+			'oringe',
+		));
 		$view->assign('name1', '(1)');
 		$view->assign('name2', '李四');
 		$view->assign('name3', 'ABC');

@@ -55,7 +55,6 @@ class compiler extends \framework\view\compiler
 	 */
 	private $_temp_variable = array();
 	
-	
 	/**
 	 * 模板文件所在路径
 	 * 当使用include标签的时候在这些目录中按照顺序搜索
@@ -524,9 +523,11 @@ class compiler extends \framework\view\compiler
 	 */
 	private function block($block)
 	{
-		$pattern = '!'.$this->_leftDelimiter.$block.'\s[\s\w\(\).\+\-\*/=,\'$[\]]+'.$this->_rightDelimiter.'([\s\S]*)'.$this->_leftDelimiter.'/'.$block.$this->_rightDelimiter.'!Ui';
-		
+		$pattern = '!'.$this->_leftDelimiter.$block.'\s[\s\w\(\).\+\-\*/=,\'$[\]]+'.$this->_rightDelimiter.'([\s\S]*)'.$this->_leftDelimiter.'/'.$block.$this->_rightDelimiter.'!i';
+		//var_dump($pattern);
+		//var_dump($this->_template);
 		$this->_template = preg_replace_callback($pattern, function($match) use($block){
+			var_dump($match);
 			$content = $match[1];
 			if(preg_match('!'.$this->_leftDelimiter.$block.'([^'.$this->_rightDelimiter.']*)'.$this->_rightDelimiter.'!i', $match[0],$left))
 			{
