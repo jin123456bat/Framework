@@ -523,11 +523,11 @@ class compiler extends \framework\view\compiler
 	 */
 	private function block($block)
 	{
-		$pattern = '!'.$this->_leftDelimiter.$block.'\s[\s\w\(\).\+\-\*/=,\'$[\]]+'.$this->_rightDelimiter.'([\s\S]*)'.$this->_leftDelimiter.'/'.$block.$this->_rightDelimiter.'!i';
-		//var_dump($pattern);
-		//var_dump($this->_template);
+		//$pattern = '!'.$this->_leftDelimiter.$block.'[\s\w\(\).\+\-\*/=,\'$[\]]+'.$this->_rightDelimiter.'([\s\S]*)'.$this->_leftDelimiter.'/'.$block.$this->_rightDelimiter.'!i';
+		$pattern = '!{%section[\s\w\(\).\+\-\*/=,\'$[\]]+%}(((?<block>{%section)|(?<-block>{%/section%})|.)*(?(block)(?!))){%/section%}!';
+		var_dump($pattern);
+		var_dump($this->_template);
 		$this->_template = preg_replace_callback($pattern, function($match) use($block){
-			var_dump($match);
 			$content = $match[1];
 			if(preg_match('!'.$this->_leftDelimiter.$block.'([^'.$this->_rightDelimiter.']*)'.$this->_rightDelimiter.'!i', $match[0],$left))
 			{
