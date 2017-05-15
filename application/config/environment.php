@@ -4,7 +4,7 @@ return array(
 	'error_reporting' => E_ALL,
 	'memory_limit' => '128M',
 	
-	'max_execution_time' => 10,
+	'max_execution_time' => 60,
 	'session' => array(
 		'cookie_lifetime' => 0,
 		'gc_maxlifetime' => 3600,

@@ -14,10 +14,14 @@ class index extends BaseControl
 
 	function index()
 	{
-		
-		
+		/* $pattern = array('/(12)[a-zA-Z0-9]{1,}(12)/');
+		$str = '12adf1ba2ds1af3ds12  456asdfasdf1234';
+		preg_replace_callback($pattern,function($match){
+			var_dump($match);
+		}, $str);
+		exit(); */
 		$view = new view('index/index.php');
-		$view->assign('name1', '(3+4)');
+		$view->assign('name1', '(1)');
 		$view->assign('name2', '李四');
 		$view->assign('name3', 'ABC');
 		$view->assign('age', function($name,$age = 18){
