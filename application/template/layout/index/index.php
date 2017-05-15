@@ -2,6 +2,9 @@
 <body>
 {%import file='index/header.php'%}
 
+
+{%$array.name.firstname%}
+
 {%(6*strlen($name1.'123'.'456'))+6%}
 {%strtoupper(strtolower($name3))%}
 

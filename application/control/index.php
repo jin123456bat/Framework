@@ -14,13 +14,13 @@ class index extends BaseControl
 
 	function index()
 	{
-		/* $pattern = array('/(12)[a-zA-Z0-9]{1,}(12)/');
-		$str = '12adf1ba2ds1af3ds12  456asdfasdf1234';
-		preg_replace_callback($pattern,function($match){
-			var_dump($match);
-		}, $str);
-		exit(); */
 		$view = new view('index/index.php');
+		$view->assign('array', array(
+			'name' => array(
+				'firstname' => 'jin',
+			),
+			'age' => 108,
+		));
 		$view->assign('name1', '(1)');
 		$view->assign('name2', '李四');
 		$view->assign('name3', 'ABC');
@@ -32,11 +32,6 @@ class index extends BaseControl
 			return strlen($name);
 		});
 		return $view;
-		//echo compress::css('./test.css');
-		//file_put_contents('./test.min.css', compress::css('./test.css'));
-		
-		//echo compress::js('./test.js');
-		//file_put_contents('./test.min.js', compress::js('./test.js'));
 	}
 
 	function page()
