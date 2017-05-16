@@ -65,6 +65,35 @@ class compiler extends \framework\view\compiler
 	function __construct($template = '')
 	{
 		$this->_template = $template;
+		$this->init();
+	}
+	
+	public function initlize()
+	{
+		
+	}
+	
+	/**
+	 * 模板初始化
+	 */
+	private function init()
+	{
+		//去除不需要的空格
+		do{
+			$num = 0;
+			$blank = array(" ","\n","\r","\r\n","\t");
+			foreach ($blank as $word)
+			{
+				$this->_template = str_replace(array(
+					$word.$this->_rightDelimiter,
+					$this->_leftDelimiter.$word,
+				), array(
+					$this->_rightDelimiter,
+					$this->_leftDelimiter,
+				), $this->_template,$count);
+				$num += $count;
+			}
+		}while (!empty($num));
 	}
 	
 	/**
@@ -109,6 +138,7 @@ class compiler extends \framework\view\compiler
 	function setTempalte($tempalte)
 	{
 		$this->_template = $tempalte;
+		$this->init();
 	}
 	
 	/**
@@ -382,31 +412,16 @@ class compiler extends \framework\view\compiler
 		return $string;
 	}
 	
-	private function strrpos($string,$word,$offset)
-	{
-		for($i = 0;$i<strlen($string);$i++)
-		{
-			if ($i == $offset)
-			{
-				return false;
-			}
-			if($string[$i] == $word)
-			{
-				return $i;
-			}
-		}
-		return false;
-	}
-	
 	/**
 	 * 判断是否存在算术表达式
 	 * @param unknown $string
 	 */
 	private function getBracketsExpression($string,$offset = 0,&$left_brackets_pos = 0,&$right_brackets_pos = 0)
 	{
-		$left_brackets_pos = $this->strrpos($string,'(',$offset);
-		$right_brackets_pos = strpos($string,')',$left_brackets_pos);
-		$offset = -$left_brackets_pos;
+		$left_brackets_pos = strripos($string,'(',$offset);
+		$right_brackets_pos = stripos($string,')',$left_brackets_pos);
+		$offset = $left_brackets_pos+1;
+		
 		if ($left_brackets_pos!==false && $right_brackets_pos!==false)
 		{
 			if (!isset($string[$left_brackets_pos-1]) || in_array($string[$left_brackets_pos-1], array('(','+','-','*','/','.')))
@@ -416,7 +431,6 @@ class compiler extends \framework\view\compiler
 			}
 			else
 			{
-				
 				return $this->getBracketsExpression($string,$offset,$left_brackets_pos,$right_brackets_pos);
 			}
 		}
@@ -490,6 +504,10 @@ class compiler extends \framework\view\compiler
 			}
 			else
 			{
+				if (isset($this->_variable[$match[0]]) && is_array($this->_variable[$match[0]]))
+				{
+					return 'array('.implode(',', $this->_variable[$match[0]]).')';
+				}
 				if (isset($this->_array[$match[0]]))
 				{
 					return 'array('.implode(',', $this->_array[$match[0]]).')';
@@ -519,37 +537,64 @@ class compiler extends \framework\view\compiler
 	}
 	
 	/**
+	 * 获取模板中最后一个最内层block的内容
+	 * @param string $block block名称
+	 * @param int &$startPos block的开始位置
+	 * @param int &$endPos block的结束位置
+	 * @return string|false 成功返回block 失败返回false
+	 */
+	public function getBlock($block,&$startPos = NULL,&$endPos = NULL)
+	{
+		$start = $this->_leftDelimiter.$block;
+		$end = $this->_leftDelimiter.'/'.$block.$this->_rightDelimiter;
+		
+		$startPos = strripos($this->_template,$start);
+		$endPos = stripos($this->_template,$end,$startPos);
+		
+		$result = false;
+		if ($startPos!==false && $endPos!==false)
+		{
+			$result = substr($this->_template, $startPos,$endPos - $startPos + strlen($end));
+		}
+		$endPos += strlen($end);
+		
+		return $result;
+	}
+	
+	/**
 	 * 处理block
 	 */
 	private function block($block)
 	{
-		//$pattern = '!'.$this->_leftDelimiter.$block.'[\s\w\(\).\+\-\*/=,\'$[\]]+'.$this->_rightDelimiter.'([\s\S]*)'.$this->_leftDelimiter.'/'.$block.$this->_rightDelimiter.'!i';
-		$pattern = '!{%section[\s\w\(\).\+\-\*/=,\'$[\]]+%}(((?<block>{%section)|(?<-block>{%/section%})|.)*(?(block)(?!))){%/section%}!';
-		var_dump($pattern);
-		var_dump($this->_template);
-		$this->_template = preg_replace_callback($pattern, function($match) use($block){
-			$content = $match[1];
-			if(preg_match('!'.$this->_leftDelimiter.$block.'([^'.$this->_rightDelimiter.']*)'.$this->_rightDelimiter.'!i', $match[0],$left))
+		do{
+			$startPos = NULL;
+			$endPos = NULL;
+			
+			$block_string = $this->getBlock($block,$startPos,$endPos);
+			$parameter = array();
+			$content = '';
+			$pattern = '!'.$this->_leftDelimiter.$block.'(.*)'.$this->_rightDelimiter.'(.*)(?='.$this->_leftDelimiter.'/'.$block.$this->_rightDelimiter.')!Uis';
+			if(preg_match($pattern, $block_string,$match))
 			{
-				$parameter = array();
-				$parameters = explode(' ',trim($left[1]));
+				$content = $match[2];
+				$parameters = explode(' ',trim($match[1]));
 				foreach ($parameters as $p)
 				{
 					list($key,$value) = explode('=', $p);
 					$parameter[trim($key)] = $this->variable(trim($value));//将表达式+函数拿去计算
 				}
 			}
-			else
-			{
-				$parameter = array();
-			}
 			$class = 'framework\\view\\block\\'.$block;
 			if (class_exists($class,true))
 			{
 				$class = new $class();
-				return $class->compile($content,$parameter,$this);
+				$result = $class->compile($content,$parameter,$this);
+				
+				if (!empty($block_string))
+				{
+					$this->_template = substr($this->_template,0,$startPos).$result.substr($this->_template, $endPos);
+				}
 			}
-			return $match[0];
-		}, $this->_template);
+		}while(!empty($block_string));
 	}
 }

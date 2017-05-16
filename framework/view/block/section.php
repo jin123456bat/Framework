@@ -29,6 +29,7 @@ class section extends block
 			$string = preg_replace_callback($pattern, function($match) use($value){
 				return $value;
 			}, $string);
+			
 			$result .= $string;
 		}
 		return $result;
