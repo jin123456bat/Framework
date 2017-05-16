@@ -291,6 +291,9 @@ class compiler extends \framework\view\compiler
 			return $after_array;
 		},$this->_template);
 		
+		//处理特殊block
+		$this->doIfBlock();
+		
 		//处理所有标签
 		$dirs = scandir(ROOT.'/framework/view/tag');
 		if ($dirs)
@@ -302,7 +305,6 @@ class compiler extends \framework\view\compiler
 				}
 			}, $dirs);
 		}
-		
 		
 		//处理 所有的block
 		$dirs = scandir(ROOT.'/framework/view/block');
@@ -394,7 +396,6 @@ class compiler extends \framework\view\compiler
 				return $value;
 			} ,$param_arr);
 			$func_name = $func_name[1];
-			
 			//优先自定义函数  自定义函数会覆盖系统函数
 			if (isset($this->_functions[$func_name]))
 			{
@@ -407,6 +408,8 @@ class compiler extends \framework\view\compiler
 				$value = call_user_func_array($func_name,$param_arr);
 				return $value;
 			}
+			//发现某些特殊的函数
+			
 		}
 		//假如没有函数存在则直接自动返回
 		return $string;
@@ -455,6 +458,7 @@ class compiler extends \framework\view\compiler
 			$calString = substr($calString,0, $left_brackets_pos) . $this->_temp_variable['$'.$expression] . substr($calString, $right_brackets_pos+1);
 			$expression = $this->getBracketsExpression($calString,0,$left_brackets_pos,$right_brackets_pos);
 		}
+		
 		//计算表达式中的函数
 		while (preg_match('![a-zA-Z_]\w*\([^\(\)]+\)!', $calString))
 		{
@@ -465,6 +469,7 @@ class compiler extends \framework\view\compiler
 				return $this->_temp_variable['$'.$match[0]];
 			}, $calString);
 		}
+		
 		//计算表达式
 		$calString = $this->expression($calString);
 		return $calString;
@@ -520,6 +525,7 @@ class compiler extends \framework\view\compiler
 		//变量替换字符串
 		foreach ($this->_string as $key => $value)
 		{
+			
 			eval($key.' = \''.$value.'\';');
 		}
 		foreach ($this->_variable as $key => $value)
@@ -529,7 +535,6 @@ class compiler extends \framework\view\compiler
 				eval($key.' = \''.$value.'\';');
 			}
 		}
-		
 		$result = @eval('return '.$calString.';');
 		$this->_temp_variable['$'.$string] = $result;
 		
@@ -595,6 +600,49 @@ class compiler extends \framework\view\compiler
 					$this->_template = substr($this->_template,0,$startPos).$result.substr($this->_template, $endPos);
 				}
 			}
+		}while(!empty($block_string));
+	}
+	
+	/**
+	 * 处理if的block
+	 */
+	private function doIfBlock()
+	{
+		
+		do{
+			$startPos = NULL;
+			$endPos = NULL;
+			
+			$block_string = $this->getBlock('if',$startPos,$endPos);
+			
+			$condition = array();
+			$content = '';
+			$pattern = '!'.$this->_leftDelimiter.'if(.+)'.$this->_rightDelimiter.'(.*)(?='.$this->_leftDelimiter.'/if'.$this->_rightDelimiter.')!Uis';
+			
+			if(preg_match($pattern, $block_string,$match))
+			{
+				
+				@list($content_true,$condition_false) = explode($this->_leftDelimiter.'else'.$this->_rightDelimiter, $match[2]);
+				var_dump($this->_template);
+				$condition = $this->variable(trim($match[1]));
+				var_dump($condition);
+				exit();
+				if ($condition)
+				{
+					if (!empty($block_string))
+					{
+						$this->_template = substr($this->_template,0,$startPos).$content_true.substr($this->_template, $endPos);
+					}
+				}
+				else
+				{
+					if (!empty($block_string))
+					{
+						$this->_template = substr($this->_template,0,$startPos).$condition_false.substr($this->_template, $endPos);
+					}
+				}
+			}
+			
 		}while(!empty($block_string));
 	}
 }
