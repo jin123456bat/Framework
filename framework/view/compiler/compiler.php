@@ -466,6 +466,14 @@ class compiler extends \framework\view\compiler
 	{
 		$calString = $string;
 		//优先计算表达式中的算术括号
+		/* $num = 0;
+		do{
+			$pattern = '{(?<!\w)\((?<expression>[\w\+\-\*\/\.\$\s]*)\)}';
+			$calString = preg_replace_callback($pattern, function($match){
+				$result = $this->expression($match['expression']);
+				return $result;
+			}, $calString);
+		}while (!empty($num)); */
 		$left_brackets_pos = 0;
 		$right_brackets_pos = 0;
 		$expression = $this->getBracketsExpression($calString,0,$left_brackets_pos,$right_brackets_pos);
@@ -551,20 +559,20 @@ class compiler extends \framework\view\compiler
 		//变量替换字符串
 		foreach ($this->_string as $key => $value)
 		{
-			eval($key.' = \''.$value.'\';');
+			@eval($key.' = \''.$value.'\';');
 		}
 		foreach ($this->_variable as $key => $value)
 		{
 			if (is_string($value))
 			{
-				eval($key.' = \''.$value.'\';');
+				@eval($key.' = \''.$value.'\';');
 			}
 		}
 		
 		//变量替换布尔
 		foreach ($this->_bool as $key => $value)
 		{
-			eval($key.'=\''.$value.'\';');
+			@eval($key.'=\''.$value.'\';');
 		}
 		
 		$result = @eval('return '.$calString.';');
@@ -612,8 +620,15 @@ class compiler extends \framework\view\compiler
 	 */
 	private function doIfBlock()
 	{
-		
+		$num = 0;
 		do{
+			$pattern = '({%if\s+(?<parameter>.+)%}(?<content>((?!{%if|{%/if%})[\s\S])*){%/if%})';
+			$this->_template = preg_replace_callback($pattern, function($match){
+				var_dump($match);
+			}, $this->_template);
+		}while (!empty($num));
+		
+		/* do{
 			$startPos = NULL;
 			$endPos = NULL;
 			
@@ -644,6 +659,6 @@ class compiler extends \framework\view\compiler
 				}
 			}
 			
-		}while(!empty($block_string));
+		}while(!empty($block_string)); */
 	}
 }
