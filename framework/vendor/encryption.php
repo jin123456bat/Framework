@@ -1,5 +1,5 @@
 <?php
-namespace framework\vender;
+namespace framework\vendor;
 
 class encryption
 {

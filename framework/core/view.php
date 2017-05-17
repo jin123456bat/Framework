@@ -2,6 +2,8 @@
 namespace framework\core;
 
 use framework\view\engine;
+use framework;
+use application\extend\application;
 
 class view extends response
 {
@@ -62,9 +64,6 @@ class view extends response
 	function setLayout($layout)
 	{
 		$this->_layout = $layout;
-		
-		//$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
-		//$this->_engine = new engine($file);
 		$this->_engine->setTemplatePath(APP_ROOT . '/template/' . trim($this->_layout, '/\\'));
 	}
 
@@ -76,8 +75,6 @@ class view extends response
 	{
 		$this->_template = $template;
 		$this->_engine->setTempalteName($template);
-		//$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
-		//$this->_engine = new engine($file);
 	}
 
 	/**
@@ -104,6 +101,11 @@ class view extends response
 		if (file_exists($file))
 		{
 			$body = $this->_engine->fetch();
+			//自动开启html压缩
+			if (class_exists('\framework\vendor\compress',true))
+			{
+				$body = \framework\vendor\compress::html($body);
+			}
 			return $body;
 		}
 		else
