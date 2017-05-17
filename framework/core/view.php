@@ -37,14 +37,14 @@ class view extends response
 
 	function __construct($template, $layout = null)
 	{
-		$app = $this->getConfig('app');
+		$view = $this->getConfig('view');
 		if ($layout !== null)
 		{
 			$this->_layout = $layout;
 		}
 		else
 		{
-			$this->_layout = isset($app['layout']) ? $app['layout'] : 'layout';
+			$this->_layout = isset($view['layout']) ? $view['layout'] : 'layout';
 		}
 		
 		$this->_template = $template;
@@ -102,9 +102,16 @@ class view extends response
 		{
 			$body = $this->_engine->fetch();
 			//自动开启html压缩
-			if (class_exists('\framework\vendor\compress',true))
+			$view = self::getConfig('view');
+			if(is_bool($view['compress']) && $view['compress'] || (is_array($view['compress']) && in_array($this->_template, $view['compress'],true)))
 			{
-				$body = \framework\vendor\compress::html($body);
+				if (!isset($view['no_compress']) || !in_array($this->_template, $view['no_compress'],true))
+				{
+					if (class_exists('\framework\vendor\compress',true))
+					{
+						$body = \framework\vendor\compress::html($body);
+					}
+				}
 			}
 			return $body;
 		}

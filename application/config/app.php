@@ -9,13 +9,12 @@ return array(
 	
 	'query_cache' => false,
 	
-	'layout' => 'layout',
-	
 	'cache' => true,
 	
 	'errorHandler' => array(
 		'class' => '/application/extend/errorHandler::run',
 		'types' => E_ALL,
 		'storage' => 'file'
-	)
+	),
+	
 );
