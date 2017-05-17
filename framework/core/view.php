@@ -3,7 +3,6 @@ namespace framework\core;
 
 use framework\view\engine;
 use framework;
-use application\extend\application;
 
 class view extends response
 {

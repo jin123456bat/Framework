@@ -1,9 +1,10 @@
 <html>
 <body>
 <!-- tag的支持 -->
-{%import file='index/header.php'%}
-
-<!-- 直接访问数组中的内容 -->
+{%import file='index/header.php'%}<style type="text/css">
+h1 {color:red}
+p {color:blue}
+</style><!-- 直接访问数组中的内容 -->
 {%$array.name.firstname%}
 
 <!-- 复杂的表达式和函数 -->
