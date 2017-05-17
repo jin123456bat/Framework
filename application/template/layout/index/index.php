@@ -35,9 +35,22 @@
 <!-- 不存在的变量直接输出空 -->
 {%$asdfasdfadf%}
 
-
+<!-- if的支持  语言构造器的支持 -->
 {%if !empty($name)%}
 name不是空的
+{%/if%}
+
+<!-- 结构语句支持 -->
+{%if empty($abc)%}
+$abc是空的
+{%else%}
+$abc不是空的
+{%/if%}
+
+{%if isset($abc)%}
+$abc存在
+{%else%}
+$abc不存在
 {%/if%}
 
 </body>

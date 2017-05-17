@@ -26,6 +26,12 @@ class compiler extends \framework\view\compiler
 	private $_string = array();
 	
 	/**
+	 * 模板中声明的布尔值  包括empty isset等运算得到的布尔值
+	 * @var array
+	 */
+	private $_bool = array();
+	
+	/**
 	 * 模板钟声明的数组
 	 * @var array
 	 */
@@ -264,6 +270,16 @@ class compiler extends \framework\view\compiler
 		return $key;
 	}
 	
+	private function remeberBool($val)
+	{
+		do{
+			$key = '$_bool_'.uniqid();
+		}
+		while (isset($this->_variable[$key]) || isset($this->_bool[$key]));
+		$this->_bool[$key] = $val;
+		return $key;
+	}
+	
 	/**
 	 * 获取编译后的内容
 	 */
@@ -408,8 +424,9 @@ class compiler extends \framework\view\compiler
 				$value = call_user_func_array($func_name,$param_arr);
 				return $value;
 			}
-			//发现某些特殊的函数
-			
+			//对于通过括号的形式调用的语言构造器 比如echo  print  empty isset 直接使用expression来执行
+			$result = $this->expression($string);
+			return $result;
 		}
 		//假如没有函数存在则直接自动返回
 		return $string;
@@ -464,12 +481,21 @@ class compiler extends \framework\view\compiler
 		{
 			$calString = preg_replace_callback('![a-zA-Z_]\w*\([^\(\)]+\)!', function($match){
 				$value = $this->func($match[0]);
-				$this->_temp_variable['$'.$match[0]] = $value;
-				
-				return $this->_temp_variable['$'.$match[0]];
+				if (is_bool($value))
+				{
+					$key = $this->remeberBool($value);
+				}
+				else if (is_array($value))
+				{
+					$key = $this->remeberArray($value);
+				}
+				else if (is_string($value) || is_int($value))
+				{
+					$key = $this->remeberString($value);
+				}
+				return $key;
 			}, $calString);
 		}
-		
 		//计算表达式
 		$calString = $this->expression($calString);
 		return $calString;
@@ -525,7 +551,6 @@ class compiler extends \framework\view\compiler
 		//变量替换字符串
 		foreach ($this->_string as $key => $value)
 		{
-			
 			eval($key.' = \''.$value.'\';');
 		}
 		foreach ($this->_variable as $key => $value)
@@ -535,6 +560,13 @@ class compiler extends \framework\view\compiler
 				eval($key.' = \''.$value.'\';');
 			}
 		}
+		
+		//变量替换布尔
+		foreach ($this->_bool as $key => $value)
+		{
+			eval($key.'=\''.$value.'\';');
+		}
+		
 		$result = @eval('return '.$calString.';');
 		$this->_temp_variable['$'.$string] = $result;
 		
@@ -623,10 +655,7 @@ class compiler extends \framework\view\compiler
 			{
 				
 				@list($content_true,$condition_false) = explode($this->_leftDelimiter.'else'.$this->_rightDelimiter, $match[2]);
-				var_dump($this->_template);
 				$condition = $this->variable(trim($match[1]));
-				var_dump($condition);
-				exit();
 				if ($condition)
 				{
 					if (!empty($block_string))
