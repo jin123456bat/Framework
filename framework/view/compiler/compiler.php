@@ -108,7 +108,7 @@ class compiler extends \framework\view\compiler
 	 */
 	function getLeftDelimiter()
 	{
-		return $this->_leftDelimiter;
+		return preg_quote($this->_leftDelimiter);
 	}
 	
 	/**
@@ -126,7 +126,7 @@ class compiler extends \framework\view\compiler
 	 */
 	function getRightDelimiter()
 	{
-		return $this->_rightDelimiter;
+		return preg_quote($this->_rightDelimiter);
 	}
 	
 	/**
@@ -285,7 +285,7 @@ class compiler extends \framework\view\compiler
 	 */
 	function fetch()
 	{
-		$pattern = '!'.$this->_leftDelimiter.'.*'.$this->_rightDelimiter.'!i';
+		$pattern = '!'.$this->getLeftDelimiter().'.*'.$this->getRightDelimiter().'!i';
 		$this->_template = preg_replace_callback($pattern, function($matches){
 			//提出声明的字符串
 			$after_string = preg_replace_callback('!\'[^\']*\'!i', function($match){
@@ -335,7 +335,7 @@ class compiler extends \framework\view\compiler
 		}
 		
 		//剩下的全都是变量了
-		$pattern = '!'.$this->_leftDelimiter.'[\s\S]*'.$this->_rightDelimiter.'!U';
+		$pattern = '!'.$this->getLeftDelimiter().'[\s\S]*'.$this->getRightDelimiter().'!Uis';
 		$this->_template = preg_replace_callback($pattern, function($match){
 			//获取到所有模板标签，然后判断，是标签还是变量
 			//对标签和表达式做一个处理
@@ -382,7 +382,7 @@ class compiler extends \framework\view\compiler
 	 */
 	private function tag($tag)
 	{
-		$pattern = '!'.$this->_leftDelimiter.$tag.' [\s\S]*'.$this->_rightDelimiter.'!Ui';
+		$pattern = '!'.$this->getLeftDelimiter().$tag.' [\s\S]*'.$this->getRightDelimiter().'!Ui';
 		$this->_template = preg_replace_callback($pattern, function($match) use ($tag){
 			
 			$parameter = $this->getTagParameter($match[0]);
@@ -574,65 +574,37 @@ class compiler extends \framework\view\compiler
 	}
 	
 	/**
-	 * 获取模板中最后一个最内层block的内容
-	 * @param string $block block名称
-	 * @param int &$startPos block的开始位置
-	 * @param int &$endPos block的结束位置
-	 * @return string|false 成功返回block 失败返回false
-	 */
-	public function getBlock($block,&$startPos = NULL,&$endPos = NULL)
-	{
-		$start = $this->_leftDelimiter.$block;
-		$end = $this->_leftDelimiter.'/'.$block.$this->_rightDelimiter;
-		
-		$startPos = strripos($this->_template,$start);
-		$endPos = stripos($this->_template,$end,$startPos);
-		
-		$result = false;
-		if ($startPos!==false && $endPos!==false)
-		{
-			$result = substr($this->_template, $startPos,$endPos - $startPos + strlen($end));
-		}
-		$endPos += strlen($end);
-		
-		return $result;
-	}
-	
-	/**
-	 * 处理block
+	 * 处理block 
+	 * block处理方式由内到外
+	 * 在正则内部中 添加(?R)*可以修改为由外到内
+	 * php5.6.19中这里会出现链接已被重置的情况  切换到php7没问题
+	 * \{%section(?<parameter>((?!%\}).)*)%\}(?<content>((?!\{%/?section((?!%\}).)*%\})[\S\s])*(?R)*((?!\{%/?section((?!%\}).)*%\})[\S\s])*)\{%/section%\}
+	 * {%section((?!%}).)*%}(((?!({%section((?!%}).)*%}|{%/section%})).)|(?R))*{%/section%}
 	 */
 	private function block($block)
 	{
+		$num = 0;
+		$pattern = '('.$this->getLeftDelimiter().$block.'(?<parameter>((?!'.$this->getRightDelimiter().').)*)'.$this->getRightDelimiter().'(?<content>((?!'.$this->getLeftDelimiter().'/?'.$block.'((?!'.$this->getRightDelimiter().').)*'.$this->getRightDelimiter().')[\S\s])*((?!'.$this->getLeftDelimiter().'/?'.$block.'((?!'.$this->getRightDelimiter().').)*'.$this->getRightDelimiter().')[\S\s])*)'.$this->getLeftDelimiter().'/'.$block.$this->getRightDelimiter().')i';
 		do{
-			$startPos = NULL;
-			$endPos = NULL;
-			
-			$block_string = $this->getBlock($block,$startPos,$endPos);
-			$parameter = array();
-			$content = '';
-			$pattern = '!'.$this->_leftDelimiter.$block.'(.*)'.$this->_rightDelimiter.'(.*)(?='.$this->_leftDelimiter.'/'.$block.$this->_rightDelimiter.')!Uis';
-			if(preg_match($pattern, $block_string,$match))
-			{
-				$content = $match[2];
-				$parameters = explode(' ',trim($match[1]));
+			$this->_template = preg_replace_callback($pattern, function($match) use($block){
+				$parameter = array();
+				$parameters = explode(' ',trim($match['parameter']));
+				$content = $match['content'];
 				foreach ($parameters as $p)
 				{
-					list($key,$value) = explode('=', $p);
+					@list($key,$value) = explode('=', $p);
 					$parameter[trim($key)] = $this->variable(trim($value));//将表达式+函数拿去计算
 				}
-			}
-			$class = 'framework\\view\\block\\'.$block;
-			if (class_exists($class,true))
-			{
-				$class = new $class();
-				$result = $class->compile($content,$parameter,$this);
-				
-				if (!empty($block_string))
+				$class = 'framework\\view\\block\\'.$block;
+				if (class_exists($class,true))
 				{
-					$this->_template = substr($this->_template,0,$startPos).$result.substr($this->_template, $endPos);
+					$class = new $class();
+					$result = $class->compile($content,$parameter,$this);
+					return $result;
 				}
-			}
-		}while(!empty($block_string));
+				return '';
+			}, $this->_template,-1,$num);
+		}while (!empty($num));
 	}
 	
 	/**
@@ -649,7 +621,7 @@ class compiler extends \framework\view\compiler
 			
 			$condition = array();
 			$content = '';
-			$pattern = '!'.$this->_leftDelimiter.'if(.+)'.$this->_rightDelimiter.'(.*)(?='.$this->_leftDelimiter.'/if'.$this->_rightDelimiter.')!Uis';
+			$pattern = '!'.$this->getLeftDelimiter().'if(.+)'.$this->getRightDelimiter().'(.*)(?='.$this->getLeftDelimiter().'/if'.$this->getRightDelimiter().')!Uis';
 			
 			if(preg_match($pattern, $block_string,$match))
 			{

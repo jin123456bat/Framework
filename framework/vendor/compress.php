@@ -103,7 +103,7 @@ class compress extends component
 		//去除连续的空格
 		$count = 0;
 		do{
-			$content = str_replace(array('  '),array(' '), $content,$count);
+			$content = str_replace(array('  ',"\t"),array(' '), $content,$count);
 		}while (!empty($count));
 		
 		//去除特殊字符
@@ -111,7 +111,6 @@ class compress extends component
 			"\r",
 			"\n",
 			"\r\n",
-			"\t",
 		);
 		$count = 0;
 		do{
