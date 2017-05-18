@@ -31,7 +31,7 @@ class index extends BaseControl
 			'banana',
 			'oringe',
 		));
-		$view->assign('name1', '(1)');
+		$view->assign('name1', '4');
 		$view->assign('name2', '李四');
 		$view->assign('name3', 'ABC');
 		$view->assign('age', function($name,$age = 18){

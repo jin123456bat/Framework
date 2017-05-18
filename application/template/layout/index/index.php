@@ -48,10 +48,13 @@ $abc是空的
 $abc不是空的
 {%/if%}
 
-{%if isset($abc)%}
-$abc存在
+<!-- elseif的支持 -->
+{%if $name1==1%}
+$name1是1
+{%elseif $name1==2%}
+$name1是2
 {%else%}
-$abc不存在
+$name1是其他值
 {%/if%}
 
 </body>

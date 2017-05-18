@@ -622,10 +622,54 @@ class compiler extends \framework\view\compiler
 	{
 		$num = 0;
 		do{
-			$pattern = '({%if\s+(?<parameter>.+)%}(?<content>((?!{%if|{%/if%})[\s\S])*){%/if%})';
+			//$pattern = '(\{%if(?<parameter>.+)%\}(?<content>((?!(\{%elseif.+%\})|(\{%/if%\}))[\s\S])*)(?<end>(?:\{%/if%\}|\{%else%\}|\{%elseif(?<np>.+)%\})))i';
+			$pattern = '({%if(?<parameter>.+)%}(?<content>[\s\S]*){%/if%})Uis';
 			$this->_template = preg_replace_callback($pattern, function($match){
-				var_dump($match);
-			}, $this->_template);
+				$parameter = $this->expression($match['parameter']);
+				$string = $match['content'];
+				
+				$return = false;
+				$total = '';
+				while(preg_match('({%elseif\s+.+%})i', $string))
+				{
+					$string = preg_replace_callback('((?<content>[\s\S]+)\{%elseif\s+(?<np>.+)%\})Uis', function($sub_match) use(&$parameter,&$return,&$total){
+						if ($parameter)
+						{
+							$return = true;
+							$total = $sub_match['content'];
+						}
+						elseif (!empty($sub_match['np']))
+						{
+							$parameter = $this->expression($sub_match['np']);
+						}
+					}, $string);
+					if ($return)
+					{
+						return $total;
+					}
+				};
+				
+				if (preg_match('({%else%})is', $string))
+				{
+					list($true,$false) = explode('{%else%}', $string);
+					if ($parameter)
+					{
+						return $true;
+					}
+					else
+					{
+						return $false;
+					}
+				}
+				else
+				{
+					if ($parameter)
+					{
+						return $string;
+					}
+				}
+				return '';
+			}, $this->_template,-1,$num);
 		}while (!empty($num));
 		
 		/* do{
