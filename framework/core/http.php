@@ -76,7 +76,10 @@ class http extends base
 					if (isset($file[0]) && $file[0] == '@')
 					{
 						// mb php5.5不支持@
-						$file = new \CURLFile(substr($file, 1));
+						if (class_exists('\CURLFile',true))
+						{
+							$file = new \CURLFile(substr($file, 1));
+						}
 					}
 				}
 			}

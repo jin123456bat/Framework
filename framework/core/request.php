@@ -54,12 +54,12 @@ class request extends base
 	 * @param string $name
 	 *        	文件上传名
 	 * @param string $config
-	 *        	使用指定配置上传文件，不填写使用默认配置
+	 *        	使用指定配置上传文件，不填写使用默认配置 配置填写在upload配置中
 	 */
 	public static function file($name, $config = null)
 	{
 		$uploader = new upload();
-		$files = $uploader->receive($name);
+		$files = $uploader->receive($name,$config);
 		$class = '\framework\vendor\file';
 		if (is_scalar($files))
 		{

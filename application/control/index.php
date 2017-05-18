@@ -8,13 +8,15 @@ use framework\data\collection;
 use application\extend\model;
 use framework\core\view;
 use framework\vendor\compress;
+use framework\core\session;
 
 class index extends BaseControl
 {
 
 	function index()
 	{
-		$view = new view('index/index.php');
+		$file = request::file('file','video');
+		/* $view = new view('index/index.php');
 		$view->assign('array', array(
 			'name' => array(
 				'firstname' => 'jin',
@@ -41,7 +43,7 @@ class index extends BaseControl
 			}
 			return strlen($name);
 		});
-		return $view;
+		return $view; */
 	}
 
 	function page()

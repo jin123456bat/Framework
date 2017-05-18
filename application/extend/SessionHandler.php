@@ -4,9 +4,13 @@ namespace application\extend;
 use framework\core\base;
 use framework\core\model;
 
-class SessionHandler extends base
+/**
+ * 重写的sessionHandler  必须继承SessionHandlerInterface接口
+ * @author fx
+ *
+ */
+class SessionHandler extends base implements \SessionHandlerInterface
 {
-
 	private $_db = null;
 
 	function __construct()

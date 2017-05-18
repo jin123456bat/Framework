@@ -16,31 +16,43 @@ class session extends component
 	function initlize()
 	{
 		$session = $this->getConfig('session');
-		// 配置session
 		
-		$sessionHandler = application::load('SessionHandler');
-		if ($sessionHandler !== null)
+		//假如用户定义了SessionHandler
+		if (isset($session['handler']) && !empty($session['handler']))
 		{
-			session_set_save_handler(array(
-				$sessionHandler,
-				'open'
-			), array(
-				$sessionHandler,
-				'close'
-			), array(
-				$sessionHandler,
-				'read'
-			), array(
-				$sessionHandler,
-				'write'
-			), array(
-				$sessionHandler,
-				'destroy'
-			), array(
-				$sessionHandler,
-				'gc'
-			));
-			register_shutdown_function('session_write_close');
+			$sessionHandler = application::load($session['handler']);
+			if ($sessionHandler !== null)
+			{
+				if (!$sessionHandler instanceof \SessionHandlerInterface)
+				{
+					session_set_save_handler(array(
+						$sessionHandler,
+						'open'
+					), array(
+						$sessionHandler,
+						'close'
+					), array(
+						$sessionHandler,
+						'read'
+					), array(
+						$sessionHandler,
+						'write'
+					), array(
+						$sessionHandler,
+						'destroy'
+					), array(
+						$sessionHandler,
+						'gc'
+					));
+					register_shutdown_function('session_write_close');
+				}
+				else
+				{
+					session_set_save_handler($sessionHandler,true);
+					register_shutdown_function('session_write_close');
+				}
+				
+			}
 		}
 		
 		if (request::php_sapi_name() == 'web')
