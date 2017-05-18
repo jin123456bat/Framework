@@ -104,11 +104,19 @@ class compiler extends \framework\view\compiler
 	
 	/**
 	 * 获取左开始符号
+	 * @param $quote 是否获取转义后的符号，默认为true  转义后的符号可以用于正则表达式
 	 * @return string
 	 */
-	function getLeftDelimiter()
+	function getLeftDelimiter($quote = true)
 	{
-		return preg_quote($this->_leftDelimiter);
+		if ($quote)
+		{
+			return preg_quote($this->_leftDelimiter);
+		}
+		else
+		{
+			return $this->_leftDelimiter;
+		}
 	}
 	
 	/**
@@ -122,11 +130,19 @@ class compiler extends \framework\view\compiler
 	
 	/**
 	 * 获取右结束符
+	 * @param $quote 是否获取转义后的符号，默认为true  转义后的符号可以用于正则表达式
 	 * @return string
 	 */
-	function getRightDelimiter()
+	function getRightDelimiter($quote = true)
 	{
-		return preg_quote($this->_rightDelimiter);
+		if ($quote)
+		{
+			return preg_quote($this->_rightDelimiter);
+		}
+		else
+		{
+			return $this->_rightDelimiter;
+		}
 	}
 	
 	/**
@@ -622,17 +638,17 @@ class compiler extends \framework\view\compiler
 	{
 		$num = 0;
 		do{
-			//$pattern = '(\{%if(?<parameter>.+)%\}(?<content>((?!(\{%elseif.+%\})|(\{%/if%\}))[\s\S])*)(?<end>(?:\{%/if%\}|\{%else%\}|\{%elseif(?<np>.+)%\})))i';
-			$pattern = '({%if(?<parameter>.+)%}(?<content>[\s\S]*){%/if%})Uis';
+			$pattern = '('.$this->getLeftDelimiter().'if(?<parameter>.+)'.$this->getRightDelimiter().'(?<content>[\s\S]*)'.$this->getLeftDelimiter().'/if'.$this->getRightDelimiter().')Uis';
 			$this->_template = preg_replace_callback($pattern, function($match){
 				$parameter = $this->expression($match['parameter']);
 				$string = $match['content'];
 				
 				$return = false;
 				$total = '';
-				while(preg_match('({%elseif\s+.+%})i', $string))
+				while(preg_match('('.$this->getLeftDelimiter().'elseif\s+.+'.$this->getRightDelimiter().')i', $string))
 				{
-					$string = preg_replace_callback('((?<content>[\s\S]+)\{%elseif\s+(?<np>.+)%\})Uis', function($sub_match) use(&$parameter,&$return,&$total){
+					$pattern = '((?<content>[\s\S]+)'.$this->getLeftDelimiter().'elseif\s+(?<np>.+)'.$this->getRightDelimiter().')Uis';
+					$string = preg_replace_callback($pattern, function($sub_match) use(&$parameter,&$return,&$total){
 						if ($parameter)
 						{
 							$return = true;
@@ -649,9 +665,9 @@ class compiler extends \framework\view\compiler
 					}
 				};
 				
-				if (preg_match('({%else%})is', $string))
+				if (preg_match('('.$this->getLeftDelimiter().'else'.$this->getRightDelimiter().')is', $string))
 				{
-					list($true,$false) = explode('{%else%}', $string);
+					list($true,$false) = explode($this->_leftDelimiter.'else'.$this->_rightDelimiter, $string);
 					if ($parameter)
 					{
 						return $true;

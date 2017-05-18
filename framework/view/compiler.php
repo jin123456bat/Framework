@@ -9,13 +9,15 @@ abstract class compiler
 	
 	/**
 	 * 获左开始符
+	 * @param $quote 是否获取转义后的字符  可以用户正则表达式  默认为true
 	 */
-	abstract public function getLeftDelimiter();
+	abstract public function getLeftDelimiter($quote = true);
 	
 	/**
 	 * 获取右结束符
+	 * @param $quote 是否获取转义后的字符  可以用户正则表达式  默认为true
 	 */
-	abstract public function getRightDelimiter();
+	abstract public function getRightDelimiter($quote = true);
 	
 	/**
 	 * 设置右结束符
