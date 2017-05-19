@@ -14,6 +14,7 @@ use framework\vendor\authorize;
 use application\extend\application;
 use framework\core\cookie;
 use framework\vendor\csrf;
+use framework\core\response\url;
 
 class index extends BaseControl
 {
@@ -55,7 +56,10 @@ class index extends BaseControl
 			}
 			return strlen($name);
 		});
-		return $view;
+		return new url('index','page');
+		//return $view;
+		
+		
 	}
 
 	function page()
