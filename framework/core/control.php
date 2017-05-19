@@ -11,7 +11,7 @@ class control extends component
 
 	function initlize()
 	{
-		parent::initlize();
+		return parent::initlize();
 	}
 
 	/**

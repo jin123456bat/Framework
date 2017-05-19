@@ -20,7 +20,7 @@ class component extends error
 
 	function initlize()
 	{
-		parent::initlize();
+		return parent::initlize();
 	}
 
 	/**

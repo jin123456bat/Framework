@@ -28,7 +28,7 @@ class upload extends component
 		}
 		
 		//判断是否整个就是一个大配置
-		if ((isset($configs['path']) && is_scalar($configs['path'])) || isset($configs['ext']) || (isset($configs['size']) && is_numeric($configs['size'])))
+		if ((isset($configs['path']) && is_scalar($configs['path'])) || isset($configs['ext']) || (isset($configs['size']) && validator::int($configs['size'])))
 		{
 			return $configs;
 		}

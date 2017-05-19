@@ -656,6 +656,7 @@ class sql extends base
 				
 				$this->_temp['ignore'] = isset($this->_temp['ignore']) && $this->_temp['ignore'] ? ' IGNORE' : '';
 				
+				$sql = '';
 				if (isset($this->_temp['insert']))
 				{
 					$this->_temp['duplicate'] = isset($this->_temp['duplicate']) ? $this->_temp['duplicate'] : '';

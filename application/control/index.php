@@ -9,13 +9,25 @@ use application\extend\model;
 use framework\core\view;
 use framework\vendor\compress;
 use framework\core\session;
+use application\entity\user;
+use framework\vendor\authorize;
+use application\extend\application;
+use framework\core\cookie;
+use framework\vendor\csrf;
 
 class index extends BaseControl
 {
 
 	function index()
 	{
-		$file = request::file('file','video');
+		//var_dump(cookie::set('name','555'));
+		//var_dump($_COOKIE);
+		$token = csrf::token();
+		var_dump($token);
+		var_dump(csrf::verify($token));
+		
+		//$authorize = application::load('authorize');
+		//$file = request::file('file','video');
 		/* $view = new view('index/index.php');
 		$view->assign('array', array(
 			'name' => array(

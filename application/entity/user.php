@@ -4,6 +4,7 @@ namespace application\entity;
 use framework\lib\data;
 use framework\core\session;
 use framework\core\request;
+use framework\core\response\json;
 
 class user extends data
 {
@@ -35,7 +36,7 @@ class user extends data
 			),
 			array(
 				'unique' => 'username',
-				'message' => '用户名已经存在',
+				'message' => '用户名已经存在',//错误信息
 				'on' => 'insert'
 			),
 			array(
