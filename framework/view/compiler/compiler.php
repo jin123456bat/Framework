@@ -1,6 +1,8 @@
 <?php
 namespace framework\view\compiler;
 
+use framework;
+
 /**
  * @author fx
  *
@@ -400,7 +402,6 @@ class compiler extends \framework\view\compiler
 	{
 		$pattern = '!'.$this->getLeftDelimiter().$tag.' [\s\S]*'.$this->getRightDelimiter().'!Ui';
 		$this->_template = preg_replace_callback($pattern, function($match) use ($tag){
-			
 			$parameter = $this->getTagParameter($match[0]);
 			$class = 'framework\\view\\tag\\'.$tag;
 			if (class_exists($class,true))
@@ -419,15 +420,15 @@ class compiler extends \framework\view\compiler
 	 */
 	private function func($string)
 	{
-		if(preg_match('!([a-zA-Z_]\w*)\(.*\)!', $string,$func_name))
+		$pattern = '/(?<func_name>\\\\?([a-zA-Z_][\w\\\\]*::)?[a-zA-Z_]\w*)\((?<parameter>[^\(\)]*)\)/';
+		if(preg_match($pattern, $string,$func_info))
 		{
-			preg_match('!\((.*)\)!', $string,$args);
-			$param_arr = explode(',', $args[1]);
+			$param_arr = explode(',', $func_info['parameter']);
 			$param_arr = array_map(function($v){
 				$value = $this->expression($v);
 				return $value;
 			} ,$param_arr);
-			$func_name = $func_name[1];
+			$func_name = $func_info['func_name'];
 			//优先自定义函数  自定义函数会覆盖系统函数
 			if (isset($this->_functions[$func_name]))
 			{
@@ -501,9 +502,10 @@ class compiler extends \framework\view\compiler
 		}
 		
 		//计算表达式中的函数
-		while (preg_match('![a-zA-Z_]\w*\([^\(\)]+\)!', $calString))
+		$pattern = '/(\\\\?[a-zA-Z_][\w\\\\]*::)?[a-zA-Z_]\w*\([^\(\)]*\)/';
+		while (preg_match($pattern, $calString))
 		{
-			$calString = preg_replace_callback('![a-zA-Z_]\w*\([^\(\)]+\)!', function($match){
+			$calString = preg_replace_callback($pattern, function($match){
 				$value = $this->func($match[0]);
 				if (is_bool($value))
 				{

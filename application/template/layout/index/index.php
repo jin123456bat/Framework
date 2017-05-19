@@ -7,6 +7,9 @@ p {color:blue}
 </style><!-- 直接访问数组中的内容 -->
 {%$array.name.firstname%}
 
+<!-- 静态函数 -->
+{%\framework\vendor\csrf::token()%}
+
 <!-- 复杂的表达式和函数 -->
 {%(6*strlen($name1.'123'.'456'))+6%}
 {%strtoupper(strtolower($name3))%}

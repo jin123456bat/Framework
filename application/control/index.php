@@ -22,13 +22,13 @@ class index extends BaseControl
 	{
 		//var_dump(cookie::set('name','555'));
 		//var_dump($_COOKIE);
-		$token = csrf::token();
+		/* $token = csrf::token();
 		var_dump($token);
-		var_dump(csrf::verify($token));
+		var_dump(csrf::verify($token)); */
 		
 		//$authorize = application::load('authorize');
 		//$file = request::file('file','video');
-		/* $view = new view('index/index.php');
+		$view = new view('index/index.php');
 		$view->assign('array', array(
 			'name' => array(
 				'firstname' => 'jin',
@@ -55,7 +55,7 @@ class index extends BaseControl
 			}
 			return strlen($name);
 		});
-		return $view; */
+		return $view;
 	}
 
 	function page()
