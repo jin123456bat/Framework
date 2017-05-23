@@ -29,7 +29,7 @@ class index extends BaseControl
 		
 		//$authorize = application::load('authorize');
 		//$file = request::file('file','video');
-		$view = new view('index/index.php');
+		/* $view = new view('index/index.php');
 		$view->assign('array', array(
 			'name' => array(
 				'firstname' => 'jin',
@@ -56,10 +56,10 @@ class index extends BaseControl
 			}
 			return strlen($name);
 		});
-		return new url('index','page');
+		return new url('index','page'); */
 		//return $view;
 		
-		
+		$this->model('tree')->create();
 	}
 
 	function page()

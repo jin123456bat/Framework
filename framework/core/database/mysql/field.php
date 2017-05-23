@@ -33,12 +33,26 @@ class field
 	public $_default = '';
 	
 	/**
+	 * 属性
+	 * @var string
+	 */
+	public $_prototype = '';
+	
+	/**
 	 * 注释
 	 * @var string
 	 */
 	public $_commit = '';
 	
-	const CURRENT_TIMESTAMP = 'current_timestamp';
+	const DEFAULT_CURRENT_TIMESTAMP = 'current_timestamp';
+	
+	const PROTOTYPE_UNSIGNED = 'unsigned';
+	
+	const PROTOTYPE_BINARY = 'binary';
+	
+	const PROTOTYPE_UNSIGNED_ZEROFILL = 'unsigned zerofill';
+	
+	const PROTOTYPE_ON_UPDATE_CURRENT_TIMESTAMP = 'on update current timestamp';
 
 	function __construct($name,$type,$length = 0)
 	{
@@ -67,6 +81,19 @@ class field
 	function default($value)
 	{
 		$this->_default = $value;
+	}
+	
+	/**
+	 * 字符集
+	 */
+	function charset()
+	{
+		
+	}
+	
+	function prototype($prototype)
+	{
+		
 	}
 
 	/**

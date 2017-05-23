@@ -3,6 +3,7 @@ namespace framework\core;
 
 use framework\core\database\sql;
 use framework\core\database\driver\mysql;
+use framework\core\database\mysql\table;
 
 class model extends component
 {
@@ -101,7 +102,6 @@ class model extends component
 
 	/**
 	 * 获取DB配置
-	 *
 	 * @return NULL|mixed
 	 */
 	private static function getDefaultDbConfig()
@@ -583,49 +583,25 @@ class model extends component
 		return $this->query('optimize table ' . $this->getTable());
 	}
 	
-	function create($data,$engine = 'InnoDB',$charset = '')
+	/**
+	 * 创建数据表
+	 * @param table $table
+	 * @param string $connection
+	 */
+	static function create(table $table,$connection = '')
 	{
-		/*CREATE TABLE `authorize` (
-		  `id` int(11) NOT NULL AUTO_INCREMENT  COMMENT '主键',
-		  `name` varchar(32) NOT NULL CHARACTER SET utf8 COLLATE utf8_general_ci,
-		  `password` varchar(128) NOT NULL,
-		  `telephone` char(11) NOT NULL,
-		  `card` int(11) NULL DEFAULT '123',
-		  PRIMARY KEY `id`(`id`,`name`),
-		  UNIQUE KEY `name` (`name`,`card`)
-		) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-		 */
-		$sql = 'create table if not exists `'.$this->getTable().'` (';
-		foreach ($data as $key => $d)
+		if (empty($connection))
 		{
-			if (is_string($key))
-			{
-				$sql.=' `'.$key.'` ';
-				
-			}
+			$config = self::getDefaultDbConfig();
+			$connection = self::getConnection($config);
 		}
-		//'ENGINE=InnoDB DEFAULT CHARSET utf8 COLLATE utf8_general_ci;'
-		/* array(
-			'id' => array(
-				'int' => 11,//字段类型
-				'null' => true,//true对应null false对应not null
-				'default' => '',//默认值  或者CURRENT_TIMESTAMP 假如类型为timestamp或者datetime或者date或者time或者year
-				
-				'这是一个ID'
-			),
-			
-			//程序中判断假如下标为数组 说明是key的声明范围
-			array(
-				'primary' => array(
-					'id' => 'auto_increment',
-					'name'
-				),
-				'unique' => array(
-					'id,name' => array('id','name'),//唯一索引
-					array('id'),
-				)
-			)
-			
-		); */
+		else 
+		{
+			$connection = self::getConnection($connection);
+		}
+		$sql = $table->__toSql();
+		$connection->exec($sql);
+		return $this->model($table->getName());
+		
 	}
 }
