@@ -13,7 +13,7 @@ return array(
 		'db_user' => 'cm2_admin',
 		'db_password' => 'fxd^CM2-2016',
 		'db_charset' => 'utf8',
-		'default' => true,
+		
 		'init_command' => $init_command
 	),
 	'ordoac' => array(
@@ -43,5 +43,14 @@ return array(
 		'db_password' => 'fxdata_Select-2016',
 		'db_charset' => 'utf8',
 		'init_command' => $init_command
+	),
+	'test' => array(
+		'default' => true,
+		'db_type' => 'mysql',
+		'db_server' => 'localhost',
+		'db_dbname' => 'test',
+		'db_user' => 'root',
+		'db_password' => '',
+		'db_charset' => 'utf8',
 	)
 );

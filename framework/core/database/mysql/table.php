@@ -6,13 +6,49 @@ namespace framework\core\database\mysql;
  */
 class table
 {
+	/**
+	 * 表名
+	 * @var unknown
+	 */
 	private $_name;
 	
+	/**
+	 * 存储了表的所有字段属性
+	 * @var array
+	 */
 	private $_fields = array();
 	
+	/**
+	 * 表在创建的时候需要额外的索引
+	 * @var array
+	 */
 	private $_key = array(
 		'unique' => array(),
+		'primary' => array(),
+		'index' => array(),
 	);
+	
+	/**
+	 * 数据表的存储引擎
+	 * @var string
+	 */
+	private $_engine = 'innodb';
+	
+	/**
+	 * 数据表的字符集
+	 * @var string
+	 */
+	private $_charset = 'utf8';
+	
+	/**
+	 * 只有当不存在表的时候才创建表
+	 * @var string
+	 */
+	private $_not_exist = true;
+	
+	const ENGINE_INNODB = 'innodb';
+	
+	const ENGINE_MYISAM = 'myisam';
 	
 	function __construct($name)
 	{
@@ -33,6 +69,14 @@ class table
 	function setName($name)
 	{
 		$this->_name = $name;
+	}
+	
+	/**
+	 * 只有当不存在的时候才创建表
+	 */
+	function notExist($exist = false)
+	{
+		$this->_not_exist = $exist;
 	}
 	
 	/**
@@ -67,7 +111,7 @@ class table
 	 * @param unknown $length 字段长度
 	 * @return \framework\core\database\mysql\field
 	 */
-	function int($name,$length)
+	function int($name,$length = 11)
 	{
 		$temp = new field($name, 'int',$length);
 		$this->_fields[] = $temp;
@@ -112,7 +156,7 @@ class table
 	}
 	
 	/**
-	 * 添加主键索引
+	 * 添加主键索引 未完成
 	 * @param string|array $field
 	 */
 	function primary($field)
@@ -128,7 +172,7 @@ class table
 	}
 	
 	/**
-	 * 添加索引
+	 * 添加索引 未完成
 	 * @param string|array $field
 	 * @param string $name 索引名 可选，默认第一个字段名
 	 */
@@ -138,13 +182,31 @@ class table
 	}
 	
 	/**
-	 * 添加唯一索引
+	 * 添加唯一索引  未完成
 	 * @param string|array $field 字段名
 	 * @param string $name 可选 索引名
 	 */
 	function unique($field,$name = '')
 	{
 		
+	}
+	
+	/**
+	 * 设置数据库引擎
+	 * @param string $engine
+	 */
+	function engine($engine)
+	{
+		$this->_engine = $engine;
+	}
+	
+	/**
+	 * 设置表的字符集
+	 * @param unknown $charset
+	 */
+	function charset($charset)
+	{
+		$this->_charset = $charset;
 	}
 	
 	/**
@@ -155,10 +217,15 @@ class table
 		$fields = array_map(function($field){
 			return $field->__toSql();
 		}, $this->_fields);
-		return 'CREATE TABLE `'.$this->getName().'` ('.implode(',', $fields).'
-		 	PRIMARY KEY `id`(`id`,`name`),
-		 	UNIQUE KEY `name` (`name`,`card`)
-		) ENGINE=MyISAM DEFAULT CHARSET=utf8;';
+		
+		
+		$engine = empty($this->_engine)?'':'ENGINE='.$this->_engine;
+		
+		$charset = empty($this->_charset)?'':'DEFAULT CHARSET='.$this->_charset;
+		
+		$exist = $this->_not_exist?'IF NOT EXISTS ':'';
+		
+		return 'CREATE TABLE '.$exist.'`'.$this->getName().'` ('.implode(',', $fields).') '.$engine.' '.$charset.';';
 	}
 }
 

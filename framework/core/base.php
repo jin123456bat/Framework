@@ -64,9 +64,9 @@ class base
 	 *        	模块名
 	 * @return model
 	 */
-	protected function model($name)
+	protected static function model($name)
 	{
-		if (! isset($this->_model_instance[$name]))
+		if (! isset(self::$_model_instance[$name]))
 		{
 			if (! class_exists(self::$APP_NAME . '\\model\\' . $name))
 			{
@@ -75,27 +75,27 @@ class base
 				{
 					include $path;
 					$model = self::$APP_NAME . '\\model\\' . $name;
-					$this->_model_instance[$name] = new $model($name);
+					self::$_model_instance[$name] = new $model($name);
 				}
 				else
 				{
-					$this->_model_instance[$name] = new model($name);
+					self::$_model_instance[$name] = new model($name);
 				}
-				if (method_exists($this->_model_instance[$name], 'initlize'))
+				if (method_exists(self::$_model_instance[$name], 'initlize'))
 				{
-					$this->_model_instance[$name]->initlize();
+					self::$_model_instance[$name]->initlize();
 				}
 			}
 			else
 			{
 				$model = self::$APP_NAME . '\\model\\' . $name;
-				$this->_model_instance[$name] = new $model($name);
-				if (method_exists($this->_model_instance[$name], 'initlize'))
+				self::$_model_instance[$name] = new $model($name);
+				if (method_exists(self::$_model_instance[$name], 'initlize'))
 				{
-					$this->_model_instance[$name]->initlize();
+					self::$_model_instance[$name]->initlize();
 				}
 			}
 		}
-		return $this->_model_instance[$name];
+		return self::$_model_instance[$name];
 	}
 }

@@ -12,6 +12,9 @@ class model extends component
 
 	private $_sql;
 
+	/**
+	 * @var \framework\core\database\driver\mysql
+	 */
 	private $_db;
 
 	private static $_history = array();
@@ -600,8 +603,22 @@ class model extends component
 			$connection = self::getConnection($connection);
 		}
 		$sql = $table->__toSql();
-		$connection->exec($sql);
-		return $this->model($table->getName());
-		
+		var_dump($sql);
+		if($connection->exec($sql) === 0)
+		{
+			return self::model($table->getName());
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	/**
+	 * 删除数据表
+	 */
+	public function drop()
+	{
+		$this->query('drop table ' . $this->getTable());
 	}
 }

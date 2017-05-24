@@ -15,6 +15,8 @@ use application\extend\application;
 use framework\core\cookie;
 use framework\vendor\csrf;
 use framework\core\response\url;
+use framework\core\database\mysql\table;
+use framework\core\database\mysql\field;
 
 class index extends BaseControl
 {
@@ -59,7 +61,15 @@ class index extends BaseControl
 		return new url('index','page'); */
 		//return $view;
 		
-		$this->model('tree')->create();
+		
+		
+		$this->model('tree')->drop();
+		$table = new table('tree');
+		$table->int('id')->primary()->default('1');
+		$table->varchar('name', 64)->unique()->default('jin')->comment('名称');
+		$table->timestamp('create_time')->prototype(field::PROTOTYPE_ON_UPDATE_CURRENT_TIMESTAMP);
+		$table->int('age')->prototype(field::PROTOTYPE_UNSIGNED_ZEROFILL)->nullable();
+		var_dump(model::create($table,'test'));
 	}
 
 	function page()
