@@ -67,7 +67,7 @@ class index extends BaseControl
 		 */
 		
 		
-		$mysql = model::getConnection('test');
+		/* $mysql = model::getConnection('test');
 		
 		$this->model('tree')->drop();
 		$table = new table('tree');
@@ -76,7 +76,20 @@ class index extends BaseControl
 		$table->timestamp('create_time')->prototype(field::PROTOTYPE_ON_UPDATE_CURRENT_TIMESTAMP);
 		$table->int('age')->prototype(field::PROTOTYPE_UNSIGNED_ZEROFILL)->nullable();
 		var_dump($mysql->create($table,'test'));
-		var_dump($this->model('tree')->select());
+		var_dump($this->model('tree')->select()); */
+		
+		
+		/* $table = new table('authorize');
+		$table->int('id')->primary()->default('1');
+		$table->varchar('name', 64)->unique()->default('jin')->comment('名称');
+		$table->timestamp('create_time')->prototype(field::PROTOTYPE_ON_UPDATE_CURRENT_TIMESTAMP);
+		$table->int('age')->prototype(field::PROTOTYPE_UNSIGNED_ZEROFILL)->nullable(); */
+		
+		$authorize = new authorize();
+		if($authorize->attempt(array('username' => $username,'password'=>$password)))
+		{
+			
+		}
 	}
 
 	function page()

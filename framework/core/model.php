@@ -4,6 +4,7 @@ namespace framework\core;
 use framework\core\database\sql;
 use framework\core\database\driver\mysql;
 use framework\core\database\mysql\table;
+use framework;
 
 class model extends component
 {
@@ -85,7 +86,11 @@ class model extends component
 			$db = $this->getDefaultDbConfig();
 		}
 		
-		$this->_db = mysql::getInstance($db);
+		//实例化mysql的类
+		$type = $db['type'];
+		$type = '\\framework\\core\\database\\driver\\'.$type;
+		
+		$this->_db = $type::getInstance($db);
 		
 		if (method_exists($this, '__tableName'))
 		{
@@ -101,16 +106,15 @@ class model extends component
 	 * @param array|string $connection 配置名称或者详细配置
 	 * @return \framework\core\database\database
 	 */
-	public static function getConnection($connection)
+	public static function getConnection($config)
 	{
-		if (! empty($connection) && is_scalar($connection))
+		if (! empty($config))
 		{
-			$db = self::getConfig('db');
-			$config = $db[$connection];
-		}
-		else if (is_array($connection))
-		{
-			$config = $connection;
+			if (is_scalar($config))
+			{
+				$db = self::getConfig('db');
+				$config = $db[$config];
+			}
 		}
 		return mysql::getInstance($config);
 	}
@@ -214,7 +218,10 @@ class model extends component
 	 */
 	private function parse()
 	{
-		$this->_desc = $this->query('DESC `' . $this->_table . '`');
+		if ($this->_db->isExist($this->getTable()))
+		{
+			$this->_desc = $this->query('DESC `' . $this->_table . '`');
+		}
 		$this->_config['max_allowed_packet'] = $this->_db->getConfig('max_allowed_packet');
 	}
 
@@ -631,6 +638,29 @@ class model extends component
 	 */
 	public function drop()
 	{
-		$this->query('drop table ' . $this->getTable());
+		return $this->query('drop table ' . $this->getTable());
+	}
+	
+	/**
+	 * 创建数据库
+	 * @param table $table
+	 * @return boolean
+	 */
+	public function create(table $table)
+	{
+		if (!$this->isExist())
+		{
+			return $this->_db->create($table);
+		}
+		return false;
+	}
+	
+	/**
+	 * 判断数据表是否存在
+	 * @return boolean
+	 */
+	public function isExist()
+	{
+		return $this->_db->isExist($this->getTable());
 	}
 }

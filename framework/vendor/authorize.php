@@ -1,6 +1,9 @@
 <?php
 namespace framework\vendor;
 use framework\core\component;
+use framework\core\model;
+use framework\core\base;
+use framework\core\database\mysql\table;
 
 /**
  * 不管你使用什么模式，用户名密码？   ID？  appid和appsecret？
@@ -10,42 +13,61 @@ use framework\core\component;
  */
 class authorize extends component
 {
+	/**
+	 * 验证数据
+	 * @var array
+	 */
 	private $_data = array();
 	
 	/**
-	 * 检查数据库
-	 * {@inheritDoc}
-	 * @see \framework\core\component::initlize()
+	 * 验证规则
+	 * @var array
 	 */
-	function initlize()
+	private $_rules = array(
+		'username' => 'exists',//登陆验证 必须存在
+	);
+	
+	function __construct()
 	{
-		$this->model('authorize')->create(array(
-			''
-		));
+		$tableName = 'authorize';
+		$table = new table($tableName);
+		$table->int('id')->primary()->AI();
+		$table->varchar('username', 64);
+		
+		$this->model($tableName)->create($table);
 	}
 	
 	/**
-	 * 设置用户数据
-	 * @param array $data
+	 * 设置验证规则
 	 */
-	function setData($data = array())
+	function rules($data)
 	{
-		$this->_data = array_merge($this->_data,$data);
+		return array(
+			
+		);
 	}
 	
+	
 	/**
-	 * 验证用户授权是否通过
-	 * @param array $data
+	 * 手动验证
 	 */
-	function authorize($data = array())
+	function attempt($data)
 	{
 		
 	}
 	
 	/**
-	 * 当验证通过之后通过这个函数可以获取验证成功的用户ID
+	 * 检查当前用户是否已经登陆
 	 */
-	function getAuthedData()
+	function check()
+	{
+		
+	}
+	
+	/**
+	 * 已经登陆的用户列表
+	 */
+	function loginedList()
 	{
 		
 	}
