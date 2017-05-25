@@ -73,6 +73,12 @@ class model extends component
 		if (method_exists($this, '__config'))
 		{
 			$db = $this->__config();
+			//支持model中__config直接返回配置名称
+			if (is_scalar($db))
+			{
+				$config = $this->getConfig('db');
+				$db = $config['db'];
+			}
 		}
 		else
 		{
