@@ -17,6 +17,7 @@ use framework\vendor\csrf;
 use framework\core\response\url;
 use framework\core\database\mysql\table;
 use framework\core\database\mysql\field;
+use framework\core\database\driver\mysql;
 
 class index extends BaseControl
 {
@@ -65,13 +66,15 @@ class index extends BaseControl
 		 * var_dump(model::isExist('asdfadsf'));
 		 */
 		
-		$this->model('tree')->drop();
+		/* $this->model('tree')->drop();
 		$table = new table('tree');
 		$table->int('id')->primary()->default('1');
 		$table->varchar('name', 64)->unique()->default('jin')->comment('名称');
 		$table->timestamp('create_time')->prototype(field::PROTOTYPE_ON_UPDATE_CURRENT_TIMESTAMP);
 		$table->int('age')->prototype(field::PROTOTYPE_UNSIGNED_ZEROFILL)->nullable();
-		var_dump(model::create($table,'test'));
+		var_dump(model::create($table,'test')); */
+		
+		var_dump($this->model('tree')->select());
 	}
 
 	function page()

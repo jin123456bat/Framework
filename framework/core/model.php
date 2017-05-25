@@ -8,8 +8,15 @@ use framework\core\database\mysql\table;
 class model extends component
 {
 
+	/**
+	 * 表名
+	 * @var unknown
+	 */
 	private $_table;
 
+	/**
+	 * @var sql
+	 */
 	private $_sql;
 
 	/**
@@ -17,35 +24,34 @@ class model extends component
 	 */
 	private $_db;
 
+	/**
+	 * 当前表执行的sql记录
+	 * @var array
+	 */
 	private static $_history = array();
 
+	/**
+	 * 表结构  通过desc tableName获取
+	 * @var unknown
+	 */
 	private $_desc;
 
+	/**
+	 * 是否开启批量提交
+	 * 批量insert的时候特别好用
+	 * @var string
+	 */
 	private $_compress = false;
 
+	/**
+	 * 存储批量提交的sql
+	 * @var array
+	 */
 	private $_compress_sql = array();
 
 	function __construct($table = null)
 	{
 		$this->_table = $table;
-	}
-
-	/**
-	 * show variables like $name
-	 *
-	 * @param string $name        	
-	 * @return NULL|boolean
-	 */
-	public function getVariables($name = '')
-	{
-		if (! empty($name))
-		{
-			$result = $this->query('show variables like ?', array(
-				$name
-			));
-			return isset($result[0]['Value']) ? $result[0]['Value'] : null;
-		}
-		return $this->query('show variables');
 	}
 
 	public static function debug_trace_sql()
@@ -70,7 +76,7 @@ class model extends component
 		}
 		else
 		{
-			$db = self::getDefaultDbConfig();
+			$db = $this->getDefaultDbConfig();
 		}
 		
 		$this->_db = mysql::getInstance($db);
@@ -85,8 +91,8 @@ class model extends component
 	}
 
 	/**
-	 *
-	 * @param array|string $connection        	
+	 * 根据配置名称 获取配置
+	 * @param array|string $connection 配置名称或者详细配置
 	 * @return \framework\core\database\database
 	 */
 	public static function getConnection($connection)
@@ -105,15 +111,21 @@ class model extends component
 
 	/**
 	 * 获取DB配置
+	 * 查询在所有配置文件中
+	 * 1、存在指定model的 有则使用指定model的
+	 * 2、查询存在默认的 有则使用默认的  default=true
+	 * 3、使用第一个
 	 * @return NULL|mixed
 	 */
-	private static function getDefaultDbConfig()
+	public function getDefaultDbConfig()
 	{
 		$db = self::getConfig('db');
 		
 		// 判断是否是多个db配置 多个db配置查询带default=true的 没有default=true的使用第一个
 		if (! isset($db['db_type']))
 		{
+			$default = NULL;
+			$model = null;
 			$firstDb = null;
 			foreach ($db as $d)
 			{
@@ -121,12 +133,34 @@ class model extends component
 				{
 					$firstDb = $d;
 				}
-				if (isset($d['default']) && $d['default'])
+				if (isset($d['model']) && !empty($this->_table) && empty($model))
 				{
-					return $d;
+					if (is_scalar($d['model']) && $d['model'] == $this->_table)
+					{
+						$model = $d;
+					}
+					else if (is_array($d['model']) && in_array($this->_table, $d['model']))
+					{
+						$model = $d;
+					}
+				}
+				if (isset($d['default']) && $d['default'] && empty($default))
+				{
+					$default = $d;
 				}
 			}
-			return $firstDb;
+			if (!empty($model))
+			{
+				return $model;
+			}
+			if (!empty($default))
+			{
+				return $default;
+			}
+			if (!empty($firstDb))
+			{
+				return $firstDb;
+			}
 		}
 		return $db;
 	}
@@ -175,7 +209,7 @@ class model extends component
 	private function parse()
 	{
 		$this->_desc = $this->query('DESC `' . $this->_table . '`');
-		$this->_config['max_allowed_packet'] = $this->getVariables('max_allowed_packet');
+		$this->_config['max_allowed_packet'] = $this->_db->getConfig('max_allowed_packet');
 	}
 
 	/**
@@ -525,7 +559,7 @@ class model extends component
 	 */
 	function truncate()
 	{
-		return $this->_db->exec('TRUNCATE `' . $this->getTable() . '`');
+		return $this->_db->query('TRUNCATE `' . $this->getTable() . '`');
 	}
 
 	/**
@@ -568,7 +602,7 @@ class model extends component
 			$result = 0;
 			while (! empty($sql))
 			{
-				$result += $this->_db->exec($sql . ';');
+				$result += $this->_db->query($sql . ';');
 				$sql = array_shift($this->_compress_sql);
 			}
 			$this->_compress = false;
@@ -584,48 +618,6 @@ class model extends component
 	function optimize()
 	{
 		return $this->query('optimize table ' . $this->getTable());
-	}
-	
-	/**
-	 * 创建数据表
-	 * @param table $table 表名
-	 * @param string $config 数据库配置
-	 */
-	static function create(table $table,$config = '')
-	{
-		if (empty($config))
-		{
-			$config = self::getDefaultDbConfig();
-		}
-		$connection = self::getConnection($config);
-		$sql = $table->__toSql();
-		var_dump($sql);
-		if($connection->exec($sql) === 0)
-		{
-			return self::model($table->getName());
-		}
-		else
-		{
-			return false;
-		}
-	}
-	
-	/**
-	 * 判断数据表是否存在
-	 */
-	static function isExist($tableName,$config = '')
-	{
-		if (empty($config))
-		{
-			$config = self::getDefaultDbConfig();
-		}
-		$connection = self::getConnection($config);
-		$result = $connection->query('show tables like ?',array($tableName));
-		if (empty($result))
-		{
-			return false;
-		}
-		return current(current($result)) == $tableName;
 	}
 	
 	/**
