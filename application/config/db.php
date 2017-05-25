@@ -17,13 +17,7 @@ return array(
 			//定义了哪些model使用这个配置
 		),
 		'type' => 'mysql',
-		'server' => array(
-			//配置读写分离
-			'read' => array(
-				'server'=>'192.168.1.225',
-			),
-			'write' => '192.168.1.225',
-		),
+		'server' => '192.168.1.225',
 		'dbname' => 'cloud_web_v2',
 		'user' => 'cm2_admin',
 		'password' => 'fxd^CM2-2016',

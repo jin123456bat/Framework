@@ -13,7 +13,7 @@ use framework\core\database\mysql\table;
  * @author jcc
  *        
  */
-class mysql implements database
+class mysql extends database
 {
 	/**
 	 * 链接配置
@@ -287,7 +287,7 @@ class mysql implements database
 	 */
 	function error()
 	{
-		return $this->pdo->errorInfo();
+		return $this->_pdo->errorInfo();
 	}
 
 	/**
@@ -299,7 +299,7 @@ class mysql implements database
 	 */
 	function errno()
 	{
-		return $this->pdo->errorCode();
+		return $this->_pdo->errorCode();
 	}
 	
 	
@@ -308,12 +308,13 @@ class mysql implements database
 	 * @param table $table 表名
 	 * @param string $config 数据库配置
 	 */
-	static function create(table $table)
+	function create(table $table)
 	{
 		$sql = $table->__toSql();
-		if($this->query($sql) === 0)
+		$result = $this->query($sql);
+		if($this->errno() === '00000')
 		{
-			return self::model($table->getName());
+			return true;
 		}
 		else
 		{
@@ -323,8 +324,9 @@ class mysql implements database
 	
 	/**
 	 * 判断数据表是否存在
+	 * @return bool
 	 */
-	static function isExist($tableName)
+	function isExist($tableName)
 	{
 		$result = $this->query('show tables like ?',array($tableName));
 		if (empty($result))
