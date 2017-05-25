@@ -7,13 +7,18 @@ $init_command = array(
 
 return array(
 	'cloud_web_v2' => array(
-		'db_type' => 'mysql',
-		'db_server' => '192.168.1.225',
-		'db_dbname' => 'cloud_web_v2',
-		'db_user' => 'cm2_admin',
-		'db_password' => 'fxd^CM2-2016',
-		'db_charset' => 'utf8',
-		
+		'type' => 'mysql',
+		'server' => array(
+			//配置读写分离
+			'read' => array(
+				'server'=>'192.168.1.225',
+			),
+			'write' => '192.168.1.225',
+		),
+		'dbname' => 'cloud_web_v2',
+		'user' => 'cm2_admin',
+		'password' => 'fxd^CM2-2016',
+		'charset' => 'utf8',
 		'init_command' => $init_command
 	),
 	'ordoac' => array(

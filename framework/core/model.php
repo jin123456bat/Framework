@@ -588,20 +588,16 @@ class model extends component
 	
 	/**
 	 * 创建数据表
-	 * @param table $table
-	 * @param string $connection
+	 * @param table $table 表名
+	 * @param string $config 数据库配置
 	 */
-	static function create(table $table,$connection = '')
+	static function create(table $table,$config = '')
 	{
-		if (empty($connection))
+		if (empty($config))
 		{
 			$config = self::getDefaultDbConfig();
-			$connection = self::getConnection($config);
 		}
-		else 
-		{
-			$connection = self::getConnection($connection);
-		}
+		$connection = self::getConnection($config);
 		$sql = $table->__toSql();
 		var_dump($sql);
 		if($connection->exec($sql) === 0)
@@ -612,6 +608,24 @@ class model extends component
 		{
 			return false;
 		}
+	}
+	
+	/**
+	 * 判断数据表是否存在
+	 */
+	static function isExist($tableName,$config = '')
+	{
+		if (empty($config))
+		{
+			$config = self::getDefaultDbConfig();
+		}
+		$connection = self::getConnection($config);
+		$result = $connection->query('show tables like ?',array($tableName));
+		if (empty($result))
+		{
+			return false;
+		}
+		return current(current($result)) == $tableName;
 	}
 	
 	/**

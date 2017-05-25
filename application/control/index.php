@@ -61,7 +61,9 @@ class index extends BaseControl
 		return new url('index','page'); */
 		//return $view;
 		
-		
+		/* 
+		 * var_dump(model::isExist('asdfadsf'));
+		 */
 		
 		$this->model('tree')->drop();
 		$table = new table('tree');
