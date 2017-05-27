@@ -170,6 +170,15 @@ class field
 	}
 	
 	/**
+	 * 判断当前字段时候设置为主键
+	 * @return string
+	 */
+	function isPrimary()
+	{
+		return $this->_primary;
+	}
+	
+	/**
 	 * 设置字段备注
 	 * @param unknown $string
 	 */

@@ -19,13 +19,35 @@ class table
 	private $_fields = array();
 	
 	/**
-	 * 表在创建的时候需要额外的索引
+	 * 唯一索引
 	 * @var array
 	 */
-	private $_key = array(
-		'unique' => array(),
-		'primary' => array(),
-		'index' => array(),
+	private $_unique = array(
+		'name' => array(
+			//有名称的
+		),
+		'noname' => array(
+			//没名称的
+		),
+	);
+	
+	/**
+	 * 主键索引
+	 * @var array
+	 */
+	private $_primary = array();
+	
+	/**
+	 * 普通索引
+	 * @var array
+	 */
+	private $_index = array(
+		'name' => array(
+			//有名称的
+		),
+		'noname' => array(
+			//没名称的
+		)
 	);
 	
 	/**
@@ -156,39 +178,76 @@ class table
 	}
 	
 	/**
-	 * 添加主键索引 未完成
+	 * 添加主键索引 
+	 * 与字段内的主键索引冲突，优先使用字段内的主键索引
 	 * @param string|array $field
 	 */
 	function primary($field)
 	{
 		if (is_scalar($field))
 		{
-			
+			$field = array($field);
 		}
-		else if (is_array($field))
-		{
-			
-		}
+		$this->_primary = array_merge($this->_primary,$field);
 	}
 	
 	/**
-	 * 添加索引 未完成
+	 * 添加索引
 	 * @param string|array $field
-	 * @param string $name 索引名 可选，默认第一个字段名
+	 * @param string $name 索引名 可选，默认第一个字段名 必须是字符串
 	 */
 	function index($field,$name = '')
 	{
-		
+		if (is_scalar($field))
+		{
+			$field = array($field);
+		}
+		if (!empty($name))
+		{
+			if (!isset($this->_index['name'][$name]) || empty($this->_index['name'][$name]))
+			{
+				$this->_index['name'][$name] = $field;
+			}
+			else
+			{
+				$this->_index['name'][$name] = array_merge($this->_index['name'][$name],$field);
+			}
+		}
+		else 
+		{
+			$this->_index['noname'] = array_merge($this->_index['noname'],$field);
+		}
+		return $this;
 	}
 	
 	/**
-	 * 添加唯一索引  未完成
+	 * 添加唯一索引
 	 * @param string|array $field 字段名
 	 * @param string $name 可选 索引名
 	 */
 	function unique($field,$name = '')
 	{
+		if (is_scalar($field))
+		{
+			$field = array($field);
+		}
 		
+		if (!empty($name))
+		{
+			if (!isset($this->_unique['name'][$name]) || empty($this->_unique['name'][$name]))
+			{
+				$this->_unique['name'][$name] = $field;
+			}
+			else
+			{
+				$this->_unique['name'][$name] = array_merge($this->_unique['name'][$name],$field);
+			}
+		}
+		else 
+		{
+			$this->_unique['noname'] = array_merge($this->_unique['noname'],$field);
+		}
+		return $this;
 	}
 	
 	/**
@@ -225,7 +284,51 @@ class table
 		
 		$exist = $this->_not_exist?'IF NOT EXISTS ':'';
 		
-		return 'CREATE TABLE '.$exist.'`'.$this->getName().'` ('.implode(',', $fields).') '.$engine.' '.$charset.';';
+		$key = '';
+		if (!empty($this->_primary))
+		{
+			$hasPrimary = false;
+			foreach ($this->_fields as $f)
+			{
+				if ($f->isPrimary())
+				{
+					$hasPrimary = true;
+				}
+			}
+			if (!$hasPrimary)
+			{
+				$key .= ',';
+				$key .= 'PRIMARY KEY ('.implode(',',$this->_primary).')';
+			}
+		}
+		if (!empty($this->_index['name']))
+		{
+			$key .= ',';
+			foreach ($this->_index['name'] as $name => $f)
+			{
+				$key .= 'INDEX `'.$name.'` ('.implode(',', $f).')';
+			}
+		}
+		if (!empty($this->_index['noname']))
+		{
+			$key .= ',';
+			$key .= 'INDEX ('.implode(',', $this->_index['noname']).')';
+		}
+		if (!empty($this->_unique['name']))
+		{
+			$key .= ',';
+			foreach ($this->_unique['name'] as $name => $f)
+			{
+				$key .= 'UNIQUE KEY `'.$name.'` ('.implode(',', $f).')';
+			}
+		}
+		if (!empty($this->_unique['noname']))
+		{
+			$key .= ',';
+			$key .= 'UNIQUE KEY ('.implode(',', $this->_unique['noname']).')';
+		}
+		
+		return 'CREATE TABLE '.$exist.'`'.$this->getName().'` ('.implode(',', $fields).' '.$key.') '.$engine.' '.$charset.';';
 	}
 }
 

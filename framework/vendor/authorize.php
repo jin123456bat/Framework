@@ -2,7 +2,6 @@
 namespace framework\vendor;
 use framework\core\component;
 use framework\core\model;
-use framework\core\base;
 use framework\core\database\mysql\table;
 
 /**
@@ -30,9 +29,17 @@ class authorize extends component
 	function __construct()
 	{
 		$tableName = 'authorize';
+		$this->model($tableName)->drop();
 		$table = new table($tableName);
-		$table->int('id')->primary()->AI();
-		$table->varchar('username', 64);
+		
+		$table->int('id');
+		$table->varchar('username', 64)->unique()->comment('用户名');
+		$table->timestamp('regtime')->comment('注册时间');
+		$table->char('telephone', 11)->comment('手机号码');
+		$table->varchar('email', 128)->comment('邮箱');
+		
+		//$table->unique('telephone','a');
+		$table->index('telephone');
 		
 		$this->model($tableName)->create($table);
 	}

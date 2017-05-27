@@ -85,10 +85,15 @@ class index extends BaseControl
 		$table->timestamp('create_time')->prototype(field::PROTOTYPE_ON_UPDATE_CURRENT_TIMESTAMP);
 		$table->int('age')->prototype(field::PROTOTYPE_UNSIGNED_ZEROFILL)->nullable(); */
 		
+		
 		$authorize = new authorize();
-		if($authorize->attempt(array('username' => $username,'password'=>$password)))
+		if($authorize->attempt(array('username' => 'jin123456bat','password'=>'jin2164389')))
 		{
-			
+			echo "验证通过";
+		}
+		else
+		{
+			echo "验证失败";
 		}
 	}
 
