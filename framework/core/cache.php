@@ -29,8 +29,7 @@ class cache extends component
 	}
 
 	/**
-	 * 数据有效期
-	 *
+	 * 设置默认的数据有效期
 	 * @param unknown $expires        	
 	 */
 	static function setExpires($expires)
@@ -41,9 +40,9 @@ class cache extends component
 	/**
 	 * 设置或者更新数据
 	 *
-	 * @param unknown $name        	
-	 * @param unknown $value        	
-	 * @param number $cache        	
+	 * @param unknown $name 数据名称
+	 * @param unknown $value 数据值	
+	 * @param number $cache 数据有效期 当为0的时候使用默认的数据有效期
 	 */
 	static function set($name, $value, $expires = 0)
 	{
@@ -61,16 +60,21 @@ class cache extends component
 	/**
 	 * 获取数据
 	 *
-	 * @param unknown $name        	
+	 * @param unknown $name
+	 * @param $default NULL
 	 * @return mixed|unknown
 	 */
-	static function get($name)
+	static function get($name,$default = NULL)
 	{
 		$app = self::getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
 		{
 			$cacheInstance = self::init();
 			$value = $cacheInstance->get($name);
+			if ($value === NULL)
+			{
+				return $default;
+			}
 			return $value;
 		}
 		return null;

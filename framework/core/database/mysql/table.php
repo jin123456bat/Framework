@@ -1,5 +1,8 @@
 <?php
 namespace framework\core\database\mysql;
+use framework\core\database\driver\mysql;
+use framework\core\model;
+
 /**
  * @author fx
  *
@@ -72,9 +75,43 @@ class table
 	
 	const ENGINE_MYISAM = 'myisam';
 	
-	function __construct($name)
+	private $_db = array();
+	
+	private $_config = '';
+	
+	function __construct($name,$config = '')
 	{
 		$this->_name = $name;
+		$this->initlize_db($name,$config);
+	}
+	
+	private function initlize_db($name,$config)
+	{
+		$this->_config = $config;
+		if (empty($config))
+		{
+			$dbs = model::getConfig('db');
+			foreach ($dbs as $configname => $config)
+			{
+				$instance = mysql::getInstance($config);
+				if ($instance->isExist($name))
+				{
+					$this->_db[$configname] = $instance;
+				}
+			}
+		}
+		else
+		{
+			$db = model::getConfig('db');
+			if (isset($dbs[$config]) && !empty($dbs[$config]))
+			{
+				$instance = mysql::getInstance($db);
+				if ($instance->isExist($name))
+				{
+					$this->_db[$config] = $instance;
+				}
+			}
+		}
 	}
 	
 	/**
@@ -91,6 +128,7 @@ class table
 	function setName($name)
 	{
 		$this->_name = $name;
+		$this->initlize_db($this->_name, $this->_config);
 	}
 	
 	/**
@@ -111,6 +149,13 @@ class table
 	{
 		$temp = new field($name,'varchar',$length);
 		$this->_fields[] = $temp;
+		
+		foreach ($this->_db as $db)
+		{
+			//ALTER TABLE `authorize` ADD `ddd` VARCHAR(123) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '2' COMMENT '1213123' AFTER `email`;
+			$sql = 'alter table `'.$this->_name.'` add `'.$name.'` varchar('.$length.')';
+			$db->query($sql);
+		}
 		return $temp;
 	}
 		
@@ -124,6 +169,13 @@ class table
 	{
 		$temp = new field($name, 'char',$length);
 		$this->_fields[] = $temp;
+		
+		foreach ($this->_db as $db)
+		{
+			//ALTER TABLE `authorize` ADD `ddd` VARCHAR(123) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '2' COMMENT '1213123' AFTER `email`;
+			$sql = 'alter table `'.$this->_name.'` add `'.$name.'` char('.$length.')';
+			$db->query($sql);
+		}
 		return $temp;
 	}
 	
@@ -137,6 +189,13 @@ class table
 	{
 		$temp = new field($name, 'int',$length);
 		$this->_fields[] = $temp;
+		
+		foreach ($this->_db as $db)
+		{
+			//ALTER TABLE `authorize` ADD `ddd` VARCHAR(123) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '2' COMMENT '1213123' AFTER `email`;
+			$sql = 'alter table `'.$this->_name.'` add `'.$name.'` int('.$length.')';
+			$db->query($sql);
+		}
 		return $temp;
 	}
 	
@@ -149,6 +208,13 @@ class table
 	{
 		$temp = new field($name, 'timestamp');
 		$this->_fields[] = $temp;
+		
+		foreach ($this->_db as $db)
+		{
+			//ALTER TABLE `authorize` ADD `ddd` VARCHAR(123) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '2' COMMENT '1213123' AFTER `email`;
+			$sql = 'alter table `'.$this->_name.'` add `'.$name.'` timestamp';
+			$db->query($sql);
+		}
 		return $temp;
 	}
 	
@@ -161,6 +227,13 @@ class table
 	{
 		$temp = new field($name, 'datetime');
 		$this->_fields[] = $temp;
+		
+		foreach ($this->_db as $db)
+		{
+			//ALTER TABLE `authorize` ADD `ddd` VARCHAR(123) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '2' COMMENT '1213123' AFTER `email`;
+			$sql = 'alter table `'.$this->_name.'` add `'.$name.'` datetime';
+			$db->query($sql);
+		}
 		return $temp;
 	}
 	
@@ -174,6 +247,13 @@ class table
 	{
 		$temp = new field($name, 'text',$length);
 		$this->_fields[] = $temp;
+		
+		foreach ($this->_db as $db)
+		{
+			//ALTER TABLE `authorize` ADD `ddd` VARCHAR(123) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '2' COMMENT '1213123' AFTER `email`;
+			$sql = 'alter table `'.$this->_name.'` add `'.$name.'` text';
+			$db->query($sql);
+		}
 		return $temp;
 	}
 	
@@ -189,6 +269,12 @@ class table
 			$field = array($field);
 		}
 		$this->_primary = array_merge($this->_primary,$field);
+		foreach ($this->_db as $db)
+		{
+			//ALTER TABLE `authorize` ADD PRIMARY KEY(` id `)
+			$db->query('alter table `'.$this->_name.'` add primary key(`'.implode('`,`', $field).'`)');
+		}
+		return $this;
 	}
 	
 	/**

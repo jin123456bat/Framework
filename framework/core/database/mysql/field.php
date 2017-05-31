@@ -68,6 +68,12 @@ class field
 	 */
 	public $_charset = '';
 	
+	/**
+	 * 新加字段位置
+	 * @var string
+	 */
+	public $_pos = '';
+	
 	const DEFAULT_CURRENT_TIMESTAMP = 'current_timestamp';
 	
 	const PROTOTYPE_UNSIGNED = 'unsigned';
@@ -138,6 +144,23 @@ class field
 			$this->_prototype = $prototype;
 		}
 		return $this;
+	}
+	
+	/**
+	 * 字段位置在XXX之后
+	 * @param unknown $name
+	 */
+	function after($name)
+	{
+		$this->_pos = 'AFTER `'.$name.'`';
+	}
+	
+	/**
+	 * 字段位置在最开始
+	 */
+	function first()
+	{
+		$this->_pos = 'FIRST';
 	}
 	
 	/**
