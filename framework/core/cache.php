@@ -56,6 +56,40 @@ class cache extends component
 		}
 		return false;
 	}
+	
+	/**
+	 * 自增
+	 * @param unknown $name
+	 * @param number $amount
+	 * @return bool true on success or false on failure
+	 */
+	static function increase($name,$amount = 1)
+	{
+		$app = self::getConfig('app');
+		if (isset($app['cache']) && $app['cache'])
+		{
+			$cacheInstance = self::init();
+			return $cacheInstance->increase($name,$amount);
+		}
+		return null;
+	}
+	
+	/**
+	 * 自减
+	 * @param unknown $name
+	 * @param number $amount
+	 * @return bool true on success or false on failure
+	 */
+	static function decrease($name,$amount = 1)
+	{
+		$app = self::getConfig('app');
+		if (isset($app['cache']) && $app['cache'])
+		{
+			$cacheInstance = self::init();
+			return $cacheInstance->decrease($name,$amount);
+		}
+		return null;
+	}
 
 	/**
 	 * 获取数据
@@ -78,5 +112,27 @@ class cache extends component
 			return $value;
 		}
 		return null;
+	}
+	
+	/**
+	 * 在不考虑数据是否过期的情况下获取数据
+	 * @param unknown $name
+	 * @param unknown $default
+	 * @return NULL
+	 */
+	static function find($name,$default = NULL)
+	{
+		$app = self::getConfig('app');
+		if (isset($app['cache']) && $app['cache'])
+		{
+			$cacheInstance = self::init();
+			$value = $cacheInstance->find($name);
+			if ($value === NULL)
+			{
+				return $default;
+			}
+			return $value;
+		}
+		return NULL;
 	}
 }

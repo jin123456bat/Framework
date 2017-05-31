@@ -67,4 +67,34 @@ class mysql extends base implements cache
 			->find();
 		return $value;
 	}
+	
+	/**
+	 * 自增
+	 * {@inheritDoc}
+	 * @see \framework\core\cache\cache::increase()
+	 */
+	public function increase($name,$amount = 1)
+	{
+		return $this->model('cache')->where('unique_key=?',array($name))->limit(1)->update('value+=',$amount);
+	}
+	
+	/**
+	 * 自减
+	 * {@inheritDoc}
+	 * @see \framework\core\cache\cache::decrease()
+	 */
+	public function decrease($name,$amount = 1)
+	{
+		return $this->model('cache')->where('unique_key=?',array($name))->limit(1)->update('value-=',$amount);
+	}
+	
+	/**
+	 * 判断是否存在
+	 * {@inheritDoc}
+	 * @see \framework\core\cache\cache::has()
+	 */
+	public function has($name)
+	{
+		return !empty($this->model('cache')->where('unique_key=?',array($name))->limit(1)->find());
+	}
 }
