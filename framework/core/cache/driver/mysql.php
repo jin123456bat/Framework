@@ -97,4 +97,22 @@ class mysql extends base implements cache
 	{
 		return !empty($this->model('cache')->where('unique_key=?',array($name))->limit(1)->find());
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\cache\cache::remove()
+	 */
+	public function remove($name)
+	{
+		return $this->model('cache')->where('unique_key=?',array($name))->limit(1)->delete();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\cache\cache::flush()
+	 */
+	public function flush()
+	{
+		return $this->model('cache')->truncate();
+	}
 }

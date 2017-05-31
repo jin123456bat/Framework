@@ -135,4 +135,6 @@ class cache extends component
 		}
 		return NULL;
 	}
+	
+	static function 
 }
