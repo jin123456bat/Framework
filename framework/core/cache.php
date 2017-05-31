@@ -61,7 +61,7 @@ class cache extends component
 	 * 获取数据
 	 *
 	 * @param unknown $name
-	 * @param $default NULL
+	 * @param $default NULL 当数据不存在的时候的默认值
 	 * @return mixed|unknown
 	 */
 	static function get($name,$default = NULL)

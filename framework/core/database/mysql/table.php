@@ -343,6 +343,13 @@ class table
 	function engine($engine)
 	{
 		$this->_engine = $engine;
+		
+		foreach ($this->_db as $db)
+		{
+			$sql = 'ALTER TABLE `'.$this->_name.'` ENGINE = '.$engine;
+			$db->query($sql);
+		}
+		return $this;
 	}
 	
 	/**
@@ -352,6 +359,28 @@ class table
 	function charset($charset)
 	{
 		$this->_charset = $charset;
+		
+		switch ($charset)
+		{
+			case 'utf8':
+				$collate = 'utf8_general_ci';
+				break;
+			case 'utf8mb4':
+				$collate = 'utf8mb4_general_ci';
+				break;
+			case 'gbk':
+				$collate = 'gbk_chinese_ci';
+				break;
+			case 'gb2312':
+				$collate = 'gb2312_chinese_ci';
+				break;
+		}
+		foreach ($this->_db as $db)
+		{
+			$sql = 'ALTER TABLE `'.$this->_name.'` DEFAULT CHARSET='.$charset.' COLLATE '.$collate;
+			$db->query($sql);
+		}
+		return $this;
 	}
 	
 	/**
