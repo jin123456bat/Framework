@@ -180,4 +180,13 @@ class cache extends component
 		}
 		return false;
 	}
+	
+	/**
+	 * 尚未实现
+	 * 强制使用某一个服务器
+	 */
+	static function server()
+	{
+		
+	}
 }

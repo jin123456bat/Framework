@@ -6,11 +6,28 @@ use framework\core\base;
 
 class memcached extends base implements cache
 {
+	/**
+	 * @var \Memcached
+	 */
 	private $_memcached;
 	
 	function __construct($config)
 	{
 		$this->_memcached = new \Memcached();
+		if (isset($config['server']) && !empty($config['server']))
+		{
+			if(!isset($config['server']['host']))
+			{
+				foreach ($config['server'] as $server)
+				{
+					$this->_memcached->addServer($server['host'],$server['port'],$server['weight']); 
+				}
+			}
+			else 
+			{
+				$this->_memcached->addServer($config['server']['host'],$config['server']['port'],$config['server']['weight']);
+			}
+		}
 	}
 	
 	/**
@@ -20,7 +37,7 @@ class memcached extends base implements cache
 	public function set($name,$value,$expires = 0)
 	{
 		// TODO Auto-generated method stub
-		
+		return $this->_memcached->set($name,$value,$expires);
 	}
 
 	/**
@@ -30,17 +47,18 @@ class memcached extends base implements cache
 	public function get($name)
 	{
 		// TODO Auto-generated method stub
-		
+		return $this->_memcached->get($name);
 	}
 
 	/**
+	 * 对于memcached这个函数不可用
 	 * {@inheritDoc}
 	 * @see \framework\core\cache\cache::find()
 	 */
 	public function find($name)
 	{
 		// TODO Auto-generated method stub
-		
+		return NULL;
 	}
 
 	/**
@@ -50,7 +68,11 @@ class memcached extends base implements cache
 	public function increase($name,$amount = 1)
 	{
 		// TODO Auto-generated method stub
-		
+		if($this->_memcached->increment($name,$amount))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -60,17 +82,22 @@ class memcached extends base implements cache
 	public function decrease($name,$amount = 1)
 	{
 		// TODO Auto-generated method stub
-		
+		if($this->_memcached->decrement($name,$amount))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	/**
+	 * 对于memcached 这个函数不可用
 	 * {@inheritDoc}
 	 * @see \framework\core\cache\cache::has()
 	 */
 	public function has($name)
 	{
 		// TODO Auto-generated method stub
-		
+		return true;
 	}
 
 	/**
@@ -80,7 +107,7 @@ class memcached extends base implements cache
 	public function remove($name)
 	{
 		// TODO Auto-generated method stub
-		
+		return $this->_memcached->delete($name,0);
 	}
 
 	/**
@@ -90,7 +117,7 @@ class memcached extends base implements cache
 	public function flush()
 	{
 		// TODO Auto-generated method stub
-		
+		return $this->_memcached->flush();
 	}
 
 	
