@@ -12,13 +12,13 @@ class cache extends component
 
 	protected static function init()
 	{
-		$cache = self::getConfig('cache');
-		self::$_expires = isset($cache['expires']) ? $cache['expires'] : 0;
-		$type = isset($cache['type']) ? $cache['type'] : 'mysql';
+		$config = self::getConfig('cache');
+		self::$_expires = isset($config['expires']) ? $config['expires'] : 0;
+		$type = isset($config['type']) ? $config['type'] : 'mysql';
 		if (! (isset(self::$_instance[$type]) && ! empty(self::$_instance[$type])))
 		{
 			$cache = 'framework\\core\\cache\\driver\\' . $type;
-			self::$_instance[$type] = new $cache();
+			self::$_instance[$type] = new $cache($config);
 		}
 		return self::$_instance[$type];
 	}
@@ -136,5 +136,48 @@ class cache extends component
 		return NULL;
 	}
 	
-	static function 
+	/**
+	 * 删除缓存
+	 * @param string $name
+	 */
+	static function remove($name)
+	{
+		$app = self::getConfig('app');
+		if (isset($app['cache']) && $app['cache'])
+		{
+			$cacheInstance = self::init();
+			return $cacheInstance->remove($name);
+		}
+		return false;
+	}
+	
+	/**
+	 * 清空缓存
+	 */
+	static function flush()
+	{
+		$app = self::getConfig('app');
+		if (isset($app['cache']) && $app['cache'])
+		{
+			$cacheInstance = self::init();
+			return $cacheInstance->flush();
+		}
+		return false;
+	}
+	
+	/**
+	 * 判断缓存是否存在
+	 * @param string $name
+	 * @return bool
+	 */
+	static function has($name)
+	{
+		$app = self::getConfig('app');
+		if (isset($app['cache']) && $app['cache'])
+		{
+			$cacheInstance = self::init();
+			return $cacheInstance->has($name);
+		}
+		return false;
+	}
 }

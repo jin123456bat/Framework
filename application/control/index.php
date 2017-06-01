@@ -18,6 +18,7 @@ use framework\core\response\url;
 use framework\core\database\mysql\table;
 use framework\core\database\mysql\field;
 use framework\core\database\driver\mysql;
+use framework\core\cache;
 
 class index extends BaseControl
 {
@@ -85,8 +86,8 @@ class index extends BaseControl
 		$table->timestamp('create_time')->prototype(field::PROTOTYPE_ON_UPDATE_CURRENT_TIMESTAMP);
 		$table->int('age')->prototype(field::PROTOTYPE_UNSIGNED_ZEROFILL)->nullable(); */
 		
-		$table = new table('authorize');
-		$table->varchar('address', 128);
+		/* $table = new table('authorize');
+		$table->varchar('address', 128); */
 		
 		/* $authorize = new authorize();
 		if($authorize->attempt(array('username' => 'jin123456bat','password'=>'jin2164389')))
@@ -97,6 +98,8 @@ class index extends BaseControl
 		{
 			echo "验证失败";
 		} */
+		
+		cache::set('name', 'jin');
 	}
 
 	function page()
