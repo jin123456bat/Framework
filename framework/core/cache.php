@@ -115,28 +115,6 @@ class cache extends component
 	}
 	
 	/**
-	 * 在不考虑数据是否过期的情况下获取数据
-	 * @param unknown $name
-	 * @param unknown $default
-	 * @return NULL
-	 */
-	static function find($name,$default = NULL)
-	{
-		$app = self::getConfig('app');
-		if (isset($app['cache']) && $app['cache'])
-		{
-			$cacheInstance = self::init();
-			$value = $cacheInstance->find($name);
-			if ($value === NULL)
-			{
-				return $default;
-			}
-			return $value;
-		}
-		return NULL;
-	}
-	
-	/**
 	 * 删除缓存
 	 * @param string $name
 	 */
@@ -152,7 +130,7 @@ class cache extends component
 	}
 	
 	/**
-	 * 清空缓存
+	 * 清空所有缓存
 	 */
 	static function flush()
 	{
@@ -177,6 +155,25 @@ class cache extends component
 		{
 			$cacheInstance = self::init();
 			return $cacheInstance->has($name);
+		}
+		return false;
+	}
+	
+	/**
+	 * 和set相同，不同的是假如原来的name存在了，会失败，并且返回false
+	 * @param unknown $name
+	 * @param unknown $value
+	 * @return boolean
+	 */
+	static function add($name,$value)
+	{
+		$app = self::getConfig('app');
+		if (isset($app['cache']) && $app['cache'])
+		{
+			$cacheInstance = self::init();
+			$config = self::getConfig('cache');
+			$expires = empty($expires) ? self::$_expires : $expires;
+			return $cacheInstance->add($name, $value, $expires);
 		}
 		return false;
 	}

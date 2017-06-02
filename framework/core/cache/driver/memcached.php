@@ -40,6 +40,15 @@ class memcached extends base implements cache
 	
 	/**
 	 * {@inheritDoc}
+	 * @see \framework\core\cache\cache::add()
+	 */
+	public function add($name, $value,$expires = 0)
+	{
+		return $this->_memcached->set($name,$value,$expires);
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 * @see \framework\core\cache\cache::set()
 	 */
 	public function set($name,$value,$expires = 0)
@@ -56,17 +65,6 @@ class memcached extends base implements cache
 	{
 		// TODO Auto-generated method stub
 		return $this->_memcached->get($name);
-	}
-
-	/**
-	 * 对于memcached这个函数不可用
-	 * {@inheritDoc}
-	 * @see \framework\core\cache\cache::find()
-	 */
-	public function find($name)
-	{
-		// TODO Auto-generated method stub
-		return NULL;
 	}
 
 	/**
@@ -98,14 +96,18 @@ class memcached extends base implements cache
 	}
 
 	/**
-	 * 对于memcached 这个函数不可用
 	 * {@inheritDoc}
 	 * @see \framework\core\cache\cache::has()
 	 */
 	public function has($name)
 	{
 		// TODO Auto-generated method stub
-		return true;
+		$result = !$this->_memcached->add($name,0);
+		if (!$result)
+		{
+			$this->remove($name);
+		}
+		return $result;
 	}
 
 	/**
@@ -128,5 +130,8 @@ class memcached extends base implements cache
 		return $this->_memcached->flush();
 	}
 
-	
+	public function __destruct()
+	{
+		$this->_memcached->quit();
+	}
 }

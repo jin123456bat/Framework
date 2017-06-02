@@ -9,11 +9,6 @@ return array(
 			'host' => 'localhost',
 			'port' => 11211,
 			'weight' => 100,
-		),
-		array(
-			'host' => '172.0.0.1',
-			'port' => 11211,
-			'weight' => 200,
 		)
 	)
 );

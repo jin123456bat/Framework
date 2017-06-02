@@ -9,7 +9,14 @@ namespace framework\core\cache;
  */
 interface cache
 {
-
+	/**
+	 * 添加数据  数据存在会返回false
+	 * @param unknown $name
+	 * @param unknown $value
+	 * @param number $expires
+	 */
+	function add($name,$value,$expires = 0);
+	
 	/**
 	 * 添加或保存数据
 	 * @param unknown $name
@@ -23,12 +30,6 @@ interface cache
 	 * @param unknown $name
 	 */
 	function get($name);
-	
-	/**
-	 * 忽略过期 获取数据
-	 * @param unknown $name
-	 */
-	function find($name);
 	
 	/**
 	 * 自增
