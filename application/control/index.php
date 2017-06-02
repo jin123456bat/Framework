@@ -99,11 +99,18 @@ class index extends BaseControl
 			echo "验证失败";
 		} */
 		
-		cache::set('name', 'jin');
-		var_dump(cache::has('name'));
-		var_dump(cache::has('name1'));
-		var_dump(cache::has('name2'));
-		
+		cache::set('name', array(
+			'jin',
+			'jin1'
+		));
+		cache::set('name1', 'jin');
+		$name2 = new \stdClass();
+		$name2->a = 1;
+		$name2->b = 2;
+		cache::set('name2', $name2);
+		var_dump(cache::get('name'));
+		var_dump(cache::get('name1'));	
+		var_dump(cache::get('name2'));
 		
 	}
 

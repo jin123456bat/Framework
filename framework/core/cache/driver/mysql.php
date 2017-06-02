@@ -13,7 +13,7 @@ class mysql extends base implements cache
 			'unique_key' => $name,
 			'createtime'=> date('Y-m-d H:i:s'),
 			'expires' => $expires,
-			'value' => $value,
+			'value' => serialize($value),
 		));
 		return $result;
 	}
@@ -32,13 +32,13 @@ class mysql extends base implements cache
 			->duplicate(array(
 			'createtime' => date('Y-m-d H:i:s'),
 			'expires' => $expires,
-			'value' => $value
+			'value' => serialize($value)
 		))
 			->insert(array(
 			'unique_key' => $name,
 			'createtime' => date('Y-m-d H:i:s'),
 			'expires' => $expires,
-			'value' => $value
+			'value' => serialize($value)
 		));
 		return $result;
 	}
@@ -59,7 +59,7 @@ class mysql extends base implements cache
 			0
 		))
 			->scalar('value');
-		return $value;
+		return unserialize($value);
 	}
 
 	/**
@@ -69,7 +69,9 @@ class mysql extends base implements cache
 	 */
 	public function increase($name,$amount = 1)
 	{
-		return $this->model('cache')->where('unique_key=?',array($name))->limit(1)->update('value+=',$amount);
+		$value = $this->get($name);
+		$value += $amount;
+		return $this->set($name, $value);
 	}
 	
 	/**
@@ -79,7 +81,9 @@ class mysql extends base implements cache
 	 */
 	public function decrease($name,$amount = 1)
 	{
-		return $this->model('cache')->where('unique_key=?',array($name))->limit(1)->update('value-=',$amount);
+		$value = $this->get($name);
+		$value -= $amount;
+		return $this->set($name, $value);
 	}
 	
 	/**
