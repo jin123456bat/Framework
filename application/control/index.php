@@ -99,7 +99,16 @@ class index extends BaseControl
 			echo "验证失败";
 		} */
 		
-		cache::set('name', 'jin');
+		//cache::set('name', 'jin');
+		//var_dump(cache::get('name'));
+		
+		$res = fopen('./index.php','a+');
+		var_dump(flock($res, LOCK_EX ));
+		//var_dump(flock($res, LOCK_UN));
+		var_dump(file_get_contents('./index.php'));
+		//$res2 = fopen('./index.php','a+');
+		
+		
 	}
 
 	function page()

@@ -18,10 +18,18 @@ class memcached extends base implements cache
 		{
 			if(!isset($config['server']['host']))
 			{
+				$array = array();
 				foreach ($config['server'] as $server)
 				{
-					$this->_memcached->addServer($server['host'],$server['port'],$server['weight']); 
+					$data = array(
+						$server['host'],
+						$server['port'],
+						$server['weight'],
+					);
+					$array[] = $data;
+					//$this->_memcached->addServer($server['host'],$server['port'],$server['weight']); 
 				}
+				$this->_memcached->addServers($array);
 			}
 			else 
 			{

@@ -33,6 +33,8 @@ class file extends \framework\lib\error
 	private $_type;
 
 	private $_path;
+	
+	private $_resource;
 
 	function __construct($file,$create_not_exist = true)
 	{
@@ -68,16 +70,21 @@ class file extends \framework\lib\error
 				}
 			}
 		}
-		else if (is_object($file) && $file instanceof file)
-		{
-			$this->_path = $file->path();
-		}
 		else
 		{
 			$this->addError('000001', 'constructor parameter $file error');
 		}
-		
+		//加锁
+		$this->_resource = fopen($this->_path, 'a+');
+		flock($this->_resource, LOCK_EX);
+			
 		$this->parse();
+	}
+	
+	function __destruct()
+	{
+		//解锁
+		flock($this->_resource, LOCK_UN);
 	}
 
 	public function initlize()
