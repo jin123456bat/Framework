@@ -12,7 +12,7 @@ class apc extends base implements cache
 	public function add($name,$value,$expires = 0)
 	{
 		// TODO Auto-generated method stub
-		return apc_add($name, $value,$expires);
+		return apcu_add($name, $value,$expires);
 	}
 
 	/**
@@ -22,8 +22,8 @@ class apc extends base implements cache
 	public function set($name,$value,$expires = 0)
 	{
 		// TODO Auto-generated method stub
-		apc_delete($name);
-		return apc_add($name, $value,$expires);
+		apcu_delete($name);
+		return apcu_add($name, $value,$expires);
 	}
 
 	/**
@@ -34,7 +34,7 @@ class apc extends base implements cache
 	{
 		// TODO Auto-generated method stub
 		$success = false;
-		$value = apc_fetch($name,$success);
+		$value = apcu_fetch($name,$success);
 		if ($success)
 		{
 			return $value;
@@ -50,7 +50,7 @@ class apc extends base implements cache
 	{
 		// TODO Auto-generated method stub
 		$success = false;
-		apc_inc($name,$amount,$success);
+		apcu_inc($name,$amount,$success);
 		return $success;
 	}
 
@@ -62,7 +62,7 @@ class apc extends base implements cache
 	{
 		// TODO Auto-generated method stub
 		$success = false;
-		apc_dec($name,$amount,$success);
+		apcu_dec($name,$amount,$success);
 		return $success;
 	}
 
@@ -73,7 +73,7 @@ class apc extends base implements cache
 	public function has($name)
 	{
 		// TODO Auto-generated method stub
-		return apc_exists($name);
+		return apcu_exists($name);
 	}
 
 	/**
@@ -83,7 +83,7 @@ class apc extends base implements cache
 	public function remove($name)
 	{
 		// TODO Auto-generated method stub
-		return apc_delete($name);
+		return apcu_delete($name);
 	}
 
 	/**
@@ -93,7 +93,7 @@ class apc extends base implements cache
 	public function flush()
 	{
 		// TODO Auto-generated method stub
-		return apc_clear_cache();
+		return apcu_clear_cache();
 	}
 
 	
