@@ -99,6 +99,7 @@ class index extends BaseControl
 			echo "验证失败";
 		} */
 		
+		
 		cache::set('name', array(
 			'jin',
 			'jin1'

@@ -7,9 +7,16 @@ use framework\core\model;
 
 class mysql extends base implements cache
 {
+	private $_model;
+	
+	public function __construct()
+	{
+		$this->_model = $this->model('cache');
+	}
+	
 	public function add($name, $value,$expires = 0)
 	{
-		$result = $this->model('cache')->insert(array(
+		$result = $this->_model->insert(array(
 			'unique_key' => $name,
 			'createtime'=> date('Y-m-d H:i:s'),
 			'expires' => $expires,
@@ -28,13 +35,13 @@ class mysql extends base implements cache
 	public function set($name, $value, $expires = 0)
 	{
 		// TODO Auto-generated method stub
-		$result = $this->model('cache')
+		$result = $this->_model
 			->duplicate(array(
 			'createtime' => date('Y-m-d H:i:s'),
 			'expires' => $expires,
 			'value' => serialize($value)
 		))
-			->insert(array(
+		->insert(array(
 			'unique_key' => $name,
 			'createtime' => date('Y-m-d H:i:s'),
 			'expires' => $expires,
@@ -53,7 +60,7 @@ class mysql extends base implements cache
 	public function get($name)
 	{
 		// TODO Auto-generated method stub
-		$value = $this->model('cache')
+		$value = $this->_model
 			->where('unique_key=? and (UNIX_TIMESTAMP(createtime)+expires>UNIX_TIMESTAMP(now()) or expires=?)', array(
 			$name,
 			0
@@ -93,7 +100,7 @@ class mysql extends base implements cache
 	 */
 	public function has($name)
 	{
-		return !empty($this->model('cache')->where('unique_key=?',array($name))->limit(1)->find());
+		return !empty($this->_model->where('unique_key=?',array($name))->limit(1)->find());
 	}
 	
 	/**
@@ -102,7 +109,7 @@ class mysql extends base implements cache
 	 */
 	public function remove($name)
 	{
-		return $this->model('cache')->where('unique_key=?',array($name))->limit(1)->delete();
+		return $this->_model->where('unique_key=?',array($name))->limit(1)->delete();
 	}
 	
 	/**
@@ -111,6 +118,6 @@ class mysql extends base implements cache
 	 */
 	public function flush()
 	{
-		return $this->model('cache')->truncate();
+		return $this->_model->truncate();
 	}
 }

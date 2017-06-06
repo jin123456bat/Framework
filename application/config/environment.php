@@ -19,6 +19,10 @@ return array(
 		//只需要配置这2个东西就可以实现session存储在memcached中
 		//'save_handler' => 'memcached',
 		//'save_path' => 'localhost:11211',
+		
+		//只需要配置这2个东西就可以实现session存储在redis中
+		//session.save_handler => 'redis',
+		//session.save_path => "tcp://host1:6379?weight=1, tcp://host2:6379?weight=2&timeout=2.5, tcp://host3:6379?weight=2&read_timeout=2.5"
 	),
 	'date' => array(
 		'timezone' => 'Asia/Shanghai'

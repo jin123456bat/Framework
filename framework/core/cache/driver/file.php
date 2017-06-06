@@ -1,14 +1,14 @@
 <?php
 namespace framework\core\cache\driver;
-use framework\core\cache\cache;
 use framework\core\base;
+use framework\core\cache\cache;
 
 /**
- * apc只是存储在本机
+ * 基于文件的缓存
  * @author fx
  *
  */
-class apc extends base implements cache
+class file extends base implements cache
 {
 	/**
 	 * {@inheritDoc}
@@ -17,7 +17,7 @@ class apc extends base implements cache
 	public function add($name,$value,$expires = 0)
 	{
 		// TODO Auto-generated method stub
-		return apcu_add($name, $value,$expires);
+		
 	}
 
 	/**
@@ -27,8 +27,7 @@ class apc extends base implements cache
 	public function set($name,$value,$expires = 0)
 	{
 		// TODO Auto-generated method stub
-		apcu_delete($name);
-		return apcu_add($name, $value,$expires);
+		
 	}
 
 	/**
@@ -38,13 +37,7 @@ class apc extends base implements cache
 	public function get($name)
 	{
 		// TODO Auto-generated method stub
-		$success = false;
-		$value = apcu_fetch($name,$success);
-		if ($success)
-		{
-			return $value;
-		}
-		return null;
+		
 	}
 
 	/**
@@ -54,9 +47,7 @@ class apc extends base implements cache
 	public function increase($name,$amount = 1)
 	{
 		// TODO Auto-generated method stub
-		$success = false;
-		apcu_inc($name,$amount,$success);
-		return $success;
+		
 	}
 
 	/**
@@ -66,9 +57,7 @@ class apc extends base implements cache
 	public function decrease($name,$amount = 1)
 	{
 		// TODO Auto-generated method stub
-		$success = false;
-		apcu_dec($name,$amount,$success);
-		return $success;
+		
 	}
 
 	/**
@@ -78,7 +67,7 @@ class apc extends base implements cache
 	public function has($name)
 	{
 		// TODO Auto-generated method stub
-		return apcu_exists($name);
+		
 	}
 
 	/**
@@ -88,7 +77,7 @@ class apc extends base implements cache
 	public function remove($name)
 	{
 		// TODO Auto-generated method stub
-		return apcu_delete($name);
+		
 	}
 
 	/**
@@ -98,6 +87,8 @@ class apc extends base implements cache
 	public function flush()
 	{
 		// TODO Auto-generated method stub
-		return apcu_clear_cache();
+		
 	}
+
+	
 }

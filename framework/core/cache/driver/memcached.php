@@ -2,9 +2,14 @@
 namespace framework\core\cache\driver;
 
 use framework\core\cache\cache;
-use framework\core\base;
+use framework\core\cache\cacheBase;
 
-class memcached extends base implements cache
+/**
+ * 对于memcached已经考虑过负载均衡，
+ * @author fx
+ *
+ */
+class memcached extends cacheBase implements cache
 {
 	/**
 	 * @var \Memcached
@@ -14,12 +19,12 @@ class memcached extends base implements cache
 	function __construct($config)
 	{
 		$this->_memcached = new \Memcached();
-		if (isset($config['server']) && !empty($config['server']))
+		if (isset($config['memcached']) && !empty($config['memcached']))
 		{
-			if(!isset($config['server']['host']))
+			if(!isset($config['memcached']['host']))
 			{
 				$array = array();
-				foreach ($config['server'] as $server)
+				foreach ($config['memcached'] as $server)
 				{
 					$data = array(
 						$server['host'],
@@ -33,7 +38,7 @@ class memcached extends base implements cache
 			}
 			else 
 			{
-				$this->_memcached->addServer($config['server']['host'],$config['server']['port'],$config['server']['weight']);
+				$this->_memcached->addServer($config['memcached']['host'],$config['memcached']['port'],$config['memcached']['weight']);
 			}
 		}
 	}
