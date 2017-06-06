@@ -57,6 +57,60 @@ class router extends component
 			}
 		}
 		
+		//路由的正则表达式的支持
+		if (!empty($query_string) && empty($this->_action_name) && empty($this->_control_name))
+		{
+			if (isset($config['bind']) && is_array($config['bind']))
+			{
+				$bind = $config['bind'];
+				foreach ($bind as $key => $value)
+				{
+					//\/about\/(?<id>[^\/]+)
+					$key = str_replace(array(
+						'/'
+					), array(
+						'\/'
+					), $key);
+					
+					$key = preg_replace_callback('/{(?<name>[a-zA-Z_]\w*)}/', function($matches){
+						return '(?<'.$matches['name'].'>[^\/]+)';
+					}, $key);
+					
+					if (preg_match('/'.$key.'/', $query_string,$matches))
+					{
+						foreach($matches as $a=>$v)
+						{
+							if (!is_numeric($a))
+							{
+								$_GET[$a] = $v;
+							}
+						}
+						
+						
+						if (isset($value['c']))
+						{
+							$this->_control_name = $value['c'];
+						}
+						if (isset($value['a']))
+						{
+							$this->_action_name = $value['a'];
+						}
+						
+						if (isset($value[0]))
+						{
+							$this->_control_name = $value[0];
+						}
+						if (isset($value[1]))
+						{
+							$this->_action_name = $value[1];
+						}
+						
+						break;
+					}
+				}
+			}
+		}
+		
 		if (empty($this->_control_name) && empty($this->_action_name))
 		{
 			$this->_control_name = isset($this->_data['c']) ? trim($this->_data['c']) : $config['default']['control'];
