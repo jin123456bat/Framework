@@ -59,17 +59,8 @@ class router extends component
 		
 		if (empty($this->_control_name) && empty($this->_action_name))
 		{
-			if ($config['mode'] == 'normal')
-			{
-				$this->_control_name = isset($this->_data['c']) ? trim($this->_data['c']) : $config['default']['control'];
-				$this->_action_name = isset($this->_data['a']) ? trim($this->_data['a']) : $config['default']['action'];
-				
-				if (! $config['case_sensitive'])
-				{
-					$this->_control_name = $this->_control_name;
-					$this->_action_name = $this->_action_name;
-				}
-			}
+			$this->_control_name = isset($this->_data['c']) ? trim($this->_data['c']) : $config['default']['control'];
+			$this->_action_name = isset($this->_data['a']) ? trim($this->_data['a']) : $config['default']['action'];
 		}
 	}
 

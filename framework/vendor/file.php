@@ -74,17 +74,24 @@ class file extends \framework\lib\error
 		{
 			$this->addError('000001', 'constructor parameter $file error');
 		}
+		
 		//加锁
-		$this->_resource = fopen($this->_path, 'a+');
-		flock($this->_resource, LOCK_EX);
-			
+		if (file_exists($this->_path))
+		{
+			$this->_resource = fopen($this->_path, 'a+');
+			flock($this->_resource, LOCK_EX);
+		}
+		
 		$this->parse();
 	}
 	
 	function __destruct()
 	{
 		//解锁
-		flock($this->_resource, LOCK_UN);
+		if ($this->_resource)
+		{
+			flock($this->_resource, LOCK_UN);
+		}
 	}
 
 	public function initlize()

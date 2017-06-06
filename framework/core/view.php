@@ -112,6 +112,7 @@ class view extends response
 					}
 				}
 			}
+			
 			return $body;
 		}
 		else
