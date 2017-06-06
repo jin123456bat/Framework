@@ -100,18 +100,25 @@ class index extends BaseControl
 		} */
 		
 		
-		cache::set('name', array(
+		/* cache::set('name', array(
 			'jin',
 			'jin1'
-		));
-		cache::set('name1', 'jin');
+		),1);
+		sleep(3);
+		var_dump(cache::get('name')); */
+		
+		/* cache::store('file')->set('abc', 'sss');//存储到file中
+		cache::store('mysql')->set('name','1234');//存储到mysql中
+		cache::set('vbb', 'dd');//存储到默认的type中 */
+		
+		/* cache::set('name1', 'jin');
 		$name2 = new \stdClass();
 		$name2->a = 1;
 		$name2->b = 2;
 		cache::set('name2', $name2);
 		var_dump(cache::get('name'));
 		var_dump(cache::get('name1'));	
-		var_dump(cache::get('name2'));
+		var_dump(cache::get('name2')); */
 		
 	}
 

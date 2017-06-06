@@ -9,12 +9,29 @@ class cache extends component
 	private static $_instance;
 
 	private static $_expires;
+	
+	private static $_store;
+	
+	function __construct($store)
+	{
+		self::$_store = $store;
+	}
 
 	protected static function init()
 	{
 		$config = self::getConfig('cache');
+		
 		self::$_expires = isset($config['expires']) ? $config['expires'] : 0;
-		$type = isset($config['type']) ? $config['type'] : 'mysql';
+		
+		if (empty(self::$_store))
+		{
+			$type = isset($config['type']) ? $config['type'] : 'mysql';
+		}
+		else
+		{
+			$type = self::$_store;
+		}
+		
 		if (! (isset(self::$_instance[$type]) && ! empty(self::$_instance[$type])))
 		{
 			$cache = 'framework\\core\\cache\\driver\\' . $type;
@@ -179,11 +196,13 @@ class cache extends component
 	}
 	
 	/**
-	 * 尚未实现
-	 * 强制使用某一个服务器
+	 * 强制使用某一个类型的缓存来存储或者读取数据
+	 * 返回一个特殊的class，这个class可以存储到变量中下次继续使用
+	 * @param string $type
+	 * @return cache
 	 */
-	static function server()
+	static function store($type)
 	{
-		
+		return new self($type);
 	}
 }

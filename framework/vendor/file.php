@@ -182,6 +182,16 @@ class file extends \framework\lib\error
 		}
 		return false;
 	}
+	
+	/**
+	 * 写入数据，会覆盖原来的数据
+	 * @param unknown $string
+	 * @return number
+	 */
+	function write($string)
+	{
+		return file_put_contents($this->_path, $string,LOCK_EX);
+	}
 
 	/**
 	 * 文件是否可读

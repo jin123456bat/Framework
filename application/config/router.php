@@ -4,6 +4,10 @@ return array(
 	'default' => array(
 		'control' => 'index',
 		'action' => 'index',
+	),
+	
+	'bind' => array(
+		'/about' => array('index','page'),
 	)
 );
 

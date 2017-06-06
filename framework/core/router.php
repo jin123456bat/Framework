@@ -25,15 +25,50 @@ class router extends component
 	{
 		$config = $this->getConfig('router');
 		
-		if ($config['mode'] == 'normal')
+		$query_string = $_SERVER['QUERY_STRING'];
+		if (empty($query_string))
 		{
-			$this->_control_name = isset($this->_data['c']) ? trim($this->_data['c']) : $config['default']['control'];
-			$this->_action_name = isset($this->_data['a']) ? trim($this->_data['a']) : $config['default']['action'];
-			
-			if (! $config['case_sensitive'])
+			$query_string = substr($_SERVER['REQUEST_URI'], strlen($_SERVER['SCRIPT_NAME']));
+		}
+		
+		if (!empty($query_string))
+		{
+			if (isset($config['bind'][$query_string]) && !empty($config['bind'][$query_string]))
 			{
-				$this->_control_name = $this->_control_name;
-				$this->_action_name = $this->_action_name;
+				$bind = $config['bind'][$query_string];
+				
+				if (isset($bind['c']))
+				{
+					$this->_control_name = $bind['c'];
+				}
+				if (isset($bind['a']))
+				{
+					$this->_action_name = $bind['a'];
+				}
+				
+				if (isset($bind[0]))
+				{
+					$this->_control_name = $bind[0];
+				}
+				if (isset($bind[1]))
+				{
+					$this->_action_name = $bind[1];
+				}
+			}
+		}
+		
+		if (empty($this->_control_name) && empty($this->_action_name))
+		{
+			if ($config['mode'] == 'normal')
+			{
+				$this->_control_name = isset($this->_data['c']) ? trim($this->_data['c']) : $config['default']['control'];
+				$this->_action_name = isset($this->_data['a']) ? trim($this->_data['a']) : $config['default']['action'];
+				
+				if (! $config['case_sensitive'])
+				{
+					$this->_control_name = $this->_control_name;
+					$this->_action_name = $this->_action_name;
+				}
 			}
 		}
 	}
