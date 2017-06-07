@@ -120,6 +120,13 @@ class index extends BaseControl
 		var_dump(cache::get('name1'));	
 		var_dump(cache::get('name2')); */
 		
+		
+		//假设当前name=123
+		var_dump(request::get('name'));//123
+		var_dump(request::get('name',333));//123  不存在的时候333
+		var_dump(request::get('name',NULL,'strlen'));//3   使用过滤器
+		var_dump(request::get('name',NULL,'strlen|explode:",","?"'));//使用多个过滤器
+		var_dump(request::get('name',NULL,NULL,'a'));//array(123);  使用强制变量转换
 	}
 
 	function page()

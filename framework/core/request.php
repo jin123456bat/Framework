@@ -185,10 +185,10 @@ class request extends base
 	 *
 	 * @param unknown $name        	
 	 * @param unknown $defaultValue        	
-	 * @param unknown $filter        	
-	 * @param string $type        	
+	 * @param unknown $filter  
+	 * @param string $type 默认是s
 	 */
-	public static function get($name, $defaultValue = null, $filter = null, $type = 's')
+	public static function get($name, $defaultValue = null, $filter = null, $type = '')
 	{
 		if (isset($_GET[$name]))
 		{
@@ -218,7 +218,7 @@ class request extends base
 							list ($func, $param) = explode(':', $filter_t);
 							if (is_callable($func))
 							{
-								$pattern = '$["\'].["\']$';
+								$pattern = '/["\'][^"\']+["\']/';
 								if (preg_match_all($pattern, $param, $matches))
 								{
 									$params = array_map(function ($param) use ($data)

@@ -32,6 +32,10 @@ class base
 	 */
 	protected static function setVariableType($variable, $type = 's')
 	{
+		if (empty($type))
+		{
+			return $variable;
+		}
 		switch ($type)
 		{
 			case 's':
