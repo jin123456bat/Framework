@@ -2,7 +2,7 @@
 namespace application\control;
 
 use application\extend\BaseControl;
-use framework\core\request;
+/* use framework\core\request;
 use framework\core\debugger;
 use framework\data\collection;
 use application\extend\model;
@@ -18,7 +18,8 @@ use framework\core\response\url;
 use framework\core\database\mysql\table;
 use framework\core\database\mysql\field;
 use framework\core\database\driver\mysql;
-use framework\core\cache;
+use framework\core\cache; */
+use framework\core\response\json;
 
 class index extends BaseControl
 {
@@ -128,8 +129,10 @@ class index extends BaseControl
 		var_dump(request::get('name',NULL,'strlen|explode:",","?"'));//使用多个过滤器
 		var_dump(request::get('name',NULL,NULL,'a'));//array(123);  使用强制变量转换 */
 		
-		request::file('file');//使用默认配置
+		/* request::file('file');//使用默认配置
 		request::file('file','video');//使用视频配置
+		 */
+		return new json(array(1,2));
 	}
 
 	function page()

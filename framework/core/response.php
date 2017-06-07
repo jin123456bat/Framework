@@ -75,11 +75,19 @@ class response extends component
 		return strtolower($this->_charset);
 	}
 
+	/**
+	 * set response content type
+	 * @param unknown $contentType
+	 */
 	function setContentType($contentType)
 	{
 		$this->_contentType = $contentType;
 	}
 
+	/**
+	 * get response content type
+	 * @return string|unknown
+	 */
 	function getContentType()
 	{
 		return $this->_contentType;
@@ -95,6 +103,10 @@ class response extends component
 		return $this->_body;
 	}
 
+	/**
+	 * set response body
+	 * @param unknown $content
+	 */
 	function setBody($content)
 	{
 		if ($content instanceof \vendor\file)

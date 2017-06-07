@@ -23,10 +23,8 @@ class application extends component
 
 	function initlize()
 	{
-		// 载入系统默认配置
-		//$this->setConfig('framework');
-		// 载入app的配置
-		//$this->setConfig(base::$APP_NAME);
+		// 载入所有配置
+		$this->setConfig();
 		// 载入环境变量
 		$this->env();
 		// 导入app配置中的文件类
@@ -175,6 +173,7 @@ class application extends component
 					}
 				}
 			}
+			
 			
 			$filter = $this->load('actionFilter');
 			$filter->load($controller, $action);
@@ -408,7 +407,6 @@ class application extends component
 				
 				if (isset($instance[$class]))
 				{
-					
 					return $instance[$class];
 				}
 				else
