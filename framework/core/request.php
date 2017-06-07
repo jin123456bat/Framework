@@ -183,9 +183,9 @@ class request extends base
 	/**
 	 * 读取get变量
 	 *
-	 * @param unknown $name        	
-	 * @param unknown $defaultValue        	
-	 * @param unknown $filter  
+	 * @param unknown $name 参数名称
+	 * @param unknown $defaultValue 默认值
+	 * @param unknown $filter  过滤器名称
 	 * @param string $type 默认是s
 	 */
 	public static function get($name, $defaultValue = null, $filter = null, $type = '')
