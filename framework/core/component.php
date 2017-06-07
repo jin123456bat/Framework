@@ -48,7 +48,7 @@ class component extends error
 	/**
 	 * 载入组件配置
 	 */
-	function setConfig($app)
+	function setConfig()
 	{
 		$config_path = APP_ROOT. '/config/';
 		foreach (scandir($config_path) as $config_file)

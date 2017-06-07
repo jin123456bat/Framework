@@ -6,12 +6,17 @@ use framework;
 class application extends component
 {
 
-	function __construct($name, $path)
+	function __construct($name, $path , $configName = '')
 	{
 		base::$APP_NAME = $name;
 		base::$APP_PATH = $path;
 		
-		// spl_autoload_register([$this,'autoload']);
+		//配置文件名称
+		if (empty($configName))
+		{
+			$configName = substr($name, 0,3);
+			base::$APP_CONF = $configName;
+		}
 		
 		parent::__construct();
 	}
@@ -19,15 +24,15 @@ class application extends component
 	function initlize()
 	{
 		// 载入系统默认配置
-		$this->setConfig('framework');
+		//$this->setConfig('framework');
 		// 载入app的配置
-		$this->setConfig(base::$APP_NAME);
+		//$this->setConfig(base::$APP_NAME);
 		// 载入环境变量
 		$this->env();
 		// 导入app配置中的文件类
-		$this->import('app');
+		$this->import(base::$APP_CONF);
 		// set_error_handler
-		$app = $this->getConfig('app');
+		$app = $this->getConfig(base::$APP_CONF);
 		if (isset($app['errorHandler']) && ! empty($app['errorHandler']))
 		{
 			if (isset($app['errorHandler']['class']))

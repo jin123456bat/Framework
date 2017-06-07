@@ -42,7 +42,7 @@ class framework
 	 * @param unknown $name        	
 	 * @param unknown $path        	
 	 */
-	function createApplication($name, $path)
+	function createApplication($name, $path, $configName = '')
 	{
 		$appkey = md5($name . $path);
 		
@@ -57,7 +57,7 @@ class framework
 		{
 			// 载入系统的application
 			$namespace = 'framework\\core\\application';
-			$this->_application[$appkey] = new $namespace($name, $path);
+			$this->_application[$appkey] = new $namespace($name, $path, $configName);
 		}
 		
 		if (method_exists($this->_application[$appkey], 'initlize'))

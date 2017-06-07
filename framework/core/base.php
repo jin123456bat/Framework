@@ -9,6 +9,8 @@ class base
 	static $APP_NAME;
 
 	static $APP_PATH;
+	
+	static $APP_CONF;
 
 	function __construct()
 	{
