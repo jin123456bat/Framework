@@ -329,7 +329,7 @@ class compiler extends \framework\view\compiler
 		$this->doIfBlock();
 		
 		//处理所有标签
-		$dirs = scandir(ROOT.'/framework/view/tag');
+		$dirs = scandir(SYSTEM_ROOT.'/view/tag');
 		if ($dirs)
 		{
 			array_map(function($file){
@@ -341,7 +341,7 @@ class compiler extends \framework\view\compiler
 		}
 		
 		//处理 所有的block
-		$dirs = scandir(ROOT.'/framework/view/block');
+		$dirs = scandir(SYSTEM_ROOT.'/view/block');
 		if ($dirs)
 		{
 			array_map(function($file){

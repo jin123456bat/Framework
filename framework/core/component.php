@@ -50,7 +50,7 @@ class component extends error
 	 */
 	function setConfig($app)
 	{
-		$config_path = rtrim(ROOT, '/') . '/' . $app . '/config/';
+		$config_path = APP_ROOT. '/config/';
 		foreach (scandir($config_path) as $config_file)
 		{
 			if ($config_file != '.' && $config_file != '..')

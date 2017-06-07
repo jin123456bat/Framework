@@ -6,12 +6,6 @@ use framework;
 class application extends component
 {
 
-	private $_session = null;
-
-	private $_argc = 0;
-
-	private $_argv = array();
-
 	function __construct($name, $path)
 	{
 		base::$APP_NAME = $name;
@@ -84,9 +78,9 @@ class application extends component
 					{
 						include $import;
 					}
-					else if (is_file(ROOT . '/' . ltrim($import, '/')))
+					else if (is_file(APP_ROOT . '/' . ltrim($import, '/')))
 					{
-						include ROOT . '/' . ltrim($import, '/');
+						include APP_ROOT . '/' . ltrim($import, '/');
 					}
 				}
 			}
@@ -96,9 +90,9 @@ class application extends component
 				{
 					include $config['import'];
 				}
-				else if (is_file(ROOT . '/' . ltrim($config['import'], '/')))
+				else if (is_file(APP_ROOT . '/' . ltrim($config['import'], '/')))
 				{
-					include ROOT . '/' . ltrim($config['import'], '/');
+					include APP_ROOT . '/' . ltrim($config['import'], '/');
 				}
 			}
 		}

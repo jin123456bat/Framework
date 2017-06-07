@@ -20,7 +20,7 @@ class log extends component
 	{
 		if (empty(self::$_logger))
 		{
-			self::$_logger = new logger(ROOT . '/log/');
+			self::$_logger = new logger(APP_ROOT . '/log/');
 		}
 		return self::$_logger;
 	}

@@ -74,7 +74,7 @@ class base
 		{
 			if (! class_exists(self::$APP_NAME . '\\model\\' . $name))
 			{
-				$path = ROOT . '/' . self::$APP_NAME . '/model/' . $name . '.php';
+				$path = APP_ROOT. '/model/' . $name . '.php';
 				if (file_exists($path))
 				{
 					include $path;

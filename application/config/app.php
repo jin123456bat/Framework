@@ -2,10 +2,10 @@
 return array(
 	'charset' => 'UTF-8',
 	
+	//自定义的文件导入  可以通篇使用的代码
 	'import' => array(
-		'application/functions/index.php'
+		'/functions/index.php'
 	),
-	// 'application/algorithm/*',
 	
 	'query_cache' => false,
 	
