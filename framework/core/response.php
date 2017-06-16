@@ -109,10 +109,6 @@ class response extends component
 	 */
 	function setBody($content)
 	{
-		if ($content instanceof \vendor\file)
-		{
-			$this->_body = $content->content();
-		}
 		if ($content instanceof view)
 		{
 			$this->_body = $content->display();
