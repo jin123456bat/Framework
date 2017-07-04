@@ -527,10 +527,64 @@ function a(){
 
 框架中默认使用c和a两个参数来确定一个控制器中的方法，c代表控制器的名称，a代表方法的名称
 
-​	如何访问一个控制器中的方法（假设访问index控制器中的page方法）
+​	访问控制器中的方法的三种方法
 
-​	一、参数访问：index.php?c=index&a=page
+​	一、参数访问
 
-​	二、
+​	`index.php?c=index&a=page`访问index控制器中的page方法
+
+​	二、路由绑定
+
+​	开发者可以在router.php配置文件中指定某一个url绑定某一个control和action
+
+```php
+'bind' => array(
+  //固定式匹配,query_string必须和/about一摸一样才可以  优先级最高
+  '/about' => array(
+  	'c'=>'index','a'=>'page',
+  ),
+
+  //匹配式绑定  id第一个不能数字开头，可以下划线开头或字母   
+  //对应的参数放在get中  可以有多个，
+  //目前测试pathinfo形式的url是可以的，其他形式的url不能确定
+  //假如id不存在也无法正常匹配
+  //优先级其次
+  '/about/{id}' => array(
+  	'about','page',
+  ),
+),
+```
+
+​	如上所示，当用户访问`index.php/about`的时候，实际上访问的是index控制器中的page方法
+
+​	当用户访问`index.php/about/123`的时候的时候，实际上访问的是about控制器中的page方法，同时可以获取到一个get参数，$_GET['id'] = 123
+
+​	上面2种方式都是路由绑定，值可以是c=XXX,a=XXX的数组，也可以是XXX,XXX的数组，第一个是控制器名，第二个是方法名
+
+​	三、pathinfo模式的支持
+
+​	使用这个模式的时候注意，php接受到的url中index.php不能省略，假如希望url中省略掉index.php请使用htaccess方案或者rewrite方案
+
+​	访问`index.php/index/page`代表控制器名为index，方法名为page
 
 ## 五、Control
+
+在框架中提供了3种不同的控制器，
+
+`framework\core\cliControl`  cli模式控制器
+
+`framework\core\webControl` web模式控制器
+
+`framework\core\socketControl` socket模式控制器
+
+这三种控制器都继承了`framework\core\control`类
+
+
+
+cli模式控制器只用于cli模式，  在windows或者linux下执行 `php index.php -c cli -a index` 将执行cli控制器中的index方法，cli控制器必须继承`framework\core\cliControl`
+
+> cli模式下部分类或者方法调用无效，比如cookie，session等
+
+
+
+web控制器只用于web模式，在地址栏中输入对应的url地址，将执行对应控制器中的对应的方法
