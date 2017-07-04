@@ -43,8 +43,10 @@ class webSocket extends component
 	
 	function initlize()
 	{
+		ini_set('max_execution_time', 0);
 		//设置名称
-		$this->_name = ucwords(end(explode('\\', get_class($this))));
+		$this->_name = explode('\\', get_class($this));
+		$this->_name = ucwords(end($this->_name));
 		//设置端口号
 		if (method_exists($this, '__port'))
 		{
@@ -287,7 +289,7 @@ class webSocket extends component
 	 * 判断当前请求是否是websocket链接
 	 * @return boolean
 	 */
-	private function isWebSocket()
+	final private function isWebSocket()
 	{
 		return $this->getKey('Connection') == 'Upgrade' && $this->getKey('Upgrade') == 'websocket';
 	}
@@ -297,7 +299,7 @@ class webSocket extends component
 	 * @param string $name 请求的Key
 	 * @return string|boolean 成功返回字符串，失败返回false
 	 */
-	private function getKey($name)
+	final private function getKey($name)
 	{
 		if (preg_match('/'.$name.': (.*)/i', $this->_http_request, $match))
 		{
@@ -310,7 +312,7 @@ class webSocket extends component
 	 * 获取websocket链接需要的AccpetKey
 	 * @return string
 	 */
-	private function getAccpetKey()
+	final private function getAccpetKey()
 	{
 		$key = $this->getKey('Sec-WebSocket-Key');
 		if ($key !== false)

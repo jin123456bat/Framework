@@ -330,6 +330,8 @@ return array(
 
 ​	Request存在于`\framework\core\request`空间下
 
+
+
 ### 1、获取请求参数
 
 ​	你可以通过以下的一些方式获取get参数
@@ -358,6 +360,8 @@ var_dump(request::get('name',NULL,NULL,'a'));\\array(123);  使用强制变量�
 > 我们可以通过injection的方式来实现自定义过滤器
 
 > 除了get的方法，相同的还有**post**方法，**param**方法
+
+
 
 ### 2、获取上传文件
 
@@ -388,13 +392,15 @@ else
 
 > 注意：假如开发者安装了\framework\vendor\file扩展，这个函数返回的是\framework\vendor\file对象或者是包含这个对象的数组
 
+
+
 ## 三、Response
 
-对于任意一个request，应用程序必须要返回一个response，在控制器的方法中我们可以通过输出一个字符串来给客户端response，同样我们也可以通过return一个字符串的方式来输出一个字符串
+​	对于任意一个request，应用程序必须要返回一个response，在控制器的方法中我们可以通过输出一个字符串来给客户端response，同样我们也可以通过return一个字符串的方式来输出一个字符串
 
-更或者我们可以返回一个`\framework\core\response`对象来输出一些内容
+​	更或者我们可以返回一个`\framework\core\response`对象来输出一些内容
 
-以下3种方式是等价的
+​	以下3种方式是等价的
 
 ```php
 function hello()
@@ -413,7 +419,7 @@ function hello2()
 }
 ```
 
-我们可以通过继承`\framework\core\response`类来实现一些特殊的响应，以json为例
+​	我们可以通过继承`\framework\core\response`类来实现一些特殊的响应，以json为例
 
 ```php
 <?php
@@ -515,13 +521,15 @@ function a(){
 
 框架中已经实现了一些response对象
 
-`\framework\core\response\json` 输出json数据
+`	\framework\core\response\json` 输出json数据
 
-`\framework\core\response\xml` 数据xml数据
+`	\framework\core\response\xml` 数据xml数据
 
-`\framework\core\response\url` 302重定向跳转
+`	\framework\core\response\url` 302重定向跳转
 
-`\framework\core\response\file` 文件下载，支持断点续传
+`	\framework\core\response\file` 文件下载，支持断点续传
+
+
 
 ## 四、Router
 
@@ -567,7 +575,11 @@ function a(){
 
 ​	访问`index.php/index/page`代表控制器名为index，方法名为page
 
+
+
 ## 五、Control
+
+框架可以在web或者cli模式运行，具体执行的代码取决于运行的模式
 
 在框架中提供了3种不同的控制器，
 
@@ -581,10 +593,158 @@ function a(){
 
 
 
-cli模式控制器只用于cli模式，  在windows或者linux下执行 `php index.php -c cli -a index` 将执行cli控制器中的index方法，cli控制器必须继承`framework\core\cliControl`
+​	cli模式控制器只用于cli模式，  在windows或者linux下执行 `php index.php -c cli -a index` 将执行cli控制器中的index方法，cli控制器必须继承`framework\core\cliControl`
 
 > cli模式下部分类或者方法调用无效，比如cookie，session等
 
 
 
-web控制器只用于web模式，在地址栏中输入对应的url地址，将执行对应控制器中的对应的方法
+​	web控制器只用于web模式，只能通过http(s)的协议的方式访问，在地址栏中输入对应的url地址，将执行对应控制器中的对应的方法
+
+
+
+​	socket控制器 只用于websocket模式，在websocket的模式下，由客户端发送一个json对象来确认控制器和方法,其中c和a分别代表控制器和方法，其他参数可以由开发者自行扩展
+
+```json
+{"c":"test","a":"message","data":"参数1","data2":"参数2"}
+```
+
+​	开发者可以在终端或者命令行中执行`php index.php[ -websocket socket_name]`的方式来启动一个websocket监听进程，详细参考websocket章节
+
+
+
+> 错误的调用了错误的模式控制器将会返回404 not found
+
+> 假如开发者希望一个控制器在不同的模式下工作，可以通过继承`framework\core\control`来实现
+
+
+
+## 六、websocket
+
+​	假设开发者希望开发一个基于websocket的应用的时候，可以通过框架启动一个websocket进程
+
+`php index.php[ -websocket socket_name]`
+
+> socket_name是websocket的名称，且必须唯一。
+>
+> 默认的websocket监听端口号是2000
+
+​	开发者可以在应用程序目录的extend目录中创建一个继承`framework\core\webSocket`的类，类名就是socket_name
+
+​	假设我们现在创建一个chat的一个websocket的类，它的类名应该为`application\extend\chat`
+
+```php
+class chat extends webSocket
+{
+	function initlize()
+	{
+		console::log('chat is running');
+		parent::initlize();
+	}
+	
+	/**
+	 * 端口号
+	 * @return number
+	 */
+	function __port()
+	{
+		return 2001;
+	}
+}
+```
+
+​	在这个类中我们声明了一个__port的方法，并且这个方法返回了2001，代表我们使用2001端口来启动监听，
+
+之后我们可以执行 `php index.php -websocket chat`来启动这个websocket监听程序
+
+```shell
+$ php index.php -websocket chat
+chat is running
+Server Chat Startted on 2001!
+```
+
+​	OK！我们的监听程序开起来正常启动了，接下来就是编写我们的逻辑代码了，
+
+​	我们在control目录中创建一个chat的控制器，当然它必须继承`framework\core\socketControl`，代码如下
+
+```php
+namespace application\control;
+use framework\core\socketControl;
+
+class chat extends socketControl
+{
+	function message()
+	{
+		return strrev($this->getParam('data'));
+	}
+}
+```
+
+​	我们的逻辑很简单，将收到的data的数据按照字符串反转后发送回客户端
+
+​	最后就要编写我们的客户端脚本，这里我直接引用网络上的一段代码，我自己做了稍微的修改
+
+```html
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Web sockets test</title>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var ws;
+        function ToggleConnectionClicked() {          
+                try {
+                    ws = new WebSocket("ws://127.0.0.1:2001");//连接服务器        
+                    ws.onopen = function(event){alert("已经与服务器建立了连接\r\n当前连接状态："+this.readyState);};
+                    ws.onmessage = function(event){alert("接收到服务器发送的数据：\r\n"+event.data);};
+                    ws.onclose = function(event){alert("已经与服务器断开连接\r\n当前连接状态："+this.readyState);};
+                    ws.onerror = function(event){alert("WebSocket异常！");};
+                } catch (ex) {
+                    alert(ex.message);      
+                }
+        };
+ 
+        function SendData() {
+            try{
+                var content = document.getElementById("content").value;
+                var content = {//这里要注意了，必须要有c和a，作用是用来执行哪个控制器的哪个方法
+                	'c':'chat',
+                	'a':'message',
+                	'data':content,
+                }
+                if(content){
+                	//客户端必须要将数据转化为json串才可以发送到服务器
+                    ws.send(JSON.stringify(content));
+                }
+            }catch(ex){
+                alert(ex.message);
+            }
+        };
+ 
+        function seestate(){
+            alert(ws.readyState);
+        }
+       
+    </script>
+</head>
+<body>
+   <button id='ToggleConnection' type="button" onclick='ToggleConnectionClicked();'>连接服务器</button><br /><br />
+   <textarea id="content" ></textarea>
+    <button id='ToggleConnection' type="button" onclick='SendData();'>发送我的名字：beston</button><br /><br />
+    <button id='ToggleConnection' type="button" onclick='seestate();'>查看状态</button><br /><br />
+</body>
+</html>
+```
+
+​	好，接下来在浏览器中执行前端脚本，点击链接服务器，弹出
+
+```
+已经与服务器建立了连接
+当前连接状态：1
+```
+
+​	服务器连接成功，接下来再输入框中输入我们要传输的数据，假设为abcd，好，正常提示dcba！了，这就是一个完整的websocket通信流程。（因为服务器端的逻辑是strrev，所以不支持中文，测试的时候注意，不要以为电脑有问题就砸电脑）
+
+
+
+## 七、model

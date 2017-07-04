@@ -143,7 +143,7 @@ class index extends BaseControl
 		/* request::file('file');//使用默认配置
 		request::file('file','video');//使用视频配置
 		 */
-		return new json(array(1,2));
+		return new json(array('c'=>'test','a'=>'message','data'=>'参数1','data2'=>'参数2'));
 	}
 
 	function page()
