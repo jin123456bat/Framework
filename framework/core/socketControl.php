@@ -2,6 +2,15 @@
 namespace framework\core;
 class socketControl extends control
 {
+	function initlize()
+	{
+		if (request::php_sapi_name() != 'socket')
+		{
+			return new response('not found', 404);
+		}
+		return parent::initlize();
+	}
+	
 	/**
 	 * 获取前端传递的参数
 	 * @param unknown $name

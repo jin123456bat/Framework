@@ -3,6 +3,15 @@ namespace framework\core;
 
 class cliControl extends control
 {
+	function initlize()
+	{
+		if (request::php_sapi_name() != 'cli')
+		{
+			return new response('not found', 404);
+		}
+		return parent::initlize();
+	}
+	
 	/**
 	 * 获取参数  尚未完成
 	 * @param string $name
