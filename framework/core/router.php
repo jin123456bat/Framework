@@ -28,9 +28,11 @@ class router extends component
 		$query_string = $_SERVER['QUERY_STRING'];
 		if (empty($query_string))
 		{
+			//假如没有？或者？后面为空  获取index.php后面的内容，index.php不能省略  可以通过rewrite规则来实现
 			$query_string = substr($_SERVER['REQUEST_URI'], strlen($_SERVER['SCRIPT_NAME']));
 		}
 		
+		//路由绑定判断
 		if (!empty($query_string))
 		{
 			if (isset($config['bind'][$query_string]) && !empty($config['bind'][$query_string]))
@@ -54,6 +56,18 @@ class router extends component
 				{
 					$this->_action_name = $bind[1];
 				}
+			}
+		}
+		
+		//pathinfo模式的支持
+		if (!empty($query_string) && empty($this->_action_name) && empty($this->_control_name))
+		{
+			$params = array_filter(explode('/', $query_string));
+			$this->_control_name = isset($params[0])?$params[0]:NULL;
+			$this->_action_name = isset($params[1])?$params[1]:NULL;
+			for($i = 2;$i<count($params);$i+=2)
+			{
+				$_GET[$params[$i]] = isset($params[$i+1])?$params[$i+1]:NULL;
 			}
 		}
 		

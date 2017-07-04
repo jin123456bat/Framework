@@ -525,4 +525,12 @@ function a(){
 
 ## 四、Router
 
+框架中默认使用c和a两个参数来确定一个控制器中的方法，c代表控制器的名称，a代表方法的名称
+
+​	如何访问一个控制器中的方法（假设访问index控制器中的page方法）
+
+​	一、参数访问：index.php?c=index&a=page
+
+​	二、
+
 ## 五、Control

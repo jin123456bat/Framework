@@ -20,6 +20,7 @@ use framework\core\database\mysql\field;
 use framework\core\database\driver\mysql;
 use framework\core\cache; */
 use framework\core\response\json;
+use framework\core\view;
 
 class index extends BaseControl
 {
