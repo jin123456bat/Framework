@@ -21,6 +21,8 @@ use framework\core\database\driver\mysql;
 use framework\core\cache; */
 use framework\core\response\json;
 use framework\core\view;
+use framework\core\database\sql;
+use framework\core\database\driver\mysql;
 
 class index extends BaseControl
 {
@@ -117,16 +119,6 @@ class index extends BaseControl
 		$name2 = new \stdClass();
 		$name2->a = 1;
 		$name2->b = 2;
-		cache::set('name2', $name2);
-		var_dump(cache::get('name'));
-		var_dump(cache::get('name1'));	
-		var_dump(cache::get('name2')); */
-		
-		
-		//假设当前name=123
-		/* var_dump(request::get('name'));//123
-		var_dump(request::
-		
 		
 		
 		
@@ -143,7 +135,19 @@ class index extends BaseControl
 		/* request::file('file');//使用默认配置
 		request::file('file','video');//使用视频配置
 		 */
-		return new json(array('c'=>'test','a'=>'message','data'=>'参数1','data2'=>'参数2'));
+		
+		$a = new sql();
+		$b = new sql();
+		$a->setFrom('a')->select();
+		$b->setFrom('b')->select();
+		$a->union(true,$b);
+		
+		$config = $this->getConfig('db');
+		$m = mysql::getInstance($config['test']);
+		$result = $m->query($a);
+		var_dump($result);
+		
+		//return new json(array('c'=>'test','a'=>'message','data'=>'参数1','data2'=>'参数2'));
 	}
 
 	function page()

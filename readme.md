@@ -748,3 +748,196 @@ class chat extends socketControl
 
 
 ## 七、model
+
+框架中任何需要操作数据库数据的地方都可以使用model。开发者可以在项目的任何类中使用model，使用方式很简单
+
+```php
+$this->model($tableName);
+```
+
+$tableName是数据库表名
+
+model方法返回的是一个`framework\core\model`对象，假如开发者在应用程序的model目录中创建了自定义的model，那么返回的将是自定义对象，
+
+> 当实例化model的时候，model对应的数据表必须存在，否则将会出错
+
+例如开发者创建了这样的一个类
+
+```php
+namespace application\model;
+
+use framework\core\model;
+
+class accounts extends model
+{
+}
+```
+
+那么开发者就可以在任意类中使用
+
+```php
+$this->model('accounts')
+```
+
+的方式来获得`application\model\accounts`类的实例，
+
+假如开发者没有创建`application\model\accounts`类，那么model方法将返回`framework\core\model`类
+
+
+
+通常在一个项目中可能连接了多个数据库，同样，我们也允许不同的model连接不能的数据库，首先我们应该按照config章节中的说明在db.php中合理的配置不同的连接方式的配置。
+
+
+
+框架允许在自定义model中声明一个__config方法，这个方法可以有2种返回值，一种是存储了详细配置的数据，或者是数据库连接的配置名称
+
+假设我们在db.php的配置文件中已经声明了如下配置
+
+```php
+return array(
+	'test' => array(
+		'type' => 'mysql',
+		'server' => 'localhost',
+		'dbname' => 'test',
+		'user' => 'root',
+		'password' => '',
+		'charset' => 'utf8',
+	)
+);
+```
+
+那么在自定义model中按照如下方式使用是等价的
+
+```php
+//使用手动指定的配置
+function __config()
+{
+	return array(
+		'type' => 'mysql',
+		'server' => 'localhost',
+		'dbname' => 'test',
+		'user' => 'root',
+		'password' => '',
+		'charset' => 'utf8',
+	);
+}
+//等价于
+//自动在配置文件中查找名为test的配置
+function __config()
+{
+  return 'test';
+}
+//等价于
+function __config()
+{
+  $db = $this->getConfig('db');
+  return $db['test'];
+}
+```
+
+
+
+默认情况下，框架使用表名来作为model的名称，有的时候，数据库表名可能和model名称不一致，或者希望可以自定义表名，开发者可以通过添加__tableName的方法来声明实际表名
+
+```php
+namespace application\model;
+
+use framework\core\model;
+
+class accounts extends model
+{
+	function __tableName()
+    {
+      return 'accounts_in_test';
+    }
+}
+```
+
+如上代码所示，虽然model名为model，但实际上操作的却是accounts_in_test表
+
+
+
+简单的查询，所有的查询操作必须以select/find/scalar/count/max/sum/avg等结尾
+
+```php
+$this->model('accounts')->select();//查询accounts表中的所有数据
+$this->model('accounts')->where('id=?',array(1))->select();//查询id为1的数据
+$this->model('accounts')->limit(0,10)->select();//相当于 limit 0,10
+$this->model('accounts')->limit(10)->select();//相当于 limit 10
+$this->model('accounts')->order('id')->select();//相当与order by id asc
+$this->model('accounts')->order('id','desc')->select();//相当于order by id desc
+$this->model('accounts')->in('id',array(1,2,3));//相当于 and in (1,2,3)
+$this->model('accounts')->where('id like ?',array(1))->where('name >= ?',array('123'))->find();//多个where
+$this->model('accounts')->group('name,id')  //等价于
+$this->model('accounts')->group(array('name','id'))
+//指定字段查询
+$this->model('accounts')->select('id,name');//等价于
+$this->model('accounts')->select(['id','name']);
+
+$this->model('accounts')->select();//select返回多行数据
+$this->model('accounts')->find();//find返回第一行数据  参数等同于select
+$this->model('accounts')->scalar();//第一行的第一个数据
+
+//select的as操作
+$this->model('accounts')->select(array('number'=>'id'));
+//select id as number from accounts;
+
+//select相关的扩展方法
+$this->model('accounts')->likein('name',array('张三','李四'))->select();
+//select * from accounts where name like "张三" or name like "李四"
+
+//where其他的用法，
+$this->model('accounts')->where('id=:id and name=:name',array('id'=>1,'name'=>'张三'))->select();
+```
+
+多表查询功能
+
+```php
+//如何添加多表以及as使用
+$this->model('accounts')->from('admin')->select();
+//select * from accounts,admin;
+$this->model('accounts')->from('admin','a')->select();
+//select * from accounts,admin as a
+$this->model('accounts')->setFrom('admin','a')->select();
+//select * from admin as a;
+
+
+//join相关函数
+//join/leftJoin/rightJoin/innerJoin/fullJoin
+//使用方法一样，所以就拿一个join来举例
+$this->model('accounts')->join('admin','admin.id=accounts.aid')->select();
+//select * from accounts join admin on admin.id=accounts.aid
+$this->model('accounts')->join('admin',array(
+  'admin.id=accounts.aid',
+  'admin.name=accounts.aname'
+));
+//select * from accounts join admin on admin.id=accounts.aid and admin.name=accounts.aname
+$this->model('accounts')->join('admin',array(
+  'admin.id=accounts.aid',
+  'admin.name=accounts.aname'
+),'or');
+//select * from accounts join admin on admin.id=accounts.aid or admin.name=accounts.aname
+```
+
+更加复杂的sql，union实例
+
+框架提供了一个sql拼装的一个类`framework\core\database\sql`
+
+```php
+$a = new framework\core\database\sql();
+$b = new framework\core\database\sql();
+$c = new framework\core\database\sql();
+$a->setFrom('a')->select();
+$b->setFrom('b')->select();
+$c->setFrom('c')->select();
+$a->union(false,$b,$c);
+//等价于生成了一个sql
+//select * from a union select * from b union select * from c
+
+//接下来就是从配置中查找一个配置
+$config = $this->getConfig('db');
+//使用制定配置实例化一个mysql连接
+$m = mysql::getInstance($config['test']);
+//使用这个mysql连接来执行上面的sql
+$result = $m->query($a);
+```
