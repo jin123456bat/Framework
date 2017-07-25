@@ -2,6 +2,8 @@
 namespace framework\lib;
 
 use framework\lib\error;
+use framework;
+use framework\core\application;
 
 class data extends error implements \ArrayAccess
 {
@@ -65,6 +67,18 @@ class data extends error implements \ArrayAccess
 			->where($pk . '=?', array(
 			$this->$pk
 		))->delete();
+	}
+	
+	/**
+	 * 根据某一个字段找一行内容
+	 * @param unknown $field 字段名
+	 * @param unknown $value 字段值
+	 * @return unknown array
+	 */
+	function findByFiled($field,$value)
+	{
+		$model = $this->__model();
+		return $this->model($model)->where($field.'=?',array($value))->limit(1)->find();
 	}
 
 	/**
@@ -163,10 +177,94 @@ class data extends error implements \ArrayAccess
 
 	/**
 	 * 验证数据集合是否符合规则
+	 * @param string $sence 场景名称 默认为空不使用场景名称
 	 */
-	function validate()
+	function validate($sence = '')
 	{
 		$rules = $this->__rules();
+		foreach ($rules as $key => $rule)
+		{
+			switch ($key)
+			{
+				//不能存在
+				case 'unsafe':
+					$key = '';
+					break;
+				//大于等于
+				case '>=':
+					$key = 'ge';
+					break;
+					//小于等于
+				case '<=':
+					$key = 'le';
+					break;
+					//不等于
+				case '!=':
+					$key = 'ne';
+					break;
+					//小于
+				case '<':
+					$key = 'lt';
+					break;
+					//大于
+				case '>':
+					$key = 'gt';
+					break;
+					//等于  这个同时也要求可以验证2个字段的值
+				case '=':
+					$key = 'eq';
+					break;
+					//必须是整数，可以是负数
+				case 'int':
+					break;
+					//可以是整数或者小数 可以是负数
+				case 'decimal':
+					break;
+					//唯一
+				case 'unique':
+					break;
+					//必须是手机号码
+				case 'telephone':
+					break;
+					//必须是email
+				case 'email':
+					break;
+					//必须是url 仅支持http或者https开头  假如没有协议名按照http来处理
+				case 'url':
+					break;
+					//必须是IP地址  或者ip地址段
+				case 'ip':
+					break;
+					//必须在多个中的一个
+				case 'enum':
+					break;
+					//必须是日期时间 要求格式和有效性同时可以验证，要求可以自定义格式验证
+				case 'datetime':
+					break;
+					//对自定义函数的支持
+				case 'function':
+					$key = '';
+					break;
+			}
+			
+			if (!empty($key))
+			{
+				$validator = application::load('validator');
+				if (is_callable(array(
+					$validator,
+					$key
+				)))
+				{
+					$render = $this->render($rule);
+					
+					$message = $this->message($rule);
+					$data = $this->data($rule);
+					
+					call_user_func(array($validator,$key),$render,$data);
+				}
+			}
+		}
+		
 		
 		foreach ($rules as $index => $rule)
 		{
@@ -194,151 +292,6 @@ class data extends error implements \ArrayAccess
 			}
 		}
 		
-		foreach ($rules as $rule)
-		{
-			$do = '';
-			$fields = array();
-			$message = '';
-			
-			if (isset($rule['required']) && ! empty($rule['required']))
-			{
-				$fields = $this->parseFileds($rule['required']);
-				$do = 'required';
-			}
-			
-			if (isset($rule['unique']) && ! empty($rule['unique']))
-			{
-				$fields = $this->parseFileds($rule['unique']);
-				$do = 'unique';
-			}
-			if (isset($rule['lt']) && ! empty($rule['lt']))
-			{
-				$fields = $this->parseFileds($rule['lt']);
-				$do = 'compare';
-				$method = '<';
-			}
-			if (isset($rule['gt']) && ! empty($rule['gt']))
-			{
-				$fields = $this->parseFileds($rule['gt']);
-				$do = 'compare';
-				$method = '>';
-			}
-			if (isset($rule['ge']) && ! empty($rule['ge']))
-			{
-				$fields = $this->parseFileds($rule['ge']);
-				$do = 'compare';
-				$method = '>=';
-			}
-			if (isset($rule['validate']) && ! empty($rule['validate']))
-			{
-				$fields = $this->parseFileds($rule['fileds']);
-				$do = 'validate';
-			}
-			if (isset($rule['enum']) && ! empty($rule['enum']))
-			{
-				$fields = $this->parseFileds($rule['enum']);
-				$do = 'enum';
-			}
-			if (isset($rule['email']) && ! empty($rule['email']))
-			{
-				$fileds = $this->parseFileds($rule['email']);
-				$do = 'email';
-			}
-			
-			$rule['message'] = isset($rule['message']) ? $rule['message'] : '';
-			
-			switch ($do)
-			{
-				case 'email':
-					$pattern = '$(\w+@\w+\.\w+)(\.[a-zA-Z]{2})?$';
-					foreach ($fields as $index => $value)
-					{
-						if (! preg_match($pattern, $this->$value))
-						{
-							$this->addError('000100', $this->message($rule, $value));
-						}
-					}
-				break;
-				case 'enum':
-					$values = is_array($rule['values']) ? $rule['values'] : explode(',', $rule['values']);
-					foreach ($fields as $index => $value)
-					{
-						if (! in_array($this->$value, $values) || ! isset($this->$value))
-						{
-							$this->addError('000100', $this->message($rule, $value));
-						}
-					}
-				break;
-				case 'required':
-					foreach ($fields as $index => $value)
-					{
-						if (! in_array($value, $this->_safe_fileds) && (! isset($this->$value) || $this->isEmpty($this->$value)))
-						{
-							$this->addError('000100', $this->message($rule, $value));
-						}
-					}
-				break;
-				case 'unique':
-					$model = $this->model($this->__model());
-					foreach ($fields as $index => $value)
-					{
-						if (! in_array($value, $this->_safe_fileds))
-						{
-							$tempValue = $this->render($rule, $value);
-							$result = $model->where($value . '=?', array(
-								$tempValue
-							))->find();
-							if (! empty($result))
-							{
-								$this->addError('000100', $this->message($rule, $value));
-							}
-						}
-					}
-				break;
-				case 'compare':
-					$firstValue = $fields[0];
-					$secondValue = $fields[1];
-					if (! (in_array($firstValue, $this->_safe_fileds) && in_array($firstValue, $this->_safe_fileds)))
-					{
-						$firstTempValue = is_numeric($firstValue) ? $firstValue : $this->render($rule, $firstValue);
-						$secondTempValue = is_numeric($secondValue) ? $secondValue : $this->render($rule, $secondValue);
-						switch ($method)
-						{
-							case '<':
-								if ($firstTempValue >= $secondTempValue)
-								{
-									$this->addError('000100', $this->message($rule, $firstValue));
-								}
-							break;
-							case '>':
-								if ($firstTempValue <= $secondTempValue)
-								{
-									$this->addError('000100', $this->message($rule, $firstValue));
-								}
-							break;
-							case '>=':
-								if ($firstTempValue < $secondTempValue)
-								{
-									$this->addError('000100', $this->message($rule, $firstValue));
-								}
-							break;
-						}
-					}
-				break;
-				case 'validate':
-					foreach ($fields as $index => $value)
-					{
-						if (is_callable($rule['validate']))
-						{
-							if (! call_user_func($rule['validate'], $this->render($rule, $value)))
-							{
-								$this->addError('000100', $this->message($rule, $value));
-							}
-						}
-					}
-				break;
-			}
-		}
 		if ($this->hasError())
 		{
 			return false;
@@ -349,13 +302,26 @@ class data extends error implements \ArrayAccess
 	/**
 	 * 判断是否有render，并且进行一次render
 	 */
-	private function render($rule, $value)
+	private function render($rule)
 	{
-		if (isset($rule['render']) && is_callable($rule['render']))
+		if (is_array($rule))
 		{
-			return call_user_func($rule['render'], $this->$value);
+			if (isset($rule['fields']))
+			{
+				if (is_string($rule['fields']))
+				{
+					$keys = explode(',', $rule['fields']);
+				}
+				else if (is_array($rule['fields'])) 
+				{
+					
+				}
+			}
+			else
+			{
+				$keys = array_keys($rule);
+			}
 		}
-		return $this->$value;
 	}
 
 	/**
@@ -371,40 +337,7 @@ class data extends error implements \ArrayAccess
 			return str_replace($replacer, $value, $rule['message']);
 		}
 		return '';
-	}
-
-	/**
-	 * 判断变量是否为空
-	 *
-	 * @param unknown $value        	
-	 */
-	private function isEmpty($value)
-	{
-		if (is_array($value))
-		{
-			foreach ($value as $val)
-			{
-				if (! $this->isEmpty($val))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-		else if (is_string($value) && strlen($value) !== 0)
-		{
-			return false;
-		}
-		else if (is_int($value) && $value !== 0)
-		{
-			return false;
-		}
-		else if (is_float($value) && $value != 0)
-		{
-			return false;
-		}
-		return true;
-	}
+	}	
 
 	private function parseFileds($string)
 	{
@@ -420,28 +353,7 @@ class data extends error implements \ArrayAccess
 
 	/**
 	 *
-	 * @example [
-	 *          [
-	 *          'required' => 'a,b,c,d...',
-	 *          'message' => 'this field can't be empty'
-	 *          ],
-	 *          [
-	 *          'string' => 'e,f,g..'
-	 *          'maxlength' => 100,
-	 *          'minlength' => 10,
-	 *          'message' => ''
-	 *          ],
-	 *          [
-	 *          'int' => 'x,y,z',
-	 *          'max' => 10,
-	 *          'min' => 0,
-	 *          'message' => '{field}'
-	 *          ],
-	 *          [
-	 *          'number' => 'h,j',
-	 *          'message'=> ''
-	 *          ]
-	 *          ]
+	 * @example 这里重写
 	 */
 	function __rules()
 	{

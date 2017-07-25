@@ -23,12 +23,20 @@ use framework\core\response\json;
 use framework\core\view;
 use framework\core\database\sql;
 use framework\core\database\driver\mysql;
+use application\entity\test;
+use framework\core\request;
 
 class index extends BaseControl
 {
 
 	function index()
 	{
+		$test = new test(array(
+			'username' => 'jin123456bat',
+		));
+		
+		var_dump($test->validate());
+		
 		//var_dump(cookie::set('name','555'));
 		//var_dump($_COOKIE);
 		/* $token = csrf::token();
@@ -136,7 +144,7 @@ class index extends BaseControl
 		request::file('file','video');//使用视频配置
 		 */
 		
-		$a = new sql();
+		/* $a = new sql();
 		$b = new sql();
 		$a->setFrom('a')->select();
 		$b->setFrom('b')->select();
@@ -145,7 +153,7 @@ class index extends BaseControl
 		$config = $this->getConfig('db');
 		$m = mysql::getInstance($config['test']);
 		$result = $m->query($a);
-		var_dump($result);
+		var_dump($result); */
 		
 		//return new json(array('c'=>'test','a'=>'message','data'=>'参数1','data2'=>'参数2'));
 	}

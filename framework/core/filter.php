@@ -1,9 +1,13 @@
 <?php
 namespace framework\core;
 
+/**
+ * 在request类中使用，用于过滤参数
+ * @author jin
+ *
+ */
 class filter extends base
 {
-
 	/**
 	 * integer的别名
 	 *

@@ -21,7 +21,6 @@ class api extends data
 				'render' => 'strtotime',
 				'message' => '开始时间必须小于于结束时间'
 			),
-			
 			array(
 				'required' => 'sn',
 				'message' => '{field}不能为空',
@@ -36,7 +35,6 @@ class api extends data
 				'message' => '{field}不合法',
 				'on' => 'sn,sn_duration'
 			),
-			
 			array(
 				'required' => 'duration',
 				'message' => 'duration间隔最少5分钟',

@@ -116,9 +116,13 @@ class request extends base
 	 * @param string $type        	
 	 * @return mixed|string|boolean|number|\core\StdClass|\core\unknown|string
 	 */
-	public static function post($name, $defaultValue = null, $filter = null, $type = 's')
+	public static function post($name = '', $defaultValue = null, $filter = null, $type = 's')
 	{
-		if (isset($_POST[$name]))
+		if ($name === '')
+		{
+			return $_POST;
+		}
+		else if (isset($_POST[$name]))
 		{
 			$data = $_POST[$name];
 			
@@ -139,7 +143,7 @@ class request extends base
 							$filter_t
 						)))
 						{
-							$data = filter::$filter_t($data);
+							$data = call_user_func(array($filterClass,$filter_t),$data);
 						}
 						else if (! empty($filter_t))
 						{
@@ -188,9 +192,13 @@ class request extends base
 	 * @param unknown $filter  过滤器名称
 	 * @param string $type 默认是s
 	 */
-	public static function get($name, $defaultValue = null, $filter = null, $type = '')
+	public static function get($name = '', $defaultValue = null, $filter = null, $type = '')
 	{
-		if (isset($_GET[$name]))
+		if ($name === '')
+		{
+			return $_GET;
+		}
+		else if (isset($_GET[$name]))
 		{
 			$data = $_GET[$name];
 			
@@ -211,7 +219,7 @@ class request extends base
 							$filter_t
 						)))
 						{
-							$data = filter::$filter_t($data);
+							$data = call_user_func(array($filterClass,$filter_t),$data);
 						}
 						else if (! empty($filter_t))
 						{
@@ -260,9 +268,13 @@ class request extends base
 	 * @param unknown $filter        	
 	 * @param string $type        	
 	 */
-	public static function param($name, $defaultValue = null, $filter = null, $type = 's')
+	public static function param($name = '', $defaultValue = null, $filter = null, $type = 's')
 	{
-		if (isset($_REQUEST[$name]))
+		if ($name === '')
+		{
+			return $_REQUEST;
+		}
+		else if (isset($_REQUEST[$name]))
 		{
 			$data = $_REQUEST[$name];
 			
@@ -283,7 +295,7 @@ class request extends base
 							$filter_t
 						)))
 						{
-							$data = filter::$filter_t($data);
+							$data = call_user_func(array($filterClass,$filter_t),$data);
 						}
 						else if (! empty($filter_t))
 						{
