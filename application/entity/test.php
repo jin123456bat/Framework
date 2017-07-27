@@ -11,22 +11,24 @@ class test extends entity
 				'fields' => 'username,password',
 				'message' => '用户名或密码必须填写',
 			),
+			//最标准的写法应该是这样子的
 			'>=' => array(
 				'fields' => array(
 					'username' => array(
 						'render' => 'mb_strlen',//对参数先经过这个函数  然后在做判断
 						'message' => '用户名长度不能低于6位',
 						'data' => 6,
+						'on' => array('insert'),//在什么样的情景下才可用，默认是所有情景，可以数组，多个情景 也可以是逗号分开的字符串
 					),
 					'age' => array(
-						'message' => '年龄必须大于18岁',
+						'message' => '年龄必须大于等于18岁',
 						'data' => 18,
 					)
 				),
 			),
 			'unsafe' => array(
 				'fields' => 'sql',//提交的参数中不能包含sql这个参数
-				'message' => '参数错误',
+				'message' => '提交不能存在sql参数',
 			),
 			'int' => array(
 				'fields' => 'age',
@@ -52,7 +54,7 @@ class test extends entity
 				'email' => 'email错误',
 			),
 			'enum' => array(
-				'fields' => 'sex',
+				'fields' => array('sex'),
 				'data' => array(
 					'男','女',
 				)
@@ -67,8 +69,9 @@ class test extends entity
 			'function' => array(//自定义函数
 				'fields' => 'relations',
 				'render' => function(){
-					
+					return '好的';
 				},
+				'message' => '123123',
 				'callback' => function($val){
 					return !!$val;//返回true或者false
 				},

@@ -7,6 +7,100 @@ namespace framework\core;
  */
 class validator extends base
 {
+	static function enum($val,$array)
+	{
+		return in_array(trim($val), $array);
+	}
+	
+	static function datetime($val,$format)
+	{
+		return trim($val) == date($format,strtotime($val));
+	}
+	
+	/**
+	 * 国内手机号码
+	 * @param unknown $val
+	 * @return number
+	 */
+	static function telephone($val)
+	{
+		if(preg_match('/(\+?86)?0?(13|14|15|18)[0-9]{9}/', trim($val),$match))
+		{
+			return $match[0]==$val;
+		}
+		return false;
+	}
+	
+	/**
+	 * 全中文
+	 */
+	static function chinese($val)
+	{
+		if(preg_match('/[\u4e00-\u9fa5]/', trim($val),$match))
+		{
+			return $match[0]==$val;
+		}
+		return false;
+	}
+	
+	/**
+	 * email
+	 * @param unknown $val
+	 */
+	static function email($val)
+	{
+		if(preg_match('/\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/', trim($val),$match))
+		{
+			return $match[0]==$val;
+		}
+		return false;
+	}
+	
+	/**
+	 * url
+	 * @param unknown $val
+	 * @return number
+	 */
+	static function url($val)
+	{
+		if(preg_match('/^((https|http|ftp|rtsp|mms)?:\/\/)[^\s]+/',trim($val),$match))
+		{
+			return $match[0]==$val;
+		}
+		return false;
+	}
+	
+	static function ip($val)
+	{
+		if(preg_match('/(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)/',trim($val),$match))
+		{
+			return $match[0]==$val;
+		}
+		return false;
+	}
+	
+	/**
+	 * 国内身份证号码
+	 */
+	static function idcard($val)
+	{
+		if(preg_match('/\d{17}[\d|x]|\d{15}/',trim($val),$match))
+		{
+			return $match[0] == $val;
+		}
+		return false;
+	}
+	
+	/**
+	 * 判断请求参数中不能包含某字段
+	 * @param unknown $val
+	 * @return boolean
+	 */
+	static function unsafe($val)
+	{
+		return $val===NULL;
+	}
+	
 	/**
 	 * 大于等于
 	 */
@@ -58,8 +152,7 @@ class validator extends base
 	}
 	
 	/**
-	 * 验证变量必须存在
-	 * 相当于empty
+	 * 判断验证器中变量必须存在
 	 * @param string|int|array $variable
 	 * @return boolean
 	 */

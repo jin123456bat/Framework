@@ -32,10 +32,22 @@ class index extends BaseControl
 	function index()
 	{
 		$test = new test(array(
-			'username' => 'jin123456bat',
+			'username' => 'jin123',
+			'password' => '111',
+			'age' => 18,
+			'money' => '1.1',
+			'telephone' => 15868481019,
+			'ip' => '255.255.255.4/24',//IP地址暂时不支持掩码
+			'email' => '326550324@qq.com',
+			'time' => '2017-05-06',//时间现在貌似必须填写格式，不填写格式会有问题,
+			'sex' => '男',
 		));
+		//自定义校验器中没有render  等待修复
 		
-		var_dump($test->validate());
+		if (!$test->validate())
+		{
+			var_dump($test->getError());
+		}
 		
 		//var_dump(cookie::set('name','555'));
 		//var_dump($_COOKIE);
