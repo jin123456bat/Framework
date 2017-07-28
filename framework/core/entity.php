@@ -338,6 +338,11 @@ class entity extends data
 						$value['on'] = $rule['on'];
 					}
 					
+					if (isset($rule['render']) && !isset($value['render']))
+					{
+						$value['render'] = $rule['render'];
+					}
+					
 					if (isset($rule['message']) && empty($value['message']))
 					{
 						$value['message'] = $rule['message'];
@@ -484,6 +489,9 @@ class entity extends data
 							$value = call_user_func($val['render'],$value);
 						}
 						
+						//其他的参数
+						$data = isset($val['data'])?$val['data']:array();
+						
 						if ($key == 'unique')
 						{
 							if(!empty($this->findByFiled($field, $value)))
@@ -491,20 +499,22 @@ class entity extends data
 								return false;
 							}
 						}
+						else if ($key == 'function' && !empty($val['callback']))
+						{
+							$callback = $val['callback'];
+							if(call_user_func($callback,$value,$data))
+							{
+								//假如失败的错误消息
+								$message = $this->message($val['message'],$field,$value);
+								$this->addError($field, $message);
+							}
+						}
 						else
 						{
-							if ($key == 'function')
-							{
-								var_dump($renderData['relations']);
-								var_dump($renderData['render']);
-							}
-							//其他的参数
-							$data = isset($val['data'])?$val['data']:array();
-							
 							if(!call_user_func(array($validator,$key),$value,$data))
 							{
 								//假如失败的错误消息
-								$message = $this->message($val['message'],$key,$value);
+								$message = $this->message($val['message'],$field,$value);
 								$this->addError($field, $message);
 							}
 						}
@@ -512,7 +522,7 @@ class entity extends data
 				}
 				else
 				{
-					exit('未知的校验器'.$key);
+					trigger_error('错误的校验器');
 				}
 			}
 		}

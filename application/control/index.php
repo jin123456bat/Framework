@@ -42,7 +42,6 @@ class index extends BaseControl
 			'time' => '2017-05-06',//时间现在貌似必须填写格式，不填写格式会有问题,
 			'sex' => '男',
 		));
-		//自定义校验器中没有render  等待修复
 		
 		if (!$test->validate())
 		{

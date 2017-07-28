@@ -68,10 +68,10 @@ class test extends entity
 			),
 			'function' => array(//自定义函数
 				'fields' => 'relations',
-				'render' => function(){
-					return '好的';
+				'render' => function($val){//$val => $this->_data['relations']
+					return '123';
 				},
-				'message' => '123123',
+				'message' => '自定义{field}函数校验失败,它的值为{value}',
 				'callback' => function($val){
 					return !!$val;//返回true或者false
 				},
