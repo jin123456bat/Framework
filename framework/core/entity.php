@@ -512,7 +512,7 @@ class entity extends data
 						else if ($key == 'function' && !empty($val['callback']))
 						{
 							$callback = $val['callback'];
-							if(call_user_func($callback,$value,$data))
+							if(!call_user_func($callback,$value,$data))
 							{
 								//假如失败的错误消息
 								$message = $this->message($val['message'],$field,$value);

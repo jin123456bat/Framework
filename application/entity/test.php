@@ -61,7 +61,7 @@ class test extends entity
 			),
 			'datetime' => array(
 				'fields' => 'time',
-				'data' => 'Y-m-d H:i:s', //这个应该是可选的，假如没有格式限制应该任意格式都是允许的
+				'data' => 'Y-m-d H:i:s', //这个是可选的  默认为Y-m-d H:i:s
 				'message' => array(
 					'时间错误',
 				)
@@ -73,7 +73,7 @@ class test extends entity
 				},
 				'message' => '自定义{field}函数校验失败,它的值为{value}',
 				'callback' => function($val){
-					return !!$val;//返回true或者false
+					return true;//返回true或者false
 				},
 			)
 		);

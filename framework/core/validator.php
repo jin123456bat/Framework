@@ -14,6 +14,10 @@ class validator extends base
 	
 	static function datetime($val,$format)
 	{
+		if (empty($format))
+		{
+			$format = 'Y-m-d H:i:s';
+		}
 		return trim($val) == date($format,strtotime($val));
 	}
 	
@@ -72,9 +76,18 @@ class validator extends base
 	
 	static function ip($val)
 	{
-		if(preg_match('/(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)/',trim($val),$match))
+		$val = explode('/', trim($val));
+		
+		if (isset($val[1]))
 		{
-			return $match[0]==$val;
+			if (!($val[1] > 0 && $val[1]<36))
+			{
+				return false;
+			}
+		}
+		if(preg_match('/(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)/',$val[0],$match))
+		{
+			return $match[0]==$val[0];
 		}
 		return false;
 	}
