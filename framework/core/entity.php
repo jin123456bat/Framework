@@ -443,7 +443,6 @@ class entity extends data
 				case '>':
 					$key = 'gt';
 					break;
-					//等于  这个同时也要求可以验证2个字段的值
 				case '=':
 					$key = 'eq';
 					break;
@@ -490,7 +489,18 @@ class entity extends data
 						}
 						
 						//其他的参数
-						$data = isset($val['data'])?$val['data']:array();
+						$data = isset($val['data'])?$val['data']:NULL;
+						//等于不等于 支持2个字段之间的对比
+						//if (in_array($key, array('ge','le','ne','lt','gt','eq')))
+						//{
+							if (is_string($data) && $data[0] == '@')
+							{
+								if (isset($this->_data[substr($data, 1)]))
+								{
+									$data = $this->_data[substr($data, 1)];
+								}
+							}
+						//}
 						
 						if ($key == 'unique')
 						{
