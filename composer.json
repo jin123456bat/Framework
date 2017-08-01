@@ -1,0 +1,21 @@
+{
+	"name" : "jin123456bat/framework3.0",
+	"description" : "framework3.0 is a mvc framework developed with php",
+	"homepage" : "https://github.com/jin123456bat/framework3.0",
+	"minimum-stability" : "alpha",
+	"license" : "Apache-2.0",
+	"type" : "project",
+	"authors" : [{
+			"name" : "金程晨",
+			"email" : "326550324@qq.com",
+			"homepage" : "http://github.com/jin123456bat/framework3.0",
+			"role" : "developer"
+		}
+	],
+	"support" : {
+		"email" : "326550324@qq.com"
+	},
+	"keywords" : [
+		"mvc framework"
+	]
+}
