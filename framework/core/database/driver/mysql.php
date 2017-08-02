@@ -308,7 +308,7 @@ class mysql extends database
 	 * @param table $table 表名
 	 * @param string $config 数据库配置
 	 */
-	function create(table $table)
+	/*function create(table $table)
 	{
 		$sql = $table->__toSql();
 		$result = $this->query($sql);
@@ -320,13 +320,13 @@ class mysql extends database
 		{
 			return false;
 		}
-	}
+	}*/
 	
 	/**
 	 * 判断数据表是否存在
 	 * @return bool
 	 */
-	function isExist($tableName)
+	/*function isExist($tableName)
 	{
 		$result = $this->query('show tables like ?',array($tableName));
 		if (empty($result))
@@ -334,5 +334,5 @@ class mysql extends database
 			return false;
 		}
 		return current(current($result)) == $tableName;
-	}
+	}*/
 }

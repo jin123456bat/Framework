@@ -51,11 +51,11 @@ abstract class database
 	 * 判断表是否存在
 	 * @param unknown $tableName
 	 */
-	abstract function isExist($tableName);
+	//abstract function isExist($tableName);
 	
 	/**
 	 * 创建表
 	 * @param table $table
 	 */
-	abstract function create(table $table);
+	//abstract function create(table $table);
 }

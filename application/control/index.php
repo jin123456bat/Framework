@@ -25,13 +25,14 @@ use framework\core\database\sql;
 use framework\core\database\driver\mysql;
 use application\entity\test;
 use framework\core\request;
+use framework\core\database\mysql\table;
 
 class index extends BaseControl
 {
 
 	function index()
 	{
-		$test = new test(array(
+		/* $test = new test(array(
 			'username' => 'jin123',
 			'password' => '111',
 			'age' => 18,
@@ -46,7 +47,10 @@ class index extends BaseControl
 		if (!$test->validate())
 		{
 			var_dump($test->getError());
-		}
+		} */
+		
+		$a = new table('a');
+		
 		
 		//var_dump(cookie::set('name','555'));
 		//var_dump($_COOKIE);

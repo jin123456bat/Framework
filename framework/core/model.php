@@ -6,6 +6,11 @@ use framework\core\database\driver\mysql;
 use framework\core\database\mysql\table;
 use framework;
 
+/**
+ * 表数据
+ * @author jin
+ *
+ */
 class model extends component
 {
 
@@ -79,6 +84,10 @@ class model extends component
 			{
 				$config = $this->getConfig('db');
 				$db = $config['db'];
+				if (isset($db[$config]) && !empty($db[$config]) && is_array($db[$config]))
+				{
+					$db = $db[$config];
+				}
 			}
 		}
 		else
@@ -218,10 +227,10 @@ class model extends component
 	 */
 	private function parse()
 	{
-		if ($this->_db->isExist($this->getTable()))
-		{
-			$this->_desc = $this->query('DESC `' . $this->_table . '`');
-		}
+		//if ($this->_db->isExist($this->getTable()))
+		//{
+		$this->_desc = $this->query('DESC `' . $this->_table . '`');
+		//}
 		$this->_config['max_allowed_packet'] = $this->_db->getConfig('max_allowed_packet');
 	}
 
@@ -639,28 +648,5 @@ class model extends component
 	public function drop()
 	{
 		return $this->query('drop table ' . $this->getTable());
-	}
-	
-	/**
-	 * 创建数据库
-	 * @param table $table
-	 * @return boolean
-	 */
-	public function create(table $table)
-	{
-		if (!$this->isExist())
-		{
-			return $this->_db->create($table);
-		}
-		return false;
-	}
-	
-	/**
-	 * 判断数据表是否存在
-	 * @return boolean
-	 */
-	public function isExist()
-	{
-		return $this->_db->isExist($this->getTable());
 	}
 }
