@@ -3,16 +3,17 @@ namespace framework\core;
 
 /**
  * 在request类中使用，用于过滤参数
+ * 
  * @author jin
- *
  */
 class filter extends base
 {
+
 	/**
 	 * integer的别名
-	 *
+	 * 
 	 * @see filter::integer
-	 * @param unknown $string        	
+	 * @param unknown $string        
 	 * @return boolean
 	 */
 	static function int($string)
@@ -22,16 +23,15 @@ class filter extends base
 
 	/**
 	 * 纯数字过滤器
-	 *
-	 * @param string|array $string        	
+	 * 
+	 * @param string|array $string        
 	 * @return boolean
 	 */
 	static function integer($string)
 	{
 		if (is_array($string))
 		{
-			return array_map(function ($n)
-			{
+			return array_map(function ($n) {
 				return self::integer($n);
 			}, $string);
 		}
@@ -43,8 +43,8 @@ class filter extends base
 
 	/**
 	 * 浮点数过滤器
-	 *
-	 * @param unknown $number        	
+	 * 
+	 * @param unknown $number        
 	 * @return mixed
 	 */
 	static function number($number)
@@ -71,8 +71,8 @@ class filter extends base
 
 	/**
 	 * 字母或数字或下划线
-	 *
-	 * @param unknown $string        	
+	 * 
+	 * @param unknown $string        
 	 * @return string|number
 	 */
 	static function word($string)
@@ -87,8 +87,8 @@ class filter extends base
 
 	/**
 	 * 去除空白
-	 *
-	 * @param unknown $string        	
+	 * 
+	 * @param unknown $string        
 	 */
 	static function anyspace($string)
 	{

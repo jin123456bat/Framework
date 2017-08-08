@@ -14,15 +14,15 @@ class json extends response
 	/**
 	 *
 	 * @param unknown $code
-	 *        	信息代码
+	 *        信息代码
 	 * @param unknown $result
-	 *        	信息代码的描述
+	 *        信息代码的描述
 	 * @param unknown $data
-	 *        	附加数据
+	 *        附加数据
 	 * @param number $cache
-	 *        	缓存时间，默认不缓存
+	 *        缓存时间，默认不缓存
 	 * @param string $encode
-	 *        	json中的汉字是否编码
+	 *        json中的汉字是否编码
 	 */
 	function __construct($code, $result = null, $data = null, $cache = 0, $encode = false)
 	{
@@ -57,9 +57,9 @@ class json extends response
 
 	/**
 	 * 对变量进行 JSON 编码
-	 *
+	 * 
 	 * @param
-	 *        	mixed value 待编码的 value ，除了resource 类型之外，可以为任何数据类型，该函数只能接受 UTF-8 编码的数据
+	 *        mixed value 待编码的 value ，除了resource 类型之外，可以为任何数据类型，该函数只能接受 UTF-8 编码的数据
 	 * @return string 返回 value 值的 JSON 形式
 	 */
 	function json_encode_ex($value)
@@ -67,8 +67,7 @@ class json extends response
 		if (version_compare(PHP_VERSION, '5.4.0', '<'))
 		{
 			$str = json_encode($value);
-			$str = preg_replace_callback("#\\\u([0-9a-f]{4})#i", function ($matchs)
-			{
+			$str = preg_replace_callback("#\\\u([0-9a-f]{4})#i", function ($matchs) {
 				return iconv('UCS-2BE', 'UTF-8', pack('H4', $matchs[1]));
 			}, $str);
 			return $str;

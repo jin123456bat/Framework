@@ -61,9 +61,9 @@ class http extends base
 
 	/**
 	 * 发送post请求
-	 *
-	 * @param unknown $url        	
-	 * @param unknown $data        	
+	 * 
+	 * @param unknown $url        
+	 * @param unknown $data        
 	 */
 	static function post($url, $data = array())
 	{
@@ -76,7 +76,7 @@ class http extends base
 					if (isset($file[0]) && $file[0] == '@')
 					{
 						// mb php5.5不支持@
-						if (class_exists('\CURLFile',true))
+						if (class_exists('\CURLFile', true))
 						{
 							$file = new \CURLFile(substr($file, 1));
 						}
@@ -119,13 +119,13 @@ class http extends base
 
 	/**
 	 * 发送get请求
-	 *
+	 * 
 	 * @param string $url
-	 *        	请求的地址
+	 *        请求的地址
 	 * @param array $data
-	 *        	请求的额外参数 默认是添加到?号后面
+	 *        请求的额外参数 默认是添加到?号后面
 	 * @param bool $use_curl
-	 *        	是否使用curl,默认是不使用
+	 *        是否使用curl,默认是不使用
 	 */
 	static function get($url, array $data = array(), $use_curl = true, $callback = null)
 	{

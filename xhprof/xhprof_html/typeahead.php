@@ -16,7 +16,7 @@
 
 /**
  * AJAX endpoint for XHProf function name typeahead.
- *
+ * 
  * @author (s) Kannan Muthukkaruppan
  *         Changhao Jiang
  */

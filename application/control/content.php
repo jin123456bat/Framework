@@ -10,9 +10,8 @@ use application\extend\cache;
 
 /**
  * 内容交付相关接口
- *
+ * 
  * @author fx
- *        
  */
 class content extends BaseControl
 {
@@ -378,8 +377,7 @@ class content extends BaseControl
 			$cp_cache_service_sum['总流量']['cache'] += $r['cache_size'] * 1;
 		}
 		
-		uasort($cp_cache_service_sum, function ($a, $b)
-		{
+		uasort($cp_cache_service_sum, function ($a, $b) {
 			if ($a['service'] + $a['cache'] > $b['service'] + $b['cache'])
 			{
 				return - 1;
@@ -631,8 +629,7 @@ class content extends BaseControl
 		}
 		
 		// 排序
-		uasort($cp_cache_service_sum, function ($a, $b)
-		{
+		uasort($cp_cache_service_sum, function ($a, $b) {
 			if ($a['service'] + $a['cache'] > $b['service'] + $b['cache'])
 			{
 				return - 1;

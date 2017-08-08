@@ -17,7 +17,7 @@ class router extends component
 
 	function initlize()
 	{
-		//self::$_data = array_merge(self::$_data, $_GET);
+		// self::$_data = array_merge(self::$_data, $_GET);
 		parent::initlize();
 	}
 
@@ -32,14 +32,14 @@ class router extends component
 			$query_string = $_SERVER['QUERY_STRING'];
 			if (empty($query_string))
 			{
-				//假如没有？或者？后面为空  获取index.php后面的内容，index.php不能省略  可以通过rewrite规则来实现
+				// 假如没有？或者？后面为空 获取index.php后面的内容，index.php不能省略 可以通过rewrite规则来实现
 				$query_string = substr($_SERVER['REQUEST_URI'], strlen($_SERVER['SCRIPT_NAME']));
 			}
-		
-			//路由绑定判断
-			if (!empty($query_string))
+			
+			// 路由绑定判断
+			if (! empty($query_string))
 			{
-				if (isset($config['bind'][$query_string]) && !empty($config['bind'][$query_string]))
+				if (isset($config['bind'][$query_string]) && ! empty($config['bind'][$query_string]))
 				{
 					$bind = $config['bind'][$query_string];
 					
@@ -63,53 +63,52 @@ class router extends component
 				}
 			}
 			
-			//pathinfo模式的支持
-			if (!empty($query_string) && empty($this->_action_name) && empty($this->_control_name))
+			// pathinfo模式的支持
+			if (! empty($query_string) && empty($this->_action_name) && empty($this->_control_name))
 			{
 				$params = array_filter(explode('/', $query_string));
-				if (!empty($params))
+				if (! empty($params))
 				{
 					$this->_control_name = array_shift($params);
 				}
-				if (!empty($params))
+				if (! empty($params))
 				{
 					$this->_action_name = array_shift($params);
 				}
-				for($i = 0;$i<count($params);$i+=2)
+				for ($i = 0; $i < count($params); $i += 2)
 				{
-					$_GET[$params[$i]] = isset($params[$i+1])?$params[$i+1]:NULL;
+					$_GET[$params[$i]] = isset($params[$i + 1]) ? $params[$i + 1] : NULL;
 				}
 			}
 			
-			//路由的正则表达式的支持
-			if (!empty($query_string) && empty($this->_action_name) && empty($this->_control_name))
+			// 路由的正则表达式的支持
+			if (! empty($query_string) && empty($this->_action_name) && empty($this->_control_name))
 			{
 				if (isset($config['bind']) && is_array($config['bind']))
 				{
 					$bind = $config['bind'];
 					foreach ($bind as $key => $value)
 					{
-						//\/about\/(?<id>[^\/]+)
+						// \/about\/(?<id>[^\/]+)
 						$key = str_replace(array(
 							'/'
 						), array(
 							'\/'
 						), $key);
 						
-						$key = preg_replace_callback('/{(?<name>[a-zA-Z_]\w*)}/', function($matches){
-							return '(?<'.$matches['name'].'>[^\/]+)';
+						$key = preg_replace_callback('/{(?<name>[a-zA-Z_]\w*)}/', function ($matches) {
+							return '(?<' . $matches['name'] . '>[^\/]+)';
 						}, $key);
 						
-						if (preg_match('/'.$key.'/', $query_string,$matches))
+						if (preg_match('/' . $key . '/', $query_string, $matches))
 						{
-							foreach($matches as $a=>$v)
+							foreach ($matches as $a => $v)
 							{
-								if (!is_numeric($a))
+								if (! is_numeric($a))
 								{
 									$_GET[$a] = $v;
 								}
 							}
-							
 							
 							if (isset($value['c']))
 							{
@@ -145,8 +144,8 @@ class router extends component
 
 	/**
 	 * 对于要分析的数据追加
-	 *
-	 * @param array $array        	
+	 * 
+	 * @param array $array        
 	 */
 	public function appendParameter(array $array)
 	{

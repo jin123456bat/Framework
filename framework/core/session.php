@@ -4,7 +4,6 @@ namespace framework\core;
 /**
  *
  * @author fx
- *        
  */
 class session extends component
 {
@@ -17,13 +16,13 @@ class session extends component
 	{
 		$session = $this->getConfig('session');
 		
-		//假如用户定义了SessionHandler
-		if (isset($session['handler']) && !empty($session['handler']))
+		// 假如用户定义了SessionHandler
+		if (isset($session['handler']) && ! empty($session['handler']))
 		{
 			$sessionHandler = application::load($session['handler']);
 			if ($sessionHandler !== null)
 			{
-				if (!$sessionHandler instanceof \SessionHandlerInterface)
+				if (! $sessionHandler instanceof \SessionHandlerInterface)
 				{
 					session_set_save_handler(array(
 						$sessionHandler,
@@ -48,10 +47,9 @@ class session extends component
 				}
 				else
 				{
-					session_set_save_handler($sessionHandler,true);
+					session_set_save_handler($sessionHandler, true);
 					register_shutdown_function('session_write_close');
 				}
-				
 			}
 		}
 		
@@ -81,8 +79,8 @@ class session extends component
 
 	/**
 	 * 判断一个session是否存在
-	 *
-	 * @param unknown $name        	
+	 * 
+	 * @param unknown $name        
 	 */
 	public static function has($name)
 	{
@@ -92,9 +90,9 @@ class session extends component
 
 	/**
 	 * 设置一个session,已经存在的会被覆盖
-	 *
-	 * @param unknown $name        	
-	 * @param unknown $value        	
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $value        
 	 */
 	public static function set($name, $value)
 	{
@@ -104,8 +102,8 @@ class session extends component
 
 	/**
 	 * 获取一个session变量，不存在的话返回NULL
-	 *
-	 * @param unknown $name        	
+	 * 
+	 * @param unknown $name        
 	 * @return NULL|mixed
 	 */
 	public static function get($name)
@@ -120,8 +118,8 @@ class session extends component
 
 	/**
 	 * 删除一个session变量
-	 *
-	 * @param unknown $name        	
+	 * 
+	 * @param unknown $name        
 	 */
 	public static function delete($name)
 	{
@@ -131,7 +129,7 @@ class session extends component
 
 	/**
 	 * 删除所有session
-	 *
+	 * 
 	 * @return boolean
 	 */
 	public static function destory()

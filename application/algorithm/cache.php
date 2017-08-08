@@ -55,7 +55,7 @@ class cache extends BaseComponent
 	/**
 	 * 网卡流速
 	 * 计算最大Service和对应的cache
-	 *
+	 * 
 	 * @return number[][]|number[]|boolean[]
 	 */
 	public function traffic_stat_algorithm($duration, $startTime, $endTime, $sn = array())
@@ -130,8 +130,7 @@ class cache extends BaseComponent
 			'hit' => 'hit_user'
 		));
 		
-		$sn = array_map(function ($s)
-		{
+		$sn = array_map(function ($s) {
 			return '%' . substr($s, 3);
 		}, $sn);
 		$cdn_traffic_stat->from('cds_v2.cdn_traffic_stat')
@@ -249,14 +248,13 @@ class cache extends BaseComponent
 
 	/**
 	 * 分时间段，累计流量
-	 *
+	 * 
 	 * @return number
 	 */
 	function operation_stat_algorithm($duration, $startTime, $endTime, $sn = array())
 	{
 		$sn = $this->combineSns($sn);
-		$sn = array_map(function ($s)
-		{
+		$sn = array_map(function ($s) {
 			return '%' . substr($s, 3);
 		}, $sn);
 		
@@ -808,11 +806,11 @@ class cache extends BaseComponent
 
 	/**
 	 * 生成api_overview使用的cds在线情况数据
-	 *
-	 * @param unknown $duration        	
-	 * @param unknown $startTime        	
-	 * @param unknown $endTime        	
-	 * @param string $sns        	
+	 * 
+	 * @param unknown $duration        
+	 * @param unknown $startTime        
+	 * @param unknown $endTime        
+	 * @param string $sns        
 	 * @return string[]
 	 */
 	function api_cds_online($duration, $startTime = null, $endTime = null, $sns = '')

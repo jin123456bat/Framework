@@ -15,17 +15,14 @@
 //
 
 /**
- *
  * A callgraph generator for XHProf.
- *
  * * This file is part of the UI/reporting component,
  * used for viewing results of XHProf runs from a
  * browser.
- *
  * Modification History:
  * 02/15/2008 - cjiang - The first version of callgraph visualizer
  * based on Graphviz's DOT tool.
- *
+ * 
  * @author Changhao Jiang (cjiang@facebook.com)
  */
 

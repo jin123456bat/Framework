@@ -9,15 +9,15 @@ class header extends base
 	/**
 	 * constructor
 	 * 
-	 * @param array $array = array()
-	 * @example 
-	 * new header(array(
-	 *	'Content-Type: application/json',
-	 * ));
-	 * or
-	 * new header(array(
-	 * 	'Content-Type' => 'application/json',
-	 * ));
+	 * @param array $array
+	 *        = array()
+	 * @example new header(array(
+	 *          'Content-Type: application/json',
+	 *          ));
+	 *          or
+	 *          new header(array(
+	 *          'Content-Type' => 'application/json',
+	 *          ));
 	 */
 	function __construct($array = array())
 	{
@@ -42,9 +42,9 @@ class header extends base
 
 	/**
 	 * 添加一个header
-	 *
-	 * @param unknown $key        	
-	 * @param string $value        	
+	 * 
+	 * @param unknown $key        
+	 * @param string $value        
 	 * @example add("Location: http://www.baidu.com");
 	 *          add("Location","http://www.baidu.com");
 	 */
@@ -54,7 +54,7 @@ class header extends base
 		{
 			$header = explode(":", $key);
 			
-			//防止value中出现冒号
+			// 防止value中出现冒号
 			$name = trim(array_shift($header));
 			$value = trim(implode(":", $header));
 			
@@ -85,8 +85,8 @@ class header extends base
 
 	/**
 	 * 检查header是否存在
-	 *
-	 * @param unknown $string        	
+	 * 
+	 * @param unknown $string        
 	 * @return boolean
 	 */
 	function check($string)
@@ -100,8 +100,8 @@ class header extends base
 
 	/**
 	 * 删除一个header，假如有同名的 则只会删除一个
-	 *
-	 * @param unknown $string        	
+	 * 
+	 * @param unknown $string        
 	 */
 	function delete($string)
 	{
@@ -124,9 +124,9 @@ class header extends base
 
 	/**
 	 * 设置一个头信息，已经设置的会被覆盖
-	 *
-	 * @param unknown $name        	
-	 * @param unknown $value        	
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $value        
 	 */
 	function set($name, $value)
 	{
@@ -135,8 +135,8 @@ class header extends base
 
 	/**
 	 * 获取已经设置的头信息
-	 *
-	 * @param unknown $name        	
+	 * 
+	 * @param unknown $name        
 	 * @return mixed
 	 */
 	function get($name)
@@ -146,9 +146,9 @@ class header extends base
 
 	/**
 	 * 立即发送一个header
-	 *
-	 * @param unknown $key        	
-	 * @param string $value        	
+	 * 
+	 * @param unknown $key        
+	 * @param string $value        
 	 */
 	static function send($key, $value = null)
 	{

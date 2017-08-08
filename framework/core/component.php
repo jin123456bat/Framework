@@ -5,7 +5,7 @@ use framework\lib\error;
 
 /**
  * 组件基类
- *
+ * 
  * @author fx
  */
 class component extends error
@@ -25,9 +25,9 @@ class component extends error
 
 	/**
 	 * 添加临时配置全局配置变量，这个变量当程序运行完毕后自动注销
-	 *
-	 * @param unknown $key        	
-	 * @param unknown $value        	
+	 * 
+	 * @param unknown $key        
+	 * @param unknown $value        
 	 */
 	function addTemporaryConfig($key, $value)
 	{
@@ -36,8 +36,8 @@ class component extends error
 
 	/**
 	 * 获取临时配置变量
-	 *
-	 * @param unknown $key        	
+	 * 
+	 * @param unknown $key        
 	 * @return mixed
 	 */
 	function getTemporaryConfig($key)
@@ -50,7 +50,7 @@ class component extends error
 	 */
 	function setConfig()
 	{
-		$config_path = APP_ROOT. '/config/';
+		$config_path = APP_ROOT . '/config/';
 		foreach (scandir($config_path) as $config_file)
 		{
 			if ($config_file != '.' && $config_file != '..')
@@ -73,10 +73,10 @@ class component extends error
 
 	/**
 	 * 替换配置
-	 *
-	 * @param unknown $key        	
-	 * @param unknown $value        	
-	 * @param string $file        	
+	 * 
+	 * @param unknown $key        
+	 * @param unknown $value        
+	 * @param string $file        
 	 * @return boolean
 	 */
 	public static function replaceConfig($key, $value, $file = 'app')

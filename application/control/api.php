@@ -236,9 +236,9 @@ class api extends apiControl
 
 	/**
 	 * 运行单条命令
-	 *
-	 * @param unknown $command        	
-	 * @param unknown $name        	
+	 * 
+	 * @param unknown $command        
+	 * @param unknown $name        
 	 */
 	function runTask($command, $name = '')
 	{
@@ -406,7 +406,7 @@ class api extends apiControl
 
 	/**
 	 * 移动端CDS详情接口
-	 *
+	 * 
 	 * @return \framework\core\response\json
 	 */
 	function detail()
@@ -599,8 +599,7 @@ class api extends apiControl
 		
 		foreach ($cp_resource as &$v)
 		{
-			uasort($v, function ($a, $b)
-			{
+			uasort($v, function ($a, $b) {
 				if ($a['service'] == $b['service'])
 				{
 					return 0;
@@ -651,7 +650,6 @@ class api extends apiControl
 			'class_resource' => $class_resource, // 分类型资源引入 分类型服务流量
 			'cp_resource' => $cp_resource
 		); // 分cp资源引入详情
-
 		
 		if (! empty($cache_key))
 		{

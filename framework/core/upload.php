@@ -10,33 +10,35 @@ class upload extends component
 
 	/**
 	 * 获取文件上传的配置信息
-	 * 配置可以直接写在upload配置文件中  
-	 * 配置文件以 key => array(所有相关的配置)的形式 
-	 * @param unknown $config 配置文件中的key
-	 * 假如没有指定key 用有default=true的配置
-	 * 假如没有default=true的配置使用第一个
-	 * 假如整个就是一个配置 则使用整个配置
+	 * 配置可以直接写在upload配置文件中
+	 * 配置文件以 key => array(所有相关的配置)的形式
+	 * 
+	 * @param unknown $config
+	 *        配置文件中的key
+	 *        假如没有指定key 用有default=true的配置
+	 *        假如没有default=true的配置使用第一个
+	 *        假如整个就是一个配置 则使用整个配置
 	 * @return mixed
 	 */
 	public function getConifg($config = null)
 	{
 		$configs = parent::getConfig('upload');
-		//upload没有配置过直接返回空数组
+		// upload没有配置过直接返回空数组
 		if (empty($configs))
 		{
 			return array();
 		}
 		
-		//判断是否整个就是一个大配置
+		// 判断是否整个就是一个大配置
 		if ((isset($configs['path']) && is_scalar($configs['path'])) || isset($configs['ext']) || (isset($configs['size']) && validator::int($configs['size'])))
 		{
 			return $configs;
 		}
 		
-		//判断是否有指定的配置
+		// 判断是否有指定的配置
 		if (! empty($config))
 		{
-			//假如存在指定配置 直接使用指定配置
+			// 假如存在指定配置 直接使用指定配置
 			if (isset($configs[$config]))
 			{
 				if (isset($configs[$config]['ext']) && is_scalar($configs[$config]['ext']))
@@ -51,7 +53,7 @@ class upload extends component
 			}
 		}
 		
-		//获取默认的配置
+		// 获取默认的配置
 		foreach ($configs as $index => $c)
 		{
 			if (isset($c['default']) && $c['default'] === true)
@@ -68,8 +70,8 @@ class upload extends component
 			}
 		}
 		
-		//使用第一个配置
-		if(is_array(current($configs)))
+		// 使用第一个配置
+		if (is_array(current($configs)))
 		{
 			$c = current($configs);
 			if (isset($c['ext']) && is_scalar($c['ext']))
@@ -88,9 +90,10 @@ class upload extends component
 
 	/**
 	 * 获取上传的文件路径
-	 *
-	 * @param unknown $name        	
-	 * @param unknown $config 配置在upload中的名称
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $config
+	 *        配置在upload中的名称
 	 * @return 上传失败返回错误代码否则返回文件路径
 	 */
 	function receive($name, $config = null)

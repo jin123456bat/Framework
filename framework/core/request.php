@@ -3,8 +3,9 @@ namespace framework\core;
 
 class request extends base
 {
-	static public $_php_sapi_name = 'cli';
-	
+
+	public static $_php_sapi_name = 'cli';
+
 	static function php_sapi_name()
 	{
 		if (stripos(php_sapi_name(), 'cli') !== false)
@@ -20,7 +21,7 @@ class request extends base
 
 	/**
 	 * 当前请求方式
-	 *
+	 * 
 	 * @return unknown
 	 */
 	static function method()
@@ -30,7 +31,7 @@ class request extends base
 
 	/**
 	 * 判断是否是https链接
-	 *
+	 * 
 	 * @return boolean
 	 */
 	static function isHttps()
@@ -40,7 +41,7 @@ class request extends base
 
 	/**
 	 * 判断是ajax请求
-	 *
+	 * 
 	 * @return boolean
 	 */
 	static function isAjax()
@@ -50,16 +51,16 @@ class request extends base
 
 	/**
 	 * 读取file变量
-	 *
+	 * 
 	 * @param string $name
-	 *        	文件上传名
+	 *        文件上传名
 	 * @param string $config
-	 *        	使用指定配置上传文件，不填写使用默认配置 配置填写在upload配置中
+	 *        使用指定配置上传文件，不填写使用默认配置 配置填写在upload配置中
 	 */
 	public static function file($name, $config = null)
 	{
 		$uploader = new upload();
-		$files = $uploader->receive($name,$config);
+		$files = $uploader->receive($name, $config);
 		$class = '\framework\vendor\file';
 		if (is_scalar($files))
 		{
@@ -109,11 +110,11 @@ class request extends base
 
 	/**
 	 * 读取post变量
-	 *
-	 * @param unknown $name        	
-	 * @param unknown $defaultValue        	
-	 * @param unknown $filter        	
-	 * @param string $type        	
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $defaultValue        
+	 * @param unknown $filter        
+	 * @param string $type        
 	 * @return mixed|string|boolean|number|\core\StdClass|\core\unknown|string
 	 */
 	public static function post($name = '', $defaultValue = null, $filter = null, $type = 's')
@@ -143,7 +144,10 @@ class request extends base
 							$filter_t
 						)))
 						{
-							$data = call_user_func(array($filterClass,$filter_t),$data);
+							$data = call_user_func(array(
+								$filterClass,
+								$filter_t
+							), $data);
 						}
 						else if (! empty($filter_t))
 						{
@@ -153,8 +157,7 @@ class request extends base
 								$pattern = '$["\'].["\']$';
 								if (preg_match_all($pattern, $param, $matches))
 								{
-									$params = array_map(function ($param) use ($data)
-									{
+									$params = array_map(function ($param) use ($data) {
 										if (trim($param, '\'"') == '?')
 										{
 											return $data;
@@ -186,11 +189,15 @@ class request extends base
 
 	/**
 	 * 读取get变量
-	 *
-	 * @param unknown $name 参数名称
-	 * @param unknown $defaultValue 默认值
-	 * @param unknown $filter  过滤器名称
-	 * @param string $type 默认是s
+	 * 
+	 * @param unknown $name
+	 *        参数名称
+	 * @param unknown $defaultValue
+	 *        默认值
+	 * @param unknown $filter
+	 *        过滤器名称
+	 * @param string $type
+	 *        默认是s
 	 */
 	public static function get($name = '', $defaultValue = null, $filter = null, $type = '')
 	{
@@ -219,7 +226,10 @@ class request extends base
 							$filter_t
 						)))
 						{
-							$data = call_user_func(array($filterClass,$filter_t),$data);
+							$data = call_user_func(array(
+								$filterClass,
+								$filter_t
+							), $data);
 						}
 						else if (! empty($filter_t))
 						{
@@ -229,8 +239,7 @@ class request extends base
 								$pattern = '/["\'][^"\']+["\']/';
 								if (preg_match_all($pattern, $param, $matches))
 								{
-									$params = array_map(function ($param) use ($data)
-									{
+									$params = array_map(function ($param) use ($data) {
 										if (trim($param, '\'"') == '?')
 										{
 											return $data;
@@ -262,11 +271,11 @@ class request extends base
 
 	/**
 	 * 读取request变量
-	 *
-	 * @param unknown $name        	
-	 * @param unknown $defaultValue        	
-	 * @param unknown $filter        	
-	 * @param string $type        	
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $defaultValue        
+	 * @param unknown $filter        
+	 * @param string $type        
 	 */
 	public static function param($name = '', $defaultValue = null, $filter = null, $type = 's')
 	{
@@ -295,7 +304,10 @@ class request extends base
 							$filter_t
 						)))
 						{
-							$data = call_user_func(array($filterClass,$filter_t),$data);
+							$data = call_user_func(array(
+								$filterClass,
+								$filter_t
+							), $data);
 						}
 						else if (! empty($filter_t))
 						{
@@ -305,8 +317,7 @@ class request extends base
 								$pattern = '$["\'].["\']$';
 								if (preg_match_all($pattern, $param, $matches))
 								{
-									$params = array_map(function ($param) use ($data)
-									{
+									$params = array_map(function ($param) use ($data) {
 										if (trim($param, '\'"') == '?')
 										{
 											return $data;
@@ -339,8 +350,8 @@ class request extends base
 
 	/**
 	 * 获取请求的header
-	 *
-	 * @param unknown $name        	
+	 * 
+	 * @param unknown $name        
 	 * @return NULL|unknown
 	 */
 	public static function header($name)

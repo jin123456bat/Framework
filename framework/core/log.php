@@ -27,9 +27,9 @@ class log extends component
 
 	/**
 	 * 用于记录mysql的日志信息
-	 *
-	 * @param unknown $sql        	
-	 * @param unknown $time        	
+	 * 
+	 * @param unknown $sql        
+	 * @param unknown $time        
 	 */
 	public static function mysql($sql, $time)
 	{

@@ -20,7 +20,7 @@
  * The wrapper must set up
  * the global $xhprof_runs_impl to correspond to an object that
  * implements the iXHProfRuns interface.
- *
+ * 
  * @author (s) Kannan Muthukkaruppan
  *         Changhao Jiang
  */

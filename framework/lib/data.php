@@ -6,12 +6,14 @@ use framework;
 
 class data extends error implements \ArrayAccess
 {
+
 	/**
 	 * 原始数据存储
+	 * 
 	 * @var array
 	 */
 	protected $_data = array();
-	
+
 	function __construct($data = array())
 	{
 		$this->_data = $data;
@@ -21,7 +23,7 @@ class data extends error implements \ArrayAccess
 	{
 		parent::initlize();
 	}
-	
+
 	/**
 	 *
 	 * {@inheritdoc}

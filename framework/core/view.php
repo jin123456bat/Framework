@@ -9,27 +9,28 @@ class view extends response
 
 	/**
 	 * 模板文件路径
-	 *
+	 * 
 	 * @var unknown
 	 */
 	private $_template;
 
 	/**
 	 * 布局名
-	 *
+	 * 
 	 * @var unknown
 	 */
 	private $_layout;
 
 	/**
 	 * 模板文件字符编码
-	 *
+	 * 
 	 * @var unknown
 	 */
 	private $_charset;
-	
+
 	/**
 	 * 模板引擎
+	 * 
 	 * @var engine
 	 */
 	private $_engine;
@@ -57,8 +58,8 @@ class view extends response
 
 	/**
 	 * 设置模板文件夹
-	 *
-	 * @param unknown $layout        	
+	 * 
+	 * @param unknown $layout        
 	 */
 	function setLayout($layout)
 	{
@@ -68,7 +69,8 @@ class view extends response
 
 	/**
 	 * 设置模板文件
-	 * @param unknown $template
+	 * 
+	 * @param unknown $template        
 	 */
 	function setTemplate($template)
 	{
@@ -78,18 +80,18 @@ class view extends response
 
 	/**
 	 * 在模板中添加变量
-	 *
-	 * @param unknown $var        	
-	 * @param unknown $val        	
+	 * 
+	 * @param unknown $var        
+	 * @param unknown $val        
 	 */
 	function assign($var, $val)
 	{
-		$this->_engine->assign($var,$val);
+		$this->_engine->assign($var, $val);
 	}
 
 	/**
 	 * 重写getBody返回响应内容
-	 *
+	 * 
 	 * {@inheritdoc}
 	 *
 	 * @see \framework\core\response::getBody()
@@ -100,13 +102,13 @@ class view extends response
 		if (file_exists($file))
 		{
 			$body = $this->_engine->fetch();
-			//自动开启html压缩
+			// 自动开启html压缩
 			$view = self::getConfig('view');
-			if(is_bool($view['compress']) && $view['compress'] || (is_array($view['compress']) && in_array($this->_template, $view['compress'],true)))
+			if (is_bool($view['compress']) && $view['compress'] || (is_array($view['compress']) && in_array($this->_template, $view['compress'], true)))
 			{
-				if (!isset($view['no_compress']) || !in_array($this->_template, $view['no_compress'],true))
+				if (! isset($view['no_compress']) || ! in_array($this->_template, $view['no_compress'], true))
 				{
-					if (class_exists('\framework\vendor\compress',true))
+					if (class_exists('\framework\vendor\compress', true))
 					{
 						$body = \framework\vendor\compress::html($body);
 					}

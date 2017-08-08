@@ -1,29 +1,29 @@
 <?php
 
 /**
- * @author fx
  *
+ * @author fx
  */
 class framework
 {
 
 	/**
 	 * 存储了所有app进程
-	 *
+	 * 
 	 * @var unknown
 	 */
 	private $_application;
 
 	/**
 	 * 命令行参数个数
-	 *
+	 * 
 	 * @var unknown
 	 */
 	private $_argc;
 
 	/**
 	 * 命令行参数
-	 *
+	 * 
 	 * @var unknown
 	 */
 	private $_argv;
@@ -38,9 +38,9 @@ class framework
 
 	/**
 	 * 创建应用程序
-	 *
-	 * @param unknown $name        	
-	 * @param unknown $path        	
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $path        
 	 */
 	function createApplication($name, $path, $configName = '')
 	{

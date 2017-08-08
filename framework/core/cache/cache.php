@@ -3,60 +3,67 @@ namespace framework\core\cache;
 
 /**
  * cache的接口
- *
+ * 
  * @author fx
- *        
  */
 interface cache
 {
+
 	/**
-	 * 添加数据  数据存在会返回false
-	 * @param unknown $name
-	 * @param unknown $value
-	 * @param number $expires
+	 * 添加数据 数据存在会返回false
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $value        
+	 * @param number $expires        
 	 */
-	function add($name,$value,$expires = 0);
-	
+	function add($name, $value, $expires = 0);
+
 	/**
 	 * 添加或保存数据
-	 * @param unknown $name
-	 * @param unknown $value
-	 * @param number $expires
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $value        
+	 * @param number $expires        
 	 */
 	function set($name, $value, $expires = 0);
 
 	/**
 	 * 获取数据 过期返回null
-	 * @param unknown $name
+	 * 
+	 * @param unknown $name        
 	 */
 	function get($name);
-	
+
 	/**
 	 * 自增
-	 * @param unknown $name
-	 * @param number $amount
+	 * 
+	 * @param unknown $name        
+	 * @param number $amount        
 	 */
-	function increase($name,$amount = 1);
-	
+	function increase($name, $amount = 1);
+
 	/**
 	 * 自减
-	 * @param unknown $name
-	 * @param number $amount
+	 * 
+	 * @param unknown $name        
+	 * @param number $amount        
 	 */
-	function decrease($name,$amount = 1);
-	
+	function decrease($name, $amount = 1);
+
 	/**
 	 * 判断缓存是否存在
-	 * @param unknown $name
+	 * 
+	 * @param unknown $name        
 	 */
 	function has($name);
-	
+
 	/**
 	 * 删除缓存
-	 * @param unknown $name
+	 * 
+	 * @param unknown $name        
 	 */
 	function remove($name);
-	
+
 	/**
 	 * 清空缓存
 	 */

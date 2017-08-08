@@ -7,9 +7,8 @@ use framework\core\application;
 
 /**
  * api请求基础control
- *
+ * 
  * @author fx
- *        
  */
 class apiControl extends BaseControl
 {
@@ -73,11 +72,11 @@ class apiControl extends BaseControl
 
 	/**
 	 * 获取通过接口传递的内容
-	 *
-	 * @param unknown $name        	
-	 * @param unknown $default        	
-	 * @param unknown $filter        	
-	 * @param string $type        	
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $default        
+	 * @param unknown $filter        
+	 * @param string $type        
 	 * @return mixed|string|boolean|number|\core\StdClass|\core\unknown
 	 */
 	function post($name, $default = null, $filter = null, $type = 's')
@@ -122,8 +121,7 @@ class apiControl extends BaseControl
 									$pattern = '$["\'].["\']$';
 									if (preg_match_all($pattern, $param, $matches))
 									{
-										$params = array_map(function ($param) use ($data)
-										{
+										$params = array_map(function ($param) use ($data) {
 											if (trim($param, '\'"') == '?')
 											{
 												return $data;

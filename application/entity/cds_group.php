@@ -6,7 +6,6 @@ use framework\lib\data;
 /**
  *
  * @author fx
- *        
  */
 class cds_group extends data
 {
@@ -21,7 +20,7 @@ class cds_group extends data
 
 	/**
 	 * 数据关联的表
-	 *
+	 * 
 	 * @return string
 	 */
 	function __model()

@@ -5,9 +5,8 @@ use lib\error;
 
 /**
  * 文件基类，包含了文件信息和文件操作
- *
+ * 
  * @author fx
- *        
  */
 class file extends \framework\lib\error
 {
@@ -33,10 +32,10 @@ class file extends \framework\lib\error
 	private $_type;
 
 	private $_path;
-	
+
 	private $_resource;
 
-	function __construct($file,$create_not_exist = true)
+	function __construct($file, $create_not_exist = true)
 	{
 		if (is_string($file))
 		{
@@ -75,7 +74,7 @@ class file extends \framework\lib\error
 			$this->addError('000001', 'constructor parameter $file error');
 		}
 		
-		//加锁
+		// 加锁
 		if (file_exists($this->_path))
 		{
 			$this->_resource = fopen($this->_path, 'a+');
@@ -84,10 +83,10 @@ class file extends \framework\lib\error
 		
 		$this->parse();
 	}
-	
+
 	function __destruct()
 	{
-		//解锁
+		// 解锁
 		if ($this->_resource)
 		{
 			flock($this->_resource, LOCK_UN);
@@ -135,7 +134,7 @@ class file extends \framework\lib\error
 
 	/**
 	 * 上次改变时间
-	 *
+	 * 
 	 * @return int 时间戳
 	 */
 	function ctime()
@@ -145,7 +144,7 @@ class file extends \framework\lib\error
 
 	/**
 	 * 上次访问时间
-	 *
+	 * 
 	 * @return int 时间戳
 	 */
 	function atime()
@@ -155,7 +154,7 @@ class file extends \framework\lib\error
 
 	/**
 	 * 上次修改时间
-	 *
+	 * 
 	 * @return int 时间戳
 	 */
 	function mtime()
@@ -178,9 +177,9 @@ class file extends \framework\lib\error
 	{
 		if ($this->readable())
 		{
-			if (!empty($length))
+			if (! empty($length))
 			{
-				return file_get_contents($this->_path, null, null, $start,$length);
+				return file_get_contents($this->_path, null, null, $start, $length);
 			}
 			else
 			{
@@ -189,20 +188,21 @@ class file extends \framework\lib\error
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 写入数据，会覆盖原来的数据
-	 * @param unknown $string
+	 * 
+	 * @param unknown $string        
 	 * @return number
 	 */
 	function write($string)
 	{
-		return file_put_contents($this->_path, $string,LOCK_EX);
+		return file_put_contents($this->_path, $string, LOCK_EX);
 	}
 
 	/**
 	 * 文件是否可读
-	 *
+	 * 
 	 * @return boolean
 	 */
 	function readable()
@@ -212,7 +212,7 @@ class file extends \framework\lib\error
 
 	/**
 	 * 文件可写
-	 *
+	 * 
 	 * @return boolean
 	 */
 	function writable()
@@ -222,7 +222,7 @@ class file extends \framework\lib\error
 
 	/**
 	 * 是否是上传的
-	 *
+	 * 
 	 * @return boolean
 	 */
 	function uploaded()
@@ -232,10 +232,9 @@ class file extends \framework\lib\error
 
 	/**
 	 * 文件删除,但是对象不会删除
-	 *
+	 * 
 	 * @param callback $callback
-	 *        	回调函数 第一个参数代表当前对象,第二个参数代表删除是否成功 function($this,$result){}
-	 *        	
+	 *        回调函数 第一个参数代表当前对象,第二个参数代表删除是否成功 function($this,$result){}
 	 */
 	function delete($callback = null)
 	{
@@ -249,9 +248,9 @@ class file extends \framework\lib\error
 
 	/**
 	 * 文件复制
-	 *
+	 * 
 	 * @param callback $callback
-	 *        	回调函数 第一个参数代表当前对象,第二个参数代表复制是否成功 function($this,$result){}
+	 *        回调函数 第一个参数代表当前对象,第二个参数代表复制是否成功 function($this,$result){}
 	 */
 	function copy($path, $callback = null)
 	{
@@ -265,9 +264,9 @@ class file extends \framework\lib\error
 
 	/**
 	 * 文件移动
-	 *
+	 * 
 	 * @param callback $callback
-	 *        	回调函数 第一个参数代表当前对象,第二个参数代表移动是否成功 function($this,$result){}
+	 *        回调函数 第一个参数代表当前对象,第二个参数代表移动是否成功 function($this,$result){}
 	 */
 	function move($path, $callback = null)
 	{
@@ -288,9 +287,9 @@ class file extends \framework\lib\error
 
 	/**
 	 * 文件更改权限
-	 *
+	 * 
 	 * @param callback $callback
-	 *        	回调函数 第一个参数代表当前对象,第二个参数代表更改是否成功 function($this,$result){}
+	 *        回调函数 第一个参数代表当前对象,第二个参数代表更改是否成功 function($this,$result){}
 	 */
 	function chmod($mode, $callback = null)
 	{
@@ -304,8 +303,8 @@ class file extends \framework\lib\error
 
 	/**
 	 * 获取文件mimetype类型
-	 *
-	 * @param unknown $magic        	
+	 * 
+	 * @param unknown $magic        
 	 */
 	function mimeType($magic = null)
 	{
@@ -350,7 +349,7 @@ class file extends \framework\lib\error
 
 	/**
 	 * 文件存储路径
-	 *
+	 * 
 	 * @return mixed
 	 */
 	function dirname()
@@ -360,7 +359,7 @@ class file extends \framework\lib\error
 
 	/**
 	 * 文件的绝对路径
-	 *
+	 * 
 	 * @return string
 	 */
 	function realpath()

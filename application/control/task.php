@@ -7,7 +7,7 @@ use framework\core\model;
 
 /**
  * 生成各个接口的文件数据
- *
+ * 
  * @author fx
  */
 class task extends bgControl
@@ -122,8 +122,7 @@ class task extends bgControl
 			'content_http_minutely_1' => 'php ' . ROOT . '/index.php -c content -a http -duration minutely -timemode 1', // 内容交付常规资源 最近24小时的数据
 			'node_cds' => 'php ' . ROOT . '/index.php -c node -a cds_cache'
 		); // CDS列表的数据
-
-		
+		   
 		// cds详情
 		/*
 		 * $sn = $this->combineSns();
@@ -176,7 +175,7 @@ class task extends bgControl
 
 	/**
 	 * 生成每小时的数据报告
-	 *
+	 * 
 	 * @return \framework\core\debugger
 	 */
 	function hour()
@@ -368,7 +367,6 @@ class task extends bgControl
 			'content_mobile_daily_5' => 'php ' . ROOT . '/index.php -c content -a mobile -duration daily -timemode 5', // 内容交付移动应用 30天的数据
 			'content_http_daily_5' => 'php ' . ROOT . '/index.php -c content -a http -duration daily -timemode 5'
 		); // 内容交付常规资源 30天的数据
-
 		
 		$sns = $this->combineSns();
 		foreach ($sns as $sn)
@@ -467,7 +465,6 @@ class task extends bgControl
 			'content_mobile_hourly_4' => 'php ' . ROOT . '/index.php -c content -a mobile -duration hourly -timemode 4', // 内容交付移动应用 上周的数据
 			'content_http_hourly_4' => 'php ' . ROOT . '/index.php -c content -a http -duration hourly -timemode 4'
 		); // 内容交付常规资源 上周的数据
-
 		
 		$sns = $this->combineSns();
 		foreach ($sns as $sn)
@@ -497,7 +494,6 @@ class task extends bgControl
 			'content_mobile_daily_6' => 'php ' . ROOT . '/index.php -c content -a mobile -duration daily -timemode 6', // 内容交付移动应用 上月的数据
 			'content_http_daily_6' => 'php ' . ROOT . '/index.php -c content -a http -duration daily -timemode 6'
 		); // 内容交付常规资源 上月的数据
-
 		
 		$sns = $this->combineSns();
 		foreach ($sns as $sn)
@@ -594,14 +590,14 @@ class task extends bgControl
 
 	/**
 	 * 记录运行日志
-	 *
-	 * @param debugger $debugger        	
-	 * @param debugger $minute5        	
-	 * @param debugger $hour1        	
-	 * @param debugger $hour2        	
-	 * @param debugger $day1        	
-	 * @param debugger $week1        	
-	 * @param debugger $month1        	
+	 * 
+	 * @param debugger $debugger        
+	 * @param debugger $minute5        
+	 * @param debugger $hour1        
+	 * @param debugger $hour2        
+	 * @param debugger $day1        
+	 * @param debugger $week1        
+	 * @param debugger $month1        
 	 */
 	function log(debugger $debugger, debugger $minute5, debugger $hour1, debugger $hour2, debugger $day1, debugger $week1, debugger $month1)
 	{
@@ -639,9 +635,9 @@ class task extends bgControl
 
 	/**
 	 * 运行单条命令
-	 *
-	 * @param unknown $command        	
-	 * @param unknown $name        	
+	 * 
+	 * @param unknown $command        
+	 * @param unknown $name        
 	 */
 	function runTask($command, $name = '')
 	{

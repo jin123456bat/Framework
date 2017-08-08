@@ -9,16 +9,15 @@ use application;
 
 /**
  * 用户相关
- *
+ * 
  * @author fx
- *        
  */
 class user extends control
 {
 
 	/**
 	 * 登陆
-	 *
+	 * 
 	 * @return \framework\core\response\json
 	 */
 	function login()
@@ -61,7 +60,7 @@ class user extends control
 
 	/**
 	 * 用户添加
-	 *
+	 * 
 	 * @return \framework\core\response\json
 	 */
 	function register()
@@ -117,13 +116,11 @@ class user extends control
 		 * {
 		 * $pageNum = 10;
 		 * }
-		 *
 		 * $page = request::param('pageNum',1,'','i');
 		 * if ($page<1)
 		 * {
 		 * $page = 1;
 		 * }
-		 *
 		 * $start = ($page-1)*$pageNum;
 		 * $length = $pageNum;
 		 */
@@ -167,7 +164,7 @@ class user extends control
 
 	/**
 	 * 获取或设置当前页码
-	 *
+	 * 
 	 * @return \framework\core\response\json
 	 */
 	function pageNum()

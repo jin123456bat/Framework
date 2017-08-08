@@ -19,7 +19,7 @@ class user extends data
 
 	/**
 	 * 数据关联的表
-	 *
+	 * 
 	 * @return string
 	 */
 	function __model()
@@ -36,7 +36,7 @@ class user extends data
 			),
 			array(
 				'unique' => 'username',
-				'message' => '用户名已经存在',//错误信息
+				'message' => '用户名已经存在', // 错误信息
 				'on' => 'insert'
 			),
 			array(
@@ -60,7 +60,7 @@ class user extends data
 
 	/**
 	 * 验证用户名和密码
-	 *
+	 * 
 	 * @return boolean
 	 */
 	function auth()
@@ -129,7 +129,7 @@ class user extends data
 
 	/**
 	 * 获取当前登录用户的id
-	 *
+	 * 
 	 * @return NULL|unknown
 	 */
 	public static function getLoginUserId()
@@ -139,8 +139,8 @@ class user extends data
 
 	/**
 	 * 用户密码加密
-	 *
-	 * @param unknown $password        	
+	 * 
+	 * @param unknown $password        
 	 * @return string
 	 */
 	public static function encrypt($password)

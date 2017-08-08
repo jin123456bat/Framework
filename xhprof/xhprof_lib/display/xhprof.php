@@ -45,7 +45,6 @@ $base_path = rtrim(dirname($_SERVER['SCRIPT_NAME']), "/");
 
 /**
  * Generate references to required stylesheets & javascript.
- *
  * If the calling script (such as index.php) resides in
  * a different location that than 'xhprof_html' directory the
  * caller must provide the URL path to 'xhprof_html' directory
@@ -73,19 +72,15 @@ function xhprof_include_js_css($ui_dir_url_path = null)
 
 /*
  * Formats call counts for XHProf reports.
- *
  * Description:
  * Call counts in single-run reports are integer values.
  * However, call counts for aggregated reports can be
  * fractional. This function will print integer values
  * without decimal point, but with commas etc.
- *
  * 4000 ==> 4,000
- *
  * It'll round fractional values to decimal precision of 3
  * 4000.1212 ==> 4,000.121
  * 4000.0001 ==> 4,000
- *
  */
 function xhprof_count_format($num)
 {
@@ -129,20 +124,20 @@ function xhprof_render_actions($actions)
 /**
  *
  * @param html-str $content
- *        	the text/image/innerhtml/whatever for the link
- * @param raw-str $href        	
- * @param raw-str $class        	
- * @param raw-str $id        	
- * @param raw-str $title        	
- * @param raw-str $target        	
- * @param raw-str $onclick        	
- * @param raw-str $style        	
- * @param raw-str $access        	
- * @param raw-str $onmouseover        	
- * @param raw-str $onmouseout        	
- * @param raw-str $onmousedown        	
- * @param raw-str $dir        	
- * @param raw-str $rel        	
+ *        the text/image/innerhtml/whatever for the link
+ * @param raw-str $href        
+ * @param raw-str $class        
+ * @param raw-str $id        
+ * @param raw-str $title        
+ * @param raw-str $target        
+ * @param raw-str $onclick        
+ * @param raw-str $style        
+ * @param raw-str $access        
+ * @param raw-str $onmouseover        
+ * @param raw-str $onmouseout        
+ * @param raw-str $onmousedown        
+ * @param raw-str $dir        
+ * @param raw-str $rel        
  */
 function xhprof_render_link($content, $href, $class = '', $id = '', $title = '', $target = '', $onclick = '', $style = '', $access = '', $onmouseover = '', $onmouseout = '', $onmousedown = '')
 {
@@ -390,7 +385,7 @@ $metrics = null;
  * Callback comparison operator (passed to usort() for sorting array of
  * tuples) that compares array elements based on the sort column
  * specified in $sort_col (global parameter).
- *
+ * 
  * @author Kannan
  */
 function sort_cbk($a, $b)
@@ -434,7 +429,7 @@ function sort_cbk($a, $b)
 /**
  * Initialize the metrics we'll display based on the information
  * in the raw data.
- *
+ * 
  * @author Kannan
  */
 function init_metrics($xhprof_data, $rep_symbol, $sort, $diff_report = false)
@@ -531,7 +526,7 @@ function init_metrics($xhprof_data, $rep_symbol, $sort, $diff_report = false)
  * Get the appropriate description for a statistic
  * (depending upon whether we are in diff report mode
  * or single run report mode).
- *
+ * 
  * @author Kannan
  */
 function stat_description($stat)
@@ -553,7 +548,7 @@ function stat_description($stat)
 /**
  * Analyze raw data & generate the profiler report
  * (common for both single run mode and diff mode).
- *
+ * 
  * @author : Kannan
  */
 function profiler_report($url_params, $rep_symbol, $sort, $run1, $run1_desc, $run1_data, $run2 = 0, $run2_desc = "", $run2_data = array())
@@ -686,7 +681,6 @@ function pct($a, $b)
 
 /**
  * Given a number, returns the td class to use for display.
- *
  * For instance, negative numbers in diff reports comparing two runs (run1 & run2)
  * represent improvement from run1 to run2. We use green to display those deltas,
  * and red for regression deltas.
@@ -765,7 +759,7 @@ function print_td_pct($numer, $denom, $bold = false, $attributes = null)
 
 /**
  * Print "flat" data corresponding to one function.
- *
+ * 
  * @author Kannan
  */
 function print_function_info($url_params, $info, $sort, $run1, $run2)
@@ -821,7 +815,7 @@ function print_function_info($url_params, $info, $sort, $run1, $run2)
 
 /**
  * Print non-hierarchical (flat-view) of profiler data.
- *
+ * 
  * @author Kannan
  */
 function print_flat_data($url_params, $title, $flat_data, $sort, $run1, $run2, $limit)
@@ -900,7 +894,7 @@ function print_flat_data($url_params, $title, $flat_data, $sort, $run1, $run2, $
 /**
  * Generates a tabular report for all functions.
  * This is the top-level report.
- *
+ * 
  * @author Kannan
  */
 function full_report($url_params, $symbol_tab, $sort, $run1, $run2)
@@ -1057,7 +1051,7 @@ function get_tooltip_attributes($type, $metric)
 /**
  * Print info for a parent or child function in the
  * parent & children report.
- *
+ * 
  * @author Kannan
  */
 function pc_info($info, $base_ct, $base_info, $parent)
@@ -1153,7 +1147,7 @@ function print_symbol_summary($symbol_info, $stat, $base)
 
 /**
  * Generates a report for a single function/symbol.
- *
+ * 
  * @author Kannan
  */
 function symbol_report($url_params, $run_data, $symbol_info, $sort, $rep_symbol, $run1, $symbol_info1 = null, $run2 = 0, $symbol_info2 = null)
@@ -1428,7 +1422,7 @@ function symbol_report($url_params, $run_data, $symbol_info, $sort, $rep_symbol,
 
 /**
  * Generate the profiler report for a single run.
- *
+ * 
  * @author Kannan
  */
 function profiler_single_run_report($url_params, $xhprof_data, $run_desc, $rep_symbol, $sort, $run)
@@ -1440,7 +1434,7 @@ function profiler_single_run_report($url_params, $xhprof_data, $run_desc, $rep_s
 
 /**
  * Generate the profiler report for diff mode (delta between two runs).
- *
+ * 
  * @author Kannan
  */
 function profiler_diff_report($url_params, $xhprof_data1, $run1_desc, $xhprof_data2, $run2_desc, $rep_symbol, $sort, $run1, $run2)
@@ -1457,43 +1451,36 @@ function profiler_diff_report($url_params, $xhprof_data1, $run1_desc, $xhprof_da
  * as arguments.
  * The first argument is an object that implements
  * the iXHProfRuns interface.
- *
+ * 
  * @param object $xhprof_runs_impl
- *        	An object that implements
- *        	the iXHProfRuns interface
- *        	.
+ *        An object that implements
+ *        the iXHProfRuns interface
+ *        .
  * @param array $url_params
- *        	Array of non-default URL params.
- *        	
+ *        Array of non-default URL params.
  * @param string $source
- *        	Category/type of the run. The source in
- *        	combination with the run id uniquely
- *        	determines a profiler run.
- *        	
+ *        Category/type of the run. The source in
+ *        combination with the run id uniquely
+ *        determines a profiler run.
  * @param string $run
- *        	run id, or comma separated sequence of
- *        	run ids. The latter is used if an aggregate
- *        	report of the runs is desired.
- *        	
+ *        run id, or comma separated sequence of
+ *        run ids. The latter is used if an aggregate
+ *        report of the runs is desired.
  * @param string $wts
- *        	Comma separate list of integers.
- *        	Represents the weighted ratio in
- *        	which which a set of runs will be
- *        	aggregated. [Used only for aggregate
- *        	reports.]
- *        	
+ *        Comma separate list of integers.
+ *        Represents the weighted ratio in
+ *        which which a set of runs will be
+ *        aggregated. [Used only for aggregate
+ *        reports.]
  * @param string $symbol
- *        	Function symbol. If non-empty then the
- *        	parent/child view of this function is
- *        	displayed. If empty, a flat-profile view
- *        	of the functions is displayed.
- *        	
+ *        Function symbol. If non-empty then the
+ *        parent/child view of this function is
+ *        displayed. If empty, a flat-profile view
+ *        of the functions is displayed.
  * @param string $run1
- *        	Base run id (for diff reports)
- *        	
+ *        Base run id (for diff reports)
  * @param string $run2
- *        	New run id (for diff reports)
- *        	
+ *        New run id (for diff reports)
  */
 function displayXHProfReport($xhprof_runs_impl, $url_params, $source, $run, $wts, $symbol, $sort, $run1, $run2)
 {

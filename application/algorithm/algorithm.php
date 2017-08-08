@@ -17,13 +17,13 @@ class algorithm extends BaseComponent
 
 	/**
 	 * constructor
-	 *
+	 * 
 	 * @param unknown $starttime
-	 *        	开始时间点
+	 *        开始时间点
 	 * @param unknown $endtime
-	 *        	结束时间点
+	 *        结束时间点
 	 * @param unknown $duration
-	 *        	时间间隔，默认5分钟
+	 *        时间间隔，默认5分钟
 	 */
 	function __construct($starttime = '', $endtime = '', $duration = 300)
 	{
@@ -34,8 +34,8 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 设置时间间隔
-	 *
-	 * @param unknown $duration        	
+	 * 
+	 * @param unknown $duration        
 	 */
 	public function setDuration($duration)
 	{
@@ -44,9 +44,9 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 设置开始时间和结束时间
-	 *
-	 * @param unknown $starttime        	
-	 * @param unknown $endtime        	
+	 * 
+	 * @param unknown $starttime        
+	 * @param unknown $endtime        
 	 */
 	public function setTime($starttime, $endtime)
 	{
@@ -259,7 +259,7 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 服务流速
-	 *
+	 * 
 	 * @return number[]|number[][]
 	 */
 	public function ServiceMax($sn = array())
@@ -276,8 +276,8 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 计算累计流量，不分时间段
-	 *
-	 * @param array $sn        	
+	 * 
+	 * @param array $sn        
 	 * @return number[]
 	 */
 	public function ServiceSum($sn = array())
@@ -319,8 +319,7 @@ class algorithm extends BaseComponent
 		}
 		
 		$sn = $this->combineSns($sn);
-		$sn = array_map(function ($s)
-		{
+		$sn = array_map(function ($s) {
 			return '%' . substr($s, 4);
 		}, $sn);
 		
@@ -339,9 +338,9 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 获取分类名称
-	 *
+	 * 
 	 * @param array $r
-	 *        	一个包含class和category的数组
+	 *        一个包含class和category的数组
 	 * @return string
 	 */
 	private function getCategoryName($r)
@@ -373,8 +372,8 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 分CP服务流速
-	 *
-	 * @param number $top        	
+	 * 
+	 * @param number $top        
 	 * @return NULL[]|unknown[]
 	 */
 	public function CPService($sn = array(), $top = 9)
@@ -547,7 +546,7 @@ class algorithm extends BaseComponent
 	/**
 	 * 网卡流速
 	 * 计算最大Service和对应的cache
-	 *
+	 * 
 	 * @return number[][]|number[]|boolean[]
 	 */
 	public function traffic_stat($sn = array())
@@ -699,8 +698,7 @@ class algorithm extends BaseComponent
 				'vpe_cache' => 0
 			));
 			
-			$sn = array_map(function ($s)
-			{
+			$sn = array_map(function ($s) {
 				return '%' . substr($s, 3);
 			}, $sn);
 			$cdn_traffic_stat->from('cds_v2.cdn_traffic_stat')
@@ -982,7 +980,7 @@ class algorithm extends BaseComponent
 
 	/**
 	 * 分时间段，累计流量
-	 *
+	 * 
 	 * @return number
 	 */
 	function operation_stat($sn = array())
@@ -1057,8 +1055,7 @@ class algorithm extends BaseComponent
 		else
 		{
 			$sn = $this->combineSns($sn);
-			$sn = array_map(function ($s)
-			{
+			$sn = array_map(function ($s) {
 				return '%' . substr($s, 3);
 			}, $sn);
 			$operation_stat = array(

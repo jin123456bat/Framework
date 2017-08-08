@@ -8,28 +8,28 @@ class response extends component
 
 	/**
 	 * http code
-	 *
+	 * 
 	 * @var integer
 	 */
 	private $_status = 200;
 
 	/**
 	 * http response header
-	 *
+	 * 
 	 * @var header
 	 */
 	private $_header = null;
 
 	/**
 	 * http body
-	 *
+	 * 
 	 * @var string
 	 */
 	private $_body = '';
 
 	/**
 	 * response content charset
-	 *
+	 * 
 	 * @var string
 	 */
 	private $_charset = 'utf-8';
@@ -57,8 +57,8 @@ class response extends component
 
 	/**
 	 * 设置字符集
-	 *
-	 * @param unknown $charset        	
+	 * 
+	 * @param unknown $charset        
 	 */
 	function setCharset($charset)
 	{
@@ -67,7 +67,7 @@ class response extends component
 
 	/**
 	 * 获取当前使用的字符集
-	 *
+	 * 
 	 * @return string
 	 */
 	function getCharset()
@@ -77,7 +77,8 @@ class response extends component
 
 	/**
 	 * set response content type
-	 * @param unknown $contentType
+	 * 
+	 * @param unknown $contentType        
 	 */
 	function setContentType($contentType)
 	{
@@ -86,6 +87,7 @@ class response extends component
 
 	/**
 	 * get response content type
+	 * 
 	 * @return string|unknown
 	 */
 	function getContentType()
@@ -95,7 +97,7 @@ class response extends component
 
 	/**
 	 * get http body
-	 *
+	 * 
 	 * @return string
 	 */
 	function getBody()
@@ -105,7 +107,8 @@ class response extends component
 
 	/**
 	 * set response body
-	 * @param unknown $content
+	 * 
+	 * @param unknown $content        
 	 */
 	function setBody($content)
 	{
@@ -118,8 +121,8 @@ class response extends component
 
 	/**
 	 * set http code
-	 *
-	 * @param unknown $status        	
+	 * 
+	 * @param unknown $status        
 	 */
 	function setHttpStatus($status)
 	{
@@ -128,7 +131,7 @@ class response extends component
 
 	/**
 	 * get http code
-	 *
+	 * 
 	 * @return int
 	 */
 	function getHttpStatus()
@@ -138,13 +141,13 @@ class response extends component
 
 	/**
 	 * set http header or add http header
-	 *
+	 * 
 	 * @param unknown $header
-	 *        	header's name
+	 *        header's name
 	 * @param
-	 *        	string [optional] $value
-	 *        	if $header instanceof header this parameter will be ignore
-	 *        	otherwise if $value is not empty $header and $value will added into current header
+	 *        string [optional] $value
+	 *        if $header instanceof header this parameter will be ignore
+	 *        otherwise if $value is not empty $header and $value will added into current header
 	 */
 	function setHeader($header, $value = '')
 	{

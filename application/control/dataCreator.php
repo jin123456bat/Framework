@@ -79,7 +79,7 @@ class dataCreator extends BaseControl
 
 	/**
 	 * 创建首页在线人数曲线图
-	 *
+	 * 
 	 * @return unknown|\framework\core\response\json
 	 */
 	function main_overview_online()
@@ -130,7 +130,7 @@ class dataCreator extends BaseControl
 
 	/**
 	 * 创建首页在服务流速
-	 *
+	 * 
 	 * @return unknown|\framework\core\response\json
 	 */
 	function main_overview_service_max()
@@ -186,7 +186,7 @@ class dataCreator extends BaseControl
 
 	/**
 	 * 添加首页分CP流速
-	 *
+	 * 
 	 * @return unknown|\framework\core\response\json
 	 */
 	function main_overview_cp_service()

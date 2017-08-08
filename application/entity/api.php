@@ -53,8 +53,8 @@ class api extends data
 
 	/**
 	 * 判断是否是sn号
-	 *
-	 * @param unknown $sn        	
+	 * 
+	 * @param unknown $sn        
 	 */
 	public function isSn($sn)
 	{

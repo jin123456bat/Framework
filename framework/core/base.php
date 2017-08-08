@@ -9,7 +9,7 @@ class base
 	static $APP_NAME;
 
 	static $APP_PATH;
-	
+
 	static $APP_CONF;
 
 	function __construct()
@@ -27,9 +27,9 @@ class base
 
 	/**
 	 * 变量类型强制转换
-	 *
-	 * @param unknown $variable        	
-	 * @param string $type        	
+	 * 
+	 * @param unknown $variable        
+	 * @param string $type        
 	 * @return string|array|boolean|number|StdClass|unknown
 	 */
 	protected static function setVariableType($variable, $type = 's')
@@ -65,9 +65,9 @@ class base
 
 	/**
 	 * 载入数据模型
-	 *
+	 * 
 	 * @param string $name
-	 *        	模块名
+	 *        模块名
 	 * @return model
 	 */
 	protected static function model($name)
@@ -76,7 +76,7 @@ class base
 		{
 			if (! class_exists(self::$APP_NAME . '\\model\\' . $name))
 			{
-				$path = APP_ROOT. '/model/' . $name . '.php';
+				$path = APP_ROOT . '/model/' . $name . '.php';
 				if (file_exists($path))
 				{
 					include $path;

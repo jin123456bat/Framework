@@ -6,9 +6,8 @@ use framework\core\model;
 
 /**
  * 这些接口只为api_overview页面提供
- *
+ * 
  * @author fx
- *        
  */
 class api_overview extends BaseComponent
 {
@@ -123,8 +122,7 @@ class api_overview extends BaseComponent
 		}
 		
 		$tableName = 'operation_stat_sn_' . $this->_duration;
-		$sn = array_map(function ($s)
-		{
+		$sn = array_map(function ($s) {
 			return substr($s, 3);
 		}, $sn);
 		

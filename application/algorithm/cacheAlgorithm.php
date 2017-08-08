@@ -183,8 +183,7 @@ class cacheAlgorithm extends BaseComponent
 			}
 		}
 		
-		$sn = array_map(function ($s)
-		{
+		$sn = array_map(function ($s) {
 			return substr($s, 3);
 		}, $sn);
 		$result = $this->model('cdn_traffic_stat')

@@ -28,7 +28,7 @@ class BaseComponent extends component
 
 	/**
 	 * 从缓存钟获取sn列表
-	 *
+	 * 
 	 * @return mixed[]|string
 	 */
 	function getSnListFromCache()
@@ -43,8 +43,8 @@ class BaseComponent extends component
 
 	/**
 	 * 获取所有允许的sn列表
-	 *
-	 * @param array $sn        	
+	 * 
+	 * @param array $sn        
 	 * @return string|mixed[]|string|boolean|number|\framework\core\StdClass|\framework\core\unknown
 	 */
 	function combineSns($sn = array())
@@ -63,12 +63,12 @@ class BaseComponent extends component
 
 	/**
 	 * 时间节点补全
-	 *
-	 * @param unknown $data        	
-	 * @param unknown $startTime        	
-	 * @param unknown $endTime        	
-	 * @param unknown $duration        	
-	 * @param number $defaultValue        	
+	 * 
+	 * @param unknown $data        
+	 * @param unknown $startTime        
+	 * @param unknown $endTime        
+	 * @param unknown $duration        
+	 * @param number $defaultValue        
 	 * @return number
 	 */
 	function formatTimenode($data, $startTime, $endTime, $duration, $defaultValue = 0)
@@ -86,9 +86,9 @@ class BaseComponent extends component
 
 	/**
 	 * 根据duration获取上一个时间点
-	 *
-	 * @param datetime $time        	
-	 * @param int $duration        	
+	 * 
+	 * @param datetime $time        
+	 * @param int $duration        
 	 */
 	function getFloorTime($time, $duration)
 	{
@@ -109,9 +109,9 @@ class BaseComponent extends component
 
 	/**
 	 * 根据duration获取下一个时间点
-	 *
-	 * @param datetime $time        	
-	 * @param int $duration        	
+	 * 
+	 * @param datetime $time        
+	 * @param int $duration        
 	 */
 	function getCeilTime($time, $duration)
 	{

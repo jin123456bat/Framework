@@ -9,9 +9,9 @@ class cache extends component
 	private static $_instance;
 
 	private static $_expires;
-	
+
 	private static $_store;
-	
+
 	function __construct($store)
 	{
 		self::$_store = $store;
@@ -47,7 +47,8 @@ class cache extends component
 
 	/**
 	 * 设置默认的数据有效期
-	 * @param unknown $expires        	
+	 * 
+	 * @param unknown $expires        
 	 */
 	static function setExpires($expires)
 	{
@@ -56,10 +57,13 @@ class cache extends component
 
 	/**
 	 * 设置或者更新数据
-	 *
-	 * @param unknown $name 数据名称
-	 * @param unknown $value 数据值	
-	 * @param number $cache 数据有效期 当为0的时候使用默认的数据有效期
+	 * 
+	 * @param unknown $name
+	 *        数据名称
+	 * @param unknown $value
+	 *        数据值
+	 * @param number $cache
+	 *        数据有效期 当为0的时候使用默认的数据有效期
 	 */
 	static function set($name, $value, $expires = 0)
 	{
@@ -73,49 +77,52 @@ class cache extends component
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 自增
-	 * @param unknown $name
-	 * @param number $amount
+	 * 
+	 * @param unknown $name        
+	 * @param number $amount        
 	 * @return bool true on success or false on failure
 	 */
-	static function increase($name,$amount = 1)
+	static function increase($name, $amount = 1)
 	{
 		$app = self::getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
 		{
 			$cacheInstance = self::init();
-			return $cacheInstance->increase($name,$amount);
+			return $cacheInstance->increase($name, $amount);
 		}
 		return null;
 	}
-	
+
 	/**
 	 * 自减
-	 * @param unknown $name
-	 * @param number $amount
+	 * 
+	 * @param unknown $name        
+	 * @param number $amount        
 	 * @return bool true on success or false on failure
 	 */
-	static function decrease($name,$amount = 1)
+	static function decrease($name, $amount = 1)
 	{
 		$app = self::getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
 		{
 			$cacheInstance = self::init();
-			return $cacheInstance->decrease($name,$amount);
+			return $cacheInstance->decrease($name, $amount);
 		}
 		return null;
 	}
 
 	/**
 	 * 获取数据
-	 *
-	 * @param unknown $name
-	 * @param $default NULL 当数据不存在的时候的默认值
+	 * 
+	 * @param unknown $name        
+	 * @param $default NULL
+	 *        当数据不存在的时候的默认值
 	 * @return mixed|unknown
 	 */
-	static function get($name,$default = NULL)
+	static function get($name, $default = NULL)
 	{
 		$app = self::getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
@@ -130,10 +137,11 @@ class cache extends component
 		}
 		return null;
 	}
-	
+
 	/**
 	 * 删除缓存
-	 * @param string $name
+	 * 
+	 * @param string $name        
 	 */
 	static function remove($name)
 	{
@@ -145,7 +153,7 @@ class cache extends component
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 清空所有缓存
 	 */
@@ -159,10 +167,11 @@ class cache extends component
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 判断缓存是否存在
-	 * @param string $name
+	 * 
+	 * @param string $name        
 	 * @return bool
 	 */
 	static function has($name)
@@ -175,14 +184,15 @@ class cache extends component
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 和set相同，不同的是假如原来的name存在了，会失败，并且返回false
-	 * @param unknown $name
-	 * @param unknown $value
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $value        
 	 * @return boolean
 	 */
-	static function add($name,$value)
+	static function add($name, $value)
 	{
 		$app = self::getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
@@ -194,11 +204,12 @@ class cache extends component
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 强制使用某一个类型的缓存来存储或者读取数据
 	 * 返回一个特殊的class，这个class可以存储到变量中下次继续使用
-	 * @param string $type
+	 * 
+	 * @param string $type        
 	 * @return cache
 	 */
 	static function store($type)

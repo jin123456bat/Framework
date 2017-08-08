@@ -3,6 +3,7 @@ namespace framework\core;
 
 class cliControl extends control
 {
+
 	function initlize()
 	{
 		if (request::php_sapi_name() != 'cli')
@@ -11,14 +12,15 @@ class cliControl extends control
 		}
 		return parent::initlize();
 	}
-	
+
 	/**
-	 * 获取参数  尚未完成
-	 * @param string $name
+	 * 获取参数 尚未完成
+	 * 
+	 * @param string $name        
 	 */
-	public function getParam($name,$default = NULL)
+	public function getParam($name, $default = NULL)
 	{
-		if(request::php_sapi_name() == 'cli')
+		if (request::php_sapi_name() == 'cli')
 		{
 			$param = self::parseArgment($_SERVER['argc'], $_SERVER['argv']);
 			if (isset($param[$name]))
@@ -28,19 +30,20 @@ class cliControl extends control
 		}
 		return $default;
 	}
-	
+
 	/**
 	 * 对命令行参数经行分析
 	 * -a index => $_GET['a'] = 'index'
 	 * --b index => $_POST['b'] = 'index'
 	 * --a a --a b => $_GET['a'] = array('a','b')
-	 * @param unknown $argc
-	 * @param unknown $argv
+	 * 
+	 * @param unknown $argc        
+	 * @param unknown $argv        
 	 */
 	static public function parseArgment($argc, $argv)
 	{
 		$param = array();
-	
+		
 		foreach ($argv as $index => $value)
 		{
 			if (substr($value, 0, 1) == '-')

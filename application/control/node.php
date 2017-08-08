@@ -12,9 +12,8 @@ use application\extend\BaseComponent;
 
 /**
  * 节点管理相关接口
- *
+ * 
  * @author fx
- *        
  */
 class node extends BaseControl
 {
@@ -34,7 +33,7 @@ class node extends BaseControl
 
 	/**
 	 * 允许绑定sn的设备
-	 *
+	 * 
 	 * @return \framework\core\response\json
 	 */
 	function avaliable_sn()
@@ -92,9 +91,8 @@ class node extends BaseControl
 			
 			'feedback.rhelp', // 登陆信息
 			'feedback.update_time'
-		)) // 更新时间
-;
-		
+		)); // 更新时间
+		    
 		// 查找24小时内的最大值
 		$timestamp = (floor(time() / (5 * 60)) - 1) * 5 * 60;
 		$start_time = date('Y-m-d H:i:s', strtotime('-24 hour', $timestamp));
@@ -105,8 +103,7 @@ class node extends BaseControl
 			$r['disk_detail'] = json_decode($r['disk_detail'], true);
 			if (is_array($r['disk_detail']))
 			{
-				usort($r['disk_detail'], function ($a, $b)
-				{
+				usort($r['disk_detail'], function ($a, $b) {
 					return (intval($a['name']) < intval($b['name'])) ? - 1 : 1;
 				});
 			}
@@ -155,8 +152,8 @@ class node extends BaseControl
 				'max(mem_used) as max_mem_used', // 最大内存使用率
 				'max(sys_disk_used) as max_sys_disk_used', // 最大系统盘使用率
 				'max(data_disk_used) as max_data_disk_used'
-			)) // 最大数据盘使用率
-;
+			)); // 最大数据盘使用率
+			
 			if (! empty($max))
 			{
 				$r['max_online'] = $max['max_online'] < $r['online'] ? $r['online'] : $max['max_online'];
@@ -186,8 +183,7 @@ class node extends BaseControl
 					'service', // 服务 kbps
 					'cpu', // cpu使用
 					'mem'
-				)) // mem使用
-;
+				)); // mem使用
 				
 				$vpe['cache'] = $t['cache'] * 1;
 				$vpe['service'] = $t['service'] * 1;
@@ -270,8 +266,7 @@ class node extends BaseControl
 		{
 			return new json(json::FAILED, 'by参数只允许asc或desc,默认为asc');
 		}
-		usort($cds_list, function ($a, $b) use ($order, $by)
-		{
+		usort($cds_list, function ($a, $b) use ($order, $by) {
 			if ($by == 'asc')
 			{
 				return ($a[$order] < $b[$order]) ? - 1 : 1;
@@ -346,8 +341,8 @@ class node extends BaseControl
 			'concat(mem_size/1024,"GB") as mem_size', // 内存大小
 			'concat(convert(sys_disk_size/1024/1024/1024,decimal),"GB") as sys_disk_size', // 系统盘大小
 			'concat(convert(data_disk_size/1024/1024/1024/1024,decimal),"TB") as data_disk_size'
-		)) // 数据盘大小
-;
+		)); // 数据盘大小
+		
 		if (empty($info))
 		{
 			return new json(json::FAILED, 'CDS不存在');
@@ -359,8 +354,8 @@ class node extends BaseControl
 			->find(array(
 			'sn', // CDS的sn号
 			'company'
-		)) // CDS的名称
-;
+		)); // CDS的名称
+		
 		$cds = array_merge($cds, $info);
 		
 		// 最近24小时用户数量
@@ -564,8 +559,7 @@ class node extends BaseControl
 			->select(array(
 			'user_info.sn', // 设备SN号
 			'user_info.company'
-		)) // CDS设备名称
-;
+		)); // CDS设备名称
 		
 		$algorithm = new algorithm($starttime, $endtime, 24 * 3600);
 		foreach ($nodes as &$node)
@@ -580,8 +574,7 @@ class node extends BaseControl
 				'max_online' => 'max(online)', // 活跃用户
 				'max_hit' => 'max(hit)', // 服务用户
 				'max_hit_online' => 'FORMAT(max(hit/online)*100,1)'
-			)) // 服务用户/活跃用户峰值
-;
+			)); // 服务用户/活跃用户峰值
 			
 			$max_service = 0;
 			$max_service_time = '';

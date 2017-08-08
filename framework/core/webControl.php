@@ -5,6 +5,7 @@ use framework\core\control;
 
 class webControl extends control
 {
+
 	function initlize()
 	{
 		if (request::php_sapi_name() != 'web')
@@ -14,7 +15,4 @@ class webControl extends control
 		
 		return parent::initlize();
 	}
-	
-	
-	
 }

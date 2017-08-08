@@ -12,7 +12,7 @@ class error extends base
 
 	/**
 	 * 是否有错误
-	 *
+	 * 
 	 * @return boolean
 	 */
 	function hasError()
@@ -22,11 +22,11 @@ class error extends base
 
 	/**
 	 * 添加错误信息
-	 *
+	 * 
 	 * @param string $code
-	 *        	错误代码
+	 *        错误代码
 	 * @param string $message
-	 *        	错误信息
+	 *        错误信息
 	 */
 	function addError($code, $message)
 	{
@@ -39,9 +39,9 @@ class error extends base
 
 	/**
 	 * 删除错误信息
-	 *
+	 * 
 	 * @param string $code
-	 *        	错误代码
+	 *        错误代码
 	 */
 	function delError($code)
 	{
@@ -70,7 +70,7 @@ class error extends base
 
 	/**
 	 * 获取错误信息
-	 *
+	 * 
 	 * @return [['code','message']]
 	 */
 	function getError()

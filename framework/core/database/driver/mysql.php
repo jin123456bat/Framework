@@ -9,31 +9,35 @@ use framework\core\database\mysql\table;
 
 /**
  * mysql类
- *
+ * 
  * @author jcc
- *        
  */
 class mysql extends database
 {
+
 	/**
 	 * 链接配置
+	 * 
 	 * @var unknown
 	 */
 	private $_config;
 
 	/**
 	 * 所有的数据库链接
+	 * 
 	 * @var array
 	 */
 	private static $mysql = array();
 
 	/**
+	 *
 	 * @var \PDO
 	 */
 	private $_pdo;
 
 	/**
 	 * 事务等级
+	 * 
 	 * @var integer
 	 */
 	private $_transaction_level = 0;
@@ -59,7 +63,8 @@ class mysql extends database
 
 	/**
 	 * 数据库链接
-	 * @param $config 配置
+	 * 
+	 * @param $config 配置        
 	 * @return \PDO
 	 */
 	private function connect($config)
@@ -88,10 +93,10 @@ class mysql extends database
 		$pdo = new PDO($config['type'] . ':host=' . $config['server'] . ';port=' . $db_port . ';dbname=' . $config['dbname'], $config['user'], $config['password'], array(
 			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // 使用默认的索引模式
 			PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false, // 不使用buffer，防止数据量过大导致php内存溢出，但是这个东西貌似需要直接操作pdo效果才会体现
-			PDO::ATTR_ERRMODE => (defined('DEBUG') && DEBUG)?PDO::ERRMODE_EXCEPTION:PDO::ERRMODE_SILENT, // 抛出异常模式
+			PDO::ATTR_ERRMODE => (defined('DEBUG') && DEBUG) ? PDO::ERRMODE_EXCEPTION : PDO::ERRMODE_SILENT, // 抛出异常模式
 			PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $charset
 		)); // 设置字符集
-
+		
 		foreach ($init_command as $command)
 		{
 			$pdo->exec($command);
@@ -102,6 +107,7 @@ class mysql extends database
 
 	/**
 	 * 获取所有表名
+	 * 
 	 * @return mixed[]
 	 */
 	public function showTables()
@@ -117,7 +123,8 @@ class mysql extends database
 
 	/**
 	 * 获取链接配置
-	 * @param unknown $name
+	 * 
+	 * @param unknown $name        
 	 */
 	public function getConfig($name = null)
 	{
@@ -134,8 +141,9 @@ class mysql extends database
 
 	/**
 	 * 设置链接配置
-	 * @param unknown $name
-	 * @param unknown $value
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $value        
 	 * @return boolean
 	 */
 	public function setConfig($name, $value)
@@ -147,8 +155,11 @@ class mysql extends database
 
 	/**
 	 * 执行sql语句
-	 * @param string $sql 要执行的sql
-	 * @param array $array 默认array() sql中的参数
+	 * 
+	 * @param string $sql
+	 *        要执行的sql
+	 * @param array $array
+	 *        默认array() sql中的参数
 	 * @return array|boolean 对于select语句返回结果集，对于其他语句返回影响数据的条数
 	 */
 	public function query($sql, array $array = array())
@@ -164,7 +175,7 @@ class mysql extends database
 				$result = $statement->fetchAll(PDO::FETCH_ASSOC);
 			}
 		}
-		else if ($isSelect == -1)
+		else if ($isSelect == - 1)
 		{
 			$statement = $this->_pdo->prepare($sql);
 			if ($statement)
@@ -189,12 +200,68 @@ class mysql extends database
 		}
 		return $result;
 	}
-	
+
+	/**
+	 * 执行一些内部语句，主要是考虑读写分离的问题
+	 * 
+	 * @param string $sql        
+	 * @param array $array        
+	 */
+	function execute($sql, $array = array())
+	{
+		list ($start_m_second, $start_second) = explode(' ', microtime());
+		$statement = $this->_pdo->prepare($sql);
+		if ($statement)
+		{
+			$statement->execute($array);
+			$result = $statement->fetchAll(PDO::FETCH_ASSOC);
+		}
+		list ($end_m_second, $end_second) = explode(' ', microtime());
+		if (defined('DEBUG') && DEBUG)
+		{
+			log::mysql($sql, $end_second + $end_m_second - $start_m_second - $start_second);
+		}
+		return $result;
+	}
+
+	/**
+	 * 通过逐行遍历的形式来遍历一个sql的结果集
+	 * 返回结果是一个数组，这个数组包含了以sql结果为key以回调函数的值为值的数组
+	 * 
+	 * @param string $sql        
+	 * @param callback $callback        
+	 * @return array
+	 */
+	function fetch($sql, $array = array(), $callback = NULL)
+	{
+		list ($start_m_second, $start_second) = explode(' ', microtime());
+		$statement = $this->_pdo->prepare($sql, array(
+			PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL
+		));
+		$result = array();
+		if ($statement)
+		{
+			$statement->execute($array);
+			if (is_callable($callback))
+			{
+				$sql_result = $statement->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_NEXT);
+				
+				$result[$sql_result] = call_user_func($callback, $sql_result);
+			}
+		}
+		list ($end_m_second, $end_second) = explode(' ', microtime());
+		if (defined('DEBUG') && DEBUG)
+		{
+			log::mysql($sql, $end_second + $end_m_second - $start_m_second - $start_second);
+		}
+		return $result;
+	}
+
 	/**
 	 * 判断SQL是否是查询语句
-	 * @param string $sql
-	 * @return -1|1|0
-	 * 返回1是select或者show语句，-1是update或者insert或者delete语句  返回0是其他语句
+	 * 
+	 * @param string $sql        
+	 * @return -1|1|0 返回1是select或者show语句，-1是update或者insert或者delete语句 返回0是其他语句
 	 */
 	private function isSelectSql($sql)
 	{
@@ -205,14 +272,13 @@ class mysql extends database
 		{
 			return 1;
 		}
-		else if(in_array(strtolower(substr(trim($sql), 0, stripos(trim($sql), ' '))), array(
+		else if (in_array(strtolower(substr(trim($sql), 0, stripos(trim($sql), ' '))), array(
 			'insert',
 			'delete',
 			'update'
 		), true))
 		{
-			return -1
-			;
+			return - 1;
 		}
 		return 0;
 	}
@@ -236,7 +302,7 @@ class mysql extends database
 
 	/**
 	 * 检查是否开启了事物
-	 *
+	 * 
 	 * @return boolean
 	 */
 	public function inTransaction()
@@ -280,7 +346,7 @@ class mysql extends database
 
 	/**
 	 * 错误信息
-	 *
+	 * 
 	 * {@inheritdoc}
 	 *
 	 * @see \framework\core\database\database::error()
@@ -292,7 +358,7 @@ class mysql extends database
 
 	/**
 	 * 错误代码
-	 *
+	 * 
 	 * {@inheritdoc}
 	 *
 	 * @see \framework\core\database\database::errno()
@@ -301,38 +367,45 @@ class mysql extends database
 	{
 		return $this->_pdo->errorCode();
 	}
-	
-	
-	/**
-	 * 创建数据表
-	 * @param table $table 表名
-	 * @param string $config 数据库配置
+
+/**
+ * 创建数据表
+ * 
+ * @param table $table
+ *        表名
+ * @param string $config
+ *        数据库配置
+ */
+	/*
+	 * function create(table $table)
+	 * {
+	 * $sql = $table->__toSql();
+	 * $result = $this->query($sql);
+	 * if($this->errno() === '00000')
+	 * {
+	 * return true;
+	 * }
+	 * else
+	 * {
+	 * return false;
+	 * }
+	 * }
 	 */
-	/*function create(table $table)
-	{
-		$sql = $table->__toSql();
-		$result = $this->query($sql);
-		if($this->errno() === '00000')
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}*/
-	
-	/**
-	 * 判断数据表是否存在
-	 * @return bool
+
+/**
+ * 判断数据表是否存在
+ * 
+ * @return bool
+ */
+	/*
+	 * function isExist($tableName)
+	 * {
+	 * $result = $this->query('show tables like ?',array($tableName));
+	 * if (empty($result))
+	 * {
+	 * return false;
+	 * }
+	 * return current(current($result)) == $tableName;
+	 * }
 	 */
-	/*function isExist($tableName)
-	{
-		$result = $this->query('show tables like ?',array($tableName));
-		if (empty($result))
-		{
-			return false;
-		}
-		return current(current($result)) == $tableName;
-	}*/
 }

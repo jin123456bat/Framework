@@ -8,36 +8,41 @@ use framework;
 
 /**
  * 表数据
+ * 
  * @author jin
- *
  */
 class model extends component
 {
 
 	/**
 	 * 表名
+	 * 
 	 * @var unknown
 	 */
 	private $_table;
 
 	/**
+	 *
 	 * @var sql
 	 */
 	private $_sql;
 
 	/**
+	 *
 	 * @var \framework\core\database\driver\mysql
 	 */
 	private $_db;
 
 	/**
 	 * 当前表执行的sql记录
+	 * 
 	 * @var array
 	 */
 	private static $_history = array();
 
 	/**
-	 * 表结构  通过desc tableName获取
+	 * 表结构 通过desc tableName获取
+	 * 
 	 * @var unknown
 	 */
 	private $_desc;
@@ -45,12 +50,14 @@ class model extends component
 	/**
 	 * 是否开启批量提交
 	 * 批量insert的时候特别好用
+	 * 
 	 * @var string
 	 */
 	private $_compress = false;
 
 	/**
 	 * 存储批量提交的sql
+	 * 
 	 * @var array
 	 */
 	private $_compress_sql = array();
@@ -67,7 +74,7 @@ class model extends component
 
 	/**
 	 * when this class is initlized,this function will be execute
-	 *
+	 * 
 	 * {@inheritdoc}
 	 *
 	 * @see \core\component::initlize()
@@ -79,12 +86,12 @@ class model extends component
 		if (method_exists($this, '__config'))
 		{
 			$db = $this->__config();
-			//支持model中__config直接返回配置名称
+			// 支持model中__config直接返回配置名称
 			if (is_scalar($db))
 			{
 				$config = $this->getConfig('db');
 				$db = $config['db'];
-				if (isset($db[$config]) && !empty($db[$config]) && is_array($db[$config]))
+				if (isset($db[$config]) && ! empty($db[$config]) && is_array($db[$config]))
 				{
 					$db = $db[$config];
 				}
@@ -95,9 +102,9 @@ class model extends component
 			$db = $this->getDefaultDbConfig();
 		}
 		
-		//实例化mysql的类
+		// 实例化mysql的类
 		$type = $db['type'];
-		$type = '\\framework\\core\\database\\driver\\'.$type;
+		$type = '\\framework\\core\\database\\driver\\' . $type;
 		
 		$this->_db = $type::getInstance($db);
 		
@@ -112,7 +119,9 @@ class model extends component
 
 	/**
 	 * 根据配置名称 获取配置
-	 * @param array|string $connection 配置名称或者详细配置
+	 * 
+	 * @param array|string $connection
+	 *        配置名称或者详细配置
 	 * @return \framework\core\database\database
 	 */
 	public static function getConnection($config)
@@ -132,8 +141,9 @@ class model extends component
 	 * 获取DB配置
 	 * 查询在所有配置文件中
 	 * 1、存在指定model的 有则使用指定model的
-	 * 2、查询存在默认的 有则使用默认的  default=true
+	 * 2、查询存在默认的 有则使用默认的 default=true
 	 * 3、使用第一个
+	 * 
 	 * @return NULL|mixed
 	 */
 	public function getDefaultDbConfig()
@@ -152,7 +162,7 @@ class model extends component
 				{
 					$firstDb = $d;
 				}
-				if (isset($d['model']) && !empty($this->_table) && empty($model))
+				if (isset($d['model']) && ! empty($this->_table) && empty($model))
 				{
 					if (is_scalar($d['model']) && $d['model'] == $this->_table)
 					{
@@ -168,15 +178,15 @@ class model extends component
 					$default = $d;
 				}
 			}
-			if (!empty($model))
+			if (! empty($model))
 			{
 				return $model;
 			}
-			if (!empty($default))
+			if (! empty($default))
 			{
 				return $default;
 			}
-			if (!empty($firstDb))
+			if (! empty($firstDb))
 			{
 				return $firstDb;
 			}
@@ -186,9 +196,9 @@ class model extends component
 
 	/**
 	 * only for sql
-	 *
-	 * @param unknown $name        	
-	 * @param unknown $args        	
+	 * 
+	 * @param unknown $name        
+	 * @param unknown $args        
 	 * @return \framework\core\model
 	 */
 	function __call($name, $args)
@@ -202,8 +212,8 @@ class model extends component
 
 	/**
 	 * set database table's name
-	 *
-	 * @param unknown $table        	
+	 * 
+	 * @param unknown $table        
 	 */
 	function setTable($table)
 	{
@@ -214,7 +224,7 @@ class model extends component
 
 	/**
 	 * get this database table's name
-	 *
+	 * 
 	 * @return unknown|string
 	 */
 	function getTable()
@@ -227,10 +237,10 @@ class model extends component
 	 */
 	private function parse()
 	{
-		//if ($this->_db->isExist($this->getTable()))
-		//{
+		// if ($this->_db->isExist($this->getTable()))
+		// {
 		$this->_desc = $this->query('DESC `' . $this->_table . '`');
-		//}
+		// }
 		$this->_config['max_allowed_packet'] = $this->_db->getConfig('max_allowed_packet');
 	}
 
@@ -268,8 +278,8 @@ class model extends component
 
 	/**
 	 * get row num from table
-	 *
-	 * @param string $field        	
+	 * 
+	 * @param string $field        
 	 * @return number
 	 */
 	function count($field = '*')
@@ -279,8 +289,8 @@ class model extends component
 
 	/**
 	 * the max value of fields
-	 *
-	 * @param unknown $field        	
+	 * 
+	 * @param unknown $field        
 	 * @return NULL|mixed
 	 */
 	function max($field)
@@ -290,8 +300,8 @@ class model extends component
 
 	/**
 	 * sum the value of fields
-	 *
-	 * @param unknown $field        	
+	 * 
+	 * @param unknown $field        
 	 * @return NULL|mixed
 	 */
 	function sum($field)
@@ -301,8 +311,8 @@ class model extends component
 
 	/**
 	 * 某字段的平均值
-	 *
-	 * @param unknown $field        	
+	 * 
+	 * @param unknown $field        
 	 * @return NULL|mixed
 	 */
 	function avg($field)
@@ -312,9 +322,9 @@ class model extends component
 
 	/**
 	 * 更新数据表
-	 *
-	 * @param unknown $name        	
-	 * @param string $value        	
+	 * 
+	 * @param unknown $name        
+	 * @param string $value        
 	 * @return boolean
 	 */
 	function update($name, $value = '')
@@ -465,9 +475,9 @@ class model extends component
 	/**
 	 * insert into on duplicate
 	 * 目前增加了在compress状态下的使用条件，对于多个insert的duplicate
-	 *
-	 * @param unknown $name        	
-	 * @param string $value        	
+	 * 
+	 * @param unknown $name        
+	 * @param string $value        
 	 * @return \framework\core\database\sql
 	 */
 	function duplicate($name, $value = '')
@@ -500,7 +510,7 @@ class model extends component
 
 	/**
 	 * 删除
-	 *
+	 * 
 	 * @return boolean
 	 */
 	function delete()
@@ -511,9 +521,9 @@ class model extends component
 
 	/**
 	 * 执行自定义sql
-	 *
-	 * @param unknown $sql        	
-	 * @param array $array        	
+	 * 
+	 * @param unknown $sql        
+	 * @param array $array        
 	 * @return boolean
 	 */
 	function query($sql, $array = array())
@@ -566,8 +576,8 @@ class model extends component
 
 	/**
 	 * 上一个插入的ID
-	 *
-	 * @param unknown $name        	
+	 * 
+	 * @param unknown $name        
 	 */
 	function lastInsertId($name = null)
 	{
@@ -576,7 +586,7 @@ class model extends component
 
 	/**
 	 * 清空表
-	 *
+	 * 
 	 * @return boolean
 	 */
 	function truncate()
@@ -607,8 +617,7 @@ class model extends component
 				unset($this->_compress_sql['insert_duplicate_values']);
 				$insert_sql = explode(';', $this->_compress_sql['insert']);
 				
-				$insert_sql = array_map(function ($sql) use ($insert_duplicate_values)
-				{
+				$insert_sql = array_map(function ($sql) use ($insert_duplicate_values) {
 					return $sql . $insert_duplicate_values;
 				}, $insert_sql);
 				$this->_compress_sql = array_merge($this->_compress_sql, $insert_sql);
@@ -635,13 +644,14 @@ class model extends component
 
 	/**
 	 * 优化数据库
+	 * 
 	 * @return boolean
 	 */
 	function optimize()
 	{
 		return $this->query('optimize table ' . $this->getTable());
 	}
-	
+
 	/**
 	 * 删除数据表
 	 */

@@ -2,7 +2,7 @@
 // 定义根目录
 ! defined('ROOT') & define('ROOT', __DIR__);
 
-//调试模式
+// 调试模式
 define('DEBUG', false);
 
 include ROOT . '/xhprof.php';

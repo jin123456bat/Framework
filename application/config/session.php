@@ -1,4 +1,4 @@
 <?php
 return array(
-	'handler' => 'SessionHandler',//重写sessionHanlder
+	'handler' => 'SessionHandler' // 重写sessionHanlder
 );
