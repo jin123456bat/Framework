@@ -1,6 +1,6 @@
 {
-	"name" : "jin123456bat/framework3.0",
-	"description" : "framework3.0 is a mvc framework developed with php",
+	"name" : "jin123456bat/framework",
+	"description" : "framework is a mvc framework developed with php",
 	"homepage" : "https://github.com/jin123456bat/framework3.0",
 	"minimum-stability" : "alpha",
 	"license" : "Apache-2.0",
