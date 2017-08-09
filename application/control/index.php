@@ -52,6 +52,8 @@ class index extends BaseControl
 		 * }
 		 */
 		$a = new table('a');
+		//var_dump($a->field('name')->comment('name的注释123'));
+		var_dump($a->field('aid')->autoIncrement(true));
 		
 		// var_dump(cookie::set('name','555'));
 		// var_dump($_COOKIE);

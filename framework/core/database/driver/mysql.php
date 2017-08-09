@@ -245,8 +245,11 @@ class mysql extends database
 			if (is_callable($callback))
 			{
 				$sql_result = $statement->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_NEXT);
-				
-				$result[$sql_result] = call_user_func($callback, $sql_result);
+				while (!empty($sql_result))
+				{
+					$result[$sql_result] = call_user_func($callback, $sql_result);
+					$sql_result = $statement->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_NEXT);
+				}
 			}
 		}
 		list ($end_m_second, $end_second) = explode(' ', microtime());

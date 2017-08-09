@@ -82,8 +82,8 @@ class table extends base
 		
 		if ($this->_exist)
 		{
-			$descs = $this->_db->query('desc ' . $this->getName());
-			// var_dump($descs);
+			$descs = $this->_db->query('show full columns from '.$this->getName());
+			//var_dump($descs);
 			foreach ($descs as $desc)
 			{
 				preg_match('/[a-zA-Z]+/', $desc['Type'], $type);
@@ -93,7 +93,9 @@ class table extends base
 					'length' => isset($length[0]) ? $length[0] : 0,
 					'null' => $desc['Null'] !== 'NO',
 					'default' => $desc['Default'],
-					'auto_increment' => $desc['Extra'] == 'auto_increment'
+					'auto_increment' => $desc['Extra'] == 'auto_increment',
+					'collation' => $desc['Collation'],
+					'comment' => $desc['Comment'],
 				);
 			}
 			
@@ -138,7 +140,11 @@ class table extends base
 	 */
 	function field($field_name)
 	{
-		return new field($field_name, $this->getName(), $this->_db);
+		if (isset($this->_desc[$field_name]))
+		{
+			return new field($this->_desc[$field_name],$field_name, $this->getName(), $this->_db);
+		}
+		return NULL;
 	}
 
 	/**
