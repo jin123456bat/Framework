@@ -4,24 +4,57 @@ namespace framework\core\response;
 use framework\core\response;
 use framework;
 use framework\core\request;
+use framework\vendor\file;
 
 class file extends response
 {
-
 	private $_path;
 
-	function __construct($file)
+	/**
+	 * @param string|file $file
+	 * @param bool $download  默认为false
+	 * @param string $download_name 下载的时候的文件名 默认为文件本身的名称
+	 * 当为false的时候 由浏览器自动判断，例如pdf文件浏览器可能直接显示出来，而不是期望中的下载，当为true的时候强制为下载
+	 */
+	function __construct($file,$download = false,$download_name = '')
 	{
 		if (is_file($file))
 		{
 			$this->_path = $file;
+			$pathinfo = pathinfo($this->_path);
+			$this->_basename = $pathinfo['basename'];
+			$this->_extension = $pathinfo['extension'];
 		}
 		else if ($file instanceof framework\vendor\file)
 		{
 			$this->_path = $file->path();
+			$this->_basename = $file->basename();
+			$this->_extension = $file->extension();
 		}
 		
 		$resource = fopen($file, 'rb');
+		
+		if ($download)
+		{
+			$this->setHeader(array(
+				'Content-Type: application/force-download',
+				'Cache-Control: must-revalidate, post-check=0, pre-check=0',
+				'Content-Transfer-Encoding: binary',
+			));
+		}
+		//header("Content-Disposition: attachment;filename=" . $fileName . ".csv");
+		if (empty($download_name))
+		{
+			$this->setHeader('Content-Disposition','attachment;filename='.$this->_basename);
+		}
+		else
+		{
+			if (stripos('.', $download_name) === false)
+			{
+				$download_name .= '.'.$this->_extension;
+			}
+			$this->setHeader('Content-Disposition','attachment;filename='.$download_name);
+		}
 		
 		$range = request::header('Range');
 		if (! empty($range))

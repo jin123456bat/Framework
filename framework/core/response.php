@@ -159,6 +159,20 @@ class response extends component
 		{
 			$this->_header->add($header, $value);
 		}
+		else if (is_array($header))
+		{
+			foreach ($header as $k => $h)
+			{
+				if (is_int($k))
+				{
+					$this->_header->add($h);
+				}
+				else if (is_string($k))
+				{
+					$this->_header->add($k,$h);
+				}
+			}
+		}
 	}
 
 	function getHeader()
