@@ -52,8 +52,16 @@ class index extends BaseControl
 		 * }
 		 */
 		$a = new table('a');
+		$a->desc();
+		$a->field('a')->int(11);
+		//$a->field('b');
+		//动态创建表有点蛋疼啊
+		$a->create(function($table){
+			$table->field('a')->int(11)->create();
+			$table->field('b')->varchar(32)->create();
+		});
 		//var_dump($a->field('name')->comment('name的注释123'));
-		var_dump($a->field('aid')->autoIncrement(true));
+		//var_dump($a->field('aa')->enum([1,2,3,'']));
 		
 		// var_dump(cookie::set('name','555'));
 		// var_dump($_COOKIE);

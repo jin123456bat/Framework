@@ -24,7 +24,13 @@ return array(
 		// session.save_handler => 'redis',
 		// session.save_path => "tcp://host1:6379?weight=1, tcp://host2:6379?weight=2&timeout=2.5, tcp://host3:6379?weight=2&read_timeout=2.5"
 	),
+	//设置时区
 	'date' => array(
 		'timezone' => 'Asia/Shanghai'
-	)
+	),
+	//开启Gzip
+	'zlib' => array(
+		'output_compression' => 'On',
+		'output_compression_level' => -1,
+	),
 );

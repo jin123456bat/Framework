@@ -83,18 +83,49 @@ class table extends base
 		if ($this->_exist)
 		{
 			$descs = $this->_db->query('show full columns from '.$this->getName());
-			//var_dump($descs);
 			foreach ($descs as $desc)
 			{
 				preg_match('/[a-zA-Z]+/', $desc['Type'], $type);
-				preg_match('/[0-9]+/', $desc['Type'], $length);
+				preg_match('/\((?<length>.+)\)/', $desc['Type'], $lengthData);
+				
+				$type = strtolower($type[0]);
+				
+				$length = 0;
+				if (isset($lengthData['length']))
+				{
+					$length = $lengthData['length'];
+				}
+				
+				$auto_increment = false;
+				$prototype = '';
+				switch (strtolower(trim($desc['Extra'])))
+				{
+					case 'auto_increment':
+						$auto_increment = true;
+					break;
+					case 'on update current_timestamp':
+						$prototype = 'on update CURRENT_TIMESTAMP';
+					break;
+				}
+				
+				if (stripos($desc['Type'], 'unsigned zerofill')!==false)
+				{
+					$prototype = 'unsigned zerofill';
+				}
+				else if (stripos($desc['Type'], 'unsigned')!==false)
+				{
+					$prototype = 'unsigned';
+				}
+				
+				
 				$this->_desc[$desc['Field']] = array(
-					'type' => strtolower($type[0]),
-					'length' => isset($length[0]) ? $length[0] : 0,
+					'type' => $type,
+					'length' => $length,
 					'null' => $desc['Null'] !== 'NO',
 					'default' => $desc['Default'],
-					'auto_increment' => $desc['Extra'] == 'auto_increment',
+					'auto_increment' => $auto_increment,
 					'collation' => $desc['Collation'],
+					'prototype' => $prototype,
 					'comment' => $desc['Comment'],
 				);
 			}
@@ -199,7 +230,7 @@ class table extends base
 	/**
 	 * 索引列表
 	 */
-	function indexList()
+	function getIndex()
 	{
 		return $this->_index_list;
 	}
@@ -209,7 +240,7 @@ class table extends base
 	 * 
 	 * @return array
 	 */
-	function desc()
+	function getDesc()
 	{
 		return $this->_desc;
 	}

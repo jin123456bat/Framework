@@ -64,26 +64,54 @@ class field
 	/**
 	 * 根据字段属性创建sql
 	 */
-	private function createSql($change = false)
+	private function createSql()
 	{
 		$collation = '';
-		switch ($this->_field_info['type'])
+		//需要字符集的字段
+		$need_collation_fields = array(
+			'text',
+			'tinytext',
+			'mediumtext',
+			'longtext',
+			'char',
+			'varchar',
+			'enum',
+		);
+		//判断字段类型中是否允许字符集
+		if (in_array($this->_field_info['type'], $need_collation_fields) && !empty($this->_field_info['collation']))
 		{
-			case 'varchar':
-				//CHARACTER SET utf8 COLLATE utf8_general_ci
-				if (!empty($this->_field_info['collation']))
-				{
-					$character = current(explode('_', $this->_field_info['collation']));
-					$collation = 'CHARACTER SET '.$character.' collate '.$this->_field_info['collation'];
-				}
-			case 'int':
-				$type = $this->_field_info['type'] . '(' . $this->_field_info['length'] . ')';
-			break;
-			default:
-				$type = $this->_field_info['type'];
+			$character = current(explode('_', $this->_field_info['collation']));
+			$collation = 'CHARACTER SET '.$character.' collate '.$this->_field_info['collation'];
+		}
+		
+		$type = $this->_field_info['type'];
+		
+		//需要长度的字段
+		$need_length_fields = array(
+			'tinyint',
+			'smallint',
+			'mediumint',
+			'int',
+			'bigint',
+			'enum',
+			'decimal',
+			'bit',
+		);
+		if (in_array($this->_field_info['type'], $need_length_fields))
+		{
+			$type = $this->_field_info['type'] . '(' . $this->_field_info['length'] . ')';
 		}
 		
 		$null = $this->_field_info['null'] ? 'NULL' : 'NOT NULL';
+		
+		//是否是时间字段
+		$is_time_fields = array(
+			'date',
+			'datetime',
+			'timestamp',
+			'time',
+			'year',
+		);
 		
 		$default = '';
 		if ($this->_field_info['default'] === null)
@@ -97,7 +125,7 @@ class field
 				$default = '';
 			}
 		}
-		else if ($this->_field_info['default'] == 'CURRENT_TIMESTAMP')
+		else if ($this->_field_info['default'] == 'CURRENT_TIMESTAMP' && in_array($type, $is_time_fields))
 		{
 			$default = 'DEFAULT CURRENT_TIMESTAMP';
 		}
@@ -124,21 +152,38 @@ class field
 		
 		$auto_increment = $this->_field_info['auto_increment']?' AUTO_INCREMENT ':'';
 		
-		if ($change)
+		//int字段
+		$number_fields= array(
+			'tinyint',
+			'smallint',
+			'mediumint',
+			'int',
+			'bigint',
+			'decimal',
+			'float',
+			'double',
+		);
+		$prototype = '';
+		if (isset($this->_field_info['prototype']) && !empty($this->_field_info['prototype']))
 		{
-			$field_name = $this->getFieldName();
-			if (isset($this->_field_info['name']) && !empty($this->_field_info['name']))
+			if ($prototype == 'on update current_timestamp' && in_array($type, $is_time_fields))
 			{
-				$field_name = $this->_field_info['name'];
+				$prototype = $this->_field_info['prototype'];
 			}
-			
-			$sql = 'ALTER TABLE `' . $this->_table_name . '` CHANGE `' . $this->getFieldName() . '` `'.$field_name.'` ' . $type .' '.$collation.' ' . $null .' ' .$auto_increment. ' ' . $default.' '.$comment.$after;
+			else if (($prototype == 'UNSIGNED' || $prototype == 'UNSIGNED ZEROFILL') && in_array($type, $number_fields))
+			{
+				$prototype = $this->_field_info['prototype'];
+			}
 		}
-		else
+		
+		$field_name = $this->getFieldName();
+		if (isset($this->_field_info['name']) && !empty($this->_field_info['name']))
 		{
-			$sql = 'ALTER TABLE `' . $this->_table_name . '` MODIFY `' . $this->getFieldName() . '` ' . $type .' '.$collation.' ' . $null .' ' .$auto_increment. ' ' . $default.' '.$comment.$after;
+			$field_name = $this->_field_info['name'];
 		}
-		var_dump($sql);
+		
+		$sql = 'ALTER TABLE `' . $this->_table_name . '` CHANGE `' . $this->getFieldName() . '` `'.$field_name.'` ' . $type .' '.$prototype.' '.$collation.' ' . $null .' ' .$auto_increment. ' ' . $default.' '.$comment.$after;
+		
 		return $sql;
 	}
 
@@ -161,7 +206,7 @@ class field
 	function rename($new_name)
 	{
 		$this->_field_info['name'] = $new_name;
-		$sql = $this->createSql(true);
+		$sql = $this->createSql();
 		$this->_connection->query($sql);
 		//更新名称
 		$this->_field_name = $new_name;
@@ -264,20 +309,39 @@ class field
 		return $this;
 	}
 
-	private function prototype()
-	{
-	}
-
+	/**
+	 * 字段添加binary属性
+	 * 这个函数可能导致字段字符集变化，比如原来是utf8_general_ci代表不区分大小写的utf8，设置为binary之后会变为utf8_bin
+	 * 而这种变化是程序目前无法检测出来的
+	 */
 	function binary()
 	{
+		$this->_field_info['prototype'] = 'BINARY';
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
 	}
 
+	/**
+	 * 字段类型为int等的时候，设置当前字段为无符号整形
+	 */
 	function unsigned()
 	{
+		$this->_field_info['prototype'] = 'UNSIGNED';
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
 	}
 
+	/**
+	 * 字段类型为int等的时候，设置当前字段为无符号整形，其余位用0填充
+	 */
 	function unsignedZerofill()
 	{
+		$this->_field_info['prototype'] = 'UNSIGNED ZEROFILL';
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
 	}
 
 	/**
@@ -286,24 +350,106 @@ class field
 	 */
 	function onUpdateCurrentTimestamp()
 	{
+		$this->_field_info['prototype'] = 'on update current_timestamp';
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 设置字段类型为tinyint
+	 * 1字节表示 范围2^8^1
+	 * @param number $length
+	 */
+	function tinyint($length = 4)
+	{
+		$this->_field_info['type'] = 'tinyint';
+		$this->_field_info['length'] = $length;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 设置字段类型为smallint
+	 * 2字节表示 范围2^8^2
+	 * @param number $length
+	 */
+	function smallint($length = 6)
+	{
+		$this->_field_info['type'] = 'smallint';
+		$this->_field_info['length'] = $length;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 设置字段类型为mediumint
+	 * 2字节表示 范围2^8^3
+	 * @param number $length
+	 */
+	function mediumint($length = 9)
+	{
+		$this->_field_info['type'] = 'mediumint';
+		$this->_field_info['length'] = $length;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
 	}
 
 	/**
-	 * 设置类型
+	 * 设置字段类型为int
+	 * 4字节表示 范围2^8^4
+	 * @param number $length
 	 */
-	private function type($type, $length)
-	{
-	}
-
 	function int($length = 11)
 	{
+		$this->_field_info['type'] = 'int';
+		$this->_field_info['length'] = $length;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 设置字段类型为bigint
+	 * 4字节表示 范围2^8^8
+	 * @param number $length
+	 */
+	function bigint($length = 20)
+	{
+		$this->_field_info['type'] = 'bigint';
+		$this->_field_info['length'] = $length;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 将字段类型设置为char类型
+	 * 定长（0-255，默认1）存储时候会在右边补充空格到指定长度
+	 */
+	function char($length = 1)
+	{
+		$this->_field_info['type'] = 'char';
+		$this->_field_info['length'] = $length;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
 	}
 
 	/**
 	 * 将字段类型设置为varchar类型
+	 * 变长
 	 */
 	function varchar($length = 32)
 	{
+		$this->_field_info['type'] = 'varchar';
+		$this->_field_info['length'] = $length;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
 	}
 
 	/**
@@ -332,7 +478,11 @@ class field
 		{
 			$type = 'longtext';
 		}
-		return $this->type($type, $length);
+		$this->_field_info['type'] = $type;
+		$this->_field_info['length'] = $length;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
 	}
 
 	/**
@@ -340,5 +490,206 @@ class field
 	 */
 	function datetime()
 	{
+		$this->_field_info['type'] = 'datetime';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 设置字段类型为timestamp
+	 */
+	function timestamp()
+	{
+		$this->_field_info['type'] = 'timestamp';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 设置字段类型为date
+	 * @return \framework\core\database\mysql\field
+	 */
+	function date()
+	{
+		$this->_field_info['type'] = 'date';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 设置字段类型为time
+	 * @return \framework\core\database\mysql\field
+	 */
+	function time()
+	{
+		$this->_field_info['type'] = 'time';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 设置字段类型为year
+	 * @return \framework\core\database\mysql\field
+	 */
+	function year()
+	{
+		$this->_field_info['type'] = 'year';
+		$this->_field_info['length'] = 4;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 设置类型为定点数
+	 * @param unknown $M 整数部分，最大65
+	 * @param unknown $D 小数部分，最大30
+	 * @return \framework\core\database\mysql\field
+	 */
+	function decimal($M,$D)
+	{
+		if ($M>=65)
+		{
+			$M = 65;
+		}
+		if ($D>=30)
+		{
+			$D = 30;
+		}
+		$this->_field_info['type'] = 'decimal';
+		$this->_field_info['length'] = $M.','.$D;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 设置字段类型为float 单精度浮点数
+	 * 
+	 */
+	function float()
+	{
+		$this->_field_info['type'] = 'float';
+		$this->_field_info['length'] = 4;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 设置字段类型为double 单精度浮点数
+	 *
+	 */
+	function double()
+	{
+		$this->_field_info['type'] = 'double';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 位类型
+	 * @param number $length = 1
+	 */
+	function bit($length = 1)
+	{
+		$this->_field_info['type'] = 'bit';
+		$this->_field_info['length'] = $length;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 枚举类型
+	 * @param array $array
+	 * @return \framework\core\database\mysql\field
+	 */
+	function enum($array)
+	{
+		$this->_field_info['type'] = 'enum';
+		$this->_field_info['length'] = '"'.implode('","', $array).'"';
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 二进制字节流
+	 * 最多2^8-1字节
+	 * @return \framework\core\database\mysql\field
+	 */
+	function tinyblob()
+	{
+		$this->_field_info['type'] = 'tinyblob';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 二进制字节刘
+	 * 最多2^24-1字节
+	 * @return \framework\core\database\mysql\field
+	 */
+	function mediumblob()
+	{
+		$this->_field_info['type'] = 'mediumblob';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 二进制字节流
+	 * 最多2^16-1字节
+	 * @return \framework\core\database\mysql\field
+	 */
+	function blob()
+	{
+		$this->_field_info['type'] = 'blob';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 二进制字节流
+	 * 最多2^32-1字节
+	 * @return \framework\core\database\mysql\field
+	 */
+	function longblob()
+	{
+		$this->_field_info['type'] = 'longblob';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 存储json对象
+	 * @return \framework\core\database\mysql\field
+	 */
+	function json()
+	{
+		$this->_field_info['type'] = 'json';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
 	}
 }
