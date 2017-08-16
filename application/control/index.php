@@ -45,6 +45,9 @@ class index extends BaseControl
 		 * 'email' => '326550324@qq.com',
 		 * 'time' => '2017-05-06 12:12:12',
 		 * 'sex' => '男',
+		 * 'user' => array(
+		 * 			'name'=>'jin',
+		 * 		)
 		 * ));
 		 * if (!$test->validate())
 		 * {
@@ -52,14 +55,17 @@ class index extends BaseControl
 		 * }
 		 */
 		$a = new table('a');
-		$a->desc();
-		$a->field('a')->int(11);
+		//$a->field('id')->int(11)->comment('ID主键');
+		//$a->field('name')->varchar(32)->comment('用户名');
+		var_dump($a->index('primary')->add('sd')->remove('sd'));
+		//$a->primary()->add('id');
+		//$a->field('a')->int(11);
 		//$a->field('b');
-		//动态创建表有点蛋疼啊
-		$a->create(function($table){
-			$table->field('a')->int(11)->create();
-			$table->field('b')->varchar(32)->create();
-		});
+		//动态创建表有点蛋疼啊  这个是laravel的方式
+		//$a->create(function($table){
+		//	$table->field('a')->int(11)->create();
+		//	$table->field('b')->varchar(32)->create();
+		//});
 		//var_dump($a->field('name')->comment('name的注释123'));
 		//var_dump($a->field('aa')->enum([1,2,3,'']));
 		

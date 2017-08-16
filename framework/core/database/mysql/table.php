@@ -47,6 +47,12 @@ class table extends base
 	 * @var array
 	 */
 	private $_index_list = array();
+	
+	/**
+	 * 存储主键索引结构
+	 * @var array
+	 */
+	private $_primary_list = array();
 
 	function __construct($table_name, $config = NULL)
 	{
@@ -134,9 +140,10 @@ class table extends base
 			$keys = $this->_db->query('show keys from ' . $this->getName());
 			foreach ($keys as $key)
 			{
-				if (! isset($this->_index_list[$key['Key_name']]))
+				$keyname = strtolower($key['Key_name']);
+				if (! isset($this->_index_list[$keyname]))
 				{
-					$this->_index_list[$key['Key_name']] = array(
+					$this->_index_list[$keyname] = array(
 						'index_type' => $key['Index_type'], // 索引类型
 						'unique' => $key['Non_unique'] == 0, // 是否唯一索引
 						'comment' => $key['Comment'], // 注释
@@ -147,7 +154,7 @@ class table extends base
 				}
 				else
 				{
-					$this->_index_list[$key['Key_name']]['fields'][] = $key['Column_name'];
+					$this->_index_list[$keyname]['fields'][] = $key['Column_name'];
 				}
 			}
 		}
@@ -179,18 +186,27 @@ class table extends base
 	}
 
 	/**
-	 * 锁定索引
-	 * 
-	 * @param unknown $index_name        
-	 * @return \application\control\index
+	 * 获取索引
+	 * @param unknown $index_name
+	 * @return \framework\core\database\mysql\index|NULL
 	 */
 	function index($index_name)
 	{
+		var_dump($this->_index_list);
 		if (isset($this->_index_list[$index_name]))
 		{
 			return new index($index_name, $this->_index_list[$index_name], $this->getName(), $this->_db);
 		}
 		return NULL;
+	}
+	
+	/**
+	 * 获取主键索引
+	 * @return \framework\core\database\mysql\index|\framework\core\database\mysql\NULL
+	 */
+	function primary()
+	{
+		return $this->index('primary');
 	}
 
 	/**
