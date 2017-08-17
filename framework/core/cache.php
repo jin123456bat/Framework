@@ -19,7 +19,7 @@ class cache extends component
 
 	protected static function init()
 	{
-		$config = self::getConfig('cache');
+		$config = $this->getConfig('cache');
 		
 		self::$_expires = isset($config['expires']) ? $config['expires'] : 0;
 		
@@ -67,11 +67,11 @@ class cache extends component
 	 */
 	static function set($name, $value, $expires = 0)
 	{
-		$app = self::getConfig('app');
+		$app = $this->getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
 		{
 			$cacheInstance = self::init();
-			$config = self::getConfig('cache');
+			$config = $this->getConfig('cache');
 			$expires = empty($expires) ? self::$_expires : $expires;
 			return $cacheInstance->set($name, $value, $expires);
 		}
@@ -87,7 +87,7 @@ class cache extends component
 	 */
 	static function increase($name, $amount = 1)
 	{
-		$app = self::getConfig('app');
+		$app = $this->getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
 		{
 			$cacheInstance = self::init();
@@ -105,7 +105,7 @@ class cache extends component
 	 */
 	static function decrease($name, $amount = 1)
 	{
-		$app = self::getConfig('app');
+		$app = $this->getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
 		{
 			$cacheInstance = self::init();
@@ -124,7 +124,7 @@ class cache extends component
 	 */
 	static function get($name, $default = NULL)
 	{
-		$app = self::getConfig('app');
+		$app = $this->getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
 		{
 			$cacheInstance = self::init();
@@ -145,7 +145,7 @@ class cache extends component
 	 */
 	static function remove($name)
 	{
-		$app = self::getConfig('app');
+		$app = $this->getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
 		{
 			$cacheInstance = self::init();
@@ -159,7 +159,7 @@ class cache extends component
 	 */
 	static function flush()
 	{
-		$app = self::getConfig('app');
+		$app = $this->getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
 		{
 			$cacheInstance = self::init();
@@ -176,7 +176,7 @@ class cache extends component
 	 */
 	static function has($name)
 	{
-		$app = self::getConfig('app');
+		$app = $this->getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
 		{
 			$cacheInstance = self::init();
@@ -194,11 +194,11 @@ class cache extends component
 	 */
 	static function add($name, $value)
 	{
-		$app = self::getConfig('app');
+		$app = $this->getConfig('app');
 		if (isset($app['cache']) && $app['cache'])
 		{
 			$cacheInstance = self::init();
-			$config = self::getConfig('cache');
+			$config = $this->getConfig('cache');
 			$expires = empty($expires) ? self::$_expires : $expires;
 			return $cacheInstance->add($name, $value, $expires);
 		}

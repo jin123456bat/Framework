@@ -106,7 +106,7 @@ class application extends component
 	 */
 	private function env()
 	{
-		$env = self::getConfig('environment');
+		$env = $this->getConfig('environment');
 		if (is_array($env) && ! empty($env))
 		{
 			foreach ($env as $name => $variable)

@@ -103,7 +103,7 @@ class view extends response
 		{
 			$body = $this->_engine->fetch();
 			// 自动开启html压缩
-			$view = self::getConfig('view');
+			$view = $this->getConfig('view');
 			if (is_bool($view['compress']) && $view['compress'] || (is_array($view['compress']) && in_array($this->_template, $view['compress'], true)))
 			{
 				if (! isset($view['no_compress']) || ! in_array($this->_template, $view['no_compress'], true))

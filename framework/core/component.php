@@ -79,36 +79,60 @@ class component extends error
 	 * @param string $file        
 	 * @return boolean
 	 */
-	public static function replaceConfig($key, $value, $file = 'app')
+	final public function replaceConfig($key, $value, $file = 'app')
 	{
 		self::$_config[$file][$key] = $value;
 		return true;
 	}
-
+	
 	/**
 	 * 获取组件配置
 	 */
-	public static function getConfig($name = null)
+	final public function getConfig($name = null,$config_name = '')
 	{
 		if ($name !== null)
 		{
-			$names = explode('.', $name);
-			$config = self::$_config;
-			foreach ($names as $name)
+			$class_config = '';
+			//直接使用类中的配置
+			if (method_exists($this, '__config'))
 			{
-				if (! empty($name))
+				$class_config = $this->__config();
+				if (!empty($class_config) && is_array($class_config))
 				{
-					if (isset($config[$name]))
-					{
-						$config = $config[$name];
-					}
-					else
-					{
-						return null;
-					}
+					return $class_config;
 				}
 			}
-			return $config;
+			
+			$config = self::$_config;
+			
+			if (isset($config[$name]))
+			{
+				if (!empty($class_config) && is_scalar($class_config))
+				{
+					if (isset($config[$name][$class_config]))
+					{
+						return $config[$name][$class_config];
+					}
+				}
+				
+				if (empty($config_name))
+				{
+					foreach ($config[$name] as $c)
+					{
+						if (isset($c['default']) && $c['default']===true)
+						{
+							return $c;
+						}
+					}
+				}
+				else if (!empty($config_name))
+				{
+					return $config[$name][$config_name];
+				}
+				
+				return $config[$name];
+			}
+			return NULL;
 		}
 		else
 		{

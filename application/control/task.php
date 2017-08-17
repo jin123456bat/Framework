@@ -24,7 +24,7 @@ class task extends bgControl
 			exit("create locked failed");
 		}
 		
-		$config = self::getConfig('app');
+		$config = $this->getConfig('app');
 		if (! $config['cache'])
 		{
 			return;
@@ -522,7 +522,7 @@ class task extends bgControl
 			unlink($this->_locked_file);
 		}
 		
-		$config = self::getConfig('app');
+		$config = $this->getConfig('app');
 		if (! $config['cache'])
 		{
 			return;

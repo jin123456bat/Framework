@@ -13,9 +13,6 @@ $init_command = array(
  */
 return array(
 	'cloud_web_v2' => array(
-		'model' => array(
-			// 定义了哪些model使用这个配置
-		),
 		'type' => 'mysql',
 		'server' => '192.168.1.225',
 		'dbname' => 'cloud_web_v2',

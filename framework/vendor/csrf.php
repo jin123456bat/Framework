@@ -21,7 +21,7 @@ class csrf extends component
 		{
 			$value = json_decode($value, true);
 			
-			$config = self::getConfig('csrf');
+			$config = $this->getConfig('csrf');
 			$max_token_num = isset($config['max_token_num']) ? intval($config['max_token_num']) : 10;
 			if (! empty($max_token_num))
 			{

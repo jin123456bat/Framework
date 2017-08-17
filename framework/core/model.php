@@ -83,30 +83,13 @@ class model extends component
 	{
 		$this->_sql = new sql();
 		
-		if (method_exists($this, '__config'))
-		{
-			$db = $this->__config();
-			// 支持model中__config直接返回配置名称
-			if (is_scalar($db))
-			{
-				$config = $this->getConfig('db');
-				$db = $config['db'];
-				if (isset($db[$config]) && ! empty($db[$config]) && is_array($db[$config]))
-				{
-					$db = $db[$config];
-				}
-			}
-		}
-		else
-		{
-			$db = $this->getDefaultDbConfig();
-		}
+		$config = $this->getConfig('db');
 		
 		// 实例化mysql的类
-		$type = $db['type'];
+		$type = $config['type'];
 		$type = '\\framework\\core\\database\\driver\\' . $type;
 		
-		$this->_db = $type::getInstance($db);
+		$this->_db = $type::getInstance($config);
 		
 		if (method_exists($this, '__tableName'))
 		{
@@ -130,68 +113,10 @@ class model extends component
 		{
 			if (is_scalar($config))
 			{
-				$db = self::getConfig('db');
-				$config = $db[$config];
+				$config = $this->getConfig('db',$config);
 			}
 		}
 		return mysql::getInstance($config);
-	}
-
-	/**
-	 * 获取DB配置
-	 * 查询在所有配置文件中
-	 * 1、存在指定model的 有则使用指定model的
-	 * 2、查询存在默认的 有则使用默认的 default=true
-	 * 3、使用第一个
-	 * 
-	 * @return NULL|mixed
-	 */
-	public function getDefaultDbConfig()
-	{
-		$db = self::getConfig('db');
-		
-		// 判断是否是多个db配置 多个db配置查询带default=true的 没有default=true的使用第一个
-		if (! isset($db['db_type']))
-		{
-			$default = NULL;
-			$model = null;
-			$firstDb = null;
-			foreach ($db as $d)
-			{
-				if (empty($firstDb))
-				{
-					$firstDb = $d;
-				}
-				if (isset($d['model']) && ! empty($this->_table) && empty($model))
-				{
-					if (is_scalar($d['model']) && $d['model'] == $this->_table)
-					{
-						$model = $d;
-					}
-					else if (is_array($d['model']) && in_array($this->_table, $d['model']))
-					{
-						$model = $d;
-					}
-				}
-				if (isset($d['default']) && $d['default'] && empty($default))
-				{
-					$default = $d;
-				}
-			}
-			if (! empty($model))
-			{
-				return $model;
-			}
-			if (! empty($default))
-			{
-				return $default;
-			}
-			if (! empty($firstDb))
-			{
-				return $firstDb;
-			}
-		}
-		return $db;
 	}
 
 	/**

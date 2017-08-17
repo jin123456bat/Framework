@@ -29,11 +29,20 @@ class router extends component
 		
 		if (request::php_sapi_name() == 'web')
 		{
+			// index.php?c=index&a=index的方式优先级最高
+			if (isset($this->_data['c']))
+			{
+				$this->_control_name = $this->_data['c'];
+			}
+			if (isset($this->_data['a']))
+			{
+				$this->_action_name = $this->_data['a'];
+			}
 			$query_string = $_SERVER['QUERY_STRING'];
 			if (empty($query_string))
 			{
 				// 假如没有？或者？后面为空 获取index.php后面的内容，index.php不能省略 可以通过rewrite规则来实现
-				$query_string = substr($_SERVER['REQUEST_URI'], strlen($_SERVER['SCRIPT_NAME']));
+				$query_string = substr($_SERVER['PHP_SELF'], strlen($_SERVER['SCRIPT_NAME']));
 			}
 			
 			// 路由绑定判断
@@ -64,7 +73,7 @@ class router extends component
 			}
 			
 			// pathinfo模式的支持
-			if (! empty($query_string) && empty($this->_action_name) && empty($this->_control_name))
+			if (! empty($query_string) && empty($this->_action_name) && empty($this->_control_name) && strpos($query_string, '/')!==false)
 			{
 				$params = array_filter(explode('/', $query_string));
 				if (! empty($params))
@@ -135,11 +144,10 @@ class router extends component
 			}
 		}
 		
-		if (empty($this->_control_name) && empty($this->_action_name))
-		{
-			$this->_control_name = isset($this->_data['c']) ? trim($this->_data['c']) : $config['default']['control'];
-			$this->_action_name = isset($this->_data['a']) ? trim($this->_data['a']) : $config['default']['action'];
-		}
+		$this->_control_name = empty($this->_control_name)?$config['default']['control']:$this->_control_name;
+		$this->_action_name= empty($this->_action_name)?$config['default']['action']:$this->_action_name;
+		
+		
 	}
 
 	/**
