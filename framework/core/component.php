@@ -88,7 +88,7 @@ class component extends error
 	/**
 	 * 获取组件配置
 	 */
-	final public function getConfig($name = null,$config_name = '')
+	final public function getConfig($name = null,$config_name = NULL)
 	{
 		if ($name !== null)
 		{

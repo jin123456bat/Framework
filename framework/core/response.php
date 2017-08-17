@@ -1,8 +1,6 @@
 <?php
 namespace framework\core;
 
-use framework\vendor\file;
-
 class response extends component
 {
 

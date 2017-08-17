@@ -28,6 +28,7 @@ use framework\core\database\driver\mysql;
 use application\entity\test;
 use framework\core\request;
 use framework\core\database\mysql\table;
+use framework\vendor\captcha;
 
 class index extends BaseControl
 {
@@ -54,10 +55,14 @@ class index extends BaseControl
 		 * var_dump($test->getError());
 		 * }
 		 */
-		$a = new table('a');
+		return new captcha();
+		 
+		 //captcha::validate($code);
+		 
+		//$a = new table('a');
 		//$a->field('id')->int(11)->comment('ID主键');
 		//$a->field('name')->varchar(32)->comment('用户名');
-		var_dump($a->index('primary')->add('sd')->remove('sd'));
+		//var_dump($a->index('primary')->add('sd')->remove('sd'));
 		//$a->primary()->add('id');
 		//$a->field('a')->int(11);
 		//$a->field('b');
