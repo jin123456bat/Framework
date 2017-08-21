@@ -55,11 +55,11 @@ class index extends BaseControl
 		 * var_dump($test->getError());
 		 * }
 		 */
+		 //验证码
 		return new captcha();
 		 
-		 //captcha::validate($code);
-		 
-		//$a = new table('a');
+		//captcha::validate($code);
+		
 		//$a->field('id')->int(11)->comment('ID主键');
 		//$a->field('name')->varchar(32)->comment('用户名');
 		//var_dump($a->index('primary')->add('sd')->remove('sd'));

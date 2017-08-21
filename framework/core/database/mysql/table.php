@@ -2,8 +2,8 @@
 namespace framework\core\database\mysql;
 
 use framework\core\database\driver\mysql;
-use framework\core\base;
 use framework\core\model;
+use framework\core\component;
 
 /**
  * model用来管理表的数据
@@ -11,7 +11,7 @@ use framework\core\model;
  * 
  * @author fx
  */
-class table extends base
+class table extends component
 {
 
 	/**
@@ -61,31 +61,24 @@ class table extends base
 		if (empty($config))
 		{
 			$model = $this->model($this->getName());
-			$db = $model->getDefaultDbConfig();
-		}
-		else if (is_array($config))
-		{
-			// $this->_db = mysql::getInstance($config);
-			$db = $config;
+			$config = $this->getConfig('db');
 		}
 		else if (is_scalar($config))
 		{
-			$config = $this->getConfig('db');
-			$db = $config['db'];
-			if (isset($db[$config]) && ! empty($db[$config]) && is_array($db[$config]))
-			{
-				$db = $db[$config];
-			}
+			$config = $this->getConfig('db',$config);
 		}
 		
-		$type = $db['type'];
+		$type = $config['type'];
 		$type = '\\framework\\core\\database\\driver\\' . $type;
 		
-		$this->_db = $type::getInstance($db);
+		$this->_db = $type::getInstance($config);
 		
 		$tables = $this->_db->showTables();
 		$this->_exist = in_array($this->getName(), $tables);
-		
+	}
+	
+	function initlize()
+	{
 		if ($this->_exist)
 		{
 			$descs = $this->_db->query('show full columns from '.$this->getName());
@@ -108,10 +101,10 @@ class table extends base
 				{
 					case 'auto_increment':
 						$auto_increment = true;
-					break;
+						break;
 					case 'on update current_timestamp':
 						$prototype = 'on update CURRENT_TIMESTAMP';
-					break;
+						break;
 				}
 				
 				if (stripos($desc['Type'], 'unsigned zerofill')!==false)
@@ -158,6 +151,7 @@ class table extends base
 				}
 			}
 		}
+		parent::initlize();
 	}
 
 	/**
@@ -178,11 +172,24 @@ class table extends base
 	 */
 	function field($field_name)
 	{
-		if (isset($this->_desc[$field_name]))
+		//字段默认属性
+		$field_info = isset($this->_desc[$field_name])?$this->_desc[$field_name]:array(
+			'type' => 'int',
+			'length' => 11,
+			'null' => false,
+			'default' => NULL,
+			'auto_increment' => false,
+			'collation' => '',
+			'prototype' => '',
+			'comment' => '',
+		);
+		$field = new field($field_info,$field_name, $this->getName(), $this->_db);
+		if (!$this->exist())
 		{
-			return new field($this->_desc[$field_name],$field_name, $this->getName(), $this->_db);
+			$sql = 'CREATE TABLE `'.$this->_table_name.'` ( '.field::getFieldSqlString($field_info).' )';
+			$this->_db->execute($sql);
 		}
-		return NULL;
+		return $field;
 	}
 
 	/**
@@ -192,12 +199,14 @@ class table extends base
 	 */
 	function index($index_name)
 	{
-		var_dump($this->_index_list);
-		if (isset($this->_index_list[$index_name]))
-		{
-			return new index($index_name, $this->_index_list[$index_name], $this->getName(), $this->_db);
-		}
-		return NULL;
+		$index_info = isset($this->_index_list[$index_name])?$this->_index_list[$index_name]:array(
+			'index_type' => '', // 索引类型
+			'unique' => false, // 是否唯一索引
+			'comment' => '', // 注释
+			'fields' => array( // 字段
+			)
+		);
+		return new index($index_info,$index_name, $this->getName(), $this->_db);
 	}
 	
 	/**
@@ -259,6 +268,14 @@ class table extends base
 	function getDesc()
 	{
 		return $this->_desc;
+	}
+	
+	/**
+	 * 判断表是否存在
+	 */
+	function exist()
+	{
+		return $this->_exist;
 	}
 }
 

@@ -11,21 +11,21 @@ class field
 	/**
 	 * 字段的其他属性
 	 * 
-	 * @var unknown
+	 * @var array
 	 */
 	private $_field_info;
 
 	/**
 	 * 字段名
 	 * 
-	 * @var unknown
+	 * @var string
 	 */
 	private $_field_name;
 
 	/**
 	 * 表名
 	 * 
-	 * @var unknown
+	 * @var string
 	 */
 	private $_table_name;
 
@@ -35,7 +35,64 @@ class field
 	 * @var \framework\core\database\driver\mysql
 	 */
 	private $_connection;
-
+	
+	/**
+	 * 数字字段
+	 * @var array
+	 */
+	private static $_number_fields= array(
+		'tinyint',
+		'smallint',
+		'mediumint',
+		'int',
+		'bigint',
+		'decimal',
+		'float',
+		'double',
+	);
+	
+	/**
+	 * 时间字段
+	 * @var array
+	 */
+	private static$_is_time_fields = array(
+		'date',
+		'datetime',
+		'timestamp',
+		'time',
+		'year',
+	);
+	
+	/**
+	 * 需要字符集的字段
+	 * @var array
+	 */
+	private static $_need_collation_fields = array(
+		'text',
+		'tinytext',
+		'mediumtext',
+		'longtext',
+		'char',
+		'varchar',
+		'enum',
+	);
+	
+	/**
+	 * 类型中带长度的字段
+	 * @var array
+	 */
+	private static $_need_length_fields = array(
+		'tinyint',
+		'smallint',
+		'mediumint',
+		'int',
+		'bigint',
+		'enum',
+		'decimal',
+		'bit',
+		'char',
+	);
+	
 	function __construct($field_info, $field_name, $table_name, $connection)
 	{
 		$this->_field_info = $field_info;
@@ -44,6 +101,10 @@ class field
 		$this->_connection = $connection;
 	}
 
+	/**
+	 * 获取字段名
+	 * @return string
+	 */
 	function getFieldName()
 	{
 		return $this->_field_name;
@@ -60,63 +121,33 @@ class field
 		$this->_connection->query($sql);
 		return $this->_connection->errno() == '00000';
 	}
-
+	
 	/**
-	 * 根据字段属性创建sql
+	 * 获取字段以及字段的其他属性组装成的sql
+	 * @return string
 	 */
-	private function createSql()
+	static public function getFieldSqlString($field_info)
 	{
 		$collation = '';
-		//需要字符集的字段
-		$need_collation_fields = array(
-			'text',
-			'tinytext',
-			'mediumtext',
-			'longtext',
-			'char',
-			'varchar',
-			'enum',
-		);
 		//判断字段类型中是否允许字符集
-		if (in_array($this->_field_info['type'], $need_collation_fields) && !empty($this->_field_info['collation']))
+		if (in_array($field_info['type'], self::$_need_collation_fields) && !empty($field_info['collation']))
 		{
-			$character = current(explode('_', $this->_field_info['collation']));
-			$collation = 'CHARACTER SET '.$character.' collate '.$this->_field_info['collation'];
+			$character = current(explode('_', $field_info['collation']));
+			$collation = 'CHARACTER SET '.$character.' collate '.$field_info['collation'];
 		}
 		
-		$type = $this->_field_info['type'];
-		
-		//需要长度的字段
-		$need_length_fields = array(
-			'tinyint',
-			'smallint',
-			'mediumint',
-			'int',
-			'bigint',
-			'enum',
-			'decimal',
-			'bit',
-		);
-		if (in_array($this->_field_info['type'], $need_length_fields))
+		$type = $field_info['type'];
+		if (in_array($field_info['type'], self::_need_length_fields))
 		{
-			$type = $this->_field_info['type'] . '(' . $this->_field_info['length'] . ')';
+			$type = $field_info['type'] . '(' . $field_info['length'] . ')';
 		}
 		
-		$null = $this->_field_info['null'] ? 'NULL' : 'NOT NULL';
-		
-		//是否是时间字段
-		$is_time_fields = array(
-			'date',
-			'datetime',
-			'timestamp',
-			'time',
-			'year',
-		);
+		$null = $field_info['null'] ? 'NULL' : 'NOT NULL';
 		
 		$default = '';
-		if ($this->_field_info['default'] === null)
+		if ($field_info['default'] === null)
 		{
-			if ($this->_field_info['null'])
+			if ($field_info['null'])
 			{
 				$default = 'DEFAULT NULL';
 			}
@@ -125,21 +156,50 @@ class field
 				$default = '';
 			}
 		}
-		else if ($this->_field_info['default'] == 'CURRENT_TIMESTAMP' && in_array($type, $is_time_fields))
+		else if ($field_info['default'] == 'CURRENT_TIMESTAMP' && in_array($type, self::$_is_time_fields))
 		{
 			$default = 'DEFAULT CURRENT_TIMESTAMP';
 		}
 		else
 		{
-			$default = 'DEFAULT	"'.$this->_field_info['default'].'"';
+			$default = 'DEFAULT	"'.$field_info['default'].'"';
 		}
 		
 		$comment = '';
-		if (isset($this->_field_info['comment']) && !empty($this->_field_info['comment']))
+		if (isset($field_info['comment']) && !empty($field_info['comment']))
 		{
-			$comment = ' comment "'.$this->_field_info['comment'].'"';
+			$comment = ' comment "'.$field_info['comment'].'"';
 		}
 		
+		$auto_increment = $field_info['auto_increment']?' AUTO_INCREMENT ':'';
+		
+		$prototype = '';
+		if (isset($field_info['prototype']) && !empty($field_info['prototype']))
+		{
+			if ($prototype == 'on update current_timestamp' && in_array($type, self::$_is_time_fields))
+			{
+				$prototype = $field_info['prototype'];
+			}
+			else if (($prototype == 'UNSIGNED' || $prototype == 'UNSIGNED ZEROFILL') && in_array($type, self::$_number_fields))
+			{
+				$prototype = $field_info['prototype'];
+			}
+		}
+		
+		$field_name = $this->getFieldName();
+		if (isset($field_info['name']) && !empty($field_info['name']))
+		{
+			$field_name = $field_info['name'];
+		}
+		
+		return '`'.$field_name.'` ' . $type .' '.$prototype.' '.$collation.' ' . $null .' ' .$auto_increment. ' ' . $default.' '.$comment;
+	}
+
+	/**
+	 * 根据字段属性创建sql
+	 */
+	private function createSql()
+	{
 		$after = '';
 		if (isset($this->_field_info['after']) && !empty($this->_field_info))
 		{
@@ -150,40 +210,7 @@ class field
 			$after = ' FIRST';
 		}
 		
-		$auto_increment = $this->_field_info['auto_increment']?' AUTO_INCREMENT ':'';
-		
-		//int字段
-		$number_fields= array(
-			'tinyint',
-			'smallint',
-			'mediumint',
-			'int',
-			'bigint',
-			'decimal',
-			'float',
-			'double',
-		);
-		$prototype = '';
-		if (isset($this->_field_info['prototype']) && !empty($this->_field_info['prototype']))
-		{
-			if ($prototype == 'on update current_timestamp' && in_array($type, $is_time_fields))
-			{
-				$prototype = $this->_field_info['prototype'];
-			}
-			else if (($prototype == 'UNSIGNED' || $prototype == 'UNSIGNED ZEROFILL') && in_array($type, $number_fields))
-			{
-				$prototype = $this->_field_info['prototype'];
-			}
-		}
-		
-		$field_name = $this->getFieldName();
-		if (isset($this->_field_info['name']) && !empty($this->_field_info['name']))
-		{
-			$field_name = $this->_field_info['name'];
-		}
-		
-		$sql = 'ALTER TABLE `' . $this->_table_name . '` CHANGE `' . $this->getFieldName() . '` `'.$field_name.'` ' . $type .' '.$prototype.' '.$collation.' ' . $null .' ' .$auto_increment. ' ' . $default.' '.$comment.$after;
-		
+		$sql = 'ALTER TABLE `' . $this->_table_name . '` CHANGE `' . $this->getFieldName() . '` '.self::getFieldSqlString($this->_field_info).' '.$after;
 		return $sql;
 	}
 
@@ -453,33 +480,48 @@ class field
 	}
 
 	/**
+	 * 将字段类型设置为tinytext类型
+	 */
+	function tinytext()
+	{
+		$this->_field_info['type'] = 'tinytext';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
 	 * 将字段类型设置为text类型
 	 */
-	function text($length = 65535)
+	function text()
 	{
-		if ($length <= 0)
-		{
-			$length = 65535;
-		}
-		
-		if ($length <= pow(2, 8) - 1)
-		{
-			$type = 'tinytext';
-		}
-		else if ($length < pow(2, 16) - 1)
-		{
-			$type = 'text';
-		}
-		else if ($length < pow(2, 24) - 1)
-		{
-			$type = 'mediumtext';
-		}
-		else if ($length < pow(2, 32) - 1)
-		{
-			$type = 'longtext';
-		}
-		$this->_field_info['type'] = $type;
-		$this->_field_info['length'] = $length;
+		$this->_field_info['type'] = 'text';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 将字段类型设置为mediumtext类型
+	 */
+	function mediumtext()
+	{
+		$this->_field_info['type'] = 'mediumtext';
+		$this->_field_info['length'] = 0;
+		$sql = $this->createSql();
+		$this->_connection->execute($sql);
+		return $this;
+	}
+	
+	/**
+	 * 将字段类型设置为longtext类型
+	 */
+	function longtext()
+	{
+		$this->_field_info['type'] = 'longtext';
+		$this->_field_info['length'] = 0;
 		$sql = $this->createSql();
 		$this->_connection->execute($sql);
 		return $this;

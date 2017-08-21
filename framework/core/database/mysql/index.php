@@ -45,10 +45,10 @@ class index extends base
 	 */
 	private $_connection;
 
-	function __construct($index_name, $index, $table_name, $connection)
+	function __construct($index_info ,$index_name , $table_name, $connection)
 	{
 		$this->_index_name = $index_name;
-		$this->_index = $index;
+		$this->_index = $index_info;
 		$this->_table_name = $table_name;
 		$this->_connection = $connection;
 	}

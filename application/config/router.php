@@ -5,6 +5,11 @@ return array(
 		'action' => 'index'
 	),
 	
+	//直接将某个类做为controller,
+	//如下所示，控制器名称就是captcha，方法名为类中的public方法，不能是static
+	//尚未实现  之后在说吧
+	//'controller' => '/framework/vendor/captcha',
+	
 	// 路由绑定,key中允许正则表达式，假如有多个正则表达式匹配，第一个优先
 	// 值必须是数组，array('control','action')或者array('c'=>'control','a'=>'action')的形式
 	'bind' => array(
