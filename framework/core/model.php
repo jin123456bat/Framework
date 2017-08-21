@@ -565,23 +565,5 @@ class model extends component
 			return $result;
 		}
 		return false;
-	}
-
-	/**
-	 * 优化数据库
-	 * 
-	 * @return boolean
-	 */
-	function optimize()
-	{
-		return $this->query('optimize table ' . $this->getTable());
-	}
-
-	/**
-	 * 删除数据表
-	 */
-	public function drop()
-	{
-		return $this->query('drop table ' . $this->getTable());
-	}
+	}	
 }

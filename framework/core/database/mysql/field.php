@@ -126,7 +126,7 @@ class field
 	 * 获取字段以及字段的其他属性组装成的sql
 	 * @return string
 	 */
-	static public function getFieldSqlString($field_info)
+	static public function getFieldSqlString($field_name,$field_info)
 	{
 		$collation = '';
 		//判断字段类型中是否允许字符集
@@ -137,7 +137,7 @@ class field
 		}
 		
 		$type = $field_info['type'];
-		if (in_array($field_info['type'], self::_need_length_fields))
+		if (in_array($field_info['type'], self::$_need_length_fields))
 		{
 			$type = $field_info['type'] . '(' . $field_info['length'] . ')';
 		}
@@ -186,7 +186,6 @@ class field
 			}
 		}
 		
-		$field_name = $this->getFieldName();
 		if (isset($field_info['name']) && !empty($field_info['name']))
 		{
 			$field_name = $field_info['name'];
@@ -210,7 +209,7 @@ class field
 			$after = ' FIRST';
 		}
 		
-		$sql = 'ALTER TABLE `' . $this->_table_name . '` CHANGE `' . $this->getFieldName() . '` '.self::getFieldSqlString($this->_field_info).' '.$after;
+		$sql = 'ALTER TABLE `' . $this->_table_name . '` CHANGE `' . $this->getFieldName() . '` '.self::getFieldSqlString($this->getFieldName(),$this->_field_info).' '.$after;
 		return $sql;
 	}
 

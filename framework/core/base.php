@@ -1,10 +1,14 @@
 <?php
 namespace framework\core;
 
+use framework\core\database\mysql\table;
+
 class base
 {
 
 	private static $_model_instance = array();
+	
+	private static $_table_instance = array();
 
 	static $APP_NAME;
 
@@ -103,5 +107,23 @@ class base
 			}
 		}
 		return self::$_model_instance[$name];
+	}
+	
+	/**
+	 * 加载数据表
+	 * @param string $name 表名
+	 * @return table
+	 */
+	protected static function table($name)
+	{
+		if (!isset(self::$_table_instance[$name]))
+		{
+			self::$_table_instance[$name] = new table($name);
+			if (method_exists(self::$_table_instance[$name], 'initlize'))
+			{
+				self::$_model_instance[$name]->initlize();
+			}
+		}
+		return self::$_table_instance[$name];
 	}
 }

@@ -56,7 +56,9 @@ class index extends BaseControl
 		 * }
 		 */
 		 //验证码
-		return new captcha();
+		 $this->table('a')->checksum();
+		 
+		//return new captcha();
 		 
 		//captcha::validate($code);
 		
