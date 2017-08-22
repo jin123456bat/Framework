@@ -295,7 +295,7 @@ class mysql extends database
 		$this->_transaction_level ++;
 		if ($this->_transaction_level === 1)
 		{
-			if ($this->pdo->beginTransaction())
+			if ($this->_pdo->beginTransaction())
 			{
 				return true;
 			}
@@ -344,7 +344,7 @@ class mysql extends database
 	 */
 	public function lastInsert($name = null)
 	{
-		return $this->pdo->lastInsertId($name);
+		return $this->_pdo->lastInsertId($name);
 	}
 
 	/**
@@ -370,45 +370,4 @@ class mysql extends database
 	{
 		return $this->_pdo->errorCode();
 	}
-
-/**
- * 创建数据表
- * 
- * @param table $table
- *        表名
- * @param string $config
- *        数据库配置
- */
-	/*
-	 * function create(table $table)
-	 * {
-	 * $sql = $table->__toSql();
-	 * $result = $this->query($sql);
-	 * if($this->errno() === '00000')
-	 * {
-	 * return true;
-	 * }
-	 * else
-	 * {
-	 * return false;
-	 * }
-	 * }
-	 */
-
-/**
- * 判断数据表是否存在
- * 
- * @return bool
- */
-	/*
-	 * function isExist($tableName)
-	 * {
-	 * $result = $this->query('show tables like ?',array($tableName));
-	 * if (empty($result))
-	 * {
-	 * return false;
-	 * }
-	 * return current(current($result)) == $tableName;
-	 * }
-	 */
 }

@@ -34,6 +34,38 @@ class framework
 			$this,
 			'autoload'
 		), true);
+		//判断是否第一次打开  是第一次的话判断目录是否存在  不存在的话创建目录
+		$this->initlize();
+	}
+	
+	/**
+	 * 判断是否可以安装
+	 */
+	function canInstall()
+	{
+		return !is_dir(APP_ROOT);
+	}
+	
+	/**
+	 * 安装过程
+	 */
+	function install()
+	{
+		//创建控制器目录
+		mkdir(APP_ROOT.'/control',0777,true);
+		//创建配置目录
+		mkdir(APP_ROOT.'/config',0777,true);
+	}
+	
+	/**
+	 * 程序初始化
+	 */
+	function initlize()
+	{
+		if ($this->canInstall())
+		{
+			$this->install();
+		}
 	}
 
 	/**

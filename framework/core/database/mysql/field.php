@@ -7,7 +7,8 @@ namespace framework\core\database\mysql;
  */
 class field
 {
-
+	const DEFAULT_CURRENT_TIMESTAMP = 'CURRENT_TIMESTAMP';
+	
 	/**
 	 * 字段的其他属性
 	 * 

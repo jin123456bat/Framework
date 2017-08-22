@@ -107,6 +107,7 @@ class component extends error
 			
 			if (isset($config[$name]))
 			{
+				
 				if (!empty($class_config) && is_scalar($class_config))
 				{
 					if (isset($config[$name][$class_config]))

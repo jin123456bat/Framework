@@ -227,6 +227,7 @@ class table extends component
 		$field = new field($field_info,$field_name, $this->getName(), $this->_db);
 		if (!$this->exist())
 		{
+			//当表不存在的时候 创建表
 			$comment = !empty($this->_comment)?' COMMENT = "'.$this->_comment.'"':'';
 			$engine = ' ENGINE = '.$this->_engine;
 			$charset = '';
@@ -238,6 +239,8 @@ class table extends component
 			
 			$sql = 'CREATE TABLE `'.$this->_name.'` ( '.field::getFieldSqlString($field_name,$field_info).' )'.$engine.$charset.$comment;
 			$this->_db->execute($sql);
+			
+			$this->_exist = true;
 		}
 		return $field;
 	}
