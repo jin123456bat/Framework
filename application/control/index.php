@@ -2,33 +2,8 @@
 namespace application\control;
 
 use application\extend\BaseControl;
-/*
- * use framework\core\request;
- * use framework\core\debugger;
- * use framework\data\collection;
- * use application\extend\model;
- * use framework\core\view;
- * use framework\vendor\compress;
- * use framework\core\session;
- * use application\entity\user;
- * use framework\vendor\authorize;
- * use application\extend\application;
- * use framework\core\cookie;
- * use framework\vendor\csrf;
- * use framework\core\response\url;
- * use framework\core\database\mysql\table;
- * use framework\core\database\mysql\field;
- * use framework\core\database\driver\mysql;
- * use framework\core\cache;
- */
-use framework\core\response\json;
 use framework\core\view;
-use framework\core\database\sql;
-use framework\core\database\driver\mysql;
 use application\entity\test;
-use framework\core\request;
-use framework\core\database\mysql\table;
-use framework\vendor\captcha;
 
 class index extends BaseControl
 {
@@ -56,10 +31,11 @@ class index extends BaseControl
 		 * }
 		 */
 		 //验证码
-		 $this->table('a')->checksum();
-		 
+		 //$this->table('a')->checksum();
+		 //cache::set('name', 'jin');
 		//return new captcha();
-		 
+		//$this->cache('apc')->set('name','jin');
+		//$this->model('session');
 		//captcha::validate($code);
 		
 		//$a->field('id')->int(11)->comment('ID主键');

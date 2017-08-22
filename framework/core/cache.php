@@ -5,59 +5,44 @@ use framework;
 
 class cache extends component
 {
-
-	private static $_instance;
-
-	private static $_expires;
-
-	private static $_store;
-
-	function __construct($store)
-	{
-		self::$_store = $store;
-	}
-
-	protected static function init()
+	private $_expires;
+	
+	private $_type;
+	
+	private $_instance;
+	
+	function setType($type = NULL)
 	{
 		$config = $this->getConfig('cache');
 		
-		self::$_expires = isset($config['expires']) ? $config['expires'] : 0;
-		
-		if (empty(self::$_store))
+		if (empty($type))
 		{
-			$type = isset($config['type']) ? $config['type'] : 'mysql';
+			$this->_type = $config['type'];
+			$this->_expires = $config['expires'];
 		}
 		else
 		{
-			$type = self::$_store;
+			$this->_type = $type;
+			$this->_expires = isset($config[$this->_type]['expires'])?$config[$this->_type]['expires']:$config['expires'];
 		}
 		
-		if (! (isset(self::$_instance[$type]) && ! empty(self::$_instance[$type])))
-		{
-			$cache = 'framework\\core\\cache\\driver\\' . $type;
-			self::$_instance[$type] = new $cache($config);
-		}
-		return self::$_instance[$type];
+		$cache = 'framework\\core\\cache\\driver\\' . $this->_type;
+		$this->_instance[$this->_type] = new $cache($config);
 	}
-
-	public static function __callstatic($name, $args)
-	{
-		return self::$name($args);
-	}
-
+	
 	/**
 	 * 设置默认的数据有效期
-	 * 
-	 * @param unknown $expires        
+	 *
+	 * @param unknown $expires
 	 */
-	static function setExpires($expires)
+	function expires($expires)
 	{
-		self::$_expires = $expires;
+		$this->_expires = $expires;
 	}
-
+	
 	/**
 	 * 设置或者更新数据
-	 * 
+	 *
 	 * @param unknown $name
 	 *        数据名称
 	 * @param unknown $value
@@ -65,155 +50,93 @@ class cache extends component
 	 * @param number $cache
 	 *        数据有效期 当为0的时候使用默认的数据有效期
 	 */
-	static function set($name, $value, $expires = 0)
+	function set($name, $value, $expires = 0)
 	{
-		$app = $this->getConfig('app');
-		if (isset($app['cache']) && $app['cache'])
-		{
-			$cacheInstance = self::init();
-			$config = $this->getConfig('cache');
-			$expires = empty($expires) ? self::$_expires : $expires;
-			return $cacheInstance->set($name, $value, $expires);
-		}
-		return false;
+		$expires = empty($expires)?$this->_expires:$expires;
+		return $this->_instance->set($name, $value, $expires);
 	}
-
+	
 	/**
 	 * 自增
-	 * 
-	 * @param unknown $name        
-	 * @param number $amount        
+	 *
+	 * @param unknown $name
+	 * @param number $amount
 	 * @return bool true on success or false on failure
 	 */
-	static function increase($name, $amount = 1)
+	function increase($name, $amount = 1)
 	{
-		$app = $this->getConfig('app');
-		if (isset($app['cache']) && $app['cache'])
-		{
-			$cacheInstance = self::init();
-			return $cacheInstance->increase($name, $amount);
-		}
-		return null;
+		return $this->_instance->increase($name, $amount);
 	}
-
+	
 	/**
 	 * 自减
-	 * 
-	 * @param unknown $name        
-	 * @param number $amount        
+	 *
+	 * @param unknown $name
+	 * @param number $amount
 	 * @return bool true on success or false on failure
 	 */
-	static function decrease($name, $amount = 1)
+	function decrease($name, $amount = 1)
 	{
-		$app = $this->getConfig('app');
-		if (isset($app['cache']) && $app['cache'])
-		{
-			$cacheInstance = self::init();
-			return $cacheInstance->decrease($name, $amount);
-		}
-		return null;
+		return $this->_instance->decrease($name, $amount);
 	}
-
+	
 	/**
 	 * 获取数据
-	 * 
-	 * @param unknown $name        
+	 *
+	 * @param unknown $name
 	 * @param $default NULL
 	 *        当数据不存在的时候的默认值
 	 * @return mixed|unknown
 	 */
-	static function get($name, $default = NULL)
+	function get($name, $default = NULL)
 	{
-		$app = $this->getConfig('app');
-		if (isset($app['cache']) && $app['cache'])
+		$value = $this->_instance->get($name);
+		if ($value === NULL)
 		{
-			$cacheInstance = self::init();
-			$value = $cacheInstance->get($name);
-			if ($value === NULL)
-			{
-				return $default;
-			}
-			return $value;
+			return $default;
 		}
-		return null;
+		return $value;
 	}
-
+	
 	/**
 	 * 删除缓存
-	 * 
-	 * @param string $name        
+	 *
+	 * @param string $name
 	 */
-	static function remove($name)
+	function remove($name)
 	{
-		$app = $this->getConfig('app');
-		if (isset($app['cache']) && $app['cache'])
-		{
-			$cacheInstance = self::init();
-			return $cacheInstance->remove($name);
-		}
-		return false;
+		return $this->_instance->remove($name);
 	}
-
+	
 	/**
 	 * 清空所有缓存
 	 */
-	static function flush()
+	function flush()
 	{
-		$app = $this->getConfig('app');
-		if (isset($app['cache']) && $app['cache'])
-		{
-			$cacheInstance = self::init();
-			return $cacheInstance->flush();
-		}
-		return false;
+		return $this->_instance->flush();
 	}
-
+	
 	/**
 	 * 判断缓存是否存在
-	 * 
-	 * @param string $name        
+	 *
+	 * @param string $name
 	 * @return bool
 	 */
-	static function has($name)
+	function has($name)
 	{
-		$app = $this->getConfig('app');
-		if (isset($app['cache']) && $app['cache'])
-		{
-			$cacheInstance = self::init();
-			return $cacheInstance->has($name);
-		}
-		return false;
+		return $this->_instance->has($name);
 	}
-
+	
 	/**
 	 * 和set相同，不同的是假如原来的name存在了，会失败，并且返回false
-	 * 
-	 * @param unknown $name        
-	 * @param unknown $value        
+	 * 有效期为默认有效期
+	 *
+	 * @param unknown $name
+	 * @param unknown $value
 	 * @return boolean
 	 */
-	static function add($name, $value)
+	function add($name, $value)
 	{
-		$app = $this->getConfig('app');
-		if (isset($app['cache']) && $app['cache'])
-		{
-			$cacheInstance = self::init();
-			$config = $this->getConfig('cache');
-			$expires = empty($expires) ? self::$_expires : $expires;
-			return $cacheInstance->add($name, $value, $expires);
-		}
-		return false;
-	}
-
-	/**
-	 * 强制使用某一个类型的缓存来存储或者读取数据
-	 * 返回一个特殊的class，这个class可以存储到变量中下次继续使用
-	 * 
-	 * @param string $type        
-	 * @return cache
-	 */
-	static function store($type)
-	{
-		return new self($type);
+		return $this->_instance->add($name, $value, $this->_expires);
 	}
 }
