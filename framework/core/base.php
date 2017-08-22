@@ -124,7 +124,7 @@ class base
 			self::$_table_instance[$name] = new table($name);
 			if (method_exists(self::$_table_instance[$name], 'initlize'))
 			{
-				self::$_model_instance[$name]->initlize();
+				self::$_table_instance[$name]->initlize();
 			}
 		}
 		return self::$_table_instance[$name];

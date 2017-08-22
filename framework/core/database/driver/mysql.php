@@ -226,7 +226,7 @@ class mysql extends database
 
 	/**
 	 * 通过逐行遍历的形式来遍历一个sql的结果集
-	 * 返回结果是一个数组，这个数组包含了以sql结果为key以回调函数的值为值的数组
+	 * 返回结果是一个数组，这个数组包含了以sql结果的json串为key以回调函数的值为值的数组
 	 * 
 	 * @param string $sql        
 	 * @param callback $callback        
@@ -247,7 +247,7 @@ class mysql extends database
 				$sql_result = $statement->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_NEXT);
 				while (!empty($sql_result))
 				{
-					$result[$sql_result] = call_user_func($callback, $sql_result);
+					$result[json_encode($sql_result)] = call_user_func($callback, $sql_result);
 					$sql_result = $statement->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_NEXT);
 				}
 			}
@@ -321,7 +321,7 @@ class mysql extends database
 		$this->_transaction_level --;
 		if ($this->_transaction_level === 0)
 		{
-			return $this->pdo->commit();
+			return $this->_pdo->commit();
 		}
 		return true;
 	}
@@ -334,7 +334,7 @@ class mysql extends database
 		$this->_transaction_level --;
 		if ($this->_transaction_level === 0)
 		{
-			return $this->pdo->rollBack();
+			return $this->_pdo->rollBack();
 		}
 		return true;
 	}

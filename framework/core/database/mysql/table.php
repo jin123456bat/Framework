@@ -90,7 +90,6 @@ class table extends component
 		
 		if (empty($config))
 		{
-			$model = $this->model($this->getName());
 			$config = $this->getConfig('db');
 		}
 		else if (is_scalar($config))
@@ -115,7 +114,10 @@ class table extends component
 			$this->_auto_increment = $status[0]['Auto_increment'];
 			$this->_row_format = $status[0]['Row_format'];
 		}
-		
+	}
+	
+	function initlize()
+	{
 		if ($this->exist())
 		{
 			$descs = $this->_db->query('show full columns from '.$this->getName());
@@ -188,10 +190,7 @@ class table extends component
 				}
 			}
 		}
-	}
-	
-	function initlize()
-	{
+		
 		return parent::initlize();
 	}
 
@@ -224,7 +223,7 @@ class table extends component
 			'prototype' => '',
 			'comment' => '',
 		);
-		$field = new field($field_info,$field_name, $this->getName(), $this->_db);
+		$field = new field($field_info,$field_name, $this->getName(), $this->_db,isset($this->_desc[$field_name]));
 		if (!$this->exist())
 		{
 			//当表不存在的时候 创建表
@@ -238,6 +237,7 @@ class table extends component
 			}
 			
 			$sql = 'CREATE TABLE `'.$this->_name.'` ( '.field::getFieldSqlString($field_name,$field_info).' )'.$engine.$charset.$comment;
+			
 			$this->_db->execute($sql);
 			
 			$this->_exist = true;
@@ -303,17 +303,25 @@ class table extends component
 
 	/**
 	 * 删除表
-	 * @return boolean
+	 * @return table
 	 */
 	function drop()
 	{
 		if ($this->_exist)
 		{
-			$sql = 'DROP VIEW `' . $this->getName() . '`';
-			$this->_db->query($sql);
-			return $this->_db->error() == '00000';
+			$sql = 'DROP TABLE `' . $this->getName() . '`';
+			$this->_db->execute($sql);
+			//删除之后清空配置
+			$this->_exist = false;
+			$this->_index_list = array();
+			$this->_desc = array();
+			$this->_comment = '';
+			$this->_engine = 'MyISAM';
+			$this->_collation = 'utf8_general_ci';
+			$this->_auto_increment = 1;
+			$this->_row_format = 'row_format';
 		}
-		return false;
+		return $this;
 	}
 
 	/**
@@ -382,8 +390,11 @@ class table extends component
 	 */
 	function rename($new_name)
 	{
-		$sql = 'RENAME TABLE `'.$this->_name.'` TO `'.$new_name.'`';
-		$this->_db->execute($sql);
+		if ($this->exist())
+		{
+			$sql = 'RENAME TABLE `'.$this->_name.'` TO `'.$new_name.'`';
+			$this->_db->execute($sql);
+		}
 		$this->_name = $new_name;
 		return $this;
 	}
@@ -394,8 +405,11 @@ class table extends component
 	 */
 	function optimize()
 	{
-		$sql = 'OPTIMIZE TABLE `'.$this->_name.'`';
-		$this->_db->execute($sql);
+		if ($this->exist())
+		{
+			$sql = 'OPTIMIZE TABLE `'.$this->_name.'`';
+			$this->_db->execute($sql);
+		}
 		return $this;
 	}
 	
@@ -405,8 +419,11 @@ class table extends component
 	 */
 	function flush()
 	{
-		$sql = 'OPTIMIZE TABLE `'.$this->_name.'`';
-		$this->_db->execute($sql);
+		if ($this->exist())
+		{
+			$sql = 'OPTIMIZE TABLE `'.$this->_name.'`';
+			$this->_db->execute($sql);
+		}
 		return $this;
 	}
 	
@@ -418,8 +435,11 @@ class table extends component
 	 */
 	function checksum()
 	{
-		$sql = 'CHECKSUM TABLE `'.$this->_name.'`';
-		$result = $this->_db->execute($sql);
+		if ($this->exist())
+		{
+			$sql = 'CHECKSUM TABLE `'.$this->_name.'`';
+			$result = $this->_db->execute($sql);
+		}
 		return $this;
 	}
 	
@@ -429,8 +449,11 @@ class table extends component
 	 */
 	function check()
 	{
-		$sql = 'check TABLE `'.$this->_name.'`';
-		$this->_db->execute($sql);
+		if ($this->exist())
+		{
+			$sql = 'check TABLE `'.$this->_name.'`';
+			$this->_db->execute($sql);
+		}
 		return $this;
 	}
 	
@@ -440,8 +463,11 @@ class table extends component
 	 */
 	function analyze()
 	{
-		$sql = 'ANALYZE TABLE `'.$this->_name.'`';
-		$this->_db->execute($sql);
+		if ($this->exist())
+		{
+			$sql = 'ANALYZE TABLE `'.$this->_name.'`';
+			$this->_db->execute($sql);
+		}
 		return $this;
 	}
 	
@@ -454,8 +480,11 @@ class table extends component
 	 */
 	function export($file)
 	{
-		$sql = 'LOCK TABLES `'.$this->_name.'` WRITE;SELECT * INTO OUTFILE '.$file.' FROM '.$this->_name.';UNLOCK TABLES;';
-		$this->_db->execute($sql);
+		if ($this->exist())
+		{
+			$sql = 'LOCK TABLES `'.$this->_name.'` WRITE;SELECT * INTO OUTFILE '.$file.' FROM '.$this->_name.';UNLOCK TABLES;';
+			$this->_db->execute($sql);
+		}
 		return true;
 	}
 	
@@ -465,8 +494,11 @@ class table extends component
 	 */
 	function import($file)
 	{
-		$sql = 'LOAD DATA LOW_PRIORITY INFILE '.$file.' REPLACE INTO TABLE '.$this->_name;
-		$this->_db->execute($sql);
+		if ($this->exist())
+		{
+			$sql = 'LOAD DATA LOW_PRIORITY INFILE '.$file.' REPLACE INTO TABLE '.$this->_name;
+			$this->_db->execute($sql);
+		}
 		return true;
 	}
 }

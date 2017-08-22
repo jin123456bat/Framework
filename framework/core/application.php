@@ -23,8 +23,10 @@ class application extends component
 
 	function initlize()
 	{
-		// 载入所有配置
-		$this->setConfig();
+		//载入系统默认配置
+		$this->setConfig('framework');
+		// 载入用户自定义配置
+		$this->setConfig(base::$APP_NAME);
 		// 载入环境变量
 		$this->env();
 		// 导入app配置中的文件类

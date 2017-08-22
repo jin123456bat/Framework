@@ -10,6 +10,12 @@ class field
 	const DEFAULT_CURRENT_TIMESTAMP = 'CURRENT_TIMESTAMP';
 	
 	/**
+	 * 当前字段是否存在
+	 * @var boolean
+	 */
+	private $_exist = false;
+	
+	/**
 	 * 字段的其他属性
 	 * 
 	 * @var array
@@ -92,14 +98,16 @@ class field
 		'decimal',
 		'bit',
 		'char',
+		'varchar',
 	);
 	
-	function __construct($field_info, $field_name, $table_name, $connection)
+	function __construct($field_info, $field_name, $table_name, $connection,$exist)
 	{
 		$this->_field_info = $field_info;
 		$this->_field_name = $field_name;
 		$this->_table_name = $table_name;
 		$this->_connection = $connection;
+		$this->_exist = $exist;
 	}
 
 	/**
@@ -172,7 +180,7 @@ class field
 			$comment = ' comment "'.$field_info['comment'].'"';
 		}
 		
-		$auto_increment = $field_info['auto_increment']?' AUTO_INCREMENT ':'';
+		$auto_increment = $field_info['auto_increment']?' PRIMARY KEY AUTO_INCREMENT ':'';
 		
 		$prototype = '';
 		if (isset($field_info['prototype']) && !empty($field_info['prototype']))
@@ -209,8 +217,9 @@ class field
 		{
 			$after = ' FIRST';
 		}
-		
-		$sql = 'ALTER TABLE `' . $this->_table_name . '` CHANGE `' . $this->getFieldName() . '` '.self::getFieldSqlString($this->getFieldName(),$this->_field_info).' '.$after;
+		$operation = $this->_exist?'CHANGE `'.$this->getFieldName().'`':'ADD';
+		$sql = 'ALTER TABLE `' . $this->_table_name . '` '.$operation.' '.self::getFieldSqlString($this->getFieldName(),$this->_field_info).' '.$after;
+		$this->_exist = true;
 		return $sql;
 	}
 

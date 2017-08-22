@@ -48,9 +48,10 @@ class component extends error
 	/**
 	 * 载入组件配置
 	 */
-	function setConfig()
+	function setConfig($app_name)
 	{
-		$config_path = APP_ROOT . '/config/';
+		//用户配置
+		$config_path = ROOT.'/'.trim($app_name,'/') . '/config/';
 		foreach (scandir($config_path) as $config_file)
 		{
 			if ($config_file != '.' && $config_file != '..')
@@ -58,13 +59,14 @@ class component extends error
 				$config = include $config_path . $config_file;
 				if (is_array($config) && ! empty($config))
 				{
-					if (isset(self::$_config[pathinfo($config_file, PATHINFO_FILENAME)]) && is_array(self::$_config[pathinfo($config_file, PATHINFO_FILENAME)]))
+					$name = pathinfo($config_file, PATHINFO_FILENAME);
+					if (isset(self::$_config[$name]) && is_array(self::$_config[$name]))
 					{
-						self::$_config[pathinfo($config_file, PATHINFO_FILENAME)] = array_merge(self::$_config[pathinfo($config_file, PATHINFO_FILENAME)], $config);
+						self::$_config[$name] = array_merge(self::$_config[$name], $config);
 					}
 					else
 					{
-						self::$_config[pathinfo($config_file, PATHINFO_FILENAME)] = $config;
+						self::$_config[$name] = $config;
 					}
 				}
 			}

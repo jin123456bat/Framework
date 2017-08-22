@@ -8,7 +8,6 @@ use framework;
 
 /**
  * 表数据
- * 
  * @author jin
  */
 class model extends component
@@ -162,10 +161,7 @@ class model extends component
 	 */
 	private function parse()
 	{
-		// if ($this->_db->isExist($this->getTable()))
-		// {
 		$this->_desc = $this->query('DESC `' . $this->_table . '`');
-		// }
 		$this->_config['max_allowed_packet'] = $this->_db->getConfig('max_allowed_packet');
 	}
 
@@ -178,7 +174,7 @@ class model extends component
 		$result = $this->query($sql);
 		return $result;
 	}
-
+	
 	/**
 	 * find a row from result
 	 */
@@ -313,6 +309,7 @@ class model extends component
 									case 'date':
 										$data[$value['Field']] = date('Y-m-d');
 									break;
+									case 'year':
 									case 'year(4)':
 										$data[$value['Field']] = date('Y');
 									break;
@@ -349,6 +346,10 @@ class model extends component
 							}
 						}
 					}
+					else if ($value['Default'] === 'CURRENT_TIMESTAMP')
+					{
+						unset($data[$value['Field']]);
+					}
 					else
 					{
 						$data[$value['Field']] = $value['Default'];
@@ -360,11 +361,14 @@ class model extends component
 			$temp = array();
 			foreach ($this->_desc as $value)
 			{
-				$temp[$value['Field']] = $data[$value['Field']];
+				if (isset($data[$value['Field']]))
+				{
+					$temp[$value['Field']] = $data[$value['Field']];
+				}
 			}
+			
 			$data = $temp;
 		}
-		
 		if ($this->_compress)
 		{
 			static $__strlen = 0;

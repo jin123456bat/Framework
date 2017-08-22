@@ -24,20 +24,19 @@ class router extends component
 	public function parse()
 	{
 		$config = $this->getConfig('router');
-		
 		$query_string = '';
+		
+		if (isset($this->_data['c']))
+		{
+			$this->_control_name = $this->_data['c'];
+		}
+		if (isset($this->_data['a']))
+		{
+			$this->_action_name = $this->_data['a'];
+		}
 		
 		if (request::php_sapi_name() == 'web')
 		{
-			// index.php?c=index&a=index的方式优先级最高
-			if (isset($this->_data['c']))
-			{
-				$this->_control_name = $this->_data['c'];
-			}
-			if (isset($this->_data['a']))
-			{
-				$this->_action_name = $this->_data['a'];
-			}
 			$query_string = $_SERVER['QUERY_STRING'];
 			if (empty($query_string))
 			{
@@ -146,8 +145,6 @@ class router extends component
 		
 		$this->_control_name = empty($this->_control_name)?$config['default']['control']:$this->_control_name;
 		$this->_action_name= empty($this->_action_name)?$config['default']['action']:$this->_action_name;
-		
-		
 	}
 
 	/**
