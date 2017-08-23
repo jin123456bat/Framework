@@ -168,4 +168,53 @@ class http extends base
 			return $result;
 		}
 	}
+	
+	/**
+	 * head请求
+	 * @param string $url
+	 */
+	static function head($url)
+	{
+		$context = stream_context_get_options(stream_context_get_default());
+		stream_context_set_default(array('http'=>array('method'=>'HEAD')));
+		$headers = get_headers($url,1);
+		stream_context_set_default($context);
+		return $headers;
+	}
+	
+	/**
+	 * put请求
+	 * @param string $url
+	 */
+	static function put($url)
+	{
+		
+	}
+	
+	/**
+	 * delete请求
+	 * @param string $url
+	 */
+	static function delete($url)
+	{
+		
+	}
+	
+	/**
+	 * options请求
+	 * @param string $url
+	 */
+	static function options($url)
+	{
+		
+	}
+	
+	/**
+	 * trace请求
+	 * @param string $url
+	 */
+	static function trace($url)
+	{
+		
+	}
 }
