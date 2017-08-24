@@ -15,9 +15,9 @@ class compress extends component
 	 */
 	static function css($content)
 	{
-		$file = new file($content, false);
-		if (! $file->hasError() && $file->readable())
+		if (file_exists($content))
 		{
+			$file = new file($content);
 			$content = $file->content();
 		}
 		
@@ -70,9 +70,9 @@ class compress extends component
 	 */
 	static function js($content)
 	{
-		$file = new file($content, false);
-		if (! $file->hasError() && $file->readable())
+		if (file_exists($content))
 		{
+			$file = new file($content);
 			$content = $file->content();
 		}
 		
@@ -140,9 +140,9 @@ class compress extends component
 	 */
 	static function html($content)
 	{
-		$file = new file($content, false);
-		if (! $file->hasError() && $file->readable())
+		if (file_exists($content))
 		{
+			$file = new file($content);
 			$content = $file->content();
 		}
 		

@@ -97,7 +97,7 @@ class file extends \framework\lib\error
 	 */
 	private $_writable;
 
-	function __construct($file, $create_not_exist = true)
+	function __construct($file)
 	{
 		$this->_path = $file;
 		$this->_exist = file_exists($this->_path);
