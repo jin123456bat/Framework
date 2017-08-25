@@ -18,8 +18,12 @@ return array(
 		'dbname' => 'cloud_web_v2',
 		'user' => 'cm2_admin',
 		'password' => 'fxd^CM2-2016',
+		//以上是必须的，否则不会认为是一个有效的配置
 		'charset' => 'utf8',
-		'init_command' => $init_command
+		'init_command' => $init_command,
+		'model' => array(
+			'cache',
+		)
 	),
 	'ordoac' => array(
 		'type' => 'mysql',

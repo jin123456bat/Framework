@@ -4,12 +4,23 @@ namespace application\control;
 use application\extend\BaseControl;
 use framework\core\view;
 use application\entity\test;
+use framework\core\cache;
 
 class index extends BaseControl
 {
 
 	function index()
 	{
+		/*
+		 * 缓存测试
+		 */
+		/* cache::set('jin','name');
+		if (cache::get('jin') == 'name')
+		{
+			var_dump("缓存测试通过");
+		} */
+		var_dump($this->model('cache')->select());
+		
 		/*
 		 * $test = new test(array(
 		 * 'username' => 'jin123',
@@ -149,7 +160,8 @@ class index extends BaseControl
 		 * cache::store('mysql')->set('name','1234');//存储到mysql中
 		 * cache::set('vbb', 'dd');//存储到默认的type中
 		 */
-		
+		 
+		 
 		/*
 		 * cache::set('name1', 'jin');
 		 * $name2 = new \stdClass();

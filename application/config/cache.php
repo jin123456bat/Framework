@@ -1,8 +1,7 @@
 <?php
 return array(
-	'type' => 'memcached', // 缓存类型 mysql memcached
-	'expires' => 0, // 默认缓存时间 永久有效
-	                
+	'type' => 'mysql', // 默认的缓存类型 mysql memcached file redis apc
+	
 	// 当type为memcached的时候，以下配置memcached的相关信息
 	'memcached' => array(
 		array(

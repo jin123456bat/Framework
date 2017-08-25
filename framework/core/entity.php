@@ -1,12 +1,12 @@
 <?php
 namespace framework\core;
 
-use framework\lib\data;
 use framework\core\database\mysql\field;
 
-class entity extends data
+class entity extends base
 {
-
+	private $_error = array();
+	
 	/**
 	 * 删除之后执行的函数
 	 */
@@ -560,5 +560,21 @@ class entity extends data
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * 判断是否有错误
+	 */
+	private function hasError()
+	{
+		return !empty($this->_error);
+	}
+	
+	/**
+	 * 不通过rules的验证的错误添加
+	 */
+	private function addError($field,$message)
+	{
+		$this->_error[$field][] = $message;
 	}
 }

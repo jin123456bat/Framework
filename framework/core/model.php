@@ -70,7 +70,64 @@ class model extends component
 	{
 		return self::$_history;
 	}
-
+	
+	/**
+	 * 获取数据库的配置
+	 * 这个方法是覆盖component中的getConfig的
+	 * @param string $name
+	 */
+	public static function getConfig($name = NULL)
+	{
+		$config = parent::getConfig('db');
+		if (is_array($config))
+		{
+			if (empty(array_diff(array(
+				'type',
+				'server',
+				'dbname',
+				'user',
+				'password',
+			), array_keys($config))))
+			{
+				return $config;
+			}
+			else
+			{
+				if ($name === NULL)
+				{
+					//查找是否有指定model的 配置
+					foreach ($config as $c)
+					{
+						if (isset($c['model']) && !empty($c['model']))
+						{
+							if (is_array($c['model']) && in_array($this->_table, $c['model']))
+							{
+								return $c;
+							}
+							else if (is_string($c['model']) && in_array($this->_table, explode(',', $c['model'])))
+							{
+								return $c;
+							}
+						}
+					}
+					
+					//查找是否有默认配置的配置
+					foreach ($config as $c)
+					{
+						if (isset($c['default']) && $c['default'] === true)
+						{
+							return $c;
+						}
+					}
+				}
+				else
+				{
+					return $config[$name];
+				}
+			}
+		}
+	}
+	
 	/**
 	 * when this class is initlized,this function will be execute
 	 * 
@@ -82,7 +139,18 @@ class model extends component
 	{
 		$this->_sql = new sql();
 		
-		$config = $this->getConfig('db');
+		if (method_exists($this, '__config'))
+		{
+			$config = $this->__config();
+			if (is_scalar($config))
+			{
+				$config = self::getConfig($config);
+			}
+		}
+		else
+		{
+			$config = self::getConfig();
+		}
 		
 		// 实例化mysql的类
 		$type = $config['type'];
@@ -173,6 +241,20 @@ class model extends component
 		$sql = $this->_sql->select($fields);
 		$result = $this->query($sql);
 		return $result;
+	}
+	
+	/**
+	 * find the first column as a array
+	 */
+	function column($fields = '*')
+	{
+		$result = $this->select($fields);
+		$temp = array();
+		foreach ($result as $r)
+		{
+			$temp[] = current($r);
+		}
+		return $temp;
 	}
 	
 	/**

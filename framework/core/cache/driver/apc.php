@@ -2,14 +2,14 @@
 namespace framework\core\cache\driver;
 
 use framework\core\cache\cache;
-use framework\core\base;
+use framework\core\cache\cacheBase;
 
 /**
  * apc只是存储在本机
  * 
  * @author fx
  */
-class apc extends base implements cache
+class apc extends cacheBase implements cache
 {
 
 	/**

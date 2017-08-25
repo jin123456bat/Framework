@@ -1,14 +1,12 @@
 <?php
 namespace framework\core;
 
-use framework\lib\error;
-
 /**
  * 组件基类
  * 
  * @author fx
  */
-class component extends error
+class component extends base
 {
 
 	private static $_config = array();
@@ -90,50 +88,13 @@ class component extends error
 	/**
 	 * 获取组件配置
 	 */
-	final public function getConfig($name = null,$config_name = NULL)
+	public static function getConfig($name = null)
 	{
 		if ($name !== null)
 		{
-			$class_config = '';
-			//直接使用类中的配置
-			if (method_exists($this, '__config'))
+			if (isset(self::$_config[$name]))
 			{
-				$class_config = $this->__config();
-				if (!empty($class_config) && is_array($class_config))
-				{
-					return $class_config;
-				}
-			}
-			
-			$config = self::$_config;
-			
-			if (isset($config[$name]))
-			{
-				
-				if (!empty($class_config) && is_scalar($class_config))
-				{
-					if (isset($config[$name][$class_config]))
-					{
-						return $config[$name][$class_config];
-					}
-				}
-				
-				if (empty($config_name))
-				{
-					foreach ($config[$name] as $c)
-					{
-						if (isset($c['default']) && $c['default']===true)
-						{
-							return $c;
-						}
-					}
-				}
-				else if (!empty($config_name))
-				{
-					return $config[$name][$config_name];
-				}
-				
-				return $config[$name];
+				return self::$_config[$name];
 			}
 			return NULL;
 		}

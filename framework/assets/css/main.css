@@ -1,0 +1,37 @@
+@CHARSET "UTF-8";
+
+body{
+	padding:0px;
+	margin:0px;
+}
+
+a{
+	text-decoration: none;
+	color:#000000;
+}
+
+
+.color-gray-1{
+	
+}
+
+/*按钮*/
+.btn{
+	padding: 5px 10px;
+	border:1px solid #656565;
+	display: inline-block;
+	border-radius: 8px;
+	background-color: #FFFFFF;
+	line-height: 30px;
+	font-size:14px;
+}
+
+/*小按钮*/
+.btn .btn-sm{
+	
+}
+
+/*小小按钮*/
+.btn .btn-xs{
+	
+}

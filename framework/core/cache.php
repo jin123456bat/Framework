@@ -1,17 +1,11 @@
 <?php
 namespace framework\core;
 
-use framework;
-
 class cache extends component
 {
-	private $_expires;
+	private static $_instance;
 	
-	private $_type;
-	
-	private $_instance;
-	
-	function setType($type = NULL)
+	/* function setType($type = NULL)
 	{
 		$config = $this->getConfig('cache');
 		
@@ -28,16 +22,31 @@ class cache extends component
 		
 		$cache = 'framework\\core\\cache\\driver\\' . $this->_type;
 		$this->_instance[$this->_type] = new $cache($config);
-	}
+	} */
 	
 	/**
-	 * 设置默认的数据有效期
-	 *
-	 * @param unknown $expires
+	 * 初始化缓存驱动
+	 * @param string $type
+	 * @return \framework\core\cache\cache
 	 */
-	function expires($expires)
+	private static function initInstance($type = NULL)
 	{
-		$this->_expires = $expires;
+		$config = self::getConfig('cache');
+		$type = empty($type)?$config['type']:$type;
+		
+		if (isset(self::$_instance[$type]) || empty(self::$_instance[$type]))
+		{
+			$cache = 'framework\\core\\cache\\driver\\' . $type;
+			if (class_exists($cache,true))
+			{
+				self::$_instance[$type] = new $cache($config);
+				if (method_exists(self::$_instance[$type], 'initlize'))
+				{
+					self::$_instance[$type]->initlize();
+				}
+			}
+		}
+		return self::$_instance[$type];
 	}
 	
 	/**
@@ -50,10 +59,9 @@ class cache extends component
 	 * @param number $cache
 	 *        数据有效期 当为0的时候使用默认的数据有效期
 	 */
-	function set($name, $value, $expires = 0)
+	static function set($name, $value, $expires = 0)
 	{
-		$expires = empty($expires)?$this->_expires:$expires;
-		return $this->_instance->set($name, $value, $expires);
+		return self::initInstance()->set($name, $value, $expires);
 	}
 	
 	/**
@@ -63,9 +71,9 @@ class cache extends component
 	 * @param number $amount
 	 * @return bool true on success or false on failure
 	 */
-	function increase($name, $amount = 1)
+	static function increase($name, $amount = 1)
 	{
-		return $this->_instance->increase($name, $amount);
+		return self::initInstance()->increase($name, $amount);
 	}
 	
 	/**
@@ -75,9 +83,9 @@ class cache extends component
 	 * @param number $amount
 	 * @return bool true on success or false on failure
 	 */
-	function decrease($name, $amount = 1)
+	static function decrease($name, $amount = 1)
 	{
-		return $this->_instance->decrease($name, $amount);
+		return self::initInstance()->decrease($name, $amount);
 	}
 	
 	/**
@@ -88,9 +96,9 @@ class cache extends component
 	 *        当数据不存在的时候的默认值
 	 * @return mixed|unknown
 	 */
-	function get($name, $default = NULL)
+	static function get($name, $default = NULL)
 	{
-		$value = $this->_instance->get($name);
+		$value = self::initInstance()->get($name);
 		if ($value === NULL)
 		{
 			return $default;
@@ -103,17 +111,17 @@ class cache extends component
 	 *
 	 * @param string $name
 	 */
-	function remove($name)
+	static function remove($name)
 	{
-		return $this->_instance->remove($name);
+		return self::initInstance()->remove($name);
 	}
 	
 	/**
 	 * 清空所有缓存
 	 */
-	function flush()
+	static function flush()
 	{
-		return $this->_instance->flush();
+		return self::initInstance()->flush();
 	}
 	
 	/**
@@ -122,9 +130,9 @@ class cache extends component
 	 * @param string $name
 	 * @return bool
 	 */
-	function has($name)
+	static function has($name)
 	{
-		return $this->_instance->has($name);
+		return self::initInstance()->has($name);
 	}
 	
 	/**
@@ -135,8 +143,16 @@ class cache extends component
 	 * @param unknown $value
 	 * @return boolean
 	 */
-	function add($name, $value)
+	static function add($name, $value)
 	{
-		return $this->_instance->add($name, $value, $this->_expires);
+		return self::initInstance()->add($name, $value, $this->_expires);
+	}
+	
+	/**
+	 * 使用指定类型的缓存
+	 */
+	static function store($type)
+	{
+		return self::initInstance($type);
 	}
 }

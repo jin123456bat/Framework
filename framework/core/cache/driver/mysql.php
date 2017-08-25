@@ -2,10 +2,10 @@
 namespace framework\core\cache\driver;
 
 use framework\core\cache\cache;
-use framework\core\base;
 use framework\core\model;
+use framework\core\cache\cacheBase;
 
-class mysql extends base implements cache
+class mysql extends cacheBase implements cache
 {
 
 	private $_model;

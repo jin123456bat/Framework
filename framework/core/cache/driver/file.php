@@ -1,15 +1,15 @@
 <?php
 namespace framework\core\cache\driver;
 
-use framework\core\base;
 use framework\core\cache\cache;
+use framework\core\cache\cacheBase;
 
 /**
  * 基于文件的缓存
  * 
  * @author fx
  */
-class file extends base implements cache
+class file extends cacheBase implements cache
 {
 
 	private $_path;
