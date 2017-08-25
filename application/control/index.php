@@ -11,15 +11,26 @@ class index extends BaseControl
 
 	function index()
 	{
+		/**
+		 * 快速排序算法测试
+		 * @var array $array
+		 */
+		$array = quickSort([4,3,5,2,1]);
+		if ($array != array(1,2,3,4,5))
+		{
+			echo "快速排序算法错误";
+		}
+		
 		/*
 		 * 缓存测试
+		 * db缓存测试
 		 */
-		/* cache::set('jin','name');
-		if (cache::get('jin') == 'name')
+		cache::store('mysql')::set('jin','name');
+		if (cache::store('mysql')::get('jin') != 'name')
 		{
-			var_dump("缓存测试通过");
-		} */
-		var_dump($this->model('cache')->select());
+			echo "mysql 缓存测试失败";
+		}
+		//var_dump($this->model('cache')->select());
 		
 		/*
 		 * $test = new test(array(

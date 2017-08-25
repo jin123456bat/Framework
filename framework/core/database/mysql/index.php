@@ -111,7 +111,14 @@ class index extends base
 	 */
 	function add($field_name)
 	{
-		$this->_index['fields'][] = $field_name;
+		if (is_string($field_name))
+		{
+			$this->_index['fields'][] = $field_name;
+		}
+		else if (is_array($field_name))
+		{
+			$this->_index['fields'] = array_merge($this->_index['fields'],$field_name);
+		}
 		$this->_index['fields'] = array_unique($this->_index['fields']);
 		$sql = $this->createSql();
 		$this->_connection->execute($sql);

@@ -193,6 +193,12 @@ class table extends component
 		
 		return parent::initlize();
 	}
+	
+	
+	public static function getConfig($name = NULL)
+	{
+		$config = parent::getConfig('db'); 
+	}
 
 	/**
 	 * 获取表名
