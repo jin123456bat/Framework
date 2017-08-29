@@ -55,29 +55,42 @@ class index extends base
 	
 	private function createSql()
 	{
+		//ALTER TABLE `test`.`cache` ADD PRIMARY KEY (`unique_key`);
+		
 		$fields = '`' . implode('`,`', $this->_index['fields']) . '`';
 		$type = $this->_index['index_type'];
-		if (strtolower($this->_index_name) == 'primary')
+		if (empty($type))
 		{
-			$sql = 'alter table `' . $this->_table_name . '` drop primary key, add primary key (' . $fields . ') using ' . $type;
+			//假如没有索引类型则为添加索引
+			$index_type = strtolower($this->_index_name) == 'primary'?'PRIMARY KEY':($this->_index['unique']?'UNIQUE':'INDEX');
+			$name = $this->_index_name;
+			return 'ALTER TABLE `'.$this->_table_name.'` ADD '.$index_type.' `'.$name.'` ('.$fields.') using '.$type;
 		}
 		else
 		{
-			$new_name = $this->_index_name;
-			if (isset($this->_new_name) && !empty($this->_new_name))
+			//更改索引
+			if (strtolower($this->_index_name) == 'primary')
 			{
-				$new_name = $this->_new_name;
-			}
-			
-			$comment = !empty($this->_index['comment'])?'COMMENT "'.$this->_index['comment'].'"':'';
-			
-			if ($this->_index['unique'])
-			{
-				$sql = 'ALTER TABLE `' . $this->_table_name . '` DROP INDEX `' . $this->_index_name . '`, ADD UNIQUE `' . $new_name . '` (' . $fields . ') using ' . $type .' '. $comment;
+				$sql = 'alter table `' . $this->_table_name . '` drop primary key, add primary key (' . $fields . ') using ' . $type;
 			}
 			else
 			{
-				$sql = 'ALTER TABLE `' . $this->_table_name . '` DROP INDEX `' . $this->_index_name . '`, ADD INDEX `' . $new_name . '` (' . $fields . ') using ' . $type .' '. $comment;
+				$new_name = $this->_index_name;
+				if (isset($this->_new_name) && !empty($this->_new_name))
+				{
+					$new_name = $this->_new_name;
+				}
+				
+				$comment = !empty($this->_index['comment'])?'COMMENT "'.$this->_index['comment'].'"':'';
+				
+				if ($this->_index['unique'])
+				{
+					$sql = 'ALTER TABLE `' . $this->_table_name . '` DROP INDEX `' . $this->_index_name . '`, ADD UNIQUE `' . $new_name . '` (' . $fields . ') using ' . $type .' '. $comment;
+				}
+				else
+				{
+					$sql = 'ALTER TABLE `' . $this->_table_name . '` DROP INDEX `' . $this->_index_name . '`, ADD INDEX `' . $new_name . '` (' . $fields . ') using ' . $type .' '. $comment;
+				}
 			}
 		}
 		return $sql;

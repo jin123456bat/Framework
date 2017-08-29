@@ -114,7 +114,14 @@ class framework
 	{
 		$classname = ltrim($classname);
 		$class = explode('\\', $classname);
-		$path = rtrim(ROOT, '/') . '/' . str_replace('\\', '/', $classname) . '.php';
+		if (array_shift($class) == 'framework')
+		{
+			$path = rtrim(SYSTEM_ROOT, '/') . '/' . implode('/', $class) . '.php';
+		}
+		else
+		{
+			$path = rtrim(APP_ROOT,'/').'/'.implode('/', $class).'.php';
+		}
 		if (file_exists($path))
 		{
 			if ((include $path) !== 1)

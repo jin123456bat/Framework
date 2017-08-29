@@ -90,11 +90,11 @@ class table extends component
 		
 		if (empty($config))
 		{
-			$config = $this->getConfig('db');
+			$config = self::getConfig();
 		}
 		else if (is_scalar($config))
 		{
-			$config = $this->getConfig('db',$config);
+			$config = $this->getConfig($config);
 		}
 		
 		$type = $config['type'];
@@ -114,10 +114,7 @@ class table extends component
 			$this->_auto_increment = $status[0]['Auto_increment'];
 			$this->_row_format = $status[0]['Row_format'];
 		}
-	}
-	
-	function initlize()
-	{
+		
 		if ($this->exist())
 		{
 			$descs = $this->_db->query('show full columns from '.$this->getName());
@@ -176,7 +173,7 @@ class table extends component
 				if (! isset($this->_index_list[$keyname]))
 				{
 					$this->_index_list[$keyname] = array(
-						'index_type' => $key['Index_type'], // 索引类型
+						'index_type' => $key['Index_type'], // 索引类型 btree hash  判断这个是否为空判断索引是否存在
 						'unique' => $key['Non_unique'] == 0, // 是否唯一索引
 						'comment' => $key['Comment'], // 注释
 						'fields' => array( // 字段
@@ -190,14 +187,22 @@ class table extends component
 				}
 			}
 		}
-		
+	}
+	
+	function initlize()
+	{
 		return parent::initlize();
 	}
 	
 	
-	public static function getConfig($name = NULL)
+	/**
+	 * 获取数据库配置
+	 * @param unknown $name
+	 */
+	public static function getConfig($name = null)
 	{
-		$config = parent::getConfig('db'); 
+		//$config = parent::getConfig('db'); 
+		return model::getConfig($name);
 	}
 
 	/**

@@ -45,11 +45,13 @@ class component extends base
 
 	/**
 	 * 载入组件配置
+	 * @param boolean $is_framework
 	 */
-	function setConfig($app_name)
+	function setConfig($is_framework = true)
 	{
+		$root = $is_framework?SYSTEM_ROOT:APP_ROOT;
 		//用户配置
-		$config_path = ROOT.'/'.trim($app_name,'/') . '/config/';
+		$config_path = $root.'/config/';
 		foreach (scandir($config_path) as $config_file)
 		{
 			if ($config_file != '.' && $config_file != '..')

@@ -5,6 +5,7 @@ use application\extend\BaseControl;
 use framework\core\view;
 use application\entity\test;
 use framework\core\cache;
+use framework\core\database\mysql\table;
 
 class index extends BaseControl
 {
@@ -25,11 +26,20 @@ class index extends BaseControl
 		 * 缓存测试
 		 * db缓存测试
 		 */
-		cache::store('mysql')::set('jin','name');
-		if (cache::store('mysql')::get('jin') != 'name')
+		/* cache::store('mysql')->set('jin','name');
+		if (cache::store('mysql')->get('jin') != 'name')
 		{
 			echo "mysql 缓存测试失败";
-		}
+		} */
+		
+		$table = new table('cache');
+		$table->field('unique_key')->varchar(32)->comment('唯一键');
+		$table->field('createtime')->datetime()->comment('创建时间');
+		$table->field('expires')->int()->comment('有效期，0不限制');
+		$table->field('value')->longtext()->comment('存储的值，seralize后');
+		$table->primary()->add('unique_key');
+		$table->index('createtime')->add(array('createtime','expires'));
+		
 		//var_dump($this->model('cache')->select());
 		
 		/*

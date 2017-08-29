@@ -18,7 +18,7 @@ class model extends component
 	 * 
 	 * @var unknown
 	 */
-	private $_table;
+	private static $_table;
 
 	/**
 	 *
@@ -63,7 +63,7 @@ class model extends component
 
 	function __construct($table = null)
 	{
-		$this->_table = $table;
+		self::$_table = $table;
 	}
 
 	public static function debug_trace_sql()
@@ -100,11 +100,11 @@ class model extends component
 					{
 						if (isset($c['model']) && !empty($c['model']))
 						{
-							if (is_array($c['model']) && in_array($this->_table, $c['model']))
+							if (is_array($c['model']) && in_array(self::getTable(), $c['model']))
 							{
 								return $c;
 							}
-							else if (is_string($c['model']) && in_array($this->_table, explode(',', $c['model'])))
+							else if (is_string($c['model']) && in_array(self::getTable(), explode(',', $c['model'])))
 							{
 								return $c;
 							}
@@ -160,10 +160,10 @@ class model extends component
 		
 		if (method_exists($this, '__tableName'))
 		{
-			$this->_table = $this->__tableName();
+			self::$_table = $this->__tableName();
 		}
 		
-		$this->setTable($this->_table);
+		$this->setTable($this->getTable());
 		parent::initlize();
 	}
 
@@ -209,8 +209,8 @@ class model extends component
 	 */
 	function setTable($table)
 	{
-		$this->_table = $table;
-		$this->_sql->from($this->_table);
+		self::$_table = $table;
+		$this->_sql->from($this->getTable());
 		$this->parse();
 	}
 
@@ -219,9 +219,9 @@ class model extends component
 	 * 
 	 * @return unknown|string
 	 */
-	function getTable()
+	public static function getTable()
 	{
-		return $this->_table;
+		return self::$_table;
 	}
 
 	/**
@@ -229,7 +229,7 @@ class model extends component
 	 */
 	private function parse()
 	{
-		$this->_desc = $this->query('DESC `' . $this->_table . '`');
+		$this->_desc = $this->query('DESC `' . $this->getTable() . '`');
 		$this->_config['max_allowed_packet'] = $this->_db->getConfig('max_allowed_packet');
 	}
 
@@ -457,7 +457,7 @@ class model extends component
 			if (! isset($this->_compress_sql['insert']))
 			{
 				$keys = array_keys($data);
-				$this->_compress_sql['insert'] = 'INSERT INTO ' . $this->_table . ' (`' . implode('`,`', $keys) . '`) values (\'' . implode('\',\'', $data) . '\')';
+				$this->_compress_sql['insert'] = 'INSERT INTO ' . $this->getTable() . ' (`' . implode('`,`', $keys) . '`) values (\'' . implode('\',\'', $data) . '\')';
 				$__strlen = strlen($this->_compress_sql['insert']);
 			}
 			else
@@ -472,7 +472,7 @@ class model extends component
 				else
 				{
 					$keys = array_keys($data);
-					$sql = 'INSERT INTO ' . $this->_table . ' (`' . implode('`,`', $keys) . '`) values (\'' . implode('\',\'', $data) . '\')';
+					$sql = 'INSERT INTO ' . $this->getTable() . ' (`' . implode('`,`', $keys) . '`) values (\'' . implode('\',\'', $data) . '\')';
 					$this->_compress_sql['insert'] .= ';' . $sql;
 					$__strlen = strlen($sql);
 				}

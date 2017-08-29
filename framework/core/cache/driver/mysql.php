@@ -14,7 +14,7 @@ class mysql extends cacheBase implements cache
 		$table = $this->table('cache');
 		if(!$table->exist())
 		{
-			$table->field('unique_key')->charset(32)->comment('唯一键');
+			$table->field('unique_key')->varchar(32)->comment('唯一键');
 			$table->field('createtime')->datetime()->comment('创建时间');
 			$table->field('expires')->int()->comment('有效期，0不限制');
 			$table->field('value')->longtext()->comment('存储的值，seralize后');
