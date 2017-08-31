@@ -105,7 +105,7 @@ class file extends cacheBase implements cache
 		{
 			$file = $this->getFileByName($name);
 			$result = unserialize(file_get_contents($file));
-			$result->data += 1;
+			$result->data += $amount;
 			$result = serialize($result);
 		}
 		file_put_contents($file, $result);
@@ -129,7 +129,7 @@ class file extends cacheBase implements cache
 		{
 			$file = $this->getFileByName($name);
 			$result = unserialize(file_get_contents($file));
-			$result->data -= 1;
+			$result->data -= $amount;
 			$result = serialize($result);
 		}
 		file_put_contents($file, $result);

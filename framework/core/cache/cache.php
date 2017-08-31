@@ -10,7 +10,7 @@ interface cache
 {
 
 	/**
-	 * 添加数据 数据存在会返回false
+	 * 添加数据 数据存在会添加失败并返回false
 	 * 
 	 * @param unknown $name        
 	 * @param unknown $value        
@@ -21,16 +21,16 @@ interface cache
 	/**
 	 * 添加或保存数据
 	 * 
-	 * @param unknown $name        
-	 * @param unknown $value        
+	 * @param string $name        
+	 * @param mixed $value        
 	 * @param number $expires        
 	 */
 	function set($name, $value, $expires = 0);
 
 	/**
-	 * 获取数据 过期返回null
+	 * 获取数据 过期或者不存在返回null
 	 * 
-	 * @param unknown $name        
+	 * @param string $name        
 	 */
 	function get($name);
 

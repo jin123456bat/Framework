@@ -22,23 +22,89 @@ class index extends BaseControl
 			echo "快速排序算法错误";
 		}
 		
-		/*
-		 * 缓存测试
-		 * db缓存测试
-		 */
-		/* cache::store('mysql')->set('jin','name');
-		if (cache::store('mysql')->get('jin') != 'name')
-		{
-			echo "mysql 缓存测试失败";
-		} */
 		
-		$table = new table('cache');
-		$table->field('unique_key')->varchar(32)->comment('唯一键');
-		$table->field('createtime')->datetime()->comment('创建时间');
-		$table->field('expires')->int()->comment('有效期，0不限制');
-		$table->field('value')->longtext()->comment('存储的值，seralize后');
-		$table->primary()->add('unique_key');
-		$table->index('createtime')->add(array('createtime','expires'));
+		$cache_type = array(
+			//'mysql',
+			'file',
+			'redis',
+			'memcached',
+			'apc',
+		);
+		
+		
+		foreach ($cache_type as $type)
+		{
+			/*
+			 * 缓存测试
+			 * db缓存测试
+			 */
+			cache::store($type)->set('jin','name');
+			if (cache::store($type)->get('jin') != 'name')
+			{
+				echo "缓存 $type set添加测试 失败";
+			}
+			
+			/*
+			 * 缓存测试
+			 * set覆盖测试
+			 */
+			cache::store($type)->set('jin','name1');
+			if (cache::store($type)->get('jin') != 'name1')
+			{
+				echo "缓存 $type set覆盖测试 失败";
+			}
+			
+			cache::store($type)->add('jin', 'name2');
+			if (cache::store($type)->get('jin') != 'name1')
+			{
+				echo "缓存 $type add覆盖测试 失败";
+			}
+			
+			cache::store($type)->set('jin', '1');
+			cache::store($type)->decrease('jin');
+			if (cache::store($type)->get('jin') !== 0)
+			{
+				echo "缓存 $type decrease测试 失败";
+			}
+			
+			
+			cache::store($type)->set('jin', '1');
+			cache::store($type)->decrease('jin',2);
+			if (cache::store($type)->get('jin') !== -1)
+			{
+				echo "缓存 $type decrease测试 失败";
+			}
+			
+			cache::store($type)->set('jin', '1');
+			cache::store($type)->increase('jin');
+			if (cache::store($type)->get('jin') !== 2)
+			{
+				echo "缓存 $type increase测试 失败";
+			}
+			
+			
+			cache::store($type)->set('jin', '1');
+			cache::store($type)->increase('jin',2);
+			if (cache::store($type)->get('jin') !== 3)
+			{
+				echo "缓存 $type increase测试 失败";
+			}
+			
+			cache::store($type)->set('jin1', 1);
+			cache::store($type)->set('jin2', 2);
+			cache::store($type)->flush();
+			if (cache::store($type)->get('jin1') !== NULL || cache::store($type)->get('jin2') !== NULL)
+			{
+				echo "缓存 $type flush测试 失败";
+			}
+			
+			cache::store($type)->set('jin1', 1);
+			cache::store($type)->remove('jin1');
+			if (cache::store($type)->get('jin1') !== NULL)
+			{
+				echo "缓存 $type remove测试 失败";
+			}
+		}
 		
 		//var_dump($this->model('cache')->select());
 		

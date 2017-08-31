@@ -83,6 +83,12 @@ class table extends component
 	 * @var string
 	 */
 	private $_row_format;
+	
+	/**
+	 * 索引对象
+	 * @var array
+	 */
+	private $_index_object = array();
 
 	function __construct($table_name, $config = NULL)
 	{
@@ -293,14 +299,18 @@ class table extends component
 	 */
 	function index($index_name)
 	{
-		$index_info = isset($this->_index_list[$index_name])?$this->_index_list[$index_name]:array(
-			'index_type' => '', // 索引类型
-			'unique' => false, // 是否唯一索引
-			'comment' => '', // 注释
-			'fields' => array( // 字段
-			)
-		);
-		return new index($index_info,$index_name, $this->getName(), $this->_db);
+		if (!isset($this->_index_object[$index_name]))
+		{
+			$index_info = isset($this->_index_list[$index_name])?$this->_index_list[$index_name]:array(
+				'index_type' => '', // 索引类型
+				'unique' => false, // 是否唯一索引
+				'comment' => '', // 注释
+				'fields' => array( // 字段
+				)
+			);
+			$this->_index_object[$index_name] = new index($index_info,$index_name, $this->getName(), $this->_db,isset($this->_index_list[$index_name]));
+		}
+		return $this->_index_object[$index_name];
 	}
 	
 	/**

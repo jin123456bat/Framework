@@ -11,7 +11,6 @@ use framework\core\cache\cacheBase;
  */
 class memcached extends cacheBase implements cache
 {
-
 	/**
 	 *
 	 * @var \Memcached

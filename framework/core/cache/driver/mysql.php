@@ -51,7 +51,7 @@ class mysql extends cacheBase implements cache
 			'expires' => $expires,
 			'value' => serialize($value)
 		))->insert(array(
-			'unique_key' => $name,
+			'unique_key' => md5($name),
 			'createtime' => date('Y-m-d H:i:s'),
 			'expires' => $expires,
 			'value' => serialize($value)
@@ -70,9 +70,13 @@ class mysql extends cacheBase implements cache
 	{
 		// TODO Auto-generated method stub
 		$value = $this->_model->where('unique_key=? and (UNIX_TIMESTAMP(createtime)+expires>UNIX_TIMESTAMP(now()) or expires=?)', array(
-			$name,
+			md5($name),
 			0
 		))->scalar('value');
+		if ($value === NULL)
+		{
+			return NULL;
+		}
 		return unserialize($value);
 	}
 
@@ -114,7 +118,7 @@ class mysql extends cacheBase implements cache
 	public function has($name)
 	{
 		return ! empty($this->_model->where('unique_key=?', array(
-			$name
+			md5($name)
 		))
 			->limit(1)
 			->find());
@@ -129,7 +133,7 @@ class mysql extends cacheBase implements cache
 	public function remove($name)
 	{
 		return $this->_model->where('unique_key=?', array(
-			$name
+			md5($name)
 		))
 			->limit(1)
 			->delete();
