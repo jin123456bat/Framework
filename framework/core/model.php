@@ -18,7 +18,7 @@ class model extends component
 	 * 
 	 * @var unknown
 	 */
-	private static $_table;
+	private $_table;
 
 	/**
 	 *
@@ -28,7 +28,7 @@ class model extends component
 
 	/**
 	 *
-	 * @var \framework\core\database\driver\mysql
+	 * @var \framework\core\database\database
 	 */
 	private $_db;
 
@@ -37,7 +37,7 @@ class model extends component
 	 * 
 	 * @var array
 	 */
-	private static $_history = array();
+	private $_history = array();
 
 	/**
 	 * 表结构 通过desc tableName获取
@@ -63,20 +63,24 @@ class model extends component
 
 	function __construct($table = null)
 	{
-		self::$_table = $table;
+		$this->_table = $table;
 	}
 
-	public static function debug_trace_sql()
+	/**
+	 * 获取当前表执行的sql记录
+	 * @return array
+	 */
+	public function history()
 	{
-		return self::$_history;
+		return $this->_history;
 	}
 	
 	/**
 	 * 获取数据库的配置
-	 * 这个方法是覆盖component中的getConfig的
-	 * @param string $name
+	 * @param string $table_name 表名
+	 * @param string $name 配置名称
 	 */
-	public static function getConfig($name = NULL)
+	public static function getDefaultConfig($table_name,$name = NULL)
 	{
 		$config = parent::getConfig('db');
 		if (is_array($config))
@@ -100,11 +104,11 @@ class model extends component
 					{
 						if (isset($c['model']) && !empty($c['model']))
 						{
-							if (is_array($c['model']) && in_array(self::getTable(), $c['model']))
+							if (is_array($c['model']) && in_array($table_name, $c['model']))
 							{
 								return $c;
 							}
-							else if (is_string($c['model']) && in_array(self::getTable(), explode(',', $c['model'])))
+							else if (is_string($c['model']) && in_array($table_name, explode(',', $c['model'])))
 							{
 								return $c;
 							}
@@ -144,12 +148,12 @@ class model extends component
 			$config = $this->__config();
 			if (is_scalar($config))
 			{
-				$config = self::getConfig($config);
+				$config = self::getDefaultConfig($this->getTable(),$config);
 			}
 		}
 		else
 		{
-			$config = self::getConfig();
+			$config = self::getDefaultConfig($this->getTable());
 		}
 		
 		// 实例化mysql的类
@@ -160,7 +164,7 @@ class model extends component
 		
 		if (method_exists($this, '__tableName'))
 		{
-			self::$_table = $this->__tableName();
+			$this->_table = $this->__tableName();
 		}
 		
 		$this->setTable($this->getTable());
@@ -168,22 +172,12 @@ class model extends component
 	}
 
 	/**
-	 * 根据配置名称 获取配置
-	 * 
-	 * @param array|string $connection
-	 *        配置名称或者详细配置
+	 * 获取当前model的连接标识符
 	 * @return \framework\core\database\database
 	 */
-	public static function getConnection($config)
+	public function getConnection()
 	{
-		if (! empty($config))
-		{
-			if (is_scalar($config))
-			{
-				$config = $this->getConfig('db',$config);
-			}
-		}
-		return mysql::getInstance($config);
+		return $this->_db;
 	}
 
 	/**
@@ -209,7 +203,7 @@ class model extends component
 	 */
 	function setTable($table)
 	{
-		self::$_table = $table;
+		$this->_table = $table;
 		$this->_sql->from($this->getTable());
 		$this->parse();
 	}
@@ -219,9 +213,9 @@ class model extends component
 	 * 
 	 * @return unknown|string
 	 */
-	public static function getTable()
+	public function getTable()
 	{
-		return self::$_table;
+		return $this->_table;
 	}
 
 	/**
@@ -542,7 +536,7 @@ class model extends component
 		if ($sql instanceof sql)
 		{
 			$complete_sql = $sql->getSql();
-			self::$_history[] = $complete_sql;
+			$this->_history[] = $complete_sql;
 			$array = $sql->getParams();
 			$sql_string = $sql->__toString();
 			$sql->clear();
@@ -551,7 +545,7 @@ class model extends component
 		else
 		{
 			$complete_sql = $this->_sql->getSql($sql, $array);
-			self::$_history[] = $complete_sql;
+			$this->_history[] = $complete_sql;
 		}
 		if ($this->_compress)
 		{

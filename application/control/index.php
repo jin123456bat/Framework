@@ -1,19 +1,19 @@
 <?php
 namespace application\control;
 
-use application\extend\BaseControl;
 use framework\core\view;
 use application\entity\test;
 use framework\core\cache;
-use framework\core\database\mysql\table;
-use application\entity\user;
 use framework\vendor\captcha;
+use framework\core\webControl;
+use framework\core\response\json;
 
-class index extends BaseControl
+class index extends webControl
 {
 
 	function index()
 	{
+		
 		/**
 		 * 快速排序算法测试
 		 * @var array $array
@@ -162,7 +162,7 @@ class index extends BaseControl
 		//var_dump($this->model('cache')->select());
 		
 		
-		$test = new test(array(
+		/* $test = new test(array(
 		'username' => 'jin123',
 		'password' => '111',
 		'age' => 18,
@@ -179,8 +179,11 @@ class index extends BaseControl
 		if (!$test->validate())
 		{
 			//var_dump($test->getError());
-		}
+		} */
 		
+		
+		
+		//return new json(1,2,3);
 		return new captcha();
 		
 		// var_dump(cookie::set('name','555'));

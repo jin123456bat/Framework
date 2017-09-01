@@ -22,7 +22,7 @@ return array(
 		'charset' => 'utf8',
 		'init_command' => $init_command,
 		'model' => array(
-			'cache',
+			'',
 		)
 	),
 	'ordoac' => array(

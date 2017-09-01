@@ -164,6 +164,7 @@ class mysql extends database
 	 */
 	public function query($sql, array $array = array())
 	{
+		self::$_history[] = $sql;
 		list ($start_m_second, $start_second) = explode(' ', microtime());
 		$isSelect = $this->isSelectSql($sql);
 		if ($isSelect == 1)
@@ -209,6 +210,7 @@ class mysql extends database
 	 */
 	function execute($sql, $array = array())
 	{
+		self::$_history[] = $sql;
 		list ($start_m_second, $start_second) = explode(' ', microtime());
 		$statement = $this->_pdo->prepare($sql);
 		if ($statement)
@@ -234,6 +236,7 @@ class mysql extends database
 	 */
 	function fetch($sql, $array = array(), $callback = NULL)
 	{
+		self::$_history[] = $sql;
 		list ($start_m_second, $start_second) = explode(' ', microtime());
 		$statement = $this->_pdo->prepare($sql, array(
 			PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL
@@ -370,5 +373,14 @@ class mysql extends database
 	function errno()
 	{
 		return $this->_pdo->errorCode();
+	}
+	
+	/**
+	 * 获取mysql执行的sql记录
+	 * @return array
+	 */
+	public static function history()
+	{
+		return self::$_history;
 	}
 }

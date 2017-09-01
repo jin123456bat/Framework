@@ -2,6 +2,7 @@
 namespace framework\core;
 
 use framework;
+use framework\core\response\json;
 
 class application extends component
 {
@@ -161,7 +162,14 @@ class application extends component
 					), request::php_sapi_name());
 					if (! $response !== NULL)
 					{
-						$this->doResponse($response, true);
+						if (is_callable($doResponse))
+						{
+							call_user_func($doResponse, $response, false, $callback);
+						}
+						else
+						{
+							return $response;
+						}
 					}
 				}
 			}
@@ -226,7 +234,6 @@ class application extends component
 						}
 					}
 				}
-				
 				$response = call_user_func(array(
 					$controller,
 					$action
@@ -303,11 +310,12 @@ class application extends component
 	 * @param bool $exit
 	 *        输出完毕后是否exit()
 	 * @param callback $callback
-	 *        对输出对像使用什么样的方法输出，默认为echo的方式
+	 *        对输出对像使用什么样的方法输出
 	 * @example $this->doResponse('123',true,function($msg){echo $msg;})
 	 */
 	protected function doResponse($response, $exit = true, $callback = NULL)
 	{
+		
 		if (method_exists($this, 'onRequestEnd'))
 		{
 			$newResponse = call_user_func(array(
@@ -319,24 +327,20 @@ class application extends component
 				$response = $newResponse;
 			}
 		}
+		
 		if ($response !== null)
 		{
 			if (is_scalar($response))
 			{
-				if (is_callable($callback))
-				{
-					call_user_func($callback, $response);
-				}
-				else
-				{
-					echo $response;
-				}
+				call_user_func($callback, $response);
 			}
 			else if ($response instanceof response)
 			{
 				if (request::php_sapi_name() == 'web')
 				{
+					
 					$response->initlize();
+					
 					// 设置status_code
 					if (function_exists('http_response_code'))
 					{
@@ -348,25 +352,11 @@ class application extends component
 					}
 					$response->getHeader()->sendAll();
 				}
-				if (is_callable($callback))
-				{
-					call_user_func($callback, $response);
-				}
-				else
-				{
-					echo $response->getBody();
-				}
+				call_user_func($callback, $response->getBody());
 			}
 			else
 			{
-				if (is_callable($callback))
-				{
-					call_user_func($callback, $response);
-				}
-				else
-				{
-					echo json_encode($response);
-				}
+				call_user_func($callback, json::json_encode_ex($response));
 			}
 			if ($exit)
 			{

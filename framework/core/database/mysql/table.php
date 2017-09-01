@@ -93,14 +93,13 @@ class table extends component
 	function __construct($table_name, $config = NULL)
 	{
 		$this->_name = $table_name;
-		
 		if (empty($config))
 		{
-			$config = self::getConfig();
+			$config = model::getDefaultConfig($this->getName());
 		}
 		else if (is_scalar($config))
 		{
-			$config = $this->getConfig($config);
+			$config = model::getDefaultConfig($this->getName(),$config);
 		}
 		
 		$type = $config['type'];
@@ -200,17 +199,6 @@ class table extends component
 		return parent::initlize();
 	}
 	
-	
-	/**
-	 * 获取数据库配置
-	 * @param unknown $name
-	 */
-	public static function getConfig($name = null)
-	{
-		//$config = parent::getConfig('db'); 
-		return model::getConfig($name);
-	}
-
 	/**
 	 * 获取表名
 	 * 

@@ -10,7 +10,12 @@ use framework\core\database\mysql\table;
  */
 abstract class database
 {
-
+	/**
+	 * 所有的sql或者命令
+	 * @var array
+	 */
+	protected static $_history = array();
+	
 	/**
 	 * 执行需要参数的sql
 	 * 通常用于pdo的prepare

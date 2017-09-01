@@ -54,8 +54,7 @@ class captcha extends response
 	function __construct()
 	{
 		parent::__construct();
-		$this->_config = $this->getConfig('captcha');
-		
+		$this->_config = self::getConfig('captcha');
 	}
 	
 	function initlize()
@@ -224,6 +223,7 @@ class captcha extends response
 		{
 			$captcha = array();
 		}
+		
 		
 		//删除过期的验证码信息
 		foreach ($captcha as $index => $code_info)
