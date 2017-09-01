@@ -5,10 +5,18 @@ return array(
 		'action' => 'index'
 	),
 	
-	//直接将某个类做为controller,
-	//如下所示，控制器名称就是captcha，方法名为类中的public方法，不能是static
-	//尚未实现  之后在说吧
-	//'controller' => '/framework/vendor/captcha',
+	//直接将某个类做为controller，需要遵循以下原则
+	//1、类必须继承于/framework/core/response类
+	//2、响应内容由类中的getBody方法定义
+	//3、类的构造函数必须支持无参数类型，
+	//4、调用方法是c=类名，类名为不带命名空间的类名 如下为index.php?c=captcha
+	//pathinfo模式调用方法为index.php/captcha
+	//因此，假如有多个相同的类名，以第一个为准，第二个不会调用
+	//5、不允许声明同样的control，否则会被control覆盖
+	//6、key是别名，假如被control覆盖，可以通过别名来调用
+	'class' => array(
+		'alias'=>'/framework/vendor/captcha',
+	),
 	
 	// 路由绑定,key中允许正则表达式，假如有多个正则表达式匹配，第一个优先
 	// 值必须是数组，array('control','action')或者array('c'=>'control','a'=>'action')的形式
@@ -28,5 +36,5 @@ return array(
 			'index',
 			'page'
 		)
-	)
+	),
 );
