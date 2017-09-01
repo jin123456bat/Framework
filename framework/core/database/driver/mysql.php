@@ -277,8 +277,9 @@ class mysql extends database
 		}
 		else if (in_array(strtolower(substr(trim($sql), 0, stripos(trim($sql), ' '))), array(
 			'insert',
-			'delete',
-			'update'
+			'delete', 
+			'update',
+			'truncate',
 		), true))
 		{
 			return - 1;

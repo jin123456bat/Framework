@@ -5,7 +5,22 @@ use framework\core\database\mysql\field;
 
 class entity extends base
 {
+	/**
+	 * 存放原始数据
+	 * @var array
+	 */
+	private $_data;
+	
+	/**
+	 * 存放错误信息
+	 * @var array
+	 */
 	private $_error = array();
+	
+	function __construct($data)
+	{
+		$this->_data = $data;
+	}
 	
 	/**
 	 * 删除之后执行的函数
@@ -427,6 +442,8 @@ class entity extends base
 	 * 
 	 * @param string $sence
 	 *        场景名称 默认为空不使用场景名称
+	 *        当为空的忽略rule中的on字段，验证所有
+	 *        不为空的时候只验证on相关的和没有on字段的
 	 */
 	function validate($sence = '')
 	{
@@ -521,7 +538,8 @@ class entity extends base
 						{
 							if (! empty($this->findByFiled($field, $value)))
 							{
-								return false;
+								$message = $this->message($val['message'], $field, $value);
+								$this->addError($field, $message);
 							}
 						}
 						else if ($key == 'function' && ! empty($val['callback']))
@@ -568,6 +586,15 @@ class entity extends base
 	private function hasError()
 	{
 		return !empty($this->_error);
+	}
+	
+	/**
+	 * 获取错误信息
+	 * @return array
+	 */
+	function getError()
+	{
+		return $this->_error;
 	}
 	
 	/**

@@ -1,6 +1,8 @@
 <?php
 namespace framework\core;
 
+use framework\vendor\captcha;
+
 /**
  * 在实体类(\framework\lib\data)中使用
  * 用于验证变量参数是否符合规则
@@ -270,5 +272,14 @@ class validator extends base
 	static function integer($variable)
 	{
 		return self::int($variable);
+	}
+	
+	/**
+	 * 验证验证码是否正确
+	 * @param string $code
+	 */
+	static function captcha($code)
+	{
+		return captcha::validate($code);
 	}
 }

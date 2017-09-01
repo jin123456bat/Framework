@@ -1,9 +1,7 @@
 <?php 
 return array(
-	'login' => array(
-		'type' => 'number|word',
-		'length' => 4,
-		'width' => 200,
-		'heigth' => 100,
-	)
+	'type' => 'number|word',//验证码文字类型
+	'length' => 4,//文字长度
+	'width' => 200,//验证码图片宽度
+	'heigth' => 100,//验证码高度
 );

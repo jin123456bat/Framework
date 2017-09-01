@@ -11,29 +11,51 @@ class captcha extends response
 	 */
 	private $_config;
 	
-	private $_config_name;
-	
+	/**
+	 * 背景颜色
+	 * @var unknown
+	 */
 	private $_backColor = 0xFFFFFF;
 	
+	/**
+	 * 字体颜色
+	 * @var unknown
+	 */
 	private $_foreColor = 0x2040A0;
 	
+	/**
+	 * 背景是否透明
+	 * @var string
+	 */
 	private $_transparent = false;
 	
-	private $_fontFile = ROOT.'/framework/assets/fonts/SpicyRice.ttf';
+	/**
+	 * 验证码字体文件
+	 * @var unknown
+	 */
+	private $_fontFile = SYSTEM_ROOT.'/assets/fonts/SpicyRice.ttf';
 	
 	private $_offset = -2;
 	
 	private $_padding = 2;
 	
+	/**
+	 * 验证码存储在session中的名称
+	 * @var string
+	 */
 	private $_session_name = '__captcha';
 	
+	/**
+	 * 验证码有效期
+	 * @var unknown
+	 */
 	private $_expire = 60*10;
 	
-	function __construct($config = NULL)
+	function __construct()
 	{
 		parent::__construct();
-		$this->_config_name = $config;
-		$this->_config = $this->getConfig('captcha',$config);
+		$this->_config = $this->getConfig('captcha');
+		
 	}
 	
 	function initlize()
@@ -66,31 +88,42 @@ class captcha extends response
 			'L'
 		);
 		$content = array();
-		for($i = ord('0');$i <= ord('9');$i++)
+		
+		$types = $this->_config['type'];
+		$types = explode('|',$types);
+		if (in_array('number', $types))
 		{
-			if (in_array(chr($i), $skip_content))
+			for($i = ord('0');$i <= ord('9');$i++)
 			{
-				continue;
+				if (in_array(chr($i), $skip_content))
+				{
+					continue;
+				}
+				$content[] = chr($i);
 			}
-			$content[] = chr($i);
+		}
+		if (in_array('word', $types))
+		{
+			for($i = ord('a');$i <= ord('z');$i++)
+			{
+				if (in_array(chr($i), $skip_content))
+				{
+					continue;
+				}
+				$content[] = chr($i);
+			}
 		}
 		
-		for($i = ord('a');$i <= ord('z');$i++)
+		if (in_array('word', $types))
 		{
-			if (in_array(chr($i), $skip_content))
+			for($i = ord('A');$i <= ord('Z');$i++)
 			{
-				continue;
+				if (in_array(chr($i), $skip_content))
+				{
+					continue;
+				}
+				$content[] = chr($i);
 			}
-			$content[] = chr($i);
-		}
-		
-		for($i = ord('A');$i <= ord('Z');$i++)
-		{
-			if (in_array(chr($i), $skip_content))
-			{
-				continue;
-			}
-			$content[] = chr($i);
 		}
 		
 		if ($length > count($content))
@@ -186,27 +219,22 @@ class captcha extends response
 		
 		$captcha = session::get($this->_session_name);
 		
-		if (!empty($this->_config_name) && isset($captcha[$this->_config_name]))
-		{
-			$captcha = $captcha[$this->_config_name];
-		}
-		else if (!isset($captcha[$this->_config_name]) || empty($captcha[$this->_config_name]))
+		//假如之前没有使用过验证码
+		if (empty($captcha))
 		{
 			$captcha = array();
 		}
 		
-		$captcha[] = $cap;
+		//删除过期的验证码信息
+		foreach ($captcha as $index => $code_info)
+		{
+			if ($code_info[1] + $code_info[2] < time())
+			{
+				unset($captcha[$index]);
+			}
+		}
 		
-		$new_captcha = array();
-		if (!empty($this->_config_name))
-		{
-			$new_captcha[$this->_config_name] = $captcha;
-		}
-		else
-		{
-			$new_captcha = $captcha;
-		}
-		session::set($this->_session_name, $new_captcha);
+		session::set($this->_session_name, $captcha);
 		return true;
 	}
 	
@@ -215,13 +243,9 @@ class captcha extends response
 	 * @param unknown $code
 	 * @return boolean
 	 */
-	public function validate($code)
+	public static function validate($code)
 	{
 		$captcha = session::get($this->_session_name);
-		if (!empty($this->_config_name))
-		{
-			$captcha = $captcha[$this->_config_name];
-		}
 		
 		foreach ($captcha as $index => $cap)
 		{
@@ -237,14 +261,6 @@ class captcha extends response
 			}
 		}
 		
-		if (!empty($this->_config_name))
-		{
-			session::set($this->_session_name, array($this->_config_name=>$captcha));
-		}
-		else
-		{
-			session::set($this->_session_name, $captcha);
-		}
 		return false;
 	}
 }

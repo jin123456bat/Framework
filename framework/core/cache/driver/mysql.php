@@ -23,6 +23,8 @@ class mysql extends cacheBase implements cache
 		}
 		
 		$this->_model = $this->model('cache');
+		//删除过期的缓存
+		$this->_model->where('expires!=0 and (UNIX_TIMESTAMP(createtime)+expires<UNIX_TIMESTAMP(now()))')->delete();
 	}
 
 	public function add($name, $value, $expires = 0)
@@ -46,7 +48,7 @@ class mysql extends cacheBase implements cache
 	public function set($name, $value, $expires = 0)
 	{
 		// TODO Auto-generated method stub
-		$result = $this->_model->duplicate(array(
+		if($this->_model->duplicate(array(
 			'createtime' => date('Y-m-d H:i:s'),
 			'expires' => $expires,
 			'value' => serialize($value)
@@ -55,8 +57,11 @@ class mysql extends cacheBase implements cache
 			'createtime' => date('Y-m-d H:i:s'),
 			'expires' => $expires,
 			'value' => serialize($value)
-		));
-		return $result;
+		)))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -132,11 +137,12 @@ class mysql extends cacheBase implements cache
 	 */
 	public function remove($name)
 	{
-		return $this->_model->where('unique_key=?', array(
+		if($this->_model->where('unique_key=?', array(
 			md5($name)
-		))
-			->limit(1)
-			->delete();
+		))->limit(1)->delete())
+		{
+			return true;
+		}
 	}
 
 	/**
@@ -147,6 +153,7 @@ class mysql extends cacheBase implements cache
 	 */
 	public function flush()
 	{
-		return $this->_model->truncate();
+		$this->_model->truncate();
+		return true;
 	}
 }

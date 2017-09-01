@@ -6,6 +6,8 @@ use framework\core\view;
 use application\entity\test;
 use framework\core\cache;
 use framework\core\database\mysql\table;
+use application\entity\user;
+use framework\vendor\captcha;
 
 class index extends BaseControl
 {
@@ -24,9 +26,10 @@ class index extends BaseControl
 		
 		
 		$cache_type = array(
-			//'file',
-			//'redis',
-			//'memcache',
+			'mysql',
+			'file',
+			'redis',
+			'memcache',
 			'apc',
 		);
 		
@@ -58,7 +61,7 @@ class index extends BaseControl
 			
 			
 			cache::store($type)->set('jin',array(1,2,3));
-			if (cache::store($type)->get('jin') != array(1,2,3))
+			if (cache::store($type)->get('jin') !== array(1,2,3))
 			{
 				echo "缓存 $type set添加测试或get测试数组 失败";
 			}
@@ -66,7 +69,7 @@ class index extends BaseControl
 			$class = new \stdClass();
 			$class->name = 'jin';
 			cache::store($type)->set('jin',$class);
-			if (cache::store($type)->get('jin')->name != 'jin')
+			if (cache::store($type)->get('jin')->name !== 'jin')
 			{
 				echo "缓存 $type set添加测试或get测试对象 失败";
 			}
@@ -158,47 +161,27 @@ class index extends BaseControl
 		
 		//var_dump($this->model('cache')->select());
 		
-		/*
-		 * $test = new test(array(
-		 * 'username' => 'jin123',
-		 * 'password' => '111',
-		 * 'age' => 18,
-		 * 'money' => '-1',
-		 * 'telephone' => 15868481019,
-		 * 'ip' => '255.255.255.4/24',
-		 * 'email' => '326550324@qq.com',
-		 * 'time' => '2017-05-06 12:12:12',
-		 * 'sex' => '男',
-		 * 'user' => array(
-		 * 			'name'=>'jin',
-		 * 		)
-		 * ));
-		 * if (!$test->validate())
-		 * {
-		 * var_dump($test->getError());
-		 * }
-		 */
-		 //验证码
-		 //$this->table('a')->checksum();
-		 //cache::set('name', 'jin');
-		//return new captcha();
-		//$this->cache('apc')->set('name','jin');
-		//$this->model('session');
-		//captcha::validate($code);
 		
-		//$a->field('id')->int(11)->comment('ID主键');
-		//$a->field('name')->varchar(32)->comment('用户名');
-		//var_dump($a->index('primary')->add('sd')->remove('sd'));
-		//$a->primary()->add('id');
-		//$a->field('a')->int(11);
-		//$a->field('b');
-		//动态创建表有点蛋疼啊  这个是laravel的方式
-		//$a->create(function($table){
-		//	$table->field('a')->int(11)->create();
-		//	$table->field('b')->varchar(32)->create();
-		//});
-		//var_dump($a->field('name')->comment('name的注释123'));
-		//var_dump($a->field('aa')->enum([1,2,3,'']));
+		$test = new test(array(
+		'username' => 'jin123',
+		'password' => '111',
+		'age' => 18,
+		'money' => '-1',
+		'telephone' => 15868481019,
+		'ip' => '255.255.255.4/24',
+		'email' => '326550324@qq.com',
+		'time' => '2017-05-06 12:12:12',
+		'sex' => '男',
+		'user' => array(
+					'name'=>'jin',
+				)
+		));
+		if (!$test->validate())
+		{
+			//var_dump($test->getError());
+		}
+		
+		return new captcha();
 		
 		// var_dump(cookie::set('name','555'));
 		// var_dump($_COOKIE);

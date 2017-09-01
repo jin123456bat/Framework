@@ -1,12 +1,11 @@
 <?php
 namespace application\entity;
 
-use framework\lib\data;
 use framework\core\session;
 use framework\core\request;
-use framework\core\response\json;
+use framework\core\entity;
 
-class user extends data
+class user extends entity
 {
 
 	/**
