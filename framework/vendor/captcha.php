@@ -43,7 +43,7 @@ class captcha extends response
 	 * 验证码存储在session中的名称
 	 * @var string
 	 */
-	private $_session_name = '__captcha';
+	private static $_session_name = '__captcha';
 	
 	/**
 	 * 验证码有效期
@@ -216,7 +216,7 @@ class captcha extends response
 		//0是内容  1是有效期  2是生成时间
 		$cap = array($code,$this->_expire,time());
 		
-		$captcha = session::get($this->_session_name);
+		$captcha = session::get(self::$_session_name);
 		
 		//假如之前没有使用过验证码
 		if (empty($captcha))
@@ -234,7 +234,9 @@ class captcha extends response
 			}
 		}
 		
-		session::set($this->_session_name, $captcha);
+		$captcha[] = $cap;
+		
+		session::set(self::$_session_name, $captcha);
 		return true;
 	}
 	
@@ -245,10 +247,11 @@ class captcha extends response
 	 */
 	public static function validate($code)
 	{
-		$captcha = session::get($this->_session_name);
+		$captcha = session::get(self::$_session_name);
 		
 		foreach ($captcha as $index => $cap)
 		{
+			//删除超时的验证码
 			if (time() > $cap[1] + $cap[2])
 			{
 				unset($captcha[$index]);
@@ -257,10 +260,11 @@ class captcha extends response
 			
 			if (strtolower($cap[0]) === strtolower($code))
 			{
+				unset($captcha[$index]);
 				return true;
 			}
 		}
-		
+		session::set(self::$_session_name, $captcha);
 		return false;
 	}
 }
