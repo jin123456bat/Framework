@@ -6,6 +6,10 @@ class request extends base
 
 	public static $_php_sapi_name = 'cli';
 
+	/**
+	 * 代码执行方式 cli web
+	 * @return string
+	 */
 	static function php_sapi_name()
 	{
 		if (stripos(php_sapi_name(), 'cli') !== false)
