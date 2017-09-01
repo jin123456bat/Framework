@@ -54,13 +54,13 @@ class apc extends cacheBase implements cache
 		// TODO Auto-generated method stub
 		if ($this->_apc_or_apcu)
 		{
-			apcu_delete($name);
-			return apcu_add($name, $value, $expires);
+			//apcu_delete($name);
+			return apcu_store($name, $value, $expires);
 		}
 		else
 		{
-			apc_delete($name);
-			return apc_add($name, $value, $expires);
+			//apc_delete($name);
+			return apcu_store($name, $value, $expires);
 		}
 	}
 
