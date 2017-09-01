@@ -108,8 +108,11 @@ class file extends cacheBase implements cache
 			$result->data += $amount;
 			$result = serialize($result);
 		}
-		file_put_contents($file, $result);
-		return true;
+		if(file_put_contents($file, $result))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -132,8 +135,11 @@ class file extends cacheBase implements cache
 			$result->data -= $amount;
 			$result = serialize($result);
 		}
-		file_put_contents($file, $result);
-		return true;
+		if(file_put_contents($file, $result))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -166,7 +172,7 @@ class file extends cacheBase implements cache
 	public function remove($name)
 	{
 		// TODO Auto-generated method stub
-		@unlink($this->getFileByName($name));
+		return @unlink($this->getFileByName($name));
 	}
 
 	/**
@@ -185,6 +191,7 @@ class file extends cacheBase implements cache
 				@unlink($file);
 			}
 		}, scandir($this->_path));
+		return true;
 	}
 
 	/**

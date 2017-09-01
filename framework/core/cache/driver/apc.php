@@ -11,7 +11,22 @@ use framework\core\cache\cacheBase;
  */
 class apc extends cacheBase implements cache
 {
-
+	/**
+	 * 判断系统应该使用apcu函数还是apc函数
+	 * apc=apcu+opcache
+	 * apcu貌似从性能上要比apc要好
+	 * 为true的话使用apcu
+	 * 默认使用apcu
+	 * 
+	 * @var boolean
+	 */
+	private $_apc_or_apcu;
+	
+	function __construct()
+	{
+		$this->_apc_or_apcu = function_exists('apcu_add');
+	}
+	
 	/**
 	 *
 	 * {@inheritdoc}
@@ -21,7 +36,11 @@ class apc extends cacheBase implements cache
 	public function add($name, $value, $expires = 0)
 	{
 		// TODO Auto-generated method stub
-		return apcu_add($name, $value, $expires);
+		if ($this->_apc_or_apcu)
+		{
+			return apcu_add($name, $value, $expires);
+		}
+		return apc_add($name, $value,$expires);
 	}
 
 	/**
@@ -33,8 +52,16 @@ class apc extends cacheBase implements cache
 	public function set($name, $value, $expires = 0)
 	{
 		// TODO Auto-generated method stub
-		apcu_delete($name);
-		return apcu_add($name, $value, $expires);
+		if ($this->_apc_or_apcu)
+		{
+			apcu_delete($name);
+			return apcu_add($name, $value, $expires);
+		}
+		else
+		{
+			apc_delete($name);
+			return apc_add($name, $value, $expires);
+		}
 	}
 
 	/**
@@ -47,7 +74,7 @@ class apc extends cacheBase implements cache
 	{
 		// TODO Auto-generated method stub
 		$success = false;
-		$value = apcu_fetch($name, $success);
+		$value = $this->_apc_or_apcu?apcu_fetch($name, $success):apc_fetch($name,$success);
 		if ($success)
 		{
 			return $value;
@@ -65,7 +92,7 @@ class apc extends cacheBase implements cache
 	{
 		// TODO Auto-generated method stub
 		$success = false;
-		apcu_inc($name, $amount, $success);
+		$this->set($name, $this->get($name)+$amount,$success);
 		return $success;
 	}
 
@@ -78,8 +105,10 @@ class apc extends cacheBase implements cache
 	public function decrease($name, $amount = 1)
 	{
 		// TODO Auto-generated method stub
+		//apcu_dec函数要求原来的值必须是int类型，string类型的数据会失败
+		//apcu_dec($name, $amount, $success);
 		$success = false;
-		apcu_dec($name, $amount, $success);
+		$this->set($name, $this->get($name)-$amount,$success);
 		return $success;
 	}
 
@@ -92,7 +121,7 @@ class apc extends cacheBase implements cache
 	public function has($name)
 	{
 		// TODO Auto-generated method stub
-		return apcu_exists($name);
+		return $this->_apc_or_apcu?apcu_exists($name):apc_exists($name);
 	}
 
 	/**
@@ -104,7 +133,7 @@ class apc extends cacheBase implements cache
 	public function remove($name)
 	{
 		// TODO Auto-generated method stub
-		return apcu_delete($name);
+		return $this->_apc_or_apcu?apcu_delete($name):apc_delete($name);
 	}
 
 	/**
@@ -116,6 +145,6 @@ class apc extends cacheBase implements cache
 	public function flush()
 	{
 		// TODO Auto-generated method stub
-		return apcu_clear_cache();
+		return $this->_apc_or_apcu?apcu_clear_cache():apc_clear_cache();
 	}
 }

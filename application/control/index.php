@@ -24,16 +24,28 @@ class index extends BaseControl
 		
 		
 		$cache_type = array(
-			//'mysql',
-			'file',
-			'redis',
-			'memcached',
+			//'file',
+			//'redis',
+			//'memcache',
 			'apc',
 		);
 		
 		
 		foreach ($cache_type as $type)
 		{
+			cache::flush();
+			
+			
+			if (cache::store($type)->get('jin') != NULL)
+			{
+				echo "缓存 $type get测试失败，应该返回NULL";
+			}
+			
+			if(!is_bool(cache::store($type)->set('jin', 'name')))
+			{
+				echo "缓存 $type set返回值不是true或者false";
+			}
+			
 			/*
 			 * 缓存测试
 			 * db缓存测试
@@ -41,7 +53,22 @@ class index extends BaseControl
 			cache::store($type)->set('jin','name');
 			if (cache::store($type)->get('jin') != 'name')
 			{
-				echo "缓存 $type set添加测试 失败";
+				echo "缓存 $type set添加测试或get测试 失败";
+			}
+			
+			
+			cache::store($type)->set('jin',array(1,2,3));
+			if (cache::store($type)->get('jin') != array(1,2,3))
+			{
+				echo "缓存 $type set添加测试或get测试数组 失败";
+			}
+			
+			$class = new \stdClass();
+			$class->name = 'jin';
+			cache::store($type)->set('jin',$class);
+			if (cache::store($type)->get('jin')->name != 'jin')
+			{
+				echo "缓存 $type set添加测试或get测试对象 失败";
 			}
 			
 			/*
@@ -54,29 +81,43 @@ class index extends BaseControl
 				echo "缓存 $type set覆盖测试 失败";
 			}
 			
-			cache::store($type)->add('jin', 'name2');
+			if(cache::store($type)->add('jin', 'name2') === true)
+			{
+				echo "缓存 $type add返回值不是boolean或者add失败";
+			}
 			if (cache::store($type)->get('jin') != 'name1')
 			{
 				echo "缓存 $type add覆盖测试 失败";
 			}
 			
-			cache::store($type)->set('jin', '1');
-			cache::store($type)->decrease('jin');
+			
+			
+			cache::store($type)->set('jin', 1);
+			if (!is_bool(cache::store($type)->decrease('jin')))
+			{
+				echo "缓存 $type decrease 返回值不是boolean";
+			}
 			if (cache::store($type)->get('jin') !== 0)
 			{
-				echo "缓存 $type decrease测试 失败";
+				echo "缓存 $type decrease测试 失败1";
 			}
 			
 			
-			cache::store($type)->set('jin', '1');
-			cache::store($type)->decrease('jin',2);
+			cache::store($type)->set('jin', 1);
+			if(!is_bool(cache::store($type)->decrease('jin',2)))
+			{
+				echo "缓存 $type decrease不是boolean";
+			}
 			if (cache::store($type)->get('jin') !== -1)
 			{
-				echo "缓存 $type decrease测试 失败";
+				echo "缓存 $type decrease测试 失败2";
 			}
 			
 			cache::store($type)->set('jin', '1');
-			cache::store($type)->increase('jin');
+			if(!is_bool(cache::store($type)->increase('jin')))
+			{
+				echo "缓存$type increase返回值不是boolean";
+			}
 			if (cache::store($type)->get('jin') !== 2)
 			{
 				echo "缓存 $type increase测试 失败";
@@ -84,7 +125,10 @@ class index extends BaseControl
 			
 			
 			cache::store($type)->set('jin', '1');
-			cache::store($type)->increase('jin',2);
+			if(!is_bool(cache::store($type)->increase('jin',2)))
+			{
+				echo "缓存$type increase返回值不是boolean";
+			}
 			if (cache::store($type)->get('jin') !== 3)
 			{
 				echo "缓存 $type increase测试 失败";
@@ -92,14 +136,20 @@ class index extends BaseControl
 			
 			cache::store($type)->set('jin1', 1);
 			cache::store($type)->set('jin2', 2);
-			cache::store($type)->flush();
+			if(!is_bool(cache::store($type)->flush()))
+			{
+				echo "缓存 $type flush返回值不是boolean";
+			}
 			if (cache::store($type)->get('jin1') !== NULL || cache::store($type)->get('jin2') !== NULL)
 			{
 				echo "缓存 $type flush测试 失败";
 			}
 			
 			cache::store($type)->set('jin1', 1);
-			cache::store($type)->remove('jin1');
+			if(!is_bool(cache::store($type)->remove('jin1')))
+			{
+				echo "缓存$type remove返回值不是boolean";
+			}
 			if (cache::store($type)->get('jin1') !== NULL)
 			{
 				echo "缓存 $type remove测试 失败";

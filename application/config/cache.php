@@ -1,11 +1,12 @@
 <?php
 return array(
-	'type' => 'mysql', // 默认的缓存类型 mysql memcached file redis apc
+	'type' => 'mysql', // 默认的缓存类型 mysql memcache file redis apc
 	
-	// 当type为memcached的时候，以下配置memcached的相关信息
-	'memcached' => array(
+	// 当type为memcache的时候，以下配置memcache的相关信息
+	//考虑到windows的兼容性
+	'memcache' => array(
 		array(
-			'host' => 'localhost',
+			'host' => '192.168.9.58',
 			'port' => 11211,
 			'weight' => 100
 		)

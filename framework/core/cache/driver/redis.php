@@ -159,9 +159,13 @@ class redis extends cacheBase implements cache
 	 */
 	public function remove($name)
 	{
-		// TODO Auto-generated method stub
 		$serverNo = $this->getServerNo($name, count($this->_redis));
-		return $this->_redis[$serverNo]->delete(md5($name));
+		//delete返回删除个数
+		if($this->_redis[$serverNo]->delete(md5($name)))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	/**

@@ -9,37 +9,32 @@ use framework\core\cache\cacheBase;
  * 
  * @author fx
  */
-class memcached extends cacheBase implements cache
+class memcache extends cacheBase implements cache
 {
 	/**
 	 *
-	 * @var \Memcached
+	 * @var \Memcache
 	 */
-	private $_memcached;
+	private $_memcache;
 
 	function __construct($config)
 	{
-		$this->_memcached = new \Memcached();
-		if (isset($config['memcached']) && ! empty($config['memcached']))
+		$this->_memcache = new \Memcache();
+		if (isset($config['memcache']) && ! empty($config['memcache']))
 		{
-			if (! isset($config['memcached']['host']))
+			if (! isset($config['memcache']['host']))
 			{
-				$array = array();
-				foreach ($config['memcached'] as $server)
+				foreach ($config['memcache'] as $server)
 				{
-					$data = array(
-						$server['host'],
-						$server['port'],
-						$server['weight']
-					);
-					$array[] = $data;
-					// $this->_memcached->addServer($server['host'],$server['port'],$server['weight']);
+					$host = $server['host'];
+					$port = $server['port'];
+					$weight = $server['weight'];
+					$this->_memcache->addserver($host,$port,null,$weight);
 				}
-				$this->_memcached->addServers($array);
 			}
 			else
 			{
-				$this->_memcached->addServer($config['memcached']['host'], $config['memcached']['port'], $config['memcached']['weight']);
+				$this->_memcache->addServer($config['memcache']['host'], $config['memcache']['port'], $config['memcache']['weight']);
 			}
 		}
 	}
@@ -52,7 +47,7 @@ class memcached extends cacheBase implements cache
 	 */
 	public function add($name, $value, $expires = 0)
 	{
-		return $this->_memcached->set($name, $value, $expires);
+		return $this->_memcache->add($name, $value,0, $expires);
 	}
 
 	/**
@@ -64,7 +59,7 @@ class memcached extends cacheBase implements cache
 	public function set($name, $value, $expires = 0)
 	{
 		// TODO Auto-generated method stub
-		return $this->_memcached->set($name, $value, $expires);
+		return $this->_memcache->set($name, $value,0, $expires);
 	}
 
 	/**
@@ -76,7 +71,12 @@ class memcached extends cacheBase implements cache
 	public function get($name)
 	{
 		// TODO Auto-generated method stub
-		return $this->_memcached->get($name);
+		$result = $this->_memcache->get($name);
+		if ($result === false)
+		{
+			return null;
+		}
+		return $result;
 	}
 
 	/**
@@ -87,12 +87,12 @@ class memcached extends cacheBase implements cache
 	 */
 	public function increase($name, $amount = 1)
 	{
-		// TODO Auto-generated method stub
-		if ($this->_memcached->increment($name, $amount))
+		$value = $this->get($name);
+		if ($value === null)
 		{
-			return true;
+			return $this->set($name, $amount);
 		}
-		return false;
+		return $this->set($name, $value+$amount);
 	}
 
 	/**
@@ -103,12 +103,12 @@ class memcached extends cacheBase implements cache
 	 */
 	public function decrease($name, $amount = 1)
 	{
-		// TODO Auto-generated method stub
-		if ($this->_memcached->decrement($name, $amount))
+		$value = $this->get($name);
+		if ($value === null)
 		{
-			return true;
+			return $this->set($name, -$amount);
 		}
-		return false;
+		return $this->set($name, $value-$amount);
 	}
 
 	/**
@@ -120,12 +120,7 @@ class memcached extends cacheBase implements cache
 	public function has($name)
 	{
 		// TODO Auto-generated method stub
-		$result = ! $this->_memcached->add($name, 0);
-		if (! $result)
-		{
-			$this->remove($name);
-		}
-		return $result;
+		return $this->get($name)!==false;
 	}
 
 	/**
@@ -137,7 +132,7 @@ class memcached extends cacheBase implements cache
 	public function remove($name)
 	{
 		// TODO Auto-generated method stub
-		return $this->_memcached->delete($name, 0);
+		return $this->_memcache->delete($name, 0);
 	}
 
 	/**
@@ -149,11 +144,11 @@ class memcached extends cacheBase implements cache
 	public function flush()
 	{
 		// TODO Auto-generated method stub
-		return $this->_memcached->flush();
+		return $this->_memcache->flush();
 	}
 
 	public function __destruct()
 	{
-		$this->_memcached->quit();
+		$this->_memcache->close();
 	}
 }
