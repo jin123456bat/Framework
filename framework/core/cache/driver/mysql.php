@@ -27,15 +27,25 @@ class mysql extends cacheBase implements cache
 		$this->_model->where('expires!=0 and (UNIX_TIMESTAMP(createtime)+expires<UNIX_TIMESTAMP(now()))')->delete();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\cache\cache::add()
+	 */
 	public function add($name, $value, $expires = 0)
 	{
-		$result = $this->_model->insert(array(
-			'unique_key' => md5($name),
-			'createtime' => date('Y-m-d H:i:s'),
-			'expires' => $expires,
-			'value' => serialize($value)
-		));
-		return $result;
+		if (!$this->has($name))
+		{
+			if($this->_model->insert(array(
+				'unique_key' => md5($name),
+				'createtime' => date('Y-m-d H:i:s'),
+				'expires' => $expires,
+				'value' => serialize($value)
+			)))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
