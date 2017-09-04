@@ -4,6 +4,8 @@ use framework\core\database\database;
 
 class sqlite extends database
 {
+	
+	
 	/**
 	 * {@inheritDoc}
 	 * @see \framework\core\database\database::query()

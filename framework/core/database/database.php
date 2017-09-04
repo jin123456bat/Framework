@@ -17,13 +17,31 @@ abstract class database
 	protected static $_history = array();
 	
 	/**
-	 * 执行需要参数的sql
-	 * 通常用于pdo的prepare
-	 * 
-	 * @param unknown $sql        
+	 * 执行sql
+	 * 主要是增删改查
+	 * 多服务器下用于读写分离的区别
+	 * @param string $sql        
 	 * @param array $array        
 	 */
-	abstract function query($sql, array $array);
+	abstract function query($sql, array $array = array());
+	
+	/**
+	 * 执行sql
+	 * 主要是一些表修改的sql
+	 * 多服务器情况下对所有服务器都执行
+	 * @param string $sql
+	 * @param array $array
+	 */
+	abstract function execute($sql, array $array = array());
+	
+	/**
+	 * 执行sql
+	 * 主要用于读取数据，然后对数据用于$callback回调函数
+	 * @param string $sql
+	 * @param array $array
+	 * @param callback $callback
+	 */
+	abstract function fetch($sql,$array = array(),$callback = NULL);
 
 	/**
 	 * 设置配置
@@ -55,6 +73,26 @@ abstract class database
 	 * 获取所有表名
 	 */
 	abstract function showTables();
+	
+	/**
+	 * 开启事物
+	 */
+	abstract function transaction();
+	
+	/**
+	 * 提交事物
+	 */
+	abstract function commit();
+	
+	/**
+	 * 回滚事物
+	 */
+	abstract function rollback();
+	
+	/**
+	 * 是否在事物中
+	 */
+	abstract function inTransaction();
 
 /**
  * 判断表是否存在

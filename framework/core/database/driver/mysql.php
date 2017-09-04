@@ -5,7 +5,6 @@ use \PDO;
 use framework\core\database\sql;
 use framework\core\log;
 use framework\core\database\database;
-use framework\core\database\mysql\table;
 
 /**
  * mysql类
@@ -27,7 +26,7 @@ class mysql extends database
 	 * 
 	 * @var array
 	 */
-	private static $mysql = array();
+	private static $_mysql = array();
 
 	/**
 	 *
@@ -54,11 +53,11 @@ class mysql extends database
 	public static function getInstance($config)
 	{
 		$configKey = md5(json_encode($config));
-		if (! isset(self::$mysql[$configKey]) || empty(self::$mysql[$configKey]))
+		if (! isset(self::$_mysql[$configKey]) || empty(self::$_mysql[$configKey]))
 		{
-			self::$mysql[$configKey] = new mysql($config);
+			self::$_mysql[$configKey] = new mysql($config);
 		}
-		return self::$mysql[$configKey];
+		return self::$_mysql[$configKey];
 	}
 
 	/**
@@ -90,12 +89,20 @@ class mysql extends database
 			$db_port = $config['port'];
 		}
 		
-		$pdo = new PDO($config['type'] . ':host=' . $config['server'] . ';port=' . $db_port . ';dbname=' . $config['dbname'], $config['user'], $config['password'], array(
-			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // 使用默认的索引模式
-			PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false, // 不使用buffer，防止数据量过大导致php内存溢出，但是这个东西貌似需要直接操作pdo效果才会体现
-			PDO::ATTR_ERRMODE => (defined('DEBUG') && DEBUG) ? PDO::ERRMODE_EXCEPTION : PDO::ERRMODE_SILENT, // 抛出异常模式
-			PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $charset
-		)); // 设置字符集
+		try{
+			$pdo = new PDO($config['type'] . ':host=' . $config['server'] . ';port=' . $db_port . ';dbname=' . $config['dbname'], $config['user'], $config['password'], array(
+				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // 使用默认的索引模式
+				PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false, // 不使用buffer，防止数据量过大导致php内存溢出，但是这个东西貌似需要直接操作pdo效果才会体现
+				PDO::ATTR_ERRMODE => (defined('DEBUG') && DEBUG) ? PDO::ERRMODE_EXCEPTION : PDO::ERRMODE_SILENT, // 抛出异常模式
+				PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $charset
+			)); // 设置字符集
+		}
+		catch (\Exception $e)
+		{
+			//连接数据库的时候必须trycatch，因为假如连接失败会导致页面提示错误信息，而这个错误信息中会包含数据库的相关信息，引发泄露
+			//或者set_exception_handler
+			exit('连接到数据库失败');
+		}
 		
 		foreach ($init_command as $command)
 		{
@@ -164,7 +171,8 @@ class mysql extends database
 	 */
 	public function query($sql, array $array = array())
 	{
-		self::$_history[] = $sql;
+		$sqlCom = new sql();
+		self::$_history[] = $sqlCom->getSql($sql,$array);
 		list ($start_m_second, $start_second) = explode(' ', microtime());
 		$isSelect = $this->isSelectSql($sql);
 		if ($isSelect == 1)
@@ -210,7 +218,8 @@ class mysql extends database
 	 */
 	function execute($sql, $array = array())
 	{
-		self::$_history[] = $sql;
+		$sqlCom = new sql();
+		self::$_history[] = $sqlCom->getSql($sql,$array);
 		list ($start_m_second, $start_second) = explode(' ', microtime());
 		$statement = $this->_pdo->prepare($sql);
 		if ($statement)
@@ -236,7 +245,8 @@ class mysql extends database
 	 */
 	function fetch($sql, $array = array(), $callback = NULL)
 	{
-		self::$_history[] = $sql;
+		$sqlCom = new sql();
+		self::$_history[] = $sqlCom->getSql($sql,$array);
 		list ($start_m_second, $start_second) = explode(' ', microtime());
 		$statement = $this->_pdo->prepare($sql, array(
 			PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL
@@ -382,5 +392,13 @@ class mysql extends database
 	public static function history()
 	{
 		return self::$_history;
+	}
+	
+	/**
+	 * 关闭连接
+	 */
+	public function __destruct()
+	{
+		$this->_pdo = NULL;
 	}
 }
