@@ -20,7 +20,7 @@ class chain extends line
 	 */
 	CONST FILL_RIGHT = false;
 	
-	function __construct(array $array = array())
+	function __construct($array = array())
 	{
 		foreach ($array as $value)
 		{
@@ -259,9 +259,9 @@ class chain extends line
 	
 	/**
 	 * 链表组合
-	 * @param unknown $chain
+	 * @param line|array $chain
 	 */
-	function combine(chain $chain)
+	function combine($chain)
 	{
 		foreach ($chain as $value)
 		{
@@ -349,29 +349,5 @@ class chain extends line
 			}
 		}
 		unset($data);
-	}
-	
-	/**
-	 * 比较2个链表是否完全相同
-	 * 顺序相同
-	 * 内容相同
-	 * @param chain $chain
-	 */
-	function equal(chain $chain)
-	{
-		if ($chain->length() != $this->length())
-		{
-			return false;
-		}
-		$point = $this->_head;
-		foreach ($chain as $value)
-		{
-			if ($value != $point->data)
-			{
-				return false;;
-			}
-			$point = $point->next;
-		}
-		return true;
 	}
 }

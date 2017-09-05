@@ -102,4 +102,38 @@ abstract class line extends data implements \Iterator
 		$this->_pointer = &$this->_head;
 		$this->_key = 0;
 	}
+	
+	/**
+	 * 比较2个线性结构是否完全相同
+	 * 顺序相同
+	 * 内容相同
+	 * @param line|array $line
+	 */
+	function equal($line)
+	{
+		if ($line instanceof line)
+		{
+			if ($line->length() != $this->length())
+			{
+				return false;
+			}
+		}
+		else if (is_array($line))
+		{
+			if (count($line) != $this->length())
+			{
+				return false;
+			}
+		}
+		$point = $this->_head;
+		foreach ($line as $value)
+		{
+			if ($value != $point->data)
+			{
+				return false;;
+			}
+			$point = $point->next;
+		}
+		return true;
+	}
 }

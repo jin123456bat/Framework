@@ -120,6 +120,18 @@ class collection extends data implements \Iterator
 	}
 	
 	/**
+	 * 当前集合加上另外一个集合
+	 * @param collection $collection
+	 */
+	function combine(collection $collection)
+	{
+		foreach ($collection as $value)
+		{
+			$this->push($value);
+		}
+	}
+	
+	/**
 	 * {@inheritDoc}
 	 * @see Iterator::current()
 	 */
