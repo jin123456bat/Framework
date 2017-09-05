@@ -14,5 +14,5 @@ return array(
 	 * 虽然session可以解决最大值的问题，但是同样，过多的页面会导致服务器的可用空间下降
 	 * 因此，开发者需要根据业务需求合理的设置token的备用验证数量
 	 */
-	'max_token_num' => 10
+	'max_token_num' => 10,
 );

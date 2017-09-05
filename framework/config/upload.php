@@ -1,6 +1,6 @@
 <?php
 return array(
-	'vio' => array(
+	/* 'vio' => array(
 		'size' => 1000000, // 文件大小限制 字节 不存在则不限制
 		'ext' => array(
 			'mp4'
@@ -16,5 +16,5 @@ return array(
 		),
 		// 文件存储路径 假如不填写则不保存，函数直接返回tmp_name
 		'path' => './application/upload'
-	)
+	) */
 );

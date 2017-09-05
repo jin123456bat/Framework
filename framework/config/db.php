@@ -1,10 +1,4 @@
 <?php
-$sql_mode = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
-$init_command = array(
-	'set sql_mode = "' . $sql_mode . '"'
-);
-// 'set max_allowed_packet = 20*1024*1024'
-
 /*
  * 数据库配置文件
  * model 定义了哪些model使用这个配置 假如一个model在多个配置中同时存在，第一个生效
@@ -12,47 +6,6 @@ $init_command = array(
  * 假如上面都没有 使用第一个配置
  */
 return array(
-	'cloud_web_v2' => array(
-		'type' => 'mysql',
-		'server' => '192.168.1.225',
-		'dbname' => 'cloud_web_v2',
-		'user' => 'cm2_admin',
-		'password' => 'fxd^CM2-2016',
-		//以上是必须的，否则不会认为是一个有效的配置
-		'charset' => 'utf8',
-		'init_command' => $init_command,
-		'model' => array(
-			'',
-		)
-	),
-	'ordoac' => array(
-		'type' => 'mysql',
-		'server' => '192.168.1.225',
-		'dbname' => 'ordoac',
-		'user' => 'selecter',
-		'password' => 'fxdata_Select-2016',
-		'charset' => 'utf8',
-		'init_command' => $init_command
-	),
-	'cds_v2' => array(
-		'type' => 'mysql',
-		'server' => '192.168.1.12',
-		'dbname' => 'cds_v2',
-		'user' => 'selector',
-		'port' => 3321,
-		'password' => 'fxdata_Select-2016',
-		'charset' => 'utf8',
-		'init_command' => $init_command
-	),
-	'django' => array(
-		'type' => 'mysql',
-		'server' => '192.168.1.225',
-		'dbname' => 'django',
-		'user' => 'selecter',
-		'password' => 'fxdata_Select-2016',
-		'charset' => 'utf8',
-		'init_command' => $init_command
-	),
 	'test' => array(
 		'default' => true,
 		'type' => 'mysql',
@@ -60,6 +13,10 @@ return array(
 		'dbname' => 'test',
 		'user' => 'root',
 		'password' => '',
-		'charset' => 'utf8'
+		'charset' => 'utf8',
+		'init_command' => $init_command,
+		'model' => array(
+			'',
+		)
 	)
 );
