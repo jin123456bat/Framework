@@ -9,7 +9,7 @@ class entity extends base
 	 * 存放原始数据
 	 * @var array
 	 */
-	private $_data;
+	protected $_data;
 	
 	/**
 	 * 存放错误信息
@@ -42,8 +42,8 @@ class entity extends base
 	/**
 	 * 保存之前执行的函数
 	 * 这个函数可以返回false,
-	 * 当返回false的时候则中断删除操作，并且save函数假如是update的时候返回false
-	 * 返回值要么是false要么是其他，0或NULL不会认为是false
+	 * 当返回false的时候则中断update操作，并且save函数假如是update的时候返回false
+	 * 返回0或者NULL不会认为是false
 	 */
 	function __preUpdate()
 	{
@@ -59,8 +59,8 @@ class entity extends base
 	/**
 	 * 执行插入之前执行的函数
 	 * 这个函数可以返回false,
-	 * 当返回false的时候则中断删除操作，并且save函数假如是insert的时候返回false
-	 * 返回值要么是false要么是其他，0或NULL不会认为是false
+	 * 当返回false的时候则中断添加操作，并且save函数假如是insert的时候返回false
+	 * 返回0或者NULL不会认为是false
 	 */
 	function __preInsert()
 	{
@@ -88,7 +88,10 @@ class entity extends base
 	 */
 	function __model()
 	{
-		return get_class($this);
+		$result = get_class($this);
+		$result = explode('\\', $result);
+		$result = end($result);
+		return $result;
 	}
 
 	/**
@@ -102,11 +105,12 @@ class entity extends base
 		{
 			return false;
 		}
+		
 		$result = $this->model($model)
 			->where($pk . '=?', array(
-			$this->$pk
-		))
-			->delete();
+			$this->_data[$pk]
+		))->delete();
+		
 		$this->__afterRemove();
 		return $result;
 	}
@@ -121,18 +125,7 @@ class entity extends base
 		
 		$data = $this->_data;
 		
-		$relation_data = array();
-		foreach ($data as $key => $value)
-		{
-			$relation = $this->__relation($key, $this->pk, $value);
-			if (! empty($relation))
-			{
-				$relation_data[$key] = $relation;
-				unset($data[$key]);
-			}
-		}
-		
-		if (! empty($pk) && ! empty($this->$pk))
+		if (! empty($pk) && ! empty($this->_data[$pk]))
 		{
 			if (false === $this->__preUpdate())
 			{
@@ -140,13 +133,23 @@ class entity extends base
 			}
 			$this->model($model)->transaction();
 			
-			$this->model($model)
-				->where($pk . '=?', array(
-				$this->$pk
-			))
-				->limit(1)
-				->update($data);
+			$temp = $data;
+			unset($temp[$pk]);
+			$this->model($model)->where($pk . '=?', array(
+				$this->_data[$pk]
+			))->limit(1)->update($temp);
 			
+			//获取关系数据
+			$relation_data = array();
+			foreach ($data as $key => $value)
+			{
+				$relation = $this->__relation($key, $this->_data[$pk], $value);
+				if (! empty($relation))
+				{
+					$relation_data[$key] = $relation;
+					unset($data[$key]);
+				}
+			}
 			// 更新关联数据 更新关系数据必须在update后执行 防止外键索引导致添加失败
 			foreach ($relation_data as $data)
 			{
@@ -157,12 +160,13 @@ class entity extends base
 					{
 						foreach ($d_data['delete'] as $key => $value)
 						{
-							$this->model($model)->where($key . '=?', [
+							$this->model($tableName)->where($key . '=?', [
 								$value
 							]);
 						}
-						$this->model($model)->delete();
+						$this->model($tableName)->delete();
 					}
+					
 					// 在添加关系
 					if (isset($d_data['insert']) && ! empty($d_data['insert']) && is_array($d_data['insert']))
 					{
@@ -192,7 +196,20 @@ class entity extends base
 			$this->model($model)->transaction();
 			if ($this->model($model)->insert($data))
 			{
-				$this->$pk = $this->model($model)->lastInsertId();
+				$this->_data[$pk] = $this->model($model)->lastInsertId();
+				
+				//获取关系数据
+				$relation_data = array();
+				foreach ($data as $key => $value)
+				{
+					$relation = $this->__relation($key, $this->$pk, $value);
+					if (! empty($relation))
+					{
+						$relation_data[$key] = $relation;
+						unset($data[$key]);
+					}
+				}
+				
 				// 这里把其它的相关数据插入进去
 				foreach ($relation_data as $key => $data)
 				{
@@ -212,7 +229,7 @@ class entity extends base
 					}
 				}
 				$this->model($model)->commit();
-				$this->__preInsert();
+				$this->__afterInsert();
 				return true;
 			}
 			$this->model($model)->rollback();
@@ -236,16 +253,16 @@ class entity extends base
 	 * @param unknown $data
 	 *        添加或者删除的时候的相关数据
 	 * @example return array(
-	 *          'field' => array(
-	 *          'tableName' => array(
-	 *          'insert' => array(
-	 *          array(),
-	 *          array(),
-	 *          ),
-	 *          'delete' => array(
-	 *          'field' => $primaryKey,
-	 *          ),
-	 *          ),
+	 *           'field' => array(
+	 *          	'tableName' => array(
+	 *          		'insert' => array(
+	 *          			array(),
+	 *          			array(),
+	 *          		),
+	 *          		'delete' => array(
+	 *          			'field' => $primaryKey,
+	 *          		),
+	 *          	),
 	 *          )
 	 *          );
 	 */
@@ -447,6 +464,7 @@ class entity extends base
 	 */
 	function validate($sence = '')
 	{
+		$this->_error = array();
 		$rules = $this->__rules();
 		foreach ($rules as $key => $rule)
 		{

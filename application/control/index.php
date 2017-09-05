@@ -8,6 +8,7 @@ use framework\vendor\captcha;
 use framework\core\webControl;
 use framework\core\response\json;
 use framework\data\line\chain;
+use application\entity\product;
 
 class index extends webControl
 {
@@ -34,8 +35,17 @@ class index extends webControl
 		$chain->reverse();
 		//$chain->debug();
 		
+		$product = new product(array(
+			'name' => '商品名称',
+			'id' => 1,
+			'category' => array(
+				10,20,30
+			)
+		));
 		
-		$n = $chain->intersect(new chain([2,4]));
+		$product->save();
+		
+		 
 		// var_dump(cookie::set('name','555'));
 		// var_dump($_COOKIE);
 		/*

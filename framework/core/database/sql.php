@@ -663,11 +663,12 @@ class sql extends base
 					if (is_array($this->_temp['insert']))
 					{
 						// 数字下标
-						if (array_keys($this->_temp['insert']) == range(0, count($this->_temp['insert']) - 1, 1))
+						if (array_keys($this->_temp['insert']) === range(0, count($this->_temp['insert']) - 1, 1))
 						{
 							$fields = '';
 							$this->_temp['params'] = array_values($this->_temp['insert']);
 							$values = array_fill(0, count($this->_temp['params']), '?');
+							
 						}
 						else
 						{
@@ -682,6 +683,7 @@ class sql extends base
 					}
 					else if ($this->_temp['insert'] instanceof sql)
 					{
+						
 						$sql = 'INSERT' . $this->_temp['ignore'] . ' INTO ' . $table . ' ' . $this->_temp['insert']->__toString() . ' ' . $this->_temp['duplicate'];
 						$this->_temp['params'] = $this->_temp['insert']->getParams();
 					}

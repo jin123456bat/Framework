@@ -129,18 +129,4 @@ class base
 		}
 		return self::$_table_instance[$name];
 	}
-	
-	/**
-	 * 缓存模块
-	 * @param string $name
-	 */
-	protected static function cache($name = NULL)
-	{
-		if (!isset(self::$_cache_instance[$name]))
-		{
-			self::$_cache_instance[$name] = application::load('cache','framework/core/cache');
-			self::$_cache_instance[$name]->setType($name);
-		}
-		return self::$_cache_instance[$name];
-	}
 }

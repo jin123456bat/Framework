@@ -338,13 +338,11 @@ class model extends component
 		{
 			$fields[] = $value['Field'];
 		}
-		
 		// 是否是数字下标
 		$source_keys = array_keys($data);
 		$des_keys = range(0, count($data) - 1, 1);
 		$diff = array_diff($source_keys, $des_keys);
 		$is_num_index = empty($diff);
-		
 		// 补充默认值
 		if (! $is_num_index)
 		{
@@ -356,7 +354,6 @@ class model extends component
 					unset($data[$index]);
 				}
 			}
-			
 			// 填充默认数据
 			foreach ($this->_desc as $index => $value)
 			{
@@ -370,7 +367,7 @@ class model extends component
 						}
 						else
 						{
-							if ($value['Key'] == 'PRI' && $value['Extra'] == trim('AUTO_INCREMENT'))
+							if (strtolower($value['Key']) == 'pri' && strtolower($value['Extra']) == 'auto_increment')
 							{
 								$data[$value['Field']] = null;
 							}
@@ -432,9 +429,8 @@ class model extends component
 					}
 				}
 			}
-			
 			// 调整字段顺序
-			$temp = array();
+			/* $temp = array();
 			foreach ($this->_desc as $value)
 			{
 				if (isset($data[$value['Field']]))
@@ -442,8 +438,7 @@ class model extends component
 					$temp[$value['Field']] = $data[$value['Field']];
 				}
 			}
-			
-			$data = $temp;
+			$data = $temp; */
 		}
 		if ($this->_compress)
 		{

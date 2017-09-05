@@ -26,8 +26,6 @@
 //调试模式
 define('DEBUG', false);
 
-include ROOT . '/xhprof.php';
-
 // 定义框架的目录
 ! defined('SYSTEM_ROOT') & define("SYSTEM_ROOT", ROOT . '/framework');
 // 定义APP的目录
@@ -75,6 +73,8 @@ $app->run();
 | upload      | 上传           |
 | view        | 模板           |
 | app         | 应用程序名称前3个字符  |
+| captcha     | 验证码模块        |
+| csrf        | csrf_token配置 |
 
 > 模块配置暂定，随着版本叠加，可能会有增加或更改
 
@@ -87,11 +87,11 @@ upload、db、cookie模块的配置中会存在配置名称（也就是key），
 ```php
 <?php
 return array(
-	'type' => 'file', // 缓存类型  mysql memcached
+	'type' => 'file', // 缓存类型  mysql memcache
 	'expires' => 0, // 默认缓存时间 永久有效
 	
-	//当type为memcached的时候，以下配置memcached的相关信息
-	'memcached' => array(
+	//当type为memcache的时候，以下配置memcache的相关信息
+	'memcache' => array(
 		array(
 			'host' => 'localhost',
 			'port' => 11211,
@@ -166,23 +166,8 @@ return array(
  * 数据库配置文件
  * model 定义了哪些model使用这个配置  假如一个model在多个配置中同时存在，第一个生效
  * default 定了一个默认的配置，在没有声明model使用的配置的时候使用default配置
- * 假如上面都没有 使用第一个配置
  */
 return array(
-	'cloud_web_v2' => array(
-		'model' => array(
-			//定义了哪些model使用这个配置
-		),
-		'type' => 'mysql',
-		'server' => '192.168.1.225',
-		'dbname' => 'cloud_web_v2',
-		'user' => 'cm2_admin',
-		'password' => 'fxd^CM2-2016',
-		'charset' => 'utf8',
-		'port'=>3306,
-		'init_command' => $init_command
-	),
-	
 	'test' => array(
 		'default' => true,
 		'type' => 'mysql',
@@ -191,7 +176,17 @@ return array(
 		'user' => 'root',
 		'password' => '',
 		'charset' => 'utf8',
-	)
+      	'init_command' => '',//当mysql连接之后执行的sql
+      	'model' => array(),//允许指定model使用指定的配置
+	),
+  	//最小配置
+  	'test1' => array(
+		'type' => 'mysql',
+		'server' => 'localhost',
+		'dbname' => 'test',
+		'user' => 'root',
+		'password' => '',
+    ),
 );
 ```
 
@@ -232,7 +227,6 @@ return array(
 		'timezone' => 'Asia/Shanghai'
 	)
 );
-
 ```
 
 5、router路由模块
@@ -244,6 +238,26 @@ return array(
 	'default' => array(
 		'control' => 'index',
 		'action' => 'index',
+	),
+  
+  	//直接将某个类做为controller，需要遵循以下原则
+	//1、类必须继承于/framework/core/response类
+	//2、响应内容由类中的getBody方法定义
+	//3、类的构造函数必须支持无参数类型，
+	//4、调用方法是c=类名，类名为不带命名空间的类名 如下为index.php?c=captcha
+	//pathinfo模式调用方法为index.php/captcha
+	//因此，假如有多个相同的类名，以第一个为准，第二个不会调用
+	//5、不允许声明同样的control，否则会被control覆盖
+	//6、key是别名，假如被control覆盖，可以通过别名来调用
+	//7、别名的优先级要高一些
+	/*
+	 * 2个都是alias，根据第4规则，应该调用第一个类，但是事实上应该调用第二个类
+	 *  array(
+		'/framework/vendor/alias',
+		'alias' => '/framework/vendor/content',
+	) */
+	'class' => array(
+		'alias'=>'\framework\vendor\captcha',
 	),
 	
 	//路由绑定,key中允许正则表达式，假如有多个正则表达式匹配，第一个优先
@@ -575,7 +589,32 @@ function a(){
 
 ​	访问`index.php/index/page`代表控制器名为index，方法名为page
 
+​	四、绑定扩展
 
+​	framework允许将一个第三方的类库作为响应来使用，这样framework可以做到直接更改配置，而无需去修改任何代码即可实现第三方类库的引入
+
+​	在路由配置中新增如下配置：
+
+```
+//直接将某个类做为controller，需要遵循以下原则
+//1、类必须继承于/framework/core/response类
+//2、响应内容由类中的getBody方法定义
+//3、类的构造函数必须支持无参数类型，
+//4、调用方法是c=类名，类名为不带命名空间的类名 如下为index.php?c=captcha
+//pathinfo模式调用方法为index.php/captcha
+//因此，假如有多个相同的类名，以第一个为准，第二个不会调用
+//5、不允许声明同样的control，否则会被control覆盖
+//6、key是别名，假如被control覆盖，可以通过别名来调用
+//7、别名的优先级要高一些
+//2个都是alias，根据第4规则，应该调用第一个类，但是事实上应该调用第二个类
+//array(
+//	'/framework/vendor/alias',
+//	'alias' => '/framework/vendor/content',
+//)
+'class' => array(
+	'alias'=>'\framework\vendor\captcha',
+),
+```
 
 ## 五、Control
 
@@ -617,8 +656,17 @@ function a(){
 
 > 假如开发者希望一个控制器在不同的模式下工作，可以通过继承`framework\core\control`来实现
 
+错误的调用了错误的模式控制器的时候，开发者可以通过在控制器中自定义__runningMode方法来实现一个更加友好的提示信息或者错误
 
-
+	/**
+	 * 当其它的模式调用了这个控制器中的方法的时候，调用这个函数来提供一个友好的输出提示
+	 * 
+	 * @param unknown $mode        
+	 */
+	public function __runningMode($mode)
+	{
+		return 'can\'t running in ' . $mode . ' mode';
+	}
 ## 六、websocket
 
 ​	假设开发者希望开发一个基于websocket的应用的时候，可以通过框架启动一个websocket进程
@@ -827,12 +875,6 @@ function __config()
 {
   return 'test';
 }
-//等价于
-function __config()
-{
-  $db = $this->getConfig('db');
-  return $db['test'];
-}
 ```
 
 
@@ -941,3 +983,354 @@ $m = mysql::getInstance($config['test']);
 //使用这个mysql连接来执行上面的sql
 $result = $m->query($a);
 ```
+
+
+## 八、Table
+
+
+
+特别的，框架中集成了数据表结构变更的类，`\framework\core\database\mysql\table`，这个类目前只支持mysql，对于其他的数据库，目前尚未支持
+
+	$table = this->table('cache');//实例化cache表
+	//假如第二个参数为空将会自动在db的配置中查找带default的或者在db配置中指定了model的，指定model的方式优先
+	$table = this->table('cache','test');//使用test的db配置来实例化cache表
+	if(!$table->exist())//判断数据库表是否存在
+	{
+		//创建表结构
+	  	$table->field('unique_key')->varchar(32)->comment('唯一键');
+	  	$table->field('createtime')->datetime()->comment('创建时间');
+	  	$table->field('expires')->int()->comment('有效期，0不限制');
+	  	$table->field('value')->longtext()->comment('存储的值，seralize后');
+	  	//为数据库添加索引
+	  	$table->primary()->add('unique_key');
+	  	$table->index('createtime')->add(array('createtime','expires'));
+	}
+table类比较特殊，table类中的所有方法都会更改表的结构，而不会更改表中的数据，由结构变更而导致数据变更的不在此列，
+
+所有的结构变更都支持链式操作，特别注意，所有结构变更有可能会失败，而不会在程序中体现出来。
+
+
+
+## 九、Entity
+
+所有的实体都必须在entity目录下，并且继承`framework\core\entity`类，
+
+设想这样一个场景，开发者需要往数据库插入一条数据，而这条数据有100或者更多的列，而这数据在很多地方都需要修改，这是很麻烦的，更或者每一列数据都需要经过大量判断，因为一些数据并不都符合我们插入到数据库的期望。
+
+以用户数据为例,
+
+```php
+$test = new test(array(
+  'username' => 'jin123',
+  'password' => '111',
+  'age' => 18,
+  'money' => '-1',
+  'telephone' => 15868481019,
+  'ip' => '255.255.255.4/24',
+  'email' => '326550324@qq.com',
+  'time' => '2017-05-06 12:12:12',
+  'sex' => '男',
+));
+//验证
+if($test->validate())
+{
+  	//添加到数据库
+    $test->save();
+}
+```
+
+1、entity实例化的时候允许一个数组参数，这个数据参数以key=>value的形式传递，key对应数据库中的键名，value对应要插入的数据，（喜欢偷懒的程序员可以直接使用request::post()方式直接传递一个数据，开发者不必要担心提交的数据，下面会讲到其他的方式来过滤数据、验证数据，以确保数据安全）
+
+2、validate验证器
+
+开发者可以在自定义的entity中自定义__rules方法来验证数据，rules方法返回一个数组，key为验证器，值为验证规则，下面列出了所有支持的验证器和验证方式，
+
+
+
+```php
+function __rules()
+{
+  return array(
+    //一个验证器，验证多个字段，省略写法
+    'required' => array(
+      'fields' => 'username,password',
+      'message' => '用户名或密码必须填写'
+    ),
+    // 最标准的写法应该是这样子的，完整写法
+    //验证字符串长度的例子，
+    '>=' => array(
+      'fields' => array(
+        'username' => array(
+          'render' => 'mb_strlen', // 对参数先经过这个函数 然后在做判断
+          'message' => '用户名长度不能低于6位',
+          'data' => 6,
+          'on' => array(
+            'insert'
+          ) // 在什么样的情景下才可用，默认是所有情景，可以数组，多个情景 也可以是逗号分开的字符串
+        ),
+        'age' => array(
+          'message' => '年龄必须大于等于18岁',
+          'data' => 18
+        )
+      )
+    ),
+    //不安全验证器  required相反
+    'unsafe' => array(
+      'fields' => 'sql', // 提交的参数中不能包含sql这个参数
+      'message' => '提交不能存在sql参数'
+    ),
+    //验证码
+    'captcha' => array(
+      'fields' => 'code',
+      'message' => '验证码错误',
+    ),
+    //整型验证
+    'int' => array(
+      'fields' => 'age',
+      'message' => '年龄必须是整数'
+    ),
+    //数字验证器
+    'decimal' => array(
+      'fields' => array(
+        'money' => '金额必须是数字'
+      )
+    ),
+    //数据唯一验证器
+    'unique' => array(
+      'telephone' => array(
+        'message' => '手机号码必须唯一'
+      )
+    ),
+    //手机号码验证器
+    'telephone' => array(
+      'telephone' => '请填写一个正确的手机号码'
+    ),
+    //IP地址验证器
+    'ip' => array(
+      'ip' => 'IP错误'
+    ),
+    //邮箱验证器
+    'email' => array(
+      'email' => 'email错误'
+    ),
+    //枚举类型验证器
+    'enum' => array(
+      'fields' => array(
+        'sex'
+      ),
+      'data' => array(
+        '男',
+        '女'
+      )
+    ),
+    //日期验证器
+    'datetime' => array(
+      'fields' => 'time',
+      'data' => 'Y-m-d H:i:s', // 这个是可选的 默认为Y-m-d H:i:s
+      'message' => array(
+        '时间错误'
+      )
+    ),
+    'function' => array( // 自定义函数验证器
+      'fields' => 'relations',
+      'render' => function ($val) { // $val => $this->_data['relations']
+        return '123';
+      },
+      'message' => '自定义{field}函数校验失败,它的值为{value}',
+      'callback' => function ($val) {
+        return true; // 返回true或者false
+      }
+    )
+  );
+}
+```
+
+除此之外验证器还支持
+
+ `>=` 等同于 `ge`
+
+`<=`等同于`le`
+
+`!=`等同于`ne`
+
+`<`等同于`lt`
+
+`>`等同于`gt`
+
+`=`等同于`eq`
+
+所有的验证器在`framework\core\validator`类中，开发者也可以通过injection这个类来增加其他的验证器
+
+
+
+验证器的标准写法应该如下
+
+```php
+'验证器名称' => array(
+      'fields' => array(
+        '字段名1' => array(
+          'render' => '函数名（可选）',
+          'message' => '错误消息（必须，没有的话虽然可以使用但是会报错）',
+          'data' => 验证器的额外参数（可选）,
+          'on' => 情景（可选）。数组或者,号分开的字符串
+        ),
+        '多个字段名' => array(
+          'message' => 错误消息,
+        )
+      )
+    ),
+```
+
+其他的写法都是简写形式
+
+
+
+validate方法返回boolen值，当为true的时候说明验证通过，false的话验证失败，当验证失败的时候可以通过`getError`方法来获取错误信息
+
+```
+if(!$test->validate())
+{
+  	//获取错误信息
+    $errors = $test->getError();
+}
+```
+
+
+
+回到之前的话题，当数据验证通过之后，数据需要被保存起来，比如password，通常password服务器端接受到的是明文，而数据库中需要保存密文，也就是说期望在保存之前经行一次加密，这个时候可以在自定义的entity中重写__preInsert函数来实现
+
+```php
+/**
+  * 执行插入之前执行的函数
+  * 这个函数可以返回false,
+  * 当返回false的时候则中断添加操作，并且save函数假如是insert的时候返回false
+  * 返回0或者NULL不会认为是false
+  */
+function __preInsert()
+{
+  $this->_data['password'] = md5($this->_data['password']);
+}
+```
+
+类似的，还有`__afterRemove`,`__preRemove`,`__preUpdate`,`__afterUpdate`,`__afterInsert`函数
+
+3、save函数
+
+save函数是一个集成函数，它会通过是否存在主键来自动判断是保存还是删除，默认情况下id字段是主键，假如数据库中实际上用了其他的主键，可以通过在entity中自定义`__primaryKey`函数来声明其他主键名称。
+
+```
+/**
+ * 默认的情况下使用ID字段作为主键
+ * 
+ * @return string
+ */
+function __primaryKey()
+{
+	return 'id';
+}
+```
+
+
+
+调用save，remove，findByField等方法的时候，数据需要从数据库中获取，因此，entity中实际上有一个内置的model，这个model是通过类名来找到的，因此通常情况下，model，entity和数据库中的表名是一致的，比如数据库的表叫user，开发者又定义了myuser的model，而开发者定义的entity叫accounts的话，这个时候需要在entity中自定义`__model`方法，并且返回实际上的model的名称（返回model的名称而不是数据库的名称，这里返回myuser，而又需要在myuser的model中定义`__tableName`方法并返回数据库名）
+
+4、多表添改
+
+entity不仅仅可以添加实体类型的数据，还可以添加关系型的数据，比如商品，商品分类，分类。
+
+商品是一个数据表，分类也是一个数据表，商品分类是关系表，当添加商品的时候如何给商品分类表同时也添加一个条数据呢？
+
+假设商品表结构
+
+| 名字   | 类型          |      |
+| ---- | ----------- | ---- |
+| id   | int         | 主键   |
+| name | varchar(32) |      |
+
+假设关系表结构
+
+| 名字   | 类型   |      |
+| ---- | ---- | ---- |
+| pid  | int  | 商品id |
+| cid  | int  | 分类id |
+
+商品和分类多对多的关系
+
+插入的代码为
+
+```
+$product = new product(array(
+	'name' => '商品名称',
+	'category' => array(
+		10,20
+	)
+));
+
+$product->save();
+```
+
+在entity中定义`__relation`函数，并且返回如下的实例
+
+```
+	function __relation($field, $primaryKey, $data)
+	{
+		if ($field == 'category')
+		{
+			$insert = array();
+			foreach ($data as $d)
+			{
+				$insert[] = array(
+					'pid'=> $primaryKey,
+					'cid' => $d,
+				);
+			}
+			
+			return array(
+				'product_category' => array(
+					'insert' => $insert,
+					'delete' => array(
+						'pid' => $primaryKey,
+					),
+				),
+			);
+		}
+	}
+```
+
+代码执行完毕后，可以看到商品表以及关系表中的数据，商品表新增一条数据，关系表新增2条数据，
+
+
+
+> save函数内部实现是基于事务的。
+>
+> save的更新操作实际上是先删除在添加，因此关系表最好不要存在自增主键，
+
+
+
+十、模板引擎
+
+framework框架内置了一种模板引擎，你可以通过返回一个`framework\core\view`对象，这个对象有2个参数，第一个模板名称，第二位布局文件夹名称。模板必须统一放在应用程序目录的template文件夹下面，template文件夹下面一级是布局文件夹名称，布局之下才是模板名称
+
+例如：
+
+```php
+template -  					#template文件夹
+	layout -					#布局文件名称
+		index-					#自定义的目录
+			index.html			#模板文件名称
+		product-				#自定义目录
+			index.php			#模板文件名称
+```
+
+要在页面中显示模板可以这样
+
+```php
+return new view('test/page.html');
+//假如布局文件名为layout的话也可以这样
+return new view('test/page.html','layout');
+```
+
+
+
+布局文件的名称可以在view的配置文件中修改
+

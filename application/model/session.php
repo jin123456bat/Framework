@@ -10,4 +10,9 @@ class session extends model
 	{
 		return 'test';
 	}
+	
+	function __tableName()
+	{
+		
+	}
 }
