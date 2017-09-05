@@ -7,185 +7,35 @@ use framework\core\cache;
 use framework\vendor\captcha;
 use framework\core\webControl;
 use framework\core\response\json;
+use framework\data\line\chain;
 
 class index extends webControl
 {
 
 	function index()
 	{
-		
-		/**
-		 * 快速排序算法测试
-		 * @var array $array
-		 */
-		$array = quickSort([4,3,5,2,1]);
-		if ($array != array(1,2,3,4,5))
-		{
-			echo "快速排序算法错误";
-		}
-		
-		
-		$cache_type = array(
-			'mysql',
-			'file',
-			'redis',
-			'memcache',
-			'apc',
-		);
-		
-		
-		foreach ($cache_type as $type)
-		{
-			cache::flush();
-			
-			
-			if (cache::store($type)->get('jin') != NULL)
-			{
-				echo "缓存 $type get测试失败，应该返回NULL";
-			}
-			
-			if(!is_bool(cache::store($type)->set('jin', 'name')))
-			{
-				echo "缓存 $type set返回值不是true或者false";
-			}
-			
-			/*
-			 * 缓存测试
-			 * db缓存测试
-			 */
-			cache::store($type)->set('jin','name');
-			if (cache::store($type)->get('jin') != 'name')
-			{
-				echo "缓存 $type set添加测试或get测试 失败";
-			}
-			
-			
-			cache::store($type)->set('jin',array(1,2,3));
-			if (cache::store($type)->get('jin') !== array(1,2,3))
-			{
-				echo "缓存 $type set添加测试或get测试数组 失败";
-			}
-			
-			$class = new \stdClass();
-			$class->name = 'jin';
-			cache::store($type)->set('jin',$class);
-			if (cache::store($type)->get('jin')->name !== 'jin')
-			{
-				echo "缓存 $type set添加测试或get测试对象 失败";
-			}
-			
-			/*
-			 * 缓存测试
-			 * set覆盖测试
-			 */
-			cache::store($type)->set('jin','name1');
-			if (cache::store($type)->get('jin') != 'name1')
-			{
-				echo "缓存 $type set覆盖测试 失败";
-			}
-			
-			if(cache::store($type)->add('jin', 'name2') === true)
-			{
-				echo "缓存 $type add返回值不是boolean或者add失败";
-			}
-			if (cache::store($type)->get('jin') != 'name1')
-			{
-				echo "缓存 $type add覆盖测试 失败";
-			}
-			
-			
-			
-			cache::store($type)->set('jin', 1);
-			if (!is_bool(cache::store($type)->decrease('jin')))
-			{
-				echo "缓存 $type decrease 返回值不是boolean";
-			}
-			if (cache::store($type)->get('jin') !== 0)
-			{
-				echo "缓存 $type decrease测试 失败1";
-			}
-			
-			
-			cache::store($type)->set('jin', 1);
-			if(!is_bool(cache::store($type)->decrease('jin',2)))
-			{
-				echo "缓存 $type decrease不是boolean";
-			}
-			if (cache::store($type)->get('jin') !== -1)
-			{
-				echo "缓存 $type decrease测试 失败2";
-			}
-			
-			cache::store($type)->set('jin', '1');
-			if(!is_bool(cache::store($type)->increase('jin')))
-			{
-				echo "缓存$type increase返回值不是boolean";
-			}
-			if (cache::store($type)->get('jin') !== 2)
-			{
-				echo "缓存 $type increase测试 失败";
-			}
-			
-			
-			cache::store($type)->set('jin', '1');
-			if(!is_bool(cache::store($type)->increase('jin',2)))
-			{
-				echo "缓存$type increase返回值不是boolean";
-			}
-			if (cache::store($type)->get('jin') !== 3)
-			{
-				echo "缓存 $type increase测试 失败";
-			}
-			
-			cache::store($type)->set('jin1', 1);
-			cache::store($type)->set('jin2', 2);
-			if(!is_bool(cache::store($type)->flush()))
-			{
-				echo "缓存 $type flush返回值不是boolean";
-			}
-			if (cache::store($type)->get('jin1') !== NULL || cache::store($type)->get('jin2') !== NULL)
-			{
-				echo "缓存 $type flush测试 失败";
-			}
-			
-			cache::store($type)->set('jin1', 1);
-			if(!is_bool(cache::store($type)->remove('jin1')))
-			{
-				echo "缓存$type remove返回值不是boolean";
-			}
-			if (cache::store($type)->get('jin1') !== NULL)
-			{
-				echo "缓存 $type remove测试 失败";
-			}
-		}
-		
-		//var_dump($this->model('cache')->select());
+		$chain = new chain();
+		$chain->push(1);
+		$chain->push(2);
+		$chain->push(3);
+		$chain->push(4);
+		$chain->push(5);
+		$chain->push(6);
+		$chain->push(6);
+		$chain->push(6);
+		$chain->push(6);
+		$chain->remove(1);
+		$chain->remove(3);
+		$chain->remove(6,9);
+		$chain->pop();
+		$chain->reverse();
+		$chain->fill(4, 7,chain::FILL_RIGHT);
+		$chain->fill(5,7, chain::FILL_LEFT);
+		$chain->reverse();
+		//$chain->debug();
 		
 		
-		/* $test = new test(array(
-		'username' => 'jin123',
-		'password' => '111',
-		'age' => 18,
-		'money' => '-1',
-		'telephone' => 15868481019,
-		'ip' => '255.255.255.4/24',
-		'email' => '326550324@qq.com',
-		'time' => '2017-05-06 12:12:12',
-		'sex' => '男',
-		'user' => array(
-					'name'=>'jin',
-				)
-		));
-		if (!$test->validate())
-		{
-			//var_dump($test->getError());
-		} */
-		
-		
-		
-		//return new json(1,2,3);
-		return new captcha();
-		
+		$n = $chain->intersect(new chain([2,4]));
 		// var_dump(cookie::set('name','555'));
 		// var_dump($_COOKIE);
 		/*

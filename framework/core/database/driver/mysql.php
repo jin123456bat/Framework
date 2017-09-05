@@ -216,7 +216,7 @@ class mysql extends database
 	 * @param string $sql        
 	 * @param array $array        
 	 */
-	function execute($sql, $array = array())
+	function execute($sql, array $array = array())
 	{
 		$sqlCom = new sql();
 		self::$_history[] = $sqlCom->getSql($sql,$array);
@@ -243,7 +243,7 @@ class mysql extends database
 	 * @param callback $callback        
 	 * @return array
 	 */
-	function fetch($sql, $array = array(), $callback = NULL)
+	function fetch($sql, array $array = array(), $callback = NULL)
 	{
 		$sqlCom = new sql();
 		self::$_history[] = $sqlCom->getSql($sql,$array);

@@ -41,7 +41,7 @@ abstract class database
 	 * @param array $array
 	 * @param callback $callback
 	 */
-	abstract function fetch($sql,$array = array(),$callback = NULL);
+	abstract function fetch($sql,array $array = array(),$callback = NULL);
 
 	/**
 	 * 设置配置
