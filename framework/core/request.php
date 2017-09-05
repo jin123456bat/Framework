@@ -24,13 +24,13 @@ class request extends base
 	}
 
 	/**
-	 * 当前请求方式
+	 * 当前请求方式 并自动转小写
 	 * 
 	 * @return unknown
 	 */
 	static function method()
 	{
-		return $_SERVER['REQUEST_METHOD'];
+		return strtolower($_SERVER['REQUEST_METHOD']);
 	}
 
 	/**

@@ -14,8 +14,15 @@ return array(
 	//因此，假如有多个相同的类名，以第一个为准，第二个不会调用
 	//5、不允许声明同样的control，否则会被control覆盖
 	//6、key是别名，假如被control覆盖，可以通过别名来调用
+	//7、别名的优先级要高一些
+	/*
+	 * 2个都是alias，根据第4规则，应该调用第一个类，但是事实上应该调用第二个类
+	 *  array(
+		'/framework/vendor/alias',
+		'alias' => '/framework/vendor/content',
+	) */
 	'class' => array(
-		'alias'=>'/framework/vendor/captcha',
+		'alias'=>'\framework\vendor\captcha',
 	),
 	
 	// 路由绑定,key中允许正则表达式，假如有多个正则表达式匹配，第一个优先

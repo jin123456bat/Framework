@@ -251,6 +251,49 @@ class application extends component
 				}
 			}
 		}
+		else if ($controller === NULL)
+		{
+			//判断是否可能是一个response
+			$router_config = self::getConfig('router');
+			if (isset($router_config['class']) && !empty($router_config['class']))
+			{
+				$class = '';
+				if (isset($router_config['class'][$control]) && class_exists($router_config['class'][$control],true))
+				{
+					$class = $router_config['class'][$control];
+				}
+				else
+				{
+					foreach ($router_config['class'] as $c)
+					{
+						$names = array_filter(explode('/', $c));
+						if(end($names) == $control)
+						{
+							$class = $c;
+							break;
+						}
+					}
+				}
+				
+				if (!empty($class))
+				{
+					$response = new $class();
+					if ($response instanceof response)
+					{
+						if (is_callable($doResponse))
+						{
+							call_user_func($doResponse, $response, true, function($msg){
+								echo $msg;
+							});
+						}
+						else
+						{
+							return $response;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**
