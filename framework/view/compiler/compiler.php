@@ -453,11 +453,19 @@ class compiler extends \framework\view\compiler
 		$pattern = '/(?<func_name>\\\\?([a-zA-Z_][\w\\\\]*::)?[a-zA-Z_]\w*)\((?<parameter>[^\(\)]*)\)/';
 		if (preg_match($pattern, $string, $func_info))
 		{
-			$param_arr = explode(',', $func_info['parameter']);
-			$param_arr = array_map(function ($v) {
-				$value = $this->expression($v);
-				return $value;
-			}, $param_arr);
+			$parameter = trim($func_info['parameter']);
+			if (empty($parameter))
+			{
+				$param_arr = array();
+			}
+			else
+			{
+				$param_arr = explode(',', $func_info['parameter']);
+				$param_arr = array_map(function ($v) {
+					$value = $this->expression($v);
+					return $value;
+				}, $param_arr);
+			}
 			$func_name = $func_info['func_name'];
 			// 优先自定义函数 自定义函数会覆盖系统函数
 			if (isset($this->_functions[$func_name]))
@@ -465,7 +473,7 @@ class compiler extends \framework\view\compiler
 				$value = call_user_func_array($this->_functions[$func_name], $param_arr);
 				return $value;
 			}
-			else if (function_exists($func_name))
+			else if (is_callable($func_name))
 			{
 				// 检查系统函数
 				$value = call_user_func_array($func_name, $param_arr);

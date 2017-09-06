@@ -14,7 +14,7 @@ return array(
 		'user' => 'root',
 		'password' => '',
 		'charset' => 'utf8',
-		'init_command' => $init_command,
+		'init_command' => '',
 		'model' => array(
 			'',
 		)
