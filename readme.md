@@ -1334,3 +1334,136 @@ return new view('test/page.html','layout');
 
 布局文件的名称可以在view的配置文件中修改
 
+
+
+分了实现读写分离，framework框架内置了一套模板引擎，
+
+我们可以在模板中写一些变量或者函数，直接访问php中的变量或者函数
+
+例如
+
+```php
+<html>
+<body>
+	<!-- tag的支持 -->
+	{%import file='index/header.php'%}
+	
+	<!-- 直接访问数组中的内容 -->
+	{%$array.name.firstname%}
+
+	<!-- 静态函数 -->
+	{%\framework\vendor\csrf::token()%}
+
+	<!-- 复杂的表达式和函数 -->
+	{%(6*strlen($name1.'123'.'456'))+6%} {%strtoupper(strtolower($name3))%}
+	{%((4+5)/(1+2))*(3*1)%}
+
+
+	<!-- section的嵌套 -->
+	{%section from=$name value=persion%} 大家好，我是{%$persion%} {%section
+	from=$fruit value=what%} {%$persion%}现在正在吃{%$what%} {%/section%}
+
+	{%$persion%}已经吃完了 {%/section%}
+
+	<!-- section的支持 -->
+	{%section from=$name%} {%$value%} {%/section%}
+
+	<!-- 不存在的变量直接输出空 -->
+	{%$asdfasdfadf%}
+
+	<!-- if的支持  语言构造器的支持 -->
+	{%if !empty($name)%} name不是空的 {%/if%}
+
+	<!-- 结构语句支持 -->
+	{%if empty($abc)%} $abc是空的 {%else%} $abc不是空的 {%/if%}
+
+	<!-- elseif的支持 -->
+	{%if $name1==1%} $name1是1 {%elseif $name1==2%} $name1是2 {%else%}
+	$name1是其他值 {%/if%}
+
+</body>
+</html>
+```
+
+而在模板调用的地方可以这样写
+
+```
+$view = new view('index/index.php');
+$view->assign('array', array(
+	'name' => array(
+		'firstname' => 'jin',
+	)
+));
+$view->assign('name1', 'wahaha');
+$view->assign('name3', '???');
+$view->assign('name', array(1,2,3));
+$view->assign('fruit', array('A','B','C'));
+$view->assign('abc', 123123123123);
+return $view;
+```
+
+通过浏览器访问，可以得到这样的内容
+
+```
+
+<html>
+<body>
+	<!-- tag的支持 -->
+	哇哈哈
+
+	<style type="text/css">
+h1 {
+	color: red
+}
+
+p {
+	color: blue
+}
+</style>
+	<!-- 直接访问数组中的内容 -->
+	jin
+
+	<!-- 静态函数 -->
+	csrfd266a8a35ce953f6d0fe6907c0a8fc03
+
+	<!-- 复杂的表达式和函数 -->
+	78 ???
+	9
+
+
+	<!-- section的嵌套 -->
+	 大家好，我是1  1现在正在吃  大家好，我是2  2现在正在吃  大家好，我是3  3现在正在吃 
+
+	已经吃完了 
+
+	<!-- section的支持 -->
+	 1  2  3 
+
+	<!-- 不存在的变量直接输出空 -->
+	
+
+	<!-- if的支持  语言构造器的支持 -->
+	 name不是空的 
+
+	<!-- 结构语句支持 -->
+	 $abc是空的 
+
+	<!-- elseif的支持 -->
+	
+	$name1是其他值 
+
+</body>
+</html>
+```
+
+
+
+如何自定义标签
+
+开发者可以访问`framekwork/view/block`目录或者`framework/view/tag`目录来查看已经实现了的2种标签,以及这2种标签的区别。
+
+block标签指块级标签，通常以`标签名`开头以`/标签名`结尾，如section标签。自定义block标签必须继承`framework\view\block`类，
+
+tag标签指行级标签，通常指需要一个标签名即可实现。自定义tag标签必须继承`frame\view\tag`类
+
+> 特别说明，import、if、section标签目前是已经开发好了并且内置到framework中的，因此自定义开发标签的时候不要覆盖原有标签
