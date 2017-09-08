@@ -178,6 +178,17 @@ class index extends webControl
 
 	function page()
 	{
-		return new view('test/page.html');
+		$view = new view('index/index.php');
+		$view->assign('array', array(
+			'name' => array(
+				'firstname' => 'jin',
+			)
+		));
+		$view->assign('name1', 'wahaha');
+		$view->assign('name3', '???');
+		$view->assign('name', array(1,2,3));
+		$view->assign('fruit', array('A','B','C'));
+		$view->assign('abc', 123123123123);
+		return $view;
 	}
 }

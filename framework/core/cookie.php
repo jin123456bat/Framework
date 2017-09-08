@@ -87,7 +87,7 @@ class cookie extends component
 	static function set($name, $value, $config = NULL)
 	{
 		// 获取cookie的配置
-		$config = $this->getConfig($config);
+		$config = self::getConfig($config);
 		
 		// 过期时间，默认为0（关掉浏览器） 可以设置一个timestamp 比如time()+60 为1分钟后过期
 		$expire = isset($config['expire']) ? intval($config['expire']) : 0;

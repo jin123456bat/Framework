@@ -101,7 +101,9 @@ class view extends response
 		$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
 		if (file_exists($file))
 		{
+			
 			$body = $this->_engine->fetch();
+			
 			// 自动开启html压缩
 			$view = $this->getConfig('view');
 			if (is_bool($view['compress']) && $view['compress'] || (is_array($view['compress']) && in_array($this->_template, $view['compress'], true)))
