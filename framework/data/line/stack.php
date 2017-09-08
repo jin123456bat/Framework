@@ -47,9 +47,12 @@ class stack extends line
 		{
 			if ($this->length()==1)
 			{
+				$result = $this->_head->data;
 				$this->_head = NULL;
 				$this->_tail = NULL;
 				$this->_pointer = NULL;
+				$this->_length--;
+				return $result;
 			}
 			else
 			{
