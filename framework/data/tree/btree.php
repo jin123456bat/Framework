@@ -14,7 +14,7 @@ class btree extends tree
 	 * 添加节点的时候的数据堆栈
 	 * @var stack
 	 */
-	private $_stack = new stack();
+	private $_stack;
 	/**
 	 * 添加数据的时候的节点指针
 	 * @var unknown
@@ -29,21 +29,7 @@ class btree extends tree
 	
 	function __construct()
 	{
-		$a = $this->node('a');
-		$b = $this->node('b');
-		$c = $this->node('c');
-		$d = $this->node('d');
-		$e = $this->node('e');
-		$f = $this->node('f');
-		$g = $this->node('g');
-		
-		$this->_root = &$a;
-		$this->_root->left = &$b;
-		$this->_root->left->left = &$d;
-		$this->_root->left->left->right = &$e;
-		$this->_root->left->right = &$f;
-		$this->_root->left->right->left = &$g;
-		$this->_root->right = &$c;
+		$this->_stack = new stack();
 	}
 	
 	/**
@@ -51,11 +37,29 @@ class btree extends tree
 	 * 先左在右
 	 * @param mixed $data 默认为NULL不添加数据
 	 */
-	function push($data)
+	function push($data = NULL)
 	{
-		if (empty($this->_root))
+		if ($data === NULL)
 		{
-			if ($data!==NULL)
+			if ($this->_pointer!==NULL)
+			{
+				if (!isset($this->_pointer->left_visit))
+				{
+					$this->_pointer->left_visit = true;
+				}
+				else if (!isset($this->_pointer->right_visit))
+				{
+					$this->_pointer->right_visit = true;
+				}
+				else
+				{
+					$this->_pointer = $this->_stack->pop();
+				}
+			}
+		}
+		else
+		{
+			if (empty($this->_root))
 			{
 				$node = $this->node($data);
 				$this->_root = &$node;
@@ -64,37 +68,37 @@ class btree extends tree
 				$this->_length++;
 				$this->_stack->push($this->_root);
 			}
-		}
-		else
-		{
-			if ($data !== NULL)
-			{
-				$node = $this->node($data);
-				if ($this->_left_or_right === 0)
-				{
-					$this->_pointer->left = &$node;
-					$this->_pointer = $this->_pointer->left;
-				}
-				else if ($this->_left_or_right === 1)
-				{
-					$this->_pointer->right = &$node;
-					$this->_pointer = $this->_pointer->right;
-				}
-				$this->_stack->push($this->_pointer);
-			}
 			else
 			{
-				if ($this->_left_or_right === 1)
+				if ($data !== NULL)
 				{
-					do{
-						$node = $this->_stack->pop();
-						$this->_pointer = &$node;
-					}while (!empty($this->_pointer->right));
-					$this->_left_or_right = 1;
+					$node = $this->node($data);
+					if ($this->_left_or_right === 0)
+					{
+						$this->_pointer->left = &$node;
+						$this->_pointer = $this->_pointer->left;
+					}
+					else if ($this->_left_or_right === 1)
+					{
+						$this->_pointer->right = &$node;
+						$this->_pointer = $this->_pointer->right;
+					}
+					$this->_stack->push($this->_pointer);
 				}
-				else if ($this->_left_or_right === 0)
+				else
 				{
-					$this->_left_or_right = 1;
+					if ($this->_left_or_right === 1)
+					{
+						do{
+							$node = $this->_stack->pop();
+							$this->_pointer = &$node;
+						}while (!empty($this->_pointer->right));
+						$this->_left_or_right = 1;
+					}
+					else if ($this->_left_or_right === 0)
+					{
+						$this->_left_or_right = 1;
+					}
 				}
 			}
 		}
@@ -186,15 +190,29 @@ class btree extends tree
 	 */
 	function postIterator(\stdClass $node = NULL)
 	{
-		$stack = new stack();
-		$pointer = &$this->_root;
-		while ($pointer!==NULL)
+		if ($node === NULL)
 		{
-			while ($pointer->left!==NULL)
-			{
-				$stack->push($pointer);
-				$pointer = &$pointer->left;
-			}
+			$node = $this->_root;
 		}
+		
+		return $this->postIteratorRecursion($node);
+	}
+	
+	/**
+	 * 递归式后序遍历
+	 * @param \stdClass $node 遍历开始的节点
+	 */
+	private function postIteratorRecursion(\stdClass $node = NULL)
+	{
+		static $array = array();
+		if ($node !== NULL)
+		{
+			$this->postIteratorRecursion($node->left);
+			
+			$this->postIteratorRecursion($node->right);
+			
+			$array[] = $this->get($node);
+		}
+		return $array;
 	}
 }

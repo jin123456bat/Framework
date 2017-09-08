@@ -53,7 +53,7 @@ abstract class tree extends data
 	 * @param mixed $data
 	 * @return \stdClass
 	 */
-	protected function node(\stdClass $node)
+	protected function node($data)
 	{
 		
 	}
