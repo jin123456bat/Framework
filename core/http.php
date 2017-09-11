@@ -7,7 +7,7 @@ class http extends base
 	/**
 	 * 创建一个url
 	 */
-	function url($c, $a, array $options = array())
+	static function url($c, $a, array $options = array())
 	{
 		$scheme = request::isHttps() ? 'https://' : 'http://';
 		if (isset($options['scheme']))
