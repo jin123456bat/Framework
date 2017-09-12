@@ -574,8 +574,6 @@ class compiler extends \framework\view\compiler
 	 */
 	private function getArrayString($array)
 	{
-		if (is_array($array))
-		{
 			$string = 'array(';
 			$content = array();
 			foreach ($array as $index => $value)
@@ -590,18 +588,16 @@ class compiler extends \framework\view\compiler
 				}
 				else if (is_string($value))
 				{
+					//输出模板的时候自动加上防xss注入
+					$value= htmlspecialchars($value);
+					$value = str_replace('\'', '"', $value);
+					$value= str_replace('"', '\"', $value);
 					$value = '"'.$value.'"';
 				}
-				
 				$content[] = $index.'=>'.$value;
 			}
 			$string.=implode(',', $content).')';
 			return $string;
-		}
-		else if (is_scalar($array))
-		{
-			return $array;
-		}
 	}
 
 	/**
@@ -614,6 +610,7 @@ class compiler extends \framework\view\compiler
 	 */
 	private function expression($string)
 	{
+		static $i = 0;
 		if (isset($this->_temp_variable['$' . $string]))
 		{
 			return $this->_temp_variable['$' . $string];
@@ -641,7 +638,6 @@ class compiler extends \framework\view\compiler
 			}
 			else
 			{
-				//这里有个问题啊，多维数据怎么办?
 				if (isset($this->_variable[$match[0]]) && is_array($this->_variable[$match[0]]))
 				{
 					return $this->getArrayString($this->_variable[$match[0]]);
@@ -653,7 +649,7 @@ class compiler extends \framework\view\compiler
 				return $match[0];
 			}
 		}, $calString);
-			
+		
 		// 变量替换字符串
 		foreach ($this->_string as $key => $value)
 		{
@@ -673,10 +669,13 @@ class compiler extends \framework\view\compiler
 		{
 			@eval($key . '=\'' . $value . '\';');
 		}
-		
+		if ($i==0)
+		{
+			//exit($calString);
+		}
 		$result = @eval('return ' . $calString . ';');
 		$this->_temp_variable['$' . $string] = $result;
-		
+		$i++;
 		return $result;
 	}
 
