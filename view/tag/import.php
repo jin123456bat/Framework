@@ -2,11 +2,12 @@
 namespace framework\view\tag;
 
 use framework\view\tag;
+use framework\view\compiler;
 
 class import extends tag
 {
 
-	function compile($parameter, $compiler)
+	function compile($parameter,compiler $compiler)
 	{
 		if (isset($parameter['file']))
 		{

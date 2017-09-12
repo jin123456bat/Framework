@@ -3,6 +3,24 @@ namespace framework\view;
 
 abstract class compiler
 {
+	/**
+	 * 在模板中添加变量
+	 * @param string $var
+	 * @param mixed $val
+	 */
+	abstract public function assign($var, $val);
+	
+	/**
+	 * 在模板中删除变量
+	 * @param string $var
+	 */
+	abstract public function unassign($var);
+	
+	/**
+	 * 设置模板内容
+	 * @param string $tempalte
+	 */
+	abstract public function setTempalte($tempalte);
 
 	/**
 	 * 获取模板编译后的内容

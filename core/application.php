@@ -358,7 +358,6 @@ class application extends component
 	 */
 	protected function doResponse($response, $exit = true, $callback = NULL)
 	{
-		
 		if (method_exists($this, 'onRequestEnd'))
 		{
 			$newResponse = call_user_func(array(
@@ -381,7 +380,6 @@ class application extends component
 			{
 				if (request::php_sapi_name() == 'web')
 				{
-					
 					$response->initlize();
 					
 					// 设置status_code

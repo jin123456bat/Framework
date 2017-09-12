@@ -13,6 +13,10 @@ use framework\core\base;
 class engine extends component
 {
 
+	/**
+	 * 编译器实例
+	 * @var compiler
+	 */
 	private $_compiler = NULL;
 
 	private $_path;

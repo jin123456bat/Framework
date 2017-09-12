@@ -120,6 +120,9 @@ class compiler extends \framework\view\compiler
 			}
 		}
 		while (! empty($num));
+		
+		//删除临时变量
+		$this->_temp_variable = array();
 	}
 
 	/**
@@ -181,7 +184,8 @@ class compiler extends \framework\view\compiler
 	}
 
 	/**
-	 * 设置模板内容
+	 * {@inheritDoc}
+	 * @see \framework\view\compiler::setTempalte()
 	 */
 	function setTempalte($tempalte)
 	{
@@ -190,10 +194,8 @@ class compiler extends \framework\view\compiler
 	}
 
 	/**
-	 * 在模板中添加变量
-	 * 
-	 * @param unknown $var        
-	 * @param unknown $val        
+	 * {@inheritDoc}
+	 * @see \framework\view\compiler::assign()
 	 */
 	function assign($var, $val)
 	{
@@ -205,6 +207,16 @@ class compiler extends \framework\view\compiler
 		{
 			$this->_variable['$' . $var] = $val;
 		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\view\compiler::unassign()
+	 */
+	function unassign($var)
+	{
+		unset($this->_functions[$var]);
+		unset($this->_variable['$'.$var]);
 	}
 
 	/**
@@ -265,16 +277,6 @@ class compiler extends \framework\view\compiler
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * 获取所有已经计算好了的值
-	 * 
-	 * @return array()
-	 */
-	function getCalculation()
-	{
-		return $this->_temp_variable;
 	}
 
 	private function guid()
@@ -366,7 +368,6 @@ class compiler extends \framework\view\compiler
 				}
 			}, $dirs);
 		}
-		
 		// 处理 所有的block
 		$dirs = scandir(SYSTEM_ROOT . '/view/block');
 		if ($dirs)
@@ -378,7 +379,6 @@ class compiler extends \framework\view\compiler
 				}
 			}, $dirs);
 		}
-		
 		// 剩下的全都是变量了
 		$pattern = '!' . $this->getLeftDelimiter() . '[\s\S]*' . $this->getRightDelimiter() . '!Uis';
 		$this->_template = preg_replace_callback($pattern, function ($match) {
@@ -531,16 +531,6 @@ class compiler extends \framework\view\compiler
 	{
 		$calString = $string;
 		// 优先计算表达式中的算术括号
-		/*
-		 * $num = 0;
-		 * do{
-		 * $pattern = '{(?<!\w)\((?<expression>[\w\+\-\*\/\.\$\s]*)\)}';
-		 * $calString = preg_replace_callback($pattern, function($match){
-		 * $result = $this->expression($match['expression']);
-		 * return $result;
-		 * }, $calString);
-		 * }while (!empty($num));
-		 */
 		$left_brackets_pos = 0;
 		$right_brackets_pos = 0;
 		$expression = $this->getBracketsExpression($calString, 0, $left_brackets_pos, $right_brackets_pos);
@@ -576,6 +566,43 @@ class compiler extends \framework\view\compiler
 		$calString = $this->expression($calString);
 		return $calString;
 	}
+	
+	/**
+	 * 将数组转化为字符串
+	 * @param unknown $array
+	 * @return string|unknown
+	 */
+	private function getArrayString($array)
+	{
+		if (is_array($array))
+		{
+			$string = 'array(';
+			$content = array();
+			foreach ($array as $index => $value)
+			{
+				if (is_string($index))
+				{
+					$index = '"'.$index.'"';
+				}
+				if (is_array($value))
+				{
+					$value = $this->getArrayString($value);
+				}
+				else if (is_string($value))
+				{
+					$value = '"'.$value.'"';
+				}
+				
+				$content[] = $index.'=>'.$value;
+			}
+			$string.=implode(',', $content).')';
+			return $string;
+		}
+		else if (is_scalar($array))
+		{
+			return $array;
+		}
+	}
 
 	/**
 	 * 计算表达式的值
@@ -596,6 +623,7 @@ class compiler extends \framework\view\compiler
 		// 变量替换 数组 将在模板中定义的数组替换回来
 		$calString = preg_replace_callback('!\$([a-zA-Z_]\w*\.)*[a-zA-Z_]\w*!', function ($match) {
 			$result = NULL;
+			//$array.name的形式变量替换
 			if (strpos($match[0], '.'))
 			{
 				$array = explode('.', $match[0]);
@@ -609,27 +637,29 @@ class compiler extends \framework\view\compiler
 					$data = isset($data[current($array)]) ? $data[current($array)] : '';
 					next($array);
 				}
-				return $data;
+				return '\''.$data.'\'';
 			}
 			else
 			{
+				//这里有个问题啊，多维数据怎么办?
 				if (isset($this->_variable[$match[0]]) && is_array($this->_variable[$match[0]]))
 				{
-					return 'array(' . implode(',', $this->_variable[$match[0]]) . ')';
+					return $this->getArrayString($this->_variable[$match[0]]);
 				}
 				if (isset($this->_array[$match[0]]))
 				{
-					return 'array(' . implode(',', $this->_array[$match[0]]) . ')';
+					return $this->getArrayString($this->_array[$match[0]]);
 				}
 				return $match[0];
 			}
 		}, $calString);
-		
+			
 		// 变量替换字符串
 		foreach ($this->_string as $key => $value)
 		{
 			@eval($key . ' = \'' . $value . '\';');
 		}
+		
 		foreach ($this->_variable as $key => $value)
 		{
 			if (is_string($value))
@@ -680,7 +710,7 @@ class compiler extends \framework\view\compiler
 					$result = $class->compile($content, $parameter, $this);
 					return $result;
 				}
-				return '';
+				return $content;
 			}, $this->_template, - 1, $num);
 		}
 		while (! empty($num));
