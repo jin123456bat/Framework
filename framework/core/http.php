@@ -7,24 +7,13 @@ class http extends base
 	/**
 	 * 创建一个url
 	 */
-	static function url($c, $a, array $options = array())
+	function url($c, $a, array $options = array())
 	{
-		if (request::isHttps())
-		{
-			$scheme = 'https://';
-			$default_port = 443;
-		}
-		else
-		{
-			$scheme = 'http://';
-			$default_port = 80;
-		}
-		
+		$scheme = request::isHttps() ? 'https://' : 'http://';
 		if (isset($options['scheme']))
 		{
 			$scheme = $options['scheme'] . '://';
 			unset($options['scheme']);
-			$default_port = 0;
 		}
 		
 		$host = $_SERVER['HTTP_HOST'];
@@ -34,13 +23,13 @@ class http extends base
 			unset($options['host']);
 		}
 		
-		$port = $_SERVER['SERVER_PORT'];
+		$port = $_SERVER['REMOTE_PORT'];
 		if (isset($options['port']))
 		{
 			$port = $options['port'];
 			unset($options['port']);
 		}
-		if (($port == 80 && $default_port == 80) || ($port == 443 && $default_port == 443))
+		if ($port == 80)
 		{
 			$port = '';
 		}
@@ -49,7 +38,7 @@ class http extends base
 			$port = ':' . $port;
 		}
 		
-		$path = $_SERVER['SCRIPT_NAME'];
+		$path = $_SERVER['PHP_SELF'];
 		if (isset($options['path']))
 		{
 			$path = '/' . ltrim($options['path'], '/');

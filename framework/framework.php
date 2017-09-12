@@ -27,17 +27,6 @@ class framework
 	 * @var unknown
 	 */
 	private $_argv;
-	
-	/**
-	 * 必须要安装的目录
-	 * @var unknown
-	 */
-	private $_install_dir = array(
-		'/control',
-		'/config',
-		'/model',
-		'/template',
-	);
 
 	function __construct()
 	{
@@ -54,18 +43,7 @@ class framework
 	 */
 	function canInstall()
 	{
-		if(!is_dir(APP_ROOT))
-		{
-			return true;
-		}
-		foreach ($this->_install_dir as $dir)
-		{
-			if (!is_dir(APP_ROOT.$dir))
-			{
-				return true;
-			}
-		}
-		return false;
+		return !is_dir(APP_ROOT);
 	}
 	
 	/**
@@ -73,13 +51,10 @@ class framework
 	 */
 	function install()
 	{
-		foreach ($this->_install_dir as $dir)
-		{
-			if (!file_exists($dir))
-			{
-				mkdir(APP_ROOT.$dir,0777,true);
-			}
-		}
+		//创建控制器目录
+		mkdir(APP_ROOT.'/control',0777,true);
+		//创建配置目录
+		mkdir(APP_ROOT.'/config',0777,true);
 	}
 	
 	/**
