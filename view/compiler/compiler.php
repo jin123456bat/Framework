@@ -13,7 +13,7 @@ class compiler extends \framework\view\compiler
 	/**
 	 * 模板原文
 	 * 
-	 * @var unknown
+	 * @var string
 	 */
 	private $_template;
 
@@ -332,31 +332,6 @@ class compiler extends \framework\view\compiler
 	 */
 	function fetch()
 	{
-		$pattern = '!' . $this->getLeftDelimiter() . '.*' . $this->getRightDelimiter() . '!i';
-		$this->_template = preg_replace_callback($pattern, function ($matches) {
-			// 提出声明的字符串
-			$after_string = preg_replace_callback('!\'[^\']*\'!i', function ($match) {
-				$key = $this->remeberString(trim($match[0], '\''));
-				return $key;
-			}, $matches[0]);
-			
-			// 声明的数组
-			$after_array = preg_replace_callback('!\[[\s\S]*\]!Ui', function ($match) {
-				$array = explode(',', trim($match[0], '[]'));
-				foreach ($array as &$value)
-				{
-					$value = $this->variable($value);
-				}
-				$key = $this->remeberArray($array);
-				return $key;
-			}, $after_string);
-			
-			return $after_array;
-		}, $this->_template);
-		
-		// 处理特殊block
-		$this->doIfBlock();
-		
 		// 处理所有标签
 		$dirs = scandir(SYSTEM_ROOT . '/view/tag');
 		if ($dirs)
@@ -368,6 +343,10 @@ class compiler extends \framework\view\compiler
 				}
 			}, $dirs);
 		}
+		
+		// 处理特殊block
+		$this->doIfBlock();
+		
 		// 处理 所有的block
 		$dirs = scandir(SYSTEM_ROOT . '/view/block');
 		if ($dirs)
@@ -379,6 +358,42 @@ class compiler extends \framework\view\compiler
 				}
 			}, $dirs);
 		}
+		
+		//处理模板中声明的变量和数组
+		$pattern = '!' . $this->getLeftDelimiter() . '.*' . $this->getRightDelimiter() . '!i';
+		$this->_template = preg_replace_callback($pattern, function ($matches) {
+			// 提出声明的字符串  字符串必须用单引号声明
+			$after_string = preg_replace_callback('!\'[^\']*\'!i', function ($match) {
+				$key = $this->remeberString(trim($match[0], '\''));
+				return $key;
+			}, $matches[0]);
+			
+			// 声明的数组
+			$after_array = preg_replace_callback('!\[[\s\S]*\]!Ui', function ($match) {
+				$array = explode(',', trim($match[0], '[]'));
+				$temp = array();
+				foreach ($array as $value)
+				{
+					$value = explode('=>', $value);
+					if (count($value)==2)
+					{
+						$key = $value[0];
+						$value = $this->variable($value[1]);
+						$temp[$key] = $value;
+					}
+					else if (count($value)==1)
+					{
+						$value = $this->variable($value[0]);
+						$temp[] = $value;
+					}
+				}
+				$key = $this->remeberArray($temp);
+				return $key;
+			}, $after_string);
+			
+			return $after_array;
+		}, $this->_template);
+		
 		// 剩下的全都是变量了
 		$pattern = '!' . $this->getLeftDelimiter() . '[\s\S]*' . $this->getRightDelimiter() . '!Uis';
 		$this->_template = preg_replace_callback($pattern, function ($match) {
@@ -454,6 +469,7 @@ class compiler extends \framework\view\compiler
 		if (preg_match($pattern, $string, $func_info))
 		{
 			$parameter = trim($func_info['parameter']);
+			
 			if (empty($parameter))
 			{
 				$param_arr = array();
@@ -462,6 +478,7 @@ class compiler extends \framework\view\compiler
 			{
 				$param_arr = explode(',', $func_info['parameter']);
 				$param_arr = array_map(function ($v) {
+					
 					$value = $this->expression($v);
 					return $value;
 				}, $param_arr);
@@ -611,11 +628,6 @@ class compiler extends \framework\view\compiler
 	private function expression($string)
 	{
 		static $i = 0;
-		if (isset($this->_temp_variable['$' . $string]))
-		{
-			return $this->_temp_variable['$' . $string];
-		}
-		
 		$calString = $string;
 		// 变量替换 数组 将在模板中定义的数组替换回来
 		$calString = preg_replace_callback('!\$([a-zA-Z_]\w*\.)*[a-zA-Z_]\w*!', function ($match) {
@@ -627,14 +639,17 @@ class compiler extends \framework\view\compiler
 				if (isset($this->_variable[current($array)]))
 				{
 					$data = $this->_variable[current($array)];
-				}
-				next($array);
-				while (current($array))
-				{
-					$data = isset($data[current($array)]) ? $data[current($array)] : '';
+					
 					next($array);
+					while (current($array))
+					{
+						$data = isset($data[current($array)]) ? $data[current($array)] : '';
+						next($array);
+					}
+					return '\''.$data.'\'';
 				}
-				return '\''.$data.'\'';
+				//变量没有找到 原样返回  前后要加单引号 防止后面的eval进行计算
+				return '\''.$match[0].'\'';
 			}
 			else
 			{
@@ -653,6 +668,7 @@ class compiler extends \framework\view\compiler
 		// 变量替换字符串
 		foreach ($this->_string as $key => $value)
 		{
+			//$calString = str_replace($key, $value, $calString);
 			@eval($key . ' = \'' . $value . '\';');
 		}
 		
@@ -660,6 +676,7 @@ class compiler extends \framework\view\compiler
 		{
 			if (is_string($value))
 			{
+				//$calString = str_replace($key, $value, $calString);
 				@eval($key . ' = \'' . $value . '\';');
 			}
 		}
@@ -667,14 +684,17 @@ class compiler extends \framework\view\compiler
 		// 变量替换布尔
 		foreach ($this->_bool as $key => $value)
 		{
-			@eval($key . '=\'' . $value . '\';');
+			/* $value = $value?'true':'false';
+			$calString = str_replace($key, $value, $calString);
+			 */@eval($key . '=\'' . $value . '\';');
 		}
-		if ($i==0)
+		
+		if ($i==2)
 		{
 			//exit($calString);
 		}
 		$result = @eval('return ' . $calString . ';');
-		$this->_temp_variable['$' . $string] = $result;
+		
 		$i++;
 		return $result;
 	}
