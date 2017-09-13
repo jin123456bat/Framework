@@ -674,15 +674,13 @@ class compiler extends \framework\view\compiler
 		// 变量替换字符串
 		foreach ($this->_string as $key => $value)
 		{
-			//$calString = str_replace($key, $value, $calString);
 			@eval($key . ' = \'' . $value . '\';');
 		}
 		
 		foreach ($this->_variable as $key => $value)
 		{
-			if (is_string($value))
+			if (is_scalar($value))
 			{
-				//$calString = str_replace($key, $value, $calString);
 				@eval($key . ' = \'' . $value . '\';');
 			}
 		}
@@ -690,9 +688,7 @@ class compiler extends \framework\view\compiler
 		// 变量替换布尔
 		foreach ($this->_bool as $key => $value)
 		{
-			/* $value = $value?'true':'false';
-			$calString = str_replace($key, $value, $calString);
-			 */@eval($key . '=\'' . $value . '\';');
+			@eval($key . '=\'' . $value . '\';');
 		}
 		
 		if ($i==2)
