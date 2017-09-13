@@ -475,7 +475,6 @@ class compiler extends \framework\view\compiler
 		if (preg_match($pattern, $string, $func_info))
 		{
 			$parameter = trim($func_info['parameter']);
-			
 			if (empty($parameter))
 			{
 				$param_arr = array();
@@ -484,7 +483,6 @@ class compiler extends \framework\view\compiler
 			{
 				$param_arr = explode(',', $func_info['parameter']);
 				$param_arr = array_map(function ($v) {
-					
 					$value = $this->expression($v);
 					return $value;
 				}, $param_arr);
@@ -633,6 +631,10 @@ class compiler extends \framework\view\compiler
 	 */
 	private function expression($string)
 	{
+		if ($string[0] == '"' && $string[strlen($string)-1]=='"')
+		{
+			return $string;
+		}
 		static $i = 0;
 		$calString = $string;
 		// 变量替换 数组 将在模板中定义的数组替换回来
