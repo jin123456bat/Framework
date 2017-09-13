@@ -55,6 +55,11 @@ class paginate extends component
 		{
 			$this->_data = $table;
 		}
+		else if ($table instanceof model)
+		{
+			$this->_model = $table;
+			$this->_clone = clone $table;
+		}
 	}
 
 	/**

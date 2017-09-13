@@ -123,6 +123,12 @@ class compiler extends \framework\view\compiler
 		
 		//删除临时变量
 		$this->_temp_variable = array();
+		
+		//添加环境变量
+		$this->assign('_GET', $_GET);
+		$this->assign('_POST', $_POST);
+		$this->assign('_SERVER', $_SERVER);
+		$this->assign('GLOBALS', $GLOBALS);
 	}
 
 	/**
