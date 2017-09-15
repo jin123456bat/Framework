@@ -3,6 +3,7 @@ namespace framework\core;
 
 use framework;
 use framework\core\response\json;
+use framework\vendor\csrf;
 
 class application extends component
 {
@@ -212,6 +213,27 @@ class application extends component
 			}
 			else
 			{
+				//csrf认证
+				if ($filter->csrf())
+				{
+					if (!csrf::verify(request::param('_csrf_token')))
+					{
+						$response = $filter->getMessage();
+						if ($response !== NULL)
+						{
+							if (is_callable($doResponse))
+							{
+								call_user_func($doResponse, $response, true, $callback);
+							}
+							else
+							{
+								return $response;
+							}
+						}
+					}
+				}
+				
+				
 				// control的初始化返回内容
 				if (method_exists($controller, 'initlize') && is_callable(array(
 					$controller,

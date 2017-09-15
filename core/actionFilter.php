@@ -106,7 +106,22 @@ class actionFilter extends component
 	 */
 	function csrf()
 	{
-		
+		if (method_exists($this->_control, '__csrf'))
+		{
+			$csrfs = call_user_func(array(
+				$this->_control,
+				'__csrf'
+			));
+			if (is_array($csrfs) && in_array($this->_action, $csrfs))
+			{
+				return true;
+			}
+			else if(is_string($csrfs) && $csrfs == $this->_action)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
