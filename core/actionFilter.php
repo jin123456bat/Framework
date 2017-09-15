@@ -100,6 +100,14 @@ class actionFilter extends component
 		}
 		return true;
 	}
+	
+	/**
+	 * action是否开启csrf验证
+	 */
+	function csrf()
+	{
+		
+	}
 
 	/**
 	 * 假如禁止访问的话获取禁止访问的消息
