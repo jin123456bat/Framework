@@ -22,6 +22,20 @@ class entity extends base
 		$this->_data = $data;
 	}
 	
+	function __get($name)
+	{
+		if (isset($this->_data[$name]))
+		{
+			return $this->_data[$name];
+		}
+		return NULL;
+	}
+	
+	function __set($name,$value)
+	{
+		$this->_data[$name] = $value;
+	}
+	
 	/**
 	 * 删除之后执行的函数
 	 */
