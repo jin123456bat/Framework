@@ -477,7 +477,7 @@ class file extends base
 		}
 		else
 		{
-			return str_replace(ROOT, '', $this->_path);
+			return str_replace(APP_ROOT, '', $this->_path);
 		}
 	}
 
