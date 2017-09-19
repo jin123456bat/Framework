@@ -430,7 +430,7 @@ class model extends component
 				}
 			}
 			// 调整字段顺序
-			/* $temp = array();
+			$temp = array();
 			foreach ($this->_desc as $value)
 			{
 				if (isset($data[$value['Field']]))
@@ -438,7 +438,7 @@ class model extends component
 					$temp[$value['Field']] = $data[$value['Field']];
 				}
 			}
-			$data = $temp; */
+			$data = $temp;
 		}
 		if ($this->_compress)
 		{
@@ -627,16 +627,25 @@ class model extends component
 			{
 				unset($this->_compress_sql['insert_duplicate_values']);
 			}
-			$sql = array_shift($this->_compress_sql);
-			$sql = trim($sql, ' ;'); // 去除前后空格和分号
-			$sql = str_replace('  ', ' ', $sql); // 把2个空格转化为1个空格
-			$result = 0;
-			while (! empty($sql))
-			{
-				$result += $this->_db->query($sql . ';');
+			$this->_db->transaction();
+			try{
 				$sql = array_shift($this->_compress_sql);
+				$sql = trim($sql, ' ;'); // 去除前后空格和分号
+				$sql = str_replace('  ', ' ', $sql); // 把2个空格转化为1个空格
+				$result = 0;
+				while (! empty($sql))
+				{
+					$result += $this->_db->query($sql . ';');
+					$sql = array_shift($this->_compress_sql);
+				}
+				$this->_compress = false;
 			}
-			$this->_compress = false;
+			catch (\Exception $e)
+			{
+				$this->_db->rollback();
+				return false;
+			}
+			$this->_db->commit();
 			return $result;
 		}
 		return false;

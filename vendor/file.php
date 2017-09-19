@@ -102,23 +102,8 @@ class file extends base
 	{
 		$this->_path = $file;
 		$this->_exist = file_exists($this->_path);
-		// 加锁
-		if ($this->_exist)
-		{
-			$this->_resource = fopen($this->_path, 'a+');
-			flock($this->_resource, LOCK_EX);
-		}
 		
 		$this->parse();
-	}
-
-	function __destruct()
-	{
-		// 解锁
-		if ($this->_resource)
-		{
-			flock($this->_resource, LOCK_UN);
-		}
 	}
 
 	public function initlize()
@@ -354,8 +339,10 @@ class file extends base
 				{
 					mkdir($path,true,0777);
 				}
-				file_put_contents($path.$this->_basename, $this->content());
-				$new_path = $path.$this->_basename;
+				if(file_put_contents($path.$this->_basename, $this->content()))
+				{
+					$new_path = $path.$this->_basename;
+				}
 			}
 			else
 			{
@@ -364,8 +351,10 @@ class file extends base
 				{
 					mkdir($dir,true,0777);
 				}
-				file_put_contents($path, $this->content());
-				$new_path = $path;
+				if(file_put_contents($path, $this->content()))
+				{
+					$new_path = $path;
+				}
 			}
 		}
 		else

@@ -206,11 +206,11 @@ class entity extends base
 			{
 				return false;
 			}
-			
 			$this->model($model)->transaction();
 			if ($this->model($model)->insert($data))
 			{
 				$this->_data[$pk] = $this->model($model)->lastInsertId();
+				$data[$pk] = $this->_data[$pk];
 				
 				//获取关系数据
 				$relation_data = array();
