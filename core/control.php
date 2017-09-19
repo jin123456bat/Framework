@@ -45,6 +45,14 @@ class control extends component
 	{
 		return array();
 	}
+	
+	/**
+	 * cli模式下只允许一个实例
+	 */
+	function __single()
+	{
+		return array();
+	}
 
 	/**
 	 * 当其它的模式调用了这个控制器中的方法的时候，调用这个函数来提供一个友好的输出提示

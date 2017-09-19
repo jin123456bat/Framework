@@ -116,21 +116,22 @@ class actionFilter extends component
 				$this->_control,
 				'__csrf'
 			));
-			if (isset($csrfs['action']))
-			{
-				$actions = $csrfs['action'];
-			}
+			
 			if (isset($csrfs['message']))
 			{
 				$this->_message = $csrfs['message'];
 			}
-			if ((is_array($actions) && in_array($this->_action, $actions)) || current($actions) == '*')
+			if (isset($csrfs['action']))
 			{
-				return true;
-			}
-			else if((is_string($actions) && $actions== $this->_action) || $actions== '*')
-			{
-				return true;
+				$actions = $csrfs['action'];
+				if ((is_array($actions) && in_array($this->_action, $actions)) || current($actions) == '*')
+				{
+					return true;
+				}
+				else if((is_string($actions) && $actions== $this->_action) || $actions== '*')
+				{
+					return true;
+				}
 			}
 		}
 		return false;
@@ -139,27 +140,38 @@ class actionFilter extends component
 	/**
 	 * 当程序在cli模式下，一个action只允许一个实例
 	 * 这个函数是判断action是否在运行中
+	 * @return boolean 返回true在运行中 false不在运行中
 	 */
 	function singleThread()
 	{
-		if (method_exists($this->_control, '__single'))
+		if (request::php_sapi_name() == 'cli')
 		{
-			$csrfs = call_user_func(array(
-				$this->_control,
-				'__single'
-			));
-			if ((is_array($csrfs) && in_array($this->_action, $csrfs)) || current($csrfs) == '*')
+			if (method_exists($this->_control, '__single'))
 			{
-				return true;
-			}
-			else if((is_string($csrfs) && $csrfs == $this->_action) || $csrfs == '*')
-			{
-				return true;
+				$singles = call_user_func(array(
+					$this->_control,
+					'__single'
+				));
+				if ((is_array($singles) && in_array($this->_action, $singles)) || current($singles) == '*')
+				{
+					return $this->isRunning($this->_control, $this->_action);
+				}
+				else if((is_string($singles) && $singles== $this->_action) || $singles== '*')
+				{
+					return $this->isRunning($this->_control, $this->_action);
+				}
 			}
 		}
 		return false;
-		
-		$shell = 'ps -ef | grep "'.APP_ROOT.'index.php -c '.$this->_control.' -a '.$this->_action.'" | grep -v grep';
+	}
+	
+	/**
+	 * 判断程序在cli下是否在运行
+	 * @return boolean
+	 */
+	private function isRunning($control,$action)
+	{
+		$shell = 'ps -ef | grep "'.APP_ROOT.'index.php -c '.$control.' -a '.$action.'" | grep -v grep';
 		$response = shell_exec($shell);
 		return !empty($response);
 	}
