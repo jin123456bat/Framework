@@ -106,11 +106,47 @@ class actionFilter extends component
 	 */
 	function csrf()
 	{
+		if (request::php_sapi_name() == 'cli')
+		{
+			return false;
+		}
 		if (method_exists($this->_control, '__csrf'))
 		{
 			$csrfs = call_user_func(array(
 				$this->_control,
 				'__csrf'
+			));
+			if (isset($csrfs['action']))
+			{
+				$actions = $csrfs['action'];
+			}
+			if (isset($csrfs['message']))
+			{
+				$this->_message = $csrfs['message'];
+			}
+			if ((is_array($actions) && in_array($this->_action, $actions)) || current($actions) == '*')
+			{
+				return true;
+			}
+			else if((is_string($actions) && $actions== $this->_action) || $actions== '*')
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * 当程序在cli模式下，一个action只允许一个实例
+	 * 这个函数是判断action是否在运行中
+	 */
+	function singleThread()
+	{
+		if (method_exists($this->_control, '__single'))
+		{
+			$csrfs = call_user_func(array(
+				$this->_control,
+				'__single'
 			));
 			if ((is_array($csrfs) && in_array($this->_action, $csrfs)) || current($csrfs) == '*')
 			{
@@ -122,6 +158,10 @@ class actionFilter extends component
 			}
 		}
 		return false;
+		
+		$shell = 'ps -ef | grep "'.APP_ROOT.'index.php -c '.$this->_control.' -a '.$this->_action.'" | grep -v grep';
+		$response = shell_exec($shell);
+		return !empty($response);
 	}
 
 	/**

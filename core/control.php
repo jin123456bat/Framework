@@ -29,6 +29,22 @@ class control extends component
 	{
 		echo $msg;
 	}
+	
+	/**
+	 * 这个函数应该返回一个数组或者字符串
+	 * 假如调用的action在返回的数组中
+	 * 就必须要通过csrf验证才允许调用
+	 * 支持*通配符
+	 * @example
+	 * return array(
+			'action' => '*',
+			'message' => '请刷新重试',
+		);
+	 */
+	function __csrf()
+	{
+		return array();
+	}
 
 	/**
 	 * 当其它的模式调用了这个控制器中的方法的时候，调用这个函数来提供一个友好的输出提示
