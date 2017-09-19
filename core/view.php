@@ -37,21 +37,30 @@ class view extends response
 
 	function __construct($template, $layout = null)
 	{
-		$view = $this->getConfig('view');
-		if ($layout !== null)
+		$this->_engine = new engine();
+		
+		if (file_exists($template))
 		{
-			$this->_layout = $layout;
+			$this->_template = $template;
+			$this->_engine->setTemplate($template);
 		}
 		else
 		{
-			$this->_layout = isset($view['layout']) ? $view['layout'] : 'layout';
+			$view = $this->getConfig('view');
+			if ($layout !== null)
+			{
+				$this->_layout = $layout;
+			}
+			else
+			{
+				$this->_layout = isset($view['layout']) ? $view['layout'] : 'layout';
+			}
+			
+			$this->_template = $template;
+			
+			$this->_engine->setTemplatePath(APP_ROOT . '/template/' . trim($this->_layout, '/\\'));
+			$this->_engine->setTempalteName($this->_template);
 		}
-		
-		$this->_template = $template;
-		
-		$this->_engine = new engine();
-		$this->_engine->setTemplatePath(APP_ROOT . '/template/' . trim($this->_layout, '/\\'));
-		$this->_engine->setTempalteName($this->_template);
 		
 		parent::__construct();
 	}
@@ -98,30 +107,21 @@ class view extends response
 	 */
 	function getBody()
 	{
-		$file = APP_ROOT . '/template/' . trim($this->_layout, '/\\') . '/' . $this->_template;
-		if (file_exists($file))
+		$body = $this->_engine->fetch();
+		
+		// 自动开启html压缩
+		$view = $this->getConfig('view');
+		if (is_bool($view['compress']) && $view['compress'] || (is_array($view['compress']) && in_array($this->_template, $view['compress'], true)))
 		{
-			
-			$body = $this->_engine->fetch();
-			
-			// 自动开启html压缩
-			$view = $this->getConfig('view');
-			if (is_bool($view['compress']) && $view['compress'] || (is_array($view['compress']) && in_array($this->_template, $view['compress'], true)))
+			if (! isset($view['no_compress']) || ! in_array($this->_template, $view['no_compress'], true))
 			{
-				if (! isset($view['no_compress']) || ! in_array($this->_template, $view['no_compress'], true))
+				if (class_exists('\framework\vendor\compress', true))
 				{
-					if (class_exists('\framework\vendor\compress', true))
-					{
-						$body = \framework\vendor\compress::html($body);
-					}
+					$body = \framework\vendor\compress::html($body);
 				}
 			}
-			
-			return $body;
 		}
-		else
-		{
-			exit('file not exist');
-		}
+		
+		return $body;
 	}
 }

@@ -226,75 +226,6 @@ class compiler extends \framework\view\compiler
 	}
 
 	/**
-	 * 设置模板文件夹路径
-	 */
-	function setTemplatePath($path)
-	{
-		$this->_template_path[] = $path;
-	}
-
-	/**
-	 * 获取模板文件夹路径
-	 * 
-	 * @return \framework\view\compiler\unknown
-	 */
-	function getTemplatePath()
-	{
-		return $this->_template_path;
-	}
-
-	/**
-	 * 已经计算好的表达式或者语句的值
-	 * 
-	 * @example $result = NULL
-	 *          if($this->calculation('1+2',$result))
-	 *          {
-	 *          return $result;
-	 *          }
-	 * @param unknown $string
-	 *        原始表达式
-	 * @param
-	 *        &$result 原始表达式的值将会填充到这个变量中
-	 * @return mixed|boolean 这个表达式是否已经计算过，并且成功拿到了值
-	 */
-	function calculation($string, &$result = NULL)
-	{
-		if ($string[0] == '$')
-		{
-			if (isset($this->_variable[$string]))
-			{
-				$result = $this->_variable[$string];
-				return true;
-			}
-			else if (isset($this->_string[$string]))
-			{
-				$result = $this->_string[$string];
-				return true;
-			}
-			else if (isset($this->_array[$string]))
-			{
-				$result = $this->_array[$string];
-				return true;
-			}
-			else if (isset($this->_temp_variable[$string]))
-			{
-				$result = $this->_temp_variable[$string];
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private function guid()
-	{
-		mt_srand((double) microtime() * 10000); // optional for php 4.2.0 and up.
-		$charid = strtoupper(md5(uniqid(rand(), true)));
-		$hyphen = chr(45);
-		$uuid = chr(123) . substr($charid, 0, 8) . $hyphen . substr($charid, 8, 4) . $hyphen . substr($charid, 12, 4) . $hyphen . substr($charid, 16, 4) . $hyphen . substr($charid, 20, 12) . chr(125);
-		return $uuid;
-	}
-
-	/**
 	 * 记录一个字符串变量
 	 * 
 	 * @param unknown $val        
@@ -798,35 +729,5 @@ class compiler extends \framework\view\compiler
 			}, $this->_template, - 1, $num);
 		}
 		while (! empty($num));
-		
-		/*
-		 * do{
-		 * $startPos = NULL;
-		 * $endPos = NULL;
-		 * $block_string = $this->getBlock('if',$startPos,$endPos);
-		 * $condition = array();
-		 * $content = '';
-		 * $pattern = '!'.$this->getLeftDelimiter().'if(.+)'.$this->getRightDelimiter().'(.*)(?='.$this->getLeftDelimiter().'/if'.$this->getRightDelimiter().')!Uis';
-		 * if(preg_match($pattern, $block_string,$match))
-		 * {
-		 * @list($content_true,$condition_false) = explode($this->_leftDelimiter.'else'.$this->_rightDelimiter, $match[2]);
-		 * $condition = $this->variable(trim($match[1]));
-		 * if ($condition)
-		 * {
-		 * if (!empty($block_string))
-		 * {
-		 * $this->_template = substr($this->_template,0,$startPos).$content_true.substr($this->_template, $endPos);
-		 * }
-		 * }
-		 * else
-		 * {
-		 * if (!empty($block_string))
-		 * {
-		 * $this->_template = substr($this->_template,0,$startPos).$condition_false.substr($this->_template, $endPos);
-		 * }
-		 * }
-		 * }
-		 * }while(!empty($block_string));
-		 */
 	}
 }

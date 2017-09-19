@@ -2,12 +2,12 @@
 namespace framework\view;
 
 use framework\core\component;
-use framework\vendor\file;
 use framework\view\compiler\compiler;
-use framework\core\base;
 
 /**
- *
+ * 设置模板文件的路径只有2种方法
+ * 要么通过setTemplate直接设置完整路径
+ * 要么先通过setTemplatePath设置一下目录 然后在 setTemplateName设置名称
  * @author fx
  */
 class engine extends component
@@ -19,9 +19,23 @@ class engine extends component
 	 */
 	private $_compiler = NULL;
 
+	/**
+	 * 模板文件所在路径
+	 * @var unknown
+	 */
 	private $_path;
 
+	/**
+	 * 模板文件名称
+	 * @var unknown
+	 */
 	private $_name;
+	
+	/**
+	 * 模板文件完整路径
+	 * @var unknown
+	 */
+	private $_template;
 
 	function __construct()
 	{
@@ -35,112 +49,49 @@ class engine extends component
 	{
 		$this->_compiler->assign($var, $val);
 	}
-
-	/*
-	 * /**
-	 * 变量替换
-	 * @param unknown $var
-	 * @param unknown $val
+	
+	/**
+	 * 直接设置模板文件完整路径
+	 * 可以不通过路径和名称的形式设置
+	 * @param string $template
 	 */
-	private function replaceVariable($var, $val)
+	function setTemplate($template)
 	{
-		$pattern = '!' . $this->_leftDelimiter . '.*\$' . $var . '.*' . $this->_rightDelimiter . '!';
-		$this->_compile = preg_replace_callback($pattern, function ($matches) use ($var, $val) {
-			return preg_replace('!\$' . $var . '!', $val, $matches[0]);
-		}, $this->_compile);
+		$this->_template = $template;
+		
+		if (file_exists($this->_template) && is_readable($this->_template))
+		{
+			$this->_compiler->setTempalte(file_get_contents($this->_template));
+		}
 	}
 
 	/**
-	 * 计算一个不带括号的表达式的值
-	 * 
-	 * @param unknown $string        
-	 * @return mixed
-	 */
-	private function expression($string)
-	{
-		return @eval('return ' . $string . ';');
-	}
-
-	/**
-	 * 现在的方式有点问题 --- 输出的模板同时也参与了内容的迭代
-	 * 模板中函数等 最终运算
-	 */
-	private function parse()
-	{
-		$pattern = '!' . $this->_leftDelimiter . '.*' . $this->_rightDelimiter . '!';
-		$this->_compile = preg_replace_callback($pattern, function ($matches) {
-			$result = $matches[0];
-			do
-			{
-				// 匹配最内层括号
-				$result = preg_replace_callback('!\w*\([^\(\)]*\)!', function ($brackets) {
-					// 找到其中的参数
-					preg_match('!\(.*\)!', $brackets[0], $args);
-					$args_list = explode(',', trim($args[0], '()'));
-					$args_list = array_map(function ($arg) {
-						if (! empty($arg))
-						{
-							// 参数中有表达式，计算参数中的表达式
-							return $this->expression($arg);
-						}
-						else
-						{
-							return '';
-						}
-					}, $args_list);
-					// 找到函数名
-					$func_name = str_replace($args[0], '', $brackets[0]);
-					if (! empty($func_name))
-					{
-						// 假如是PHP内置函数 直接执行
-						if (function_exists($func_name))
-						{
-							return call_user_func_array($func_name, $args_list);
-						}
-						else
-						{
-							// 不是PHP内置函数 在$this->_function中寻找
-							if (isset($this->_function[$func_name]))
-							{
-								return call_user_func_array($this->_function[$func_name], $args_list);
-							}
-						}
-					}
-					else
-					{
-						return $this->expression(trim($args[0], '()'));
-					}
-				}, $result);
-			}
-			while (preg_match('!\(.*\)!', $result));
-			return $this->expression(ltrim(rtrim($result, $this->_rightDelimiter), $this->_leftDelimiter));
-		}, $this->_compile);
-	}
-
-	/**
-	 * 设置模板路径
-	 * 
-	 * @param unknown $path        
+	 * 设置模板文件所在路径 
+	 * @param string $path        
 	 */
 	function setTemplatePath($path)
 	{
 		$this->_path = $path;
-		$this->_compiler->setTemplatePath($path);
+		
+		$this->_template = rtrim($this->_path, '/') . '/' . ltrim($this->_name, '/');
+		if (file_exists($this->_template) && is_readable($this->_template))
+		{
+			$this->_compiler->setTempalte(file_get_contents($this->_template));
+		}
 	}
 
 	/**
 	 * 设置模板名称
-	 * 
 	 * @param unknown $name        
 	 */
 	function setTempalteName($name)
 	{
 		$this->_name = $name;
-		$file = rtrim($this->_path, '/') . '/' . ltrim($this->_name, '/');
-		if (file_exists($file) && is_readable($file))
+		
+		$this->_template = rtrim($this->_path, '/') . '/' . ltrim($this->_name, '/');
+		if (file_exists($this->_template) && is_readable($this->_template))
 		{
-			$content = file_get_contents($file);
-			$this->_compiler->setTempalte($content);
+			$this->_compiler->setTempalte(file_get_contents($this->_template));
 		}
 	}
 

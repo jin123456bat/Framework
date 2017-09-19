@@ -4,7 +4,7 @@ namespace framework\core\response;
 use framework\core\response;
 
 /**
- *
+ * 302跳转
  * @author fx
  */
 class url extends response
