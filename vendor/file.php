@@ -321,6 +321,16 @@ class file extends base
 	{
 		return $path[strlen($path)-1] == '/';
 	}
+	
+	/**
+	 * 创建一个目录
+	 * 可以循环创建子目录
+	 * @param unknown $dir
+	 */
+	static function mkdir($dir,$mode = 0777)
+	{
+		mkdir($dir,$mode,true);
+	}
 
 	/**
 	 * 文件移动
@@ -337,7 +347,7 @@ class file extends base
 			{
 				if (!file_exists($path))
 				{
-					mkdir($path,true,0777);
+					self::mkdir($path,0777);
 				}
 				if(file_put_contents($path.$this->_basename, $this->content()))
 				{
@@ -349,7 +359,7 @@ class file extends base
 				$dir = pathinfo($path,PATHINFO_DIRNAME);
 				if (!file_exists($dir))
 				{
-					mkdir($dir,true,0777);
+					self::mkdir($dir,0777);
 				}
 				if(file_put_contents($path, $this->content()))
 				{
@@ -365,7 +375,7 @@ class file extends base
 				{
 					if (!file_exists($path))
 					{
-						mkdir($path,true,0777);
+						self::mkdir($path,0777);
 					}
 					move_uploaded_file($this->_path, $path.'/'.$this->_basename);
 					$new_path = $path.'/'.$this->_basename;
@@ -375,7 +385,7 @@ class file extends base
 					$dir = pathinfo($path,PATHINFO_DIRNAME);
 					if (!file_exists($dir))
 					{
-						mkdir($dir,true,0777);
+						self::mkdir($dir,0777);
 					}
 					move_uploaded_file($this->_path, $path);
 					$new_path = $this->_path;
@@ -387,7 +397,7 @@ class file extends base
 				{
 					if (!file_exists($path))
 					{
-						mkdir($path,true,0777);
+						self::mkdir($path,0777);
 					}
 					rename($this->_path, $path.'/'.$this->_basename);
 					$new_path = $path.'/'.$this->_basename;
@@ -397,7 +407,7 @@ class file extends base
 					$dir = pathinfo($path,PATHINFO_DIRNAME);
 					if (!file_exists($dir))
 					{
-						mkdir($dir,true,0777);
+						self::mkdir($dir,0777);
 					}
 					rename($this->_path, $path);
 					$new_path = $path;
