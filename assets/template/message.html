@@ -50,7 +50,7 @@ body{
 	<div class="bg">
 		<div class="container">
 			<div class="message">
-			{%message%}
+			{%$message%}
 			</div>
 			<div class="jump">
 			<div id="second" style="display:inline;">{%$timeout%}</div>秒后自动跳转，如果浏览器不能跳转，请<a href="{%$url%}">点此跳转</a>
@@ -58,7 +58,7 @@ body{
 		</div>
 	</div>
 	<script type="text/javascript">
-	/* setInterval(function(){
+	setInterval(function(){
 		secondElement = document.getElementById('second');
 		second = parseInt(secondElement.innerHTML);
 		second--;
@@ -68,9 +68,9 @@ body{
 		}
 		else
 		{
-			window.location = '{%url%}';
+			window.location = '{%$url%}';
 		}
-	},1000); */
+	},1000);
 	</script>
 </body>
 </html>
