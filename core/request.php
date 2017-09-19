@@ -32,6 +32,15 @@ class request extends base
 	{
 		return strtolower($_SERVER['REQUEST_METHOD']);
 	}
+	
+	/**
+	 * 获取当前的url
+	 */
+	static function url()
+	{
+		$secheme = self::isHttps()?'https://':'http://';
+		return $secheme.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+	}
 
 	/**
 	 * 判断是否是https链接

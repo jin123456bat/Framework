@@ -2,9 +2,75 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>提示消息</title>
 </head>
+<style>
+body{
+	padding:0px;
+	margin:0px;
+}
+.bg{
+	position: absolute;
+    opacity: 0.5;
+    background-color: rgba(0, 0, 0, 0.2);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+	z-index:0;
+}
+.container{
+	z-index:1;
+	width:400px;
+	background-color:#FFFFFF;
+	border-radius: 7px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+	position: absolute;
+	left:50%;
+	top:50%;
+	margin-top: -100px;
+    margin-left: -200px;
+	padding: 40px 20px;
+}
+.message{
+	font-size: 25px;
+    font-weight: bold;
+    color: #000000;
+    line-height: 40px;
+    word-wrap: break-word;
+	overflow: hidden;
+	text-align: center;
+}
+.jump{
+	margin-top: 40px;
+	text-align: center;
+}
+</style>
 <body>
-
+	<div class="bg">
+		<div class="container">
+			<div class="message">
+			{%message%}
+			</div>
+			<div class="jump">
+			<div id="second" style="display:inline;">{%$timeout%}</div>秒后自动跳转，如果浏览器不能跳转，请<a href="{%$url%}">点此跳转</a>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	/* setInterval(function(){
+		secondElement = document.getElementById('second');
+		second = parseInt(secondElement.innerHTML);
+		second--;
+		if(second>0)
+		{
+			secondElement.innerHTML = second;
+		}
+		else
+		{
+			window.location = '{%url%}';
+		}
+	},1000); */
+	</script>
 </body>
 </html>

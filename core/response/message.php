@@ -3,6 +3,7 @@ namespace framework\core\response;
 
 use framework\core\response;
 use framework\core\view;
+use framework\core\request;
 
 /**
  * 提示消息
@@ -15,6 +16,10 @@ class message extends response
 	
 	function __construct($message,$url = '',$timeout = 3)
 	{
+		if (empty($url))
+		{
+			$url = request::url();
+		}
 		$view = new view($this->_template);
 		$view->assign('message', $message);
 		$view->assign('url', $url);

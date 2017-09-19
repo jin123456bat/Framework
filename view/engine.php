@@ -72,11 +72,13 @@ class engine extends component
 	function setTemplatePath($path)
 	{
 		$this->_path = $path;
-		
-		$this->_template = rtrim($this->_path, '/') . '/' . ltrim($this->_name, '/');
-		if (file_exists($this->_template) && is_readable($this->_template))
+		if (!empty($this->_name))
 		{
-			$this->_compiler->setTempalte(file_get_contents($this->_template));
+			$this->_template = rtrim($this->_path, '/') . '/' . ltrim($this->_name, '/');
+			if (file_exists($this->_template) && is_readable($this->_template))
+			{
+				$this->_compiler->setTempalte(file_get_contents($this->_template));
+			}
 		}
 	}
 
@@ -87,11 +89,13 @@ class engine extends component
 	function setTempalteName($name)
 	{
 		$this->_name = $name;
-		
-		$this->_template = rtrim($this->_path, '/') . '/' . ltrim($this->_name, '/');
-		if (file_exists($this->_template) && is_readable($this->_template))
+		if (!empty($this->_path))
 		{
-			$this->_compiler->setTempalte(file_get_contents($this->_template));
+			$this->_template = rtrim($this->_path, '/') . '/' . ltrim($this->_name, '/');
+			if (file_exists($this->_template) && is_readable($this->_template))
+			{
+				$this->_compiler->setTempalte(file_get_contents($this->_template));
+			}
 		}
 	}
 
