@@ -4,13 +4,14 @@ namespace framework\vendor;
 use lib\error;
 use framework\core\validator;
 use framework\core\http;
+use framework\core\base;
 
 /**
  * 文件基类，包含了文件信息和文件操作
  * 
  * @author fx
  */
-class file extends \framework\lib\error
+class file extends base
 {
 
 	/**
