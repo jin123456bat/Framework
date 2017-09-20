@@ -384,7 +384,6 @@ class compiler extends \framework\view\compiler
 			}
 			
 			list ($key, $value) = explode('=', $str);
-			$value = trim($value, '\'" ');
 			
 			$parameter[$key] = $this->variable(trim($value));
 		}
