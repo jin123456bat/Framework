@@ -75,9 +75,8 @@ class compiler extends \framework\view\compiler
 
 	/**
 	 * 模板文件所在路径
-	 * 当使用include标签的时候在这些目录中按照顺序搜索
-	 * 
-	 * @var unknown
+	 * 当使用import标签的时候在这些目录中按照顺序搜索
+	 * @var string[]
 	 */
 	private $_template_path = array();
 
@@ -197,6 +196,24 @@ class compiler extends \framework\view\compiler
 	{
 		$this->_template = $tempalte;
 		$this->init();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\view\compiler::addTemplatePath()
+	 */
+	function addTemplatePath($dir)
+	{
+		$this->_template_path[] = $dir;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\view\compiler::getTemplatePath()
+	 */
+	function getTemplatePath()
+	{
+		return $this->_template_path;
 	}
 
 	/**

@@ -64,4 +64,16 @@ abstract class compiler
 	 * @return mixed 表达式的计算结果
 	 */
 	abstract public function variable($string);
+	
+	/**
+	 * 添加模板默认目录
+	 * @param string $dir 目录
+	 */
+	abstract public function addTemplatePath($dir);
+	
+	/**
+	 * 获取模板默认目录
+	 * @return string[]
+	 */
+	abstract public function getTemplatePath();
 }
