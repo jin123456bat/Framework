@@ -75,6 +75,12 @@ class captcha extends response
 			$length = $this->_config['length'];
 		}
 		
+		$types = 'number|supper_word|lower_word';
+		if (isset($this->_config['types']))
+		{
+			$types = $this->_config['types'];
+		}
+		
 		//验证码中不生成这些字符
 		$skip_content = array(
 			'1',
@@ -86,58 +92,7 @@ class captcha extends response
 			'I',
 			'L'
 		);
-		$content = array();
-		
-		$types = $this->_config['type'];
-		$types = explode('|',$types);
-		if (in_array('number', $types))
-		{
-			for($i = ord('0');$i <= ord('9');$i++)
-			{
-				if (in_array(chr($i), $skip_content))
-				{
-					continue;
-				}
-				$content[] = chr($i);
-			}
-		}
-		if (in_array('word', $types))
-		{
-			for($i = ord('a');$i <= ord('z');$i++)
-			{
-				if (in_array(chr($i), $skip_content))
-				{
-					continue;
-				}
-				$content[] = chr($i);
-			}
-		}
-		
-		if (in_array('word', $types))
-		{
-			for($i = ord('A');$i <= ord('Z');$i++)
-			{
-				if (in_array(chr($i), $skip_content))
-				{
-					continue;
-				}
-				$content[] = chr($i);
-			}
-		}
-		
-		if ($length > count($content))
-		{
-			$length = 4;
-		}
-		
-		$string = '';
-		$keys = array_rand($content,$length);
-		foreach ($keys as $k)
-		{
-			$string .= $content[$k];
-		}
-		
-		return $string;
+		return encryption::random($length,$types,$skip_content);
 	}
 	
 	/**

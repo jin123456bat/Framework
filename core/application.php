@@ -130,6 +130,17 @@ class application extends component
 			}
 		}
 	}
+	
+	/**
+	 * 判断程序在cli下是否在运行
+	 * @return boolean
+	 */
+	private function isRunning($control,$action)
+	{
+		$shell = 'ps -ef | grep "'.APP_ROOT.'/index.php -c '.$control.' -a '.$action.'" | grep -v grep';
+		exec($shell,$response);
+		return count($response)>=2;
+	}
 
 	/**
 	 * 执行控制器中的方法
@@ -232,8 +243,7 @@ class application extends component
 						}
 					}
 				}
-				
-				if ($filter->singleThread())
+				if ($filter->singleThread() && $this->isRunning($control, $action))
 				{
 					return false;
 				}

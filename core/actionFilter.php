@@ -154,26 +154,15 @@ class actionFilter extends component
 				));
 				if ((is_array($singles) && in_array($this->_action, $singles)) || current($singles) == '*')
 				{
-					return $this->isRunning($this->_control, $this->_action);
+					return true;
 				}
 				else if((is_string($singles) && $singles== $this->_action) || $singles== '*')
 				{
-					return $this->isRunning($this->_control, $this->_action);
+					return true;
 				}
 			}
 		}
 		return false;
-	}
-	
-	/**
-	 * 判断程序在cli下是否在运行
-	 * @return boolean
-	 */
-	private function isRunning($control,$action)
-	{
-		$shell = 'ps -ef | grep "'.APP_ROOT.'index.php -c '.$control.' -a '.$action.'" | grep -v grep';
-		$response = shell_exec($shell);
-		return !empty($response);
 	}
 
 	/**
