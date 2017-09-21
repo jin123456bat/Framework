@@ -80,7 +80,7 @@ class encryption
 		$string = '';
 		while ($length--)
 		{
-			$k = mt_rand(0,count($content));
+			$k = mt_rand(0,count($content)-1);
 			$string .= $content[$k];
 		}
 		return $string;
