@@ -78,12 +78,11 @@ class encryption
 		}
 		
 		$string = '';
-		$keys = array_rand($content,$length);
-		foreach ($keys as $k)
+		while ($length--)
 		{
+			$k = mt_rand(0,count($content));
 			$string .= $content[$k];
 		}
-		
 		return $string;
 	}
 }
