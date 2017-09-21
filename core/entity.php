@@ -434,7 +434,15 @@ class entity extends base
 						{
 							$data['callback'] = $value['callback'];
 						}
-						$return[$key] = $data;
+						
+						if (is_string($key))
+						{
+							$return[$key] = $data;
+						}
+						else if (is_int($key) && isset($value['fields']))
+						{
+							$return[$value['fields']] = $data;
+						}
 					}
 					else if (is_string($value))
 					{
@@ -546,7 +554,6 @@ class entity extends base
 						}
 						
 						$value = isset($this->_data[$field]) ? $this->_data[$field] : NULL;
-						
 						if (isset($val['render']) && is_callable($val['render']))
 						{
 							$value = call_user_func($val['render'], $value);
