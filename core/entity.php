@@ -137,14 +137,16 @@ class entity extends base
 		$pk = $this->__primaryKey();
 		$model = $this->__model();
 		
-		$data = $this->_data;
-		
 		if (! empty($pk) && ! empty($this->_data[$pk]))
 		{
 			if (false === $this->__preUpdate())
 			{
 				return false;
 			}
+			
+			//这个必须在preUpdate之后，因为preUpdate中可能存在更改值的行为
+			$data = $this->_data;
+			
 			$this->model($model)->transaction();
 			
 			$temp = $data;
@@ -206,6 +208,10 @@ class entity extends base
 			{
 				return false;
 			}
+			
+			//这个必须在__preInsert之后，因为__preInsert中可能存在更改值的行为
+			$data = $this->_data;
+			
 			$this->model($model)->transaction();
 			if ($this->model($model)->insert($data))
 			{
