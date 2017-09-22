@@ -132,12 +132,13 @@ class application extends component
 	}
 	
 	/**
+	 * 这里还是有问题 还是需要share memory来实现
 	 * 判断程序在cli下是否在运行
 	 * @return boolean
 	 */
 	private function isRunning($control,$action)
 	{
-		$shell = 'ps -ef | grep "'.APP_ROOT.'/index.php -c '.$control.' -a '.$action.'" | grep -v grep';
+		$shell = 'ps -ef | grep "'.APP_ROOT.'/index.php -c '.$control.' -a '.$action.'" | grep -v grep | grep -v "sh -c"';
 		exec($shell,$response);
 		return count($response)>=2;
 	}
