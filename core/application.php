@@ -245,7 +245,7 @@ class application extends component
 				}
 				if ($filter->singleThread() && $this->isRunning($control, $action))
 				{
-					return false;
+					exit(0);
 				}
 				
 				
