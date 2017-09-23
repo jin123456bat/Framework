@@ -1,7 +1,7 @@
 <?php
 namespace framework\core;
 
-class http extends component
+class http extends base
 {
 
 	/**
@@ -62,6 +62,14 @@ class http extends component
 			unset($options['fragment']);
 		}
 		
+		if (!empty($c))
+		{
+			$options['c'] = $c;
+		}
+		if (!empty($a))
+		{
+			$options['a'] = $a;
+		}
 		$query = !empty($options)?'?' . http_build_query($options):'';
 		
 		return $scheme . $host . $port . $path . $query . $fragment;
