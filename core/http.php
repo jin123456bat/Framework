@@ -1,13 +1,13 @@
 <?php
 namespace framework\core;
 
-class http extends base
+class http extends component
 {
 
 	/**
 	 * 创建一个url
 	 */
-	static function url($c, $a, array $options = array())
+	static function url($c = '', $a = '', array $options = array())
 	{
 		$default_port = 0;
 		if (request::isHttps())
@@ -62,9 +62,7 @@ class http extends base
 			unset($options['fragment']);
 		}
 		
-		$options['c'] = $c;
-		$options['a'] = $a;
-		$query = '?' . http_build_query($options);
+		$query = !empty($options)?'?' . http_build_query($options):'';
 		
 		return $scheme . $host . $port . $path . $query . $fragment;
 	}
