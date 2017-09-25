@@ -70,6 +70,12 @@ class http extends base
 		{
 			$options['a'] = $a;
 		}
+		//判断是否强制使用了url中的session_id
+		if (ini_get('session.use_trans_sid')==1 && ini_get('use_cookies') ==0 && ini_get('use_only_cookies')==0)
+		{
+			$session_id = request::get(session_name(),session_id(),null,'s');
+			$options[session_name()] = $session_id;
+		}
 		$query = !empty($options)?'?' . http_build_query($options):'';
 		
 		return $scheme . $host . $port . $path . $query . $fragment;

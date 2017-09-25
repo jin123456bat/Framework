@@ -136,7 +136,7 @@ class request extends base
 		{
 			return $_POST;
 		}
-		else if (isset($_POST[$name]))
+		else if (isset($_POST[$name]) && $_POST[$name]!=='')
 		{
 			$data = $_POST[$name];
 			
@@ -218,7 +218,7 @@ class request extends base
 		{
 			return $_GET;
 		}
-		else if (isset($_GET[$name]))
+		else if (isset($_GET[$name]) && $_GET[$name]!=='')
 		{
 			$data = $_GET[$name];
 			
@@ -296,7 +296,7 @@ class request extends base
 		{
 			return $_REQUEST;
 		}
-		else if (isset($_REQUEST[$name]))
+		else if (isset($_REQUEST[$name]) && $_REQUEST[$name]!=='')
 		{
 			$data = $_REQUEST[$name];
 			
