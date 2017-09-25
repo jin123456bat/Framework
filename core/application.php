@@ -461,7 +461,7 @@ class application extends component
 	{
 	}
 
-	public function onRequestEnd()
+	public function onRequestEnd($response)
 	{
 	}
 

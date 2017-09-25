@@ -99,7 +99,6 @@ class framework
 			$namespace = 'framework\\core\\application';
 			$this->_application[$appkey] = new $namespace($name, $path, $configName);
 		}
-		
 		if (method_exists($this->_application[$appkey], 'initlize'))
 		{
 			$this->_application[$appkey]->initlize();
