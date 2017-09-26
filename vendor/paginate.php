@@ -106,18 +106,42 @@ class paginate extends component
 	/**
 	 * 获取数据
 	 * 返回要获取的数据
-	 * 
+	 * @param string|array $fields 要查询的字段
 	 * @return array
 	 */
-	function fetch()
+	function fetch($fields = '*')
 	{
 		if (! empty($this->_model))
 		{
-			return $this->_model->select();
+			return $this->_model->select($fields);
 		}
 		else
 		{
-			return $this->_result;
+			if ($fields == '*')
+			{
+				return $this->_result;
+			}
+			else
+			{
+				if (is_string($fields))
+				{
+					$fields = explode(',', $fields);
+				}
+				$result = array();
+				foreach ($this->_result as $r)
+				{
+					$data = array();
+					foreach ($r as $k => $v)
+					{
+						if (in_array($k, $fields))
+						{
+							$data[$k] = $v;
+						}
+					}
+					$result[] = $data;
+				}
+				return $result;
+			}
 		}
 	}
 
