@@ -88,7 +88,7 @@ class framework
 		
 		$paths = explode('/', $path);
 		$namespace = end($paths) . '\\extend\\' . $name;
-		$user_deinfed_component_path = trim($path, '/') . '/extend/' . $name . '.php';
+		$user_deinfed_component_path = rtrim($path, '/') . '/extend/' . $name . '.php';
 		if (file_exists($user_deinfed_component_path))
 		{
 			$this->_application[$appkey] = new $namespace($name, $path);
