@@ -443,11 +443,13 @@ class model extends component
 		if ($this->_compress)
 		{
 			static $__strlen = 0;
+			static $__key = 0;
 			if (! isset($this->_compress_sql['insert']))
 			{
 				$keys = array_keys($data);
-				$this->_compress_sql['insert'] = 'INSERT INTO ' . $this->getTable() . ' (`' . implode('`,`', $keys) . '`) values (\'' . implode('\',\'', $data) . '\')';
-				$__strlen = strlen($this->_compress_sql['insert']);
+				$sql = 'INSERT INTO ' . $this->getTable() . ' (`' . implode('`,`', $keys) . '`) values (\'' . implode('\',\'', $data) . '\')';
+				$this->_compress_sql['insert'][$__key] = $sql;
+				$__strlen = strlen($sql);
 			}
 			else
 			{
@@ -455,14 +457,15 @@ class model extends component
 				$this->_compress_sql['insert_duplicate_values'] = isset($this->_compress_sql['insert_duplicate_values']) ? $this->_compress_sql['insert_duplicate_values'] : '';
 				if (($__strlen + strlen($sql) + strlen($this->_compress_sql['insert_duplicate_values']) + 1) * 3 < $this->_config['max_allowed_packet'])
 				{
-					$this->_compress_sql['insert'] .= $sql;
+					$this->_compress_sql['insert'][$__key] .= $sql;
 					$__strlen += strlen($sql);
 				}
 				else
 				{
+					$__key++;
 					$keys = array_keys($data);
 					$sql = 'INSERT INTO ' . $this->getTable() . ' (`' . implode('`,`', $keys) . '`) values (\'' . implode('\',\'', $data) . '\')';
-					$this->_compress_sql['insert'] .= ';' . $sql;
+					$this->_compress_sql['insert'][$__key] = $sql;
 					$__strlen = strlen($sql);
 				}
 			}
@@ -615,11 +618,12 @@ class model extends component
 			{
 				$insert_duplicate_values = isset($this->_compress_sql['insert_duplicate_values']) ? $this->_compress_sql['insert_duplicate_values'] : '';
 				unset($this->_compress_sql['insert_duplicate_values']);
-				$insert_sql = explode(';', $this->_compress_sql['insert']);
+				$insert_sql = $this->_compress_sql['insert'];
 				
 				$insert_sql = array_map(function ($sql) use ($insert_duplicate_values) {
 					return $sql . $insert_duplicate_values;
 				}, $insert_sql);
+				//把其他的比如update 等sql都放到一起
 				$this->_compress_sql = array_merge($this->_compress_sql, $insert_sql);
 				unset($this->_compress_sql['insert']);
 			}
@@ -627,6 +631,7 @@ class model extends component
 			{
 				unset($this->_compress_sql['insert_duplicate_values']);
 			}
+			//启用事务插入的方式执行
 			$this->_db->transaction();
 			try{
 				$sql = array_shift($this->_compress_sql);
@@ -638,7 +643,7 @@ class model extends component
 					$result += $this->_db->query($sql . ';');
 					$sql = array_shift($this->_compress_sql);
 				}
-				$this->_compress = false;
+				$this->_compress = false;//关闭compress状态
 			}
 			catch (\Exception $e)
 			{
