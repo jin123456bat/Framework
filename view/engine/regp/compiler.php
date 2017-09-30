@@ -1,14 +1,11 @@
 <?php
 namespace framework\view\engine\regp;
 
-use framework;
-use framework\view\engine\compiler;
-
 /**
  *
  * @author fx
  */
-class compiler extends compiler
+class compiler extends \framework\view\engine\compiler
 {
 
 	/**
@@ -287,9 +284,8 @@ class compiler extends compiler
 	 */
 	function fetch()
 	{
-		
 		// 处理所有标签
-		$dirs = scandir(SYSTEM_ROOT . '/view/tag');
+		$dirs = scandir(dirname(__FILE__). '/tag');
 		if ($dirs)
 		{
 			array_map(function ($file) {
@@ -304,7 +300,7 @@ class compiler extends compiler
 		$this->doIfBlock();
 		
 		// 处理 所有的block
-		$dirs = scandir(SYSTEM_ROOT . '/view/block');
+		$dirs = scandir(dirname(__FILE__). '/block');
 		if ($dirs)
 		{
 			array_map(function ($file) {

@@ -38,7 +38,10 @@ class engine extends component
 
 	function __construct()
 	{
-		$this->_compiler = new compiler();
+		$config = $this->getConfig('view');
+		$engine = isset($config['engine']) && !empty($config['engine'])?$config['engine']:'regp';
+		$engine = '\\framework\\view\\engine\\'.$engine.'\\compiler';
+		$this->_compiler = new $engine();
 	}
 
 	/**
