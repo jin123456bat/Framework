@@ -398,7 +398,7 @@ class compiler extends \framework\view\engine\compiler
 		$pattern = '!' . $this->getLeftDelimiter() . $tag . ' [\s\S]*' . $this->getRightDelimiter() . '!Ui';
 		$this->_template = preg_replace_callback($pattern, function ($match) use ($tag) {
 			$parameter = $this->getTagParameter($match[0]);
-			$class = 'framework\\view\\tag\\' . $tag;
+			$class = 'framework\\view\\engine\\regp\\tag\\' . $tag;
 			if (class_exists($class, true))
 			{
 				$class = new $class();
@@ -604,7 +604,7 @@ class compiler extends \framework\view\engine\compiler
 				}
 				//变量没有找到 原样返回  前后要加单引号 防止后面的eval进行计算
 				//这里问题好大   empty($name)  这里会变成 empty('$name')  简直是ri dog了
-				return $match[0];
+				return '\''.$match[0].'\'';
 			}
 			else
 			{
@@ -640,9 +640,10 @@ class compiler extends \framework\view\engine\compiler
 			@eval($key . '=\'' . $value . '\';');
 		}
 		
-		if ($i==2)
+		if ($i==4)
 		{
-			//exit($calString);
+			var_dump($calString);
+			var_dump(@eval('return ' . $calString . ';'));
 		}
 		$result = @eval('return ' . $calString . ';');
 		
@@ -673,7 +674,7 @@ class compiler extends \framework\view\engine\compiler
 					@list ($key, $value) = explode('=', $p);
 					$parameter[trim($key)] = $this->variable(trim($value)); // 将表达式+函数拿去计算
 				}
-				$class = 'framework\\view\\block\\' . $block;
+				$class = 'framework\\view\\engine\\regp\\block\\' . $block;
 				if (class_exists($class, true))
 				{
 					$class = new $class();
@@ -696,9 +697,7 @@ class compiler extends \framework\view\engine\compiler
 		{
 			$pattern = '(' . $this->getLeftDelimiter() . 'if(?<parameter>.+)' . $this->getRightDelimiter() . '(?<content>[\s\S]*)' . $this->getLeftDelimiter() . '/if' . $this->getRightDelimiter() . ')Uis';
 			$this->_template = preg_replace_callback($pattern, function ($match) {
-				var_dump($match['parameter']);
 				$parameter = $this->variable($match['parameter']);
-				var_dump($parameter);
 				$string = $match['content'];
 				
 				$return = false;

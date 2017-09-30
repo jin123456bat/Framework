@@ -1,5 +1,5 @@
 <?php
-namespace framework\view\tag;
+namespace framework\view\engine\regp\tag;
 
 use framework\view\engine\regp\tag;
 use framework\view\engine\regp\compiler;
