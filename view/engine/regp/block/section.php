@@ -1,8 +1,8 @@
 <?php
-namespace framework\view\block;
+namespace framework\view\engine\regp\block;
 
-use framework\view\block;
-use framework\view\compiler;
+use framework\view\engine\regp\block;
+use framework\view\engine\regp\compiler;
 
 class section extends block
 {

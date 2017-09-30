@@ -1,13 +1,14 @@
 <?php
-namespace framework\view\compiler;
+namespace framework\view\engine\regp;
 
 use framework;
+use framework\view\engine\compiler;
 
 /**
  *
  * @author fx
  */
-class compiler extends \framework\view\compiler
+class compiler extends compiler
 {
 
 	/**
@@ -286,6 +287,7 @@ class compiler extends \framework\view\compiler
 	 */
 	function fetch()
 	{
+		
 		// 处理所有标签
 		$dirs = scandir(SYSTEM_ROOT . '/view/tag');
 		if ($dirs)
@@ -584,6 +586,7 @@ class compiler extends \framework\view\compiler
 		}
 		static $i = 0;
 		$calString = $string;
+		
 		// 变量替换 数组 将在模板中定义的数组替换回来
 		$calString = preg_replace_callback('!\$([a-zA-Z_]\w*\.)*[a-zA-Z_]\w*!', function ($match) {
 			$result = NULL;
@@ -604,7 +607,8 @@ class compiler extends \framework\view\compiler
 					return '\''.$data.'\'';
 				}
 				//变量没有找到 原样返回  前后要加单引号 防止后面的eval进行计算
-				return '\''.$match[0].'\'';
+				//这里问题好大   empty($name)  这里会变成 empty('$name')  简直是ri dog了
+				return $match[0];
 			}
 			else
 			{
@@ -696,7 +700,9 @@ class compiler extends \framework\view\compiler
 		{
 			$pattern = '(' . $this->getLeftDelimiter() . 'if(?<parameter>.+)' . $this->getRightDelimiter() . '(?<content>[\s\S]*)' . $this->getLeftDelimiter() . '/if' . $this->getRightDelimiter() . ')Uis';
 			$this->_template = preg_replace_callback($pattern, function ($match) {
-				$parameter = $this->expression($match['parameter']);
+				var_dump($match['parameter']);
+				$parameter = $this->variable($match['parameter']);
+				var_dump($parameter);
 				$string = $match['content'];
 				
 				$return = false;
@@ -712,7 +718,7 @@ class compiler extends \framework\view\compiler
 						}
 						elseif (! empty($sub_match['np']))
 						{
-							$parameter = $this->expression($sub_match['np']);
+							$parameter = $this->variable($sub_match['np']);
 						}
 					}, $string);
 					if ($return)

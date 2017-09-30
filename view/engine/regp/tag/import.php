@@ -1,8 +1,8 @@
 <?php
 namespace framework\view\tag;
 
-use framework\view\tag;
-use framework\view\compiler;
+use framework\view\engine\regp\tag;
+use framework\view\engine\regp\compiler;
 
 class import extends tag
 {

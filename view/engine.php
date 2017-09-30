@@ -2,7 +2,6 @@
 namespace framework\view;
 
 use framework\core\component;
-use framework\view\compiler\compiler;
 
 /**
  * 设置模板文件的路径只有2种方法

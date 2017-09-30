@@ -1,5 +1,5 @@
 <?php
-namespace framework\view;
+namespace framework\view\engine\regp;
 
 use framework\core\component;
 

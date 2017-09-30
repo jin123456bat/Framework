@@ -1,6 +1,11 @@
 <?php
-namespace framework\view;
+namespace framework\view\engine;
 
+/**
+ * 引擎编译器接口
+ * @author jin
+ *
+ */
 abstract class compiler
 {
 	/**
