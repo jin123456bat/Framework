@@ -580,7 +580,6 @@ class compiler extends \framework\view\engine\compiler
 		{
 			return $string;
 		}
-		static $i = 0;
 		$calString = $string;
 		
 		// 变量替换 数组 将在模板中定义的数组替换回来
@@ -640,14 +639,8 @@ class compiler extends \framework\view\engine\compiler
 			@eval($key . '=\'' . $value . '\';');
 		}
 		
-		if ($i==4)
-		{
-			var_dump($calString);
-			var_dump(@eval('return ' . $calString . ';'));
-		}
 		$result = @eval('return ' . $calString . ';');
 		
-		$i++;
 		return $result;
 	}
 
