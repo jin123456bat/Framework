@@ -563,6 +563,10 @@ class compiler extends \framework\view\engine\compiler
 					//$value= str_replace('"', '\"', $value);
 					$value = '"'.$value.'"';
 				}
+				else if ($value === null)
+				{
+					$value = 'null';
+				}
 				$content[] = $index.'=>'.$value;
 			}
 			$string.=implode(',', $content).')';
