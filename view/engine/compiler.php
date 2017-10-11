@@ -61,14 +61,6 @@ abstract class compiler
 	 * @param unknown $leftDelimiter        
 	 */
 	abstract public function setLeftDelimiter($leftDelimiter);
-
-	/**
-	 * 计算表达式的值
-	 * 
-	 * @param string $string        
-	 * @return mixed 表达式的计算结果
-	 */
-	abstract public function variable($string);
 	
 	/**
 	 * 添加模板默认目录

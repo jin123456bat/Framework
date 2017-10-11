@@ -432,7 +432,9 @@ class compiler extends \framework\view\engine\compiler
 					return $value;
 				}, $param_arr);
 			}
+			
 			$func_name = $func_info['func_name'];
+			
 			// 优先自定义函数 自定义函数会覆盖系统函数
 			if (isset($this->_functions[$func_name]))
 			{
@@ -555,9 +557,10 @@ class compiler extends \framework\view\engine\compiler
 				else if (is_string($value))
 				{
 					//输出模板的时候自动加上防xss注入
-					$value= htmlspecialchars($value);
-					$value = str_replace('\'', '"', $value);
-					$value= str_replace('"', '\"', $value);
+					//var_dump($value);
+					//$value= htmlspecialchars($value);
+					//$value = str_replace('\'', '"', $value);
+					//$value= str_replace('"', '\"', $value);
 					$value = '"'.$value.'"';
 				}
 				$content[] = $index.'=>'.$value;
@@ -580,11 +583,13 @@ class compiler extends \framework\view\engine\compiler
 		{
 			return $string;
 		}
+		
 		$calString = $string;
 		
 		// 变量替换 数组 将在模板中定义的数组替换回来
 		$calString = preg_replace_callback('!\$([a-zA-Z_]\w*\.)*[a-zA-Z_]\w*!', function ($match) {
 			$result = NULL;
+			
 			//$array.name的形式变量替换
 			if (strpos($match[0], '.'))
 			{
@@ -599,7 +604,12 @@ class compiler extends \framework\view\engine\compiler
 						$data = isset($data[current($array)]) ? $data[current($array)] : '';
 						next($array);
 					}
-					return '\''.$data.'\'';
+					
+					if (is_string($data))
+					{
+						$key = $this->remeberString($data);
+						return $key;
+					}
 				}
 				//变量没有找到 原样返回  前后要加单引号 防止后面的eval进行计算
 				//这里问题好大   empty($name)  这里会变成 empty('$name')  简直是ri dog了
@@ -622,6 +632,11 @@ class compiler extends \framework\view\engine\compiler
 		// 变量替换字符串
 		foreach ($this->_string as $key => $value)
 		{
+			$value = str_replace(array(
+				'\''
+			), array(
+				'\\\''
+			), $value);
 			@eval($key . ' = \'' . $value . '\';');
 		}
 		
@@ -638,7 +653,6 @@ class compiler extends \framework\view\engine\compiler
 		{
 			@eval($key . '=\'' . $value . '\';');
 		}
-		
 		$result = @eval('return ' . $calString . ';');
 		
 		return $result;
