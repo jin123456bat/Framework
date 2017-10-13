@@ -10,20 +10,21 @@ a{
 	color:#000000;
 }
 
-
-.color-gray-1{
-	
-}
-
 /*按钮*/
 .btn{
-	padding: 5px 10px;
-	border:1px solid #656565;
+	outline:none;
+	padding: 6px 12px;
+	border:1px solid transparent;
 	display: inline-block;
-	border-radius: 8px;
+	border-radius: 4px;
 	background-color: #FFFFFF;
 	line-height: 30px;
-	font-size:14px;
+	font-size:13px;
+	text-align:center;
+	white-space:nowrap;
+	vertical-align:middle;
+	cursor:pointer;
+	user-select:none;
 }
 
 /*小按钮*/
@@ -33,5 +34,10 @@ a{
 
 /*小小按钮*/
 .btn .btn-xs{
+	
+}
+
+/*边框式按钮*/
+.btn .btn-outline{
 	
 }
