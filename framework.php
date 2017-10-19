@@ -66,14 +66,6 @@ class framework
 		{
 			$this->install();
 		}
-		//算法导入
-		$dir = SYSTEM_ROOT.'/algorithm/';
-		array_map(function($file) use($dir){
-			if ($file!='.' && $file!='..')
-			{
-				include_once $dir.$file;
-			}
-		}, scandir($dir));
 	}
 
 	/**
