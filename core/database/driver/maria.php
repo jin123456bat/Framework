@@ -63,6 +63,66 @@ class maria extends database
 		// TODO Auto-generated method stub
 		
 	}
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\database\database::execute()
+	 */
+	public function execute($sql, array $array = array())
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\database\database::fetch()
+	 */
+	public function fetch($sql, array $array = array(), $callback = NULL)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\database\database::transaction()
+	 */
+	public function transaction()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\database\database::commit()
+	 */
+	public function commit()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\database\database::rollback()
+	 */
+	public function rollback()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\database\database::inTransaction()
+	 */
+	public function inTransaction()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
 
 	
 }
