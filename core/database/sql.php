@@ -265,28 +265,74 @@ class sql extends base
 		return $this;
 	}
 
+	/**
+	 * @example
+	 * $this->where('id=?',array(1))
+	 * select * from table where id=1
+	 * 
+	 * $this->where('id=:id',array('id'=>1))
+	 * select * from table where id=1
+	 * 
+	 * $this->where(array(
+	 * 	'id' => 1,
+	 * ))
+	 * select * from table where id=1
+	 * 
+	 * $this->where(array(
+	 * 	'name' => array('张三','李四')
+	 * ))
+	 * select * from table where name in ('张三','李四')
+	 * 
+	 * @param unknown $sql
+	 * @param array $array
+	 * @param string $combine
+	 * @return \framework\core\database\sql
+	 */
 	function where($sql, $array = array(), $combine = 'and')
 	{
 		if (is_array($sql))
 		{
-			$sql = '(' . implode(') ' . $combine . ' (', $sql) . ')';
+			foreach ($sql as $field => $s)
+			{
+				if (is_string($field))
+				{
+					if (is_scalar($s))
+					{
+						$this->where($field.'=?',array($s),$combine);
+					}
+					else if (is_array($s))
+					{
+						if (count($s) == 1)
+						{
+							$this->where($field.'=?',array(current($s)),$combine);
+						}
+						else
+						{
+							$this->in($field,$s,$combine);
+						}
+					}
+				}
+			}
 		}
-		if (empty($this->_temp['where']))
+		else if (is_string($sql))
 		{
-			$this->_temp['where'] = ' WHERE (' . $sql . ')';
-		}
-		else
-		{
-			$this->_temp['where'] = $this->_temp['where'] . ' ' . $combine . ' (' . $sql . ')';
-		}
-		
-		if (empty($this->_temp['params']))
-		{
-			$this->_temp['params'] = $array;
-		}
-		else
-		{
-			$this->_temp['params'] = array_merge($this->_temp['params'], $array);
+			if (empty($this->_temp['where']))
+			{
+				$this->_temp['where'] = ' WHERE (' . $sql . ')';
+			}
+			else
+			{
+				$this->_temp['where'] = $this->_temp['where'] . ' ' . $combine . ' (' . $sql . ')';
+			}
+			
+			if (empty($this->_temp['params']))
+			{
+				$this->_temp['params'] = $array;
+			}
+			else
+			{
+				$this->_temp['params'] = array_merge($this->_temp['params'], $array);
+			}
 		}
 		return $this;
 	}
