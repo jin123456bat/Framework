@@ -228,11 +228,11 @@ class sql extends base
 	{
 		if (empty($as))
 		{
-			$this->_temp['from'][] = $table;
+			$this->_temp['from'][] = self::fieldFormat($table);
 		}
 		else
 		{
-			$this->_temp['from'][$as] = $table;
+			$this->_temp['from'][$as] = self::fieldFormat($table);
 		}
 		return $this;
 	}
@@ -298,13 +298,13 @@ class sql extends base
 				{
 					if (is_scalar($s))
 					{
-						$this->where($field.'=?',array($s),$combine);
+						$this->where(self::fieldFormat($field).'=?',array($s),$combine);
 					}
 					else if (is_array($s))
 					{
 						if (count($s) == 1)
 						{
-							$this->where($field.'=?',array(current($s)),$combine);
+							$this->where(self::fieldFormat($field).'=?',array(current($s)),$combine);
 						}
 						else
 						{
