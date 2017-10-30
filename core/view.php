@@ -57,7 +57,6 @@ class view extends response
 			}
 			
 			$this->_template = $template;
-			
 			$this->_engine->setTemplatePath(APP_ROOT . '/template/' . trim($this->_layout, '/\\'));
 			$this->_engine->setTempalteName($this->_template);
 		}

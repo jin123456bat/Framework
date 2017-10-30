@@ -81,7 +81,7 @@ class engine extends component
 			$this->_template = rtrim($this->_path, '/') . '/' . ltrim($this->_name, '/');
 			if (file_exists($this->_template) && is_readable($this->_template))
 			{
-				$this->_compiler->setTempalte(file_get_contents($this->_template));
+				$this->_compiler->setTempalte(file_get_contents($this->_template),$this->_template);
 			}
 		}
 	}
@@ -98,7 +98,7 @@ class engine extends component
 			$this->_template = rtrim($this->_path, '/') . '/' . ltrim($this->_name, '/');
 			if (file_exists($this->_template) && is_readable($this->_template))
 			{
-				$this->_compiler->setTempalte(file_get_contents($this->_template));
+				$this->_compiler->setTempalte(file_get_contents($this->_template),$this->_template);
 			}
 		}
 	}

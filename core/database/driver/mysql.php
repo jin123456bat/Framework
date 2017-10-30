@@ -49,6 +49,8 @@ class mysql extends database
 
 	/**
 	 * 获取mysql进程
+	 * @param array $config 配置数组
+	 * @return mysql
 	 */
 	public static function getInstance($config)
 	{

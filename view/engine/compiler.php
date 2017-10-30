@@ -23,9 +23,10 @@ abstract class compiler
 	
 	/**
 	 * 设置模板内容
-	 * @param string $tempalte
+	 * @param string $tempalte 模板文件内容
+	 * @param string $template_path 模板文件完整路径
 	 */
-	abstract public function setTempalte($tempalte);
+	abstract public function setTempalte($tempalte,$template_path);
 
 	/**
 	 * 获取模板编译后的内容

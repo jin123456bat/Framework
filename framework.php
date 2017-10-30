@@ -39,22 +39,51 @@ class framework
 	}
 	
 	/**
-	 * 判断是否可以安装
-	 */
-	function canInstall()
-	{
-		return !is_dir(APP_ROOT);
-	}
-	
-	/**
 	 * 安装过程
 	 */
 	function install()
 	{
-		//创建控制器目录
-		mkdir(APP_ROOT.'/control',0777,true);
-		//创建配置目录
-		mkdir(APP_ROOT.'/config',0777,true);
+		if (DEBUG)
+		{
+			$dir = array(
+				'control',
+				'config' => array(
+					substr(APP_NAME, 0,3).'.php',
+				),
+				'entity',
+				'extend',
+				'log',
+				'template',
+			);
+			foreach ($dir as $k => $d)
+			{
+				if (is_string($d))
+				{
+					$file = APP_ROOT.'/'.$d;
+					if (!file_exists($file))
+					{
+						//创建控制器目录
+						mkdir($file,0777,true);
+					}
+				}
+				else if (is_array($d))
+				{
+					$file = APP_ROOT.'/'.$k;
+					if (!file_exists($file))
+					{
+						mkdir($file,0777,true);
+					}
+					foreach ($d as $f)
+					{
+						if (strpos($f, '.'))
+						{
+							$file = APP_ROOT.'/'.$k.'/'.$f;
+							file_put_contents($file,"<?php\nreturn array(\n\n);\n?>");
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -62,10 +91,7 @@ class framework
 	 */
 	function initlize()
 	{
-		if ($this->canInstall())
-		{
-			$this->install();
-		}
+		$this->install();
 	}
 
 	/**

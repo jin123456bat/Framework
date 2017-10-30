@@ -190,7 +190,7 @@ class compiler extends \framework\view\engine\compiler
 	 * {@inheritDoc}
 	 * @see \framework\view\compiler::setTempalte()
 	 */
-	function setTempalte($tempalte)
+	function setTempalte($tempalte,$template_path)
 	{
 		$this->_template = $tempalte;
 		$this->init();
