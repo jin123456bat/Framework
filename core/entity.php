@@ -149,7 +149,8 @@ class entity extends base
 			
 			$this->model($model)->transaction();
 			
-			$temp = $data;
+			$temp = $this->getRenderData($data);
+			//主键不更新
 			unset($temp[$pk]);
 			$this->model($model)->where($pk . '=?', array(
 				$this->_data[$pk]
@@ -210,7 +211,7 @@ class entity extends base
 			}
 			
 			//这个必须在__preInsert之后，因为__preInsert中可能存在更改值的行为
-			$data = $this->_data;
+			$data = $this->getRenderData($this->_data);
 			
 			$this->model($model)->transaction();
 			if ($this->model($model)->insert($data))
@@ -308,6 +309,50 @@ class entity extends base
 			$field,
 			$value
 		), $string);
+	}
+	
+	/**
+	 * 数据渲染
+	 * 当数据被update或者insert到数据库中的时候需要经过这个函数
+	 * 一个通常的情景是 当开发者需要添加或者修改用户的自我介绍的时候，这个字段需要被转义，防止xss攻击，
+	 * 或者用户修改密码的时候，密码需要被加密，
+	 * function __render($data)
+	 * {
+	 * 		return array(
+	 * 			'password' => 'trim|md5',
+	 * 			'description' => 'trim|htmlspecialchars',
+	 * 		);
+	 * }
+	 * 支持通过|的方式来分割多个函数
+	 * @param unknown $data  原始数据
+	 * @return unknown 经过渲染的数据
+	 */
+	function __render($data)
+	{
+		return array();
+	}
+	
+	private function getRenderData($data)
+	{
+		$renders = $this->__render($data);
+		if (is_array($renders) && !empty($renders))
+		{
+			foreach ($renders as $field=>$render)
+			{
+				if (isset($data[$field]) && !empty($data[$field]))
+				{
+					$funcs = explode('|', $render);
+					foreach ($funcs as $func)
+					{
+						if (is_callable($func))
+						{
+							$data[$field] = call_user_func($func,$data[$field]);
+						}
+					}
+				}
+			}
+		}
+		return $data;
 	}
 
 	/**
