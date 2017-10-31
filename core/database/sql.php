@@ -697,7 +697,7 @@ class sql extends base
 				$table = '';
 				if (isset($this->_temp['from']) && ! empty($this->_temp['from']))
 				{
-					$table = '`' . implode('`,`', $this->_temp['from']) . '`';
+					$table = implode(',', $this->_temp['from']);
 				}
 				
 				$this->_temp['ignore'] = isset($this->_temp['ignore']) && $this->_temp['ignore'] ? ' IGNORE' : '';
@@ -812,7 +812,7 @@ class sql extends base
 				$table = '';
 				if (isset($this->_temp['from']) && ! empty($this->_temp['from']))
 				{
-					$table = '`' . implode('`,`', $this->_temp['from']) . '`';
+					$table = implode(',', $this->_temp['from']);
 				}
 				
 				$set = ' SET ';

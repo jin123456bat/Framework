@@ -21,7 +21,7 @@ class section extends block
 		$value_word = isset($parameter['value']) ? $parameter['value'] : 'value';
 		foreach ($from as $key => $value)
 		{
-			$compiler->setTempalte($content);
+			$compiler->setTempalte($content,'');
 			$compiler->assign($value_word, $value);
 			$compiler->assign($key_word, $key);
 			$string = $compiler->fetch();
