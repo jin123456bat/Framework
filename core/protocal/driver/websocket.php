@@ -96,15 +96,27 @@ class websocket implements protocal
 		}
 		return $decoded;
 	}
-	
+
 	/**
-	 * @param string $string
-	 * @return array
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::get()
 	 */
-	public function parse($string)
+	public function get($string)
 	{
 		return json_decode($string,true);
 	}
 	
-
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::post()
+	 */
+	public function post($string)
+	{
+		return json_decode($string,true);
+	}
+	
+	public function cookie($string)
+	{
+		return array();
+	}
 }

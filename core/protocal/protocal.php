@@ -10,27 +10,40 @@ interface protocal
 	 * 以websocket为例，这里可以验证握手机制
 	 * @param string $request
 	 * $param connection $connection
-	 * @return boolean 返回false的时候中断连接
+	 * @return boolean 返回false的时候代码执行完毕，不在继续执行下面的代码
 	 */
 	function init($request,$connection);
 	
 	/**
 	 * 编码方法
 	 * 通过socket发送的数据需要通过encode方法进行编码，然后在发送
-	 * @param unknown $string
+	 * @param string $string
 	 */
 	function encode($string);
 	
 	/**
 	 * 解码方法
 	 * 从socket收到的数据需要解码然后才能读取
-	 * @param unknown $buffer
+	 * @param string $buffer
 	 */
 	function decode($buffer);
 	
+	
 	/**
-	 * 解码完后的字符串转化为参数数组并且参数可以通过get的形式访问
-	 * @param unknown $string
+	 * 获取get参数
+	 * @param string $buffer
 	 */
-	function parse($string);
+	function get($buffer);
+	
+	/**
+	 * 获取post参数
+	 * @param unknown $buffer
+	 */
+	function post($buffer);
+	
+	/**
+	 * 获取cookie
+	 * @param unknown $buffer
+	 */
+	function cookie($buffer);
 }

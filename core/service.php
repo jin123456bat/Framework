@@ -140,17 +140,12 @@ class service extends component
 								$request = call_user_func(array($protocal,'decode'),$buffer);
 								
 								//通常一个字符串并不能满足系统的参数需求，这里必须要将字符串转化为数组，作为系统的输入参数
-								$request = call_user_func(array($protocal,'parse'),$request);
-								
-								//设置$_GET参数
-								$_GET = $request;
-								//设置$_POST参数
-								$_POST = $request;
-								//设置cookie 尚未实现
-								$_COOKIE = array();
+								$_GET = call_user_func(array($protocal,'get'),$request);
+								$_POST= call_user_func(array($protocal,'post'),$request);
+								$_COOKIE= call_user_func(array($protocal,'cookie'),$request);
 								
 								$router = application::load('router');
-								$router->appendParameter($request);
+								$router->appendParameter($_GET);
 								$router->parse();
 								$control = $router->getControlName();
 								$action = $router->getActionName();
