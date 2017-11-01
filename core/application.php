@@ -375,17 +375,17 @@ class application extends component
 			{
 				request::$_php_sapi_name = 'server';
 				
-				$service = self::load('service');
+				$server = self::load('server');
 				$command = trim(strtolower($_SERVER['argv'][0]));
 				
-				if (method_exists($service, $command))
+				if (method_exists($server, $command))
 				{
-					$service->_run_control = array(
+					$server->_run_control = array(
 						$this,
 						'runControl'
 					);
 					call_user_func(array(
-						$service,
+						$server,
 						$command
 					));
 				}

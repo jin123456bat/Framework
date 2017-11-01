@@ -3,7 +3,7 @@ namespace framework\core;
 
 use framework;
 
-class service extends component
+class server extends component
 {
 	/**
 	 * run control function
