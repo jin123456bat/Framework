@@ -13,7 +13,8 @@ class application extends component
 		base::$APP_NAME = $name;
 		base::$APP_PATH = $path;
 		
-		// 配置文件名称
+		// 应用程序的配置文件名称
+		// 默认用应用程序的前3个字符
 		if (empty($configName))
 		{
 			$configName = substr($name, 0, 3);
@@ -25,7 +26,7 @@ class application extends component
 
 	function initlize()
 	{
-		//载入系统默认配置
+		// 载入系统默认配置
 		$this->setConfig(true);
 		// 载入用户自定义配置
 		$this->setConfig(false);
@@ -83,11 +84,11 @@ class application extends component
 				{
 					if (is_file($import))
 					{
-						include $import;
+						include_once $import;
 					}
 					else if (is_file(APP_ROOT . '/' . ltrim($import, '/')))
 					{
-						include APP_ROOT . '/' . ltrim($import, '/');
+						include_once APP_ROOT . '/' . ltrim($import, '/');
 					}
 				}
 			}
@@ -130,22 +131,21 @@ class application extends component
 			}
 		}
 	}
-	
+
 	/**
 	 * 这里还是有问题 还是需要share memory来实现
 	 * 判断程序在cli下是否在运行
 	 * @return boolean
 	 */
-	private function isRunning($control,$action)
+	private function isRunning($control, $action)
 	{
-		$shell = 'ps -ef | grep "'.APP_ROOT.'/index.php -c '.$control.' -a '.$action.'" | grep -v grep | grep -v "sh -c"';
-		exec($shell,$response);
-		return count($response)>=2;
+		$shell = 'ps -ef | grep "' . APP_ROOT . '/index.php -c ' . $control . ' -a ' . $action . '" | grep -v grep | grep -v "sh -c"';
+		exec($shell, $response);
+		return count($response) >= 2;
 	}
 
 	/**
 	 * 执行控制器中的方法
-	 * 
 	 * @param string $control
 	 *        控制器名称
 	 * @param string $action
@@ -164,28 +164,6 @@ class application extends component
 				$controller,
 				'__output'
 			);
-			
-			if ($controller instanceof socketControl && request::php_sapi_name() != 'socket')
-			{
-				if (method_exists($controller, '__runningMode'))
-				{
-					$response = call_user_func(array(
-						$controller,
-						'__runningMode'
-					), request::php_sapi_name());
-					if (! $response !== NULL)
-					{
-						if (is_callable($doResponse))
-						{
-							call_user_func($doResponse, $response, false, $callback);
-						}
-						else
-						{
-							return $response;
-						}
-					}
-				}
-			}
 			
 			if (method_exists($this, 'onRequestStart'))
 			{
@@ -225,10 +203,10 @@ class application extends component
 			}
 			else
 			{
-				//csrf认证
+				// csrf认证
 				if ($filter->csrf())
 				{
-					if (!csrf::verify(request::param('_csrf_token')))
+					if (! csrf::verify(request::param('_csrf_token')))
 					{
 						$response = $filter->getMessage();
 						if ($response !== NULL)
@@ -248,7 +226,6 @@ class application extends component
 				{
 					exit(0);
 				}
-				
 				
 				// control的初始化返回内容
 				if (method_exists($controller, 'initlize') && is_callable(array(
@@ -291,12 +268,12 @@ class application extends component
 		}
 		else if ($controller === NULL)
 		{
-			//判断是否可能是一个response
+			// 判断是否可能是一个response
 			$router_config = self::getConfig('router');
-			if (isset($router_config['class']) && !empty($router_config['class']))
+			if (isset($router_config['class']) && ! empty($router_config['class']))
 			{
 				$class = '';
-				if (isset($router_config['class'][$control]) && class_exists($router_config['class'][$control],true))
+				if (isset($router_config['class'][$control]) && class_exists($router_config['class'][$control], true))
 				{
 					$class = $router_config['class'][$control];
 				}
@@ -305,7 +282,7 @@ class application extends component
 					foreach ($router_config['class'] as $c)
 					{
 						$names = array_filter(explode('/', $c));
-						if(end($names) == $control)
+						if (end($names) == $control)
 						{
 							$class = $c;
 							break;
@@ -313,14 +290,14 @@ class application extends component
 					}
 				}
 				
-				if (!empty($class))
+				if (! empty($class))
 				{
 					$response = new $class();
 					if ($response instanceof response)
 					{
 						if (is_callable($doResponse))
 						{
-							call_user_func($doResponse, $response, true, function($msg){
+							call_user_func($doResponse, $response, true, function ($msg) {
 								echo $msg;
 							});
 						}
@@ -348,30 +325,31 @@ class application extends component
 		{
 			array_shift($_SERVER['argv']);
 			$_SERVER['argc'] --;
-			$argment = cliControl::parseArgment($_SERVER['argc'], $_SERVER['argv']);
-			if (isset($argment['c']) && isset($argment['a']))
-			{
-				$router->appendParameter($argment);
-			}
-			else
+			
+			if (isset($_SERVER['argc']) && $_SERVER['argc'] == 1)
 			{
 				request::$_php_sapi_name = 'socket';
-				$socekt = isset($argment['websocket']) && ! empty($argment['websocket']) ? $argment['websocket'] : 'webSocket';
-				$websocket = self::load($socekt, 'framework\core\webSocket');
-				if (empty($websocket))
+				
+				$service = self::load('service');
+				$command = trim(strtolower($_SERVER['argv'][0]));
+				
+				if (method_exists($service, $command))
 				{
-					exit('don\'t exist websocket: ' . $socekt . "\r\n");
+					$service->_run_control= array(
+						$this,
+						'runControl'
+					);
+					call_user_func(array($service,$command));
 				}
 				else
 				{
-					while (true)
-					{
-						$websocket->run(array(
-							$this,
-							'runControl'
-						));
-					}
+					console::log('未知命令:'.$command);
 				}
+			}
+			else
+			{
+				$argment = cliControl::parseArgment($_SERVER['argc'], $_SERVER['argv']);
+				$router->appendParameter($argment);
 			}
 		}
 		$router->parse();
@@ -385,7 +363,6 @@ class application extends component
 
 	/**
 	 * 输出response
-	 * 
 	 * @param mixed $response
 	 *        输出的对象
 	 * @param bool $exit
@@ -467,7 +444,6 @@ class application extends component
 
 	/**
 	 * 载入系统类
-	 * 
 	 * @param string $classname
 	 *        类名
 	 * @param string $instance

@@ -13,10 +13,22 @@ class base
 	
 	private static $_cache_instance = array();
 	
+	/**
+	 * 应用程序的名称
+	 * @var string
+	 */
 	static $APP_NAME;
 	
+	/**
+	 * 应用程序的路径
+	 * @var unknown
+	 */
 	static $APP_PATH;
 	
+	/**
+	 * 应用程序配置文件的名称
+	 * @var unknown
+	 */
 	static $APP_CONF;
 	
 	function __construct()

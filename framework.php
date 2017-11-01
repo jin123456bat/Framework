@@ -78,7 +78,10 @@ class framework
 						if (strpos($f, '.'))
 						{
 							$file = APP_ROOT.'/'.$k.'/'.$f;
-							file_put_contents($file,"<?php\nreturn array(\n\n);\n?>");
+							if (!file_exists($file))
+							{
+								file_put_contents($file,"<?php\nreturn array(\n\n);\n?>");
+							}
 						}
 					}
 				}

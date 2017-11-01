@@ -22,6 +22,38 @@ class request extends base
 			return self::$_php_sapi_name;
 		}
 	}
+	
+	/**
+	 * 获取请求头
+	 * @return unknown[]
+	 */
+	public static function header()
+	{
+		$headers = array();
+		foreach($_SERVER as $key => $value)
+		{
+			if(substr($key, 0, 5) === 'HTTP_')
+			{
+				$key = substr($key, 5);
+				$key = strtolower($key);
+				$key = str_replace('_', ' ', $key);
+				$key = ucwords($key);
+				$key = str_replace(' ', '-', $key);
+				$headers[$key] = $value;
+			}
+		}
+		return $headers; 
+	}
+	
+	/**
+	 * 获取post提交的原始数据
+	 * enctype="multipart/form-data" 的时候无效
+	 * @return string
+	 */
+	static function body()
+	{
+		return file_get_contents('php://input');
+	}
 
 	/**
 	 * 当前请求方式 并自动转小写
@@ -359,16 +391,5 @@ class request extends base
 		{
 			return $defaultValue;
 		}
-	}
-
-	/**
-	 * 获取请求的header
-	 * 
-	 * @param unknown $name        
-	 * @return NULL|unknown
-	 */
-	public static function header($name)
-	{
-		return isset($_SERVER[$name]) ? $_SERVER[$name] : null;
 	}
 }

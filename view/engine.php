@@ -64,7 +64,7 @@ class engine extends component
 		$this->_compiler->addTemplatePath(pathinfo($this->_template,PATHINFO_DIRNAME));
 		if (file_exists($this->_template) && is_readable($this->_template))
 		{
-			$this->_compiler->setTempalte(file_get_contents($this->_template));
+			$this->_compiler->setTempalte(file_get_contents($this->_template),$this->_template);
 		}
 	}
 
