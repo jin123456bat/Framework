@@ -2,6 +2,7 @@
 namespace framework\core\protocal\driver;
 use framework\core\protocal\protocal;
 use framework\core\connection;
+use framework\core\console;
 
 class http implements protocal
 {
@@ -18,6 +19,13 @@ class http implements protocal
 		$request = explode("\n", $request);
 		
 		$head = explode(' ', array_shift($request));
+		
+		if (!in_array(strtolower($head), array('get','post','head','put','delete','trace','options')))
+		{
+			console::log('错误的请求方法');
+			return false;
+		}
+		
 		$_SERVER['REQUEST_METHOD'] = $head[0];
 		if (strpos($head[1], '?'))
 		{
@@ -55,27 +63,47 @@ class http implements protocal
 			}
 		}
 		
+		$header_end = false;
 		foreach ($request as $req)
 		{
-			list($name,$value) = sscanf($req, "%s:%s");
-			if (!in_array(strtolower($name), array(
-				'cookie'
-			)))
+			if (!empty($req))
 			{
-				$_SERVER['HTTP_'.strtoupper(str_replace('-', '_', $name))] = $value;
+				if (!$header_end)
+				{
+					list($name,$value) = sscanf($req, "%s:%s");
+					if (!in_array(strtolower($name), array(
+						'cookie'
+					)))
+					{
+						$_SERVER['HTTP_'.strtoupper(str_replace('-', '_', $name))] = $value;
+					}
+					else
+					{
+						switch (strtolower($name))
+						{
+							case 'cookie':
+								foreach (explode(';', $value) as $c)
+								{
+									list($k,$v) = explode('=', $c);
+									$_COOKIE[trim($k)] = trim($v);
+								}
+							break;
+						}
+					}
+				}
+				else if (strtolower($_SERVER['REQUEST_METHOD']) == 'post')
+				{
+					//这里解释body
+					foreach(explode('&', $req) as $r)
+					{
+						list($k,$v) = explode('=', $r);
+						$_POST[trim($k)] = trim($v);
+					}
+				}
 			}
 			else
 			{
-				switch (strtolower($name))
-				{
-					case 'cookie':
-						foreach (explode(';', $value) as $c)
-						{
-							list($k,$v) = explode('=', $c);
-							$_COOKIE[trim($k)] = trim($v);
-						}
-					break;
-				}
+				$header_end = true;
 			}
 		}
 		$_SERVER['HTTPS'] = 'off';
@@ -115,7 +143,7 @@ class http implements protocal
 	 */
 	function post($string)
 	{
-		
+		return $_POST;
 	}
 	
 	/**
