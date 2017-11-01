@@ -180,6 +180,12 @@ class response extends component
 
 	function __toString()
 	{
-		return $this->getBody();
+		$content = '';
+		if (request::$_php_sapi_name == 'server')
+		{
+			$content .= $this->_header->__toString();
+		}
+		$content .= $this->getBody();
+		return $content;
 	}
 }

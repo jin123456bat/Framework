@@ -178,4 +178,8 @@ class header extends base
 			}
 		}
 	}
+	
+	function __toString()
+	{
+	}
 }
