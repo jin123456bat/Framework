@@ -7,7 +7,7 @@ class request extends base
 	public static $_php_sapi_name = 'cli';
 
 	/**
-	 * 代码执行方式 cli web
+	 * 代码执行方式 cli web server
 	 * @return string
 	 */
 	static function php_sapi_name()

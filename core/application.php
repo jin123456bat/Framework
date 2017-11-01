@@ -312,6 +312,51 @@ class application extends component
 	}
 
 	/**
+	 * 解析cli模式下的命令
+	 * @param unknown $argc
+	 * @param unknown $argv
+	 * @return boolean[]|unknown[]|unknown[][]
+	 */
+	function parseCliCommand($argc, $argv)
+	{
+		$param = array();
+		foreach ($argv as $index => $value)
+		{
+			if (substr($value, 0, 1) == '-')
+			{
+				if (isset($argv[$index + 1]))
+				{
+					if (isset($param[substr($value, 1)]))
+					{
+						if (is_array($param[substr($value, 1)]))
+						{
+							$param[substr($value, 1)][] = $argv[$index + 1];
+						}
+						else if (is_string($param[substr($value, 1)]))
+						{
+							$param[substr($value, 1)] = array(
+								$param[substr($value, 1)],
+								$argv[$index + 1]
+							);
+						}
+					}
+					else
+					{
+						$param[substr($value, 1)] = $argv[$index + 1];
+					}
+					unset($argv[$index + 1]);
+				}
+				else
+				{
+					$param[substr($value, 1)] = true;
+				}
+				unset($argv[$index]);
+			}
+		}
+		return $param;
+	}
+
+	/**
 	 * 运行application
 	 */
 	function run()
@@ -328,27 +373,30 @@ class application extends component
 			
 			if (isset($_SERVER['argc']) && $_SERVER['argc'] == 1)
 			{
-				request::$_php_sapi_name = 'socket';
+				request::$_php_sapi_name = 'server';
 				
 				$service = self::load('service');
 				$command = trim(strtolower($_SERVER['argv'][0]));
 				
 				if (method_exists($service, $command))
 				{
-					$service->_run_control= array(
+					$service->_run_control = array(
 						$this,
 						'runControl'
 					);
-					call_user_func(array($service,$command));
+					call_user_func(array(
+						$service,
+						$command
+					));
 				}
 				else
 				{
-					console::log('未知命令:'.$command);
+					console::log('未知命令:' . $command);
 				}
 			}
 			else
 			{
-				$argment = cliControl::parseArgment($_SERVER['argc'], $_SERVER['argv']);
+				$argment = $this->parseCliCommand($_SERVER['argc'], $_SERVER['argv']);
 				$router->appendParameter($argment);
 			}
 		}

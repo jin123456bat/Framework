@@ -36,7 +36,23 @@ class http implements protocal
 			$_SERVER['PHP_SELF'] = substr($head[1], 0,strpos($head[1], '.php'));
 			
 			$queryString = explode('/', $_SERVER['QUERY_STRING']);
+			if (isset($queryString[0]) && !empty($queryString[0]))
+			{
+				$_GET['c'] = $queryString[0];
+			}
 			
+			if (isset($queryString[1]) && !empty($queryString[1]))
+			{
+				$_GET['a'] = $queryString[1];
+			}
+			
+			for ($i=2;$i<count($queryString);$i+=2)
+			{
+				if (isset($queryString[$i+1]))
+				{
+					$_GET[$queryString[$i]] = $queryString[$i+1];
+				}
+			}
 		}
 		
 		foreach ($request as $req)
@@ -90,7 +106,7 @@ class http implements protocal
 	 */
 	function get($string)
 	{
-		$request[1];
+		return $_GET;
 	}
 	
 	/**
