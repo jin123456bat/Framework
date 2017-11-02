@@ -34,7 +34,7 @@ class framework
 			$this,
 			'autoload'
 		), true);
-		//判断是否第一次打开  是第一次的话判断目录是否存在  不存在的话创建目录
+		//项目的初始化
 		$this->initlize();
 	}
 	
@@ -94,7 +94,62 @@ class framework
 	 */
 	function initlize()
 	{
+		//程序安装
 		$this->install();
+		//
+		$this->immigrate();
+	}
+	
+	/**
+	 * 移植兼容性，当使用低版本的php的时候，对高版本的部分功能的替代
+	 */
+	function immigrate()
+	{
+		//兼容array_column
+		if (!function_exists('array_column'))
+		{
+			function array_column(array $input,$column_key,$index_key = null)
+			{
+				$temp = array();
+				foreach ($input as $value)
+				{
+					if (isset($value[$column_key]))
+					{
+						if (empty($index_key) || !isset($value[$index_key]))
+						{
+							$temp[] = $value[$column_key];
+						}
+						else
+						{
+							$temp[$value[$index_key]] = $value[$column_key];
+						}
+					}
+				}
+				return $temp;
+			}
+		}
+		
+		/**
+		 * 触发
+		 * @param unknown $a 除数
+		 * @param unknown $b 被除数
+		 * @param number $default 当被除数为0的时候的默认值 默认为0
+		 * @return number
+		 */
+		function division($a,$b,$default = 0)
+		{
+			if (empty($b))
+				return $default;
+			return $a/$b;
+		}
+		
+		if (!class_exists('Error'))
+		{
+			class Error extends Exception
+			{
+				
+			}
+		}
 	}
 
 	/**
