@@ -2,8 +2,7 @@
 namespace framework\core;
 
 class response extends component
-{
-
+{	
 	/**
 	 * http code
 	 * 
@@ -50,6 +49,7 @@ class response extends component
 		$app = $this->getConfig('app');
 		$this->_charset = $app['charset'];
 		$this->setHeader('Content-Type', $this->getContentType() . '; charset=' . $this->getCharset());
+		//$this->setHeader('Date',date(DATE_RFC2822));
 		parent::initlize();
 	}
 
@@ -115,6 +115,7 @@ class response extends component
 			$this->_body = $content->display();
 		}
 		$this->_body = $this->setVariableType($content, 's');
+		$this->setHeader('Content-Length',strlen($this->_body));
 	}
 
 	/**
@@ -180,12 +181,6 @@ class response extends component
 
 	function __toString()
 	{
-		$content = '';
-		if (request::$_php_sapi_name == 'server')
-		{
-			$content .= $this->_header->__toString();
-		}
-		$content .= $this->getBody();
-		return $content;
+		return $this->getBody();
 	}
 }

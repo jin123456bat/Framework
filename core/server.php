@@ -127,7 +127,7 @@ class server extends component
 								self::$_connection[(int)$socket] = new connection($socket, $protocal);
 							}
 							$connection = self::$_connection[(int)$socket];
-							
+							//var_dump($buffer);
 							$init_result = true;
 							if (method_exists($protocal, 'init'))
 							{

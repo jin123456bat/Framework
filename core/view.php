@@ -60,8 +60,8 @@ class view extends response
 			$this->_engine->setTemplatePath(APP_ROOT . '/template/' . trim($this->_layout, '/\\'));
 			$this->_engine->setTempalteName($this->_template);
 		}
-		
 		parent::__construct();
+		$this->setHeader('Content-Type','text/html;charset='.strtolower(ini_get('default_charset')));
 	}
 
 	/**

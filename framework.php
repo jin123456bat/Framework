@@ -142,14 +142,6 @@ class framework
 				return $default;
 			return $a/$b;
 		}
-		
-		if (!class_exists('Error'))
-		{
-			class Error extends Exception
-			{
-				
-			}
-		}
 	}
 
 	/**

@@ -134,7 +134,7 @@ class header extends base
 	}
 
 	/**
-	 * 获取已经设置的头信息
+	 * 根据建名获取已经设置的头信息
 	 * 
 	 * @param unknown $name        
 	 * @return mixed
@@ -142,6 +142,15 @@ class header extends base
 	function get($name)
 	{
 		return self::$_header[$name];
+	}
+	
+	/**
+	 * 获取所有的已经设置的头信息
+	 * @return array
+	 */
+	function getAll()
+	{
+		return self::$_header;
 	}
 
 	/**
@@ -177,9 +186,5 @@ class header extends base
 				header($key . ': ' . $value, true);
 			}
 		}
-	}
-	
-	function __toString()
-	{
 	}
 }
