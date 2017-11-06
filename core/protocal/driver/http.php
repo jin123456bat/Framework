@@ -106,14 +106,6 @@ class http implements protocal
 	);
 	
 	/**
-	 * 其他额外响应的header
-	 * @var array
-	 */
-	private $_header = array(
-		
-	);
-	
-	/**
 	 * http状态码以及含义
 	 * @var array
 	 */
@@ -193,6 +185,36 @@ class http implements protocal
 	private $_post = array();
 	
 	/**
+	 * $_COOKIE
+	 * @var array
+	 */
+	private $_cookie = array();
+	
+	/**
+	 * $_FILES
+	 * @var array
+	 */
+	private $_files = array();
+	
+	/**
+	 * $_ENV
+	 * @var array
+	 */
+	private $_env = array();
+	
+	/**
+	 * $_REQUEST
+	 * @var array
+	 */
+	private $_request = array();
+	
+	/**
+	 * $_SESSION
+	 * @var array
+	 */
+	private $_session = array();
+	
+	/**
 	 * {@inheritDoc}
 	 * @see \framework\core\protocal\protocal::init()
 	 */
@@ -200,9 +222,14 @@ class http implements protocal
 	{
 		$this->_server['REQUEST_TIME'] = time();
 		$this->_server['REQUEST_TIME_FLOAT'] = microtime(true);
+		$this->_server['QUERY_STRING'] = '';
+		$this->_server['HTTPS'] = 'off';
+		socket_getpeername($connection->getSocket(),$this->_server['REMOTE_ADDR'],$this->_server['REMOTE_PORT']);
 		
-		$request = substr($request, strpos($request, "\n"));
-		list($method,$path,$version) = explode(' ', $request);
+		$header = explode("\r\n", substr($request,0, strpos($request, "\r\n\r\n")));
+		
+		$head = array_shift($header);
+		list($method,$path,$version) = explode(' ', $head);
 		$method = trim($method);
 		$path = trim($path);
 		$version = trim($version);
@@ -210,66 +237,101 @@ class http implements protocal
 		$this->_server['SERVER_PROTOCOL'] = $version;
 		$this->_server['REQUEST_METHOD'] = $method;
 		$this->_server['REQUEST_URI'] = $path;
-		$this->_server['QUERY_STRING'] = '';
+		
 		
 		if (!in_array(strtolower($method), array('get','post','head','put','delete','trace','options')))
 		{
 			$connection->send(new response('<h1>错误的请求</h1>',400));
 			return false;
 		}
-		var_dump($this->_server);
-		exit();
-		//一个http请求中 以一个单行的\r\n为结束 所以只要碰见了一次空行 就认为header解析完成了
-		$header_end = false;
-		foreach ($request as $req)
+		
+		//处理其他的请求头
+		foreach ($header as $head)
 		{
-			if (!empty($req))
+			if (!empty($head))
 			{
-				if (!$header_end)
+				list($name,$value) = explode(':', $head);
+				$name = strtolower(trim($name));
+				if (!in_array($name, array(
+					'cookie'
+				)))
 				{
-					list($name,$value) = sscanf($req, "%s:%s");
-					if (!in_array(strtolower($name), array(
-						'cookie'
-					)))
+					$this->_server['HTTP_'.strtoupper(str_replace('-', '_', $name))] = trim($value);
+				}
+				else
+				{
+					switch ($name)
 					{
-						$_SERVER['HTTP_'.strtoupper(str_replace('-', '_', $name))] = $value;
-					}
-					else
-					{
-						switch (strtolower($name))
-						{
-							case 'cookie':
-								//处理cookie的header
-								foreach (explode(';', $value) as $c)
-								{
-									list($k,$v) = explode('=', $c);
-									$_COOKIE[trim($k)] = trim($v);
-								}
-								break;
-						}
+						case 'cookie':
+							//处理cookie的header
+							foreach (explode(';', $value) as $c)
+							{
+								list($k,$v) = explode('=', $c);
+								$this->_cookie[trim($k)] = trim($v);
+							}
+							break;
 					}
 				}
-				else if (strtolower($_SERVER['REQUEST_METHOD']) == 'post')
-				{
-					//这里解释body  但是目前只支持urlencode的方式
-					foreach(explode('&', $req) as $r)
-					{
-						if (!empty($r))
-						{
-							list($k,$v) = explode('=', $r);
-							$_POST[trim($k)] = trim($v);
-						}
-					}
-				}
-			}
-			else
-			{
-				$header_end = true;
 			}
 		}
-		//https暂时还不支持
-		$_SERVER['HTTPS'] = 'off';
-		socket_getpeername($connection->getSocket(),$_SERVER['REMOTE_ADDR'],$_SERVER['REMOTE_PORT']);
+		
+		if (strtolower($this->_server['REQUEST_METHOD']) == 'post')
+		{
+			//剩下的就是body了
+			$body = trim(substr($request,strpos($request, "\r\n\r\n")));
+			
+			//默认的编码方式
+			$this_content_type = 'application/x-www-form-urlencoded';
+			foreach(explode(';', $this->_server['HTTP_CONTENT_TYPE']) as $content_type)
+			{
+				$content_type = strtolower(trim($content_type));
+				if ($content_type == 'multipart/form-data')
+				{
+					$this_content_type = 'multipart/form-data';
+					break;
+				}
+				else if ($content_type == 'application/x-www-form-urlencoded')
+				{
+					$this_content_type = 'application/x-www-form-urlencoded';
+					break;
+				}
+				
+				
+			}
+			if ($this_content_type == 'application/x-www-form-urlencoded')
+			{
+				//x-www-form-urlencode
+				$body = urldecode($body);
+				parse_str($body,$this->_post);
+			}
+			else if ($this_content_type == 'multipart/form-data')
+			{
+				if(preg_match('/boundary=(?<boundary>.+)/', $this->_server['HTTP_CONTENT_TYPE'],$match))
+				{
+					$boundary = $match['boundary'];
+				}
+				
+				foreach(explode('--'.$boundary, $body) as $split)
+				{
+					if ($split == '--')
+					{
+						continue;
+					}
+					
+					if (preg_match('/Content-Disposition:\s*form-data;\s*name="(?<name>[^"]*)"/i', $split,$match))
+					{
+						$name = $match['name'];
+						$value = trim(preg_replace('/Content-Disposition:\s*form-data;\s*name="(?<name>[^"]*)"/i', '', $split,1));
+						$this->_post[$name] = $value;
+					}
+				}
+			}
+		}
+		
+		
+		var_dump($request);
+		exit();
+		
 		//处理path
 		if (strpos($path, '?'))
 		{
@@ -390,7 +452,7 @@ class http implements protocal
 						$extension = 'html';
 					}
 					//处理文件请求
-					self::$_header[] = 'Content-Type:'.self::$_mime_type[$extension];
+					//self::$_header[] = 'Content-Type:'.self::$_mime_type[$extension];
 					$connection->send(file_get_contents($filepath));
 					return false;
 				}
@@ -485,7 +547,7 @@ class http implements protocal
 	public function files($buffer)
 	{
 		// TODO Auto-generated method stub
-		
+		return $this->_files;
 	}
 
 	/**
@@ -495,7 +557,7 @@ class http implements protocal
 	public function request($buffer)
 	{
 		// TODO Auto-generated method stub
-		
+		return $this->_request;
 	}
 
 	/**
@@ -505,7 +567,7 @@ class http implements protocal
 	public function env($buffer)
 	{
 		// TODO Auto-generated method stub
-		
+		return $this->_env;
 	}
 
 	/**
@@ -515,7 +577,7 @@ class http implements protocal
 	public function session($buffer)
 	{
 		// TODO Auto-generated method stub
-		
+		return $this->_session;
 	}
 
 }

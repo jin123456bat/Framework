@@ -38,9 +38,9 @@ class response extends component
 
 	function __construct($response_string = '', $status = 200)
 	{
-		$this->setBody($response_string);
 		$this->_status = filter::int($status);
 		$this->_header = new header();
+		$this->setBody($response_string);
 		parent::__construct();
 	}
 
