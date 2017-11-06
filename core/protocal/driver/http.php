@@ -410,18 +410,16 @@ class http implements protocal
 	function encode($string)
 	{
 		$content = [];
-		if (is_string($string))
+		if (!($string instanceof response))
 		{
 			$string = new response($string,200);
 		}
-		if ($string instanceof response)
+		
+		$content[]  = $this->_server['SERVER_PROTOCOL'].' '.$string->getHttpStatus().' '.self::$_http_status[$string->getHttpStatus()];
+		$headers = $string->getHeader()->getAll();
+		foreach ($headers as $key => $header)
 		{
-			$content[]  = $this->_server['SERVER_PROTOCOL'].' '.$string->getHttpStatus().' '.self::$_http_status[$string->getHttpStatus()];
-			$headers = $string->getHeader()->getAll();
-			foreach ($headers as $key => $header)
-			{
-				$content[] = $key.':'.$header;
-			}
+			$content[] = $key.':'.$header;
 		}
 		
 		//添加额外的header

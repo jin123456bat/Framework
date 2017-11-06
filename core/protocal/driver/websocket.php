@@ -2,6 +2,7 @@
 namespace framework\core\protocal\driver;
 use framework\core\protocal\protocal;
 use framework\core\connection;
+use framework\core\response;
 
 class websocket implements protocal
 {
