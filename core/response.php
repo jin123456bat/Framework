@@ -38,7 +38,7 @@ class response extends component
 
 	function __construct($response_string = '', $status = 200)
 	{
-		$this->_body = $response_string;
+		$this->setBody($response_string);
 		$this->_status = filter::int($status);
 		$this->_header = new header();
 		parent::__construct();
@@ -49,6 +49,7 @@ class response extends component
 		$app = $this->getConfig('app');
 		$this->_charset = $app['charset'];
 		$this->setHeader('Content-Type', $this->getContentType() . '; charset=' . $this->getCharset());
+		$this->setHeader('Server','framework/'.APP_NAME);
 		//$this->setHeader('Date',date(DATE_RFC2822));
 		parent::initlize();
 	}
@@ -110,10 +111,6 @@ class response extends component
 	 */
 	function setBody($content)
 	{
-		if ($content instanceof view)
-		{
-			$this->_body = $content->display();
-		}
 		$this->_body = $this->setVariableType($content, 's');
 		$this->setHeader('Content-Length',strlen($this->_body));
 	}

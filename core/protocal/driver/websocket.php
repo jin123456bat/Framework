@@ -4,7 +4,7 @@ use framework\core\protocal\protocal;
 use framework\core\connection;
 
 class websocket implements protocal
-{	
+{
 	/**
 	 * {@inheritDoc}
 	 * @see \framework\core\protocal\protocal::init()
@@ -119,4 +119,54 @@ class websocket implements protocal
 	{
 		return array();
 	}
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::server()
+	 */
+	public function server($buffer)
+	{
+		// TODO Auto-generated method stub
+		return $_SERVER;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::files()
+	 */
+	public function files($buffer)
+	{
+		// TODO Auto-generated method stub
+		return $_FILES;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::request()
+	 */
+	public function request($buffer)
+	{
+		// TODO Auto-generated method stub
+		return $_REQUEST;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::env()
+	 */
+	public function env($buffer)
+	{
+		// TODO Auto-generated method stub
+		return $_ENV;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::session()
+	 */
+	public function session($buffer)
+	{
+		// TODO Auto-generated method stub
+		return $_SESSION;
+	}
+
 }

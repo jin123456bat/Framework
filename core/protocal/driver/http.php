@@ -6,7 +6,7 @@ use framework\core\console;
 use framework\core\response;
 
 class http implements protocal
-{	
+{
 	private static $_mime_type = array(
 		'shtml' => 'text/html',
 		'html' => 'text/html',
@@ -109,7 +109,7 @@ class http implements protocal
 	 * 其他额外响应的header
 	 * @var array
 	 */
-	private static $_header = array(
+	private $_header = array(
 		
 	);
 	
@@ -163,10 +163,34 @@ class http implements protocal
 		505 => 'HTTP Version Not Supported',
 	);
 	
+	/**
+	 * 作为http的配置
+	 * @var array
+	 */
 	private $_config = array(
 		'DirectoryIndex' => 'index.php index.html',
 		'ShowDirectory' => false,
 	);
+	
+	/**
+	 * $_SERVER
+	 * @var array
+	 */
+	private $_server = array(
+		'SERVER_SOFTWARE' => 'framework',
+	);
+	
+	/**
+	 * $_GET
+	 * @var array
+	 */
+	private $_get = array();
+	
+	/**
+	 * $_POST
+	 * @var array
+	 */
+	private $_post = array();
 	
 	/**
 	 * {@inheritDoc}
@@ -174,27 +198,27 @@ class http implements protocal
 	 */
 	function init($request,$connection)
 	{
-		$_SERVER['REQUEST_TIME'] = time();
-		$_SERVER['SERVER_SOFTWARE'] = 'framework';
-		$_SERVER['REQUEST_TIME_FLOAT'] = microtime(true);
+		$this->_server['REQUEST_TIME'] = time();
+		$this->_server['REQUEST_TIME_FLOAT'] = microtime(true);
 		
-		$request = explode("\n", $request);
-		list($method,$path,$version) = explode(' ', $request[0]);
+		$request = substr($request, strpos($request, "\n"));
+		list($method,$path,$version) = explode(' ', $request);
 		$method = trim($method);
 		$path = trim($path);
 		$version = trim($version);
 		
-		$_SERVER['SERVER_PROTOCOL'] = $version;
+		$this->_server['SERVER_PROTOCOL'] = $version;
+		$this->_server['REQUEST_METHOD'] = $method;
+		$this->_server['REQUEST_URI'] = $path;
+		$this->_server['QUERY_STRING'] = '';
+		
 		if (!in_array(strtolower($method), array('get','post','head','put','delete','trace','options')))
 		{
-			//这里想办法响应一个400
-			console::log('错误的请求方法');
+			$connection->send(new response('<h1>错误的请求</h1>',400));
 			return false;
 		}
-		$_SERVER['REQUEST_METHOD'] = $method;
-		$_SERVER['REQUEST_URI'] = $path;
-		$_SERVER['QUERY_STRING'] = '';
-		
+		var_dump($this->_server);
+		exit();
 		//一个http请求中 以一个单行的\r\n为结束 所以只要碰见了一次空行 就认为header解析完成了
 		$header_end = false;
 		foreach ($request as $req)
@@ -367,9 +391,14 @@ class http implements protocal
 					}
 					//处理文件请求
 					self::$_header[] = 'Content-Type:'.self::$_mime_type[$extension];
-					$connection->send(file_get_contents($_SERVER['SCRIPT_NAME']));
+					$connection->send(file_get_contents($filepath));
 					return false;
 				}
+			}
+			else
+			{
+				//返回404
+				return false;
 			}
 		}
 	}
@@ -380,39 +409,28 @@ class http implements protocal
 	 */
 	function encode($string)
 	{
-		$content = self::$_header;
+		$content = [];
 		if (is_string($string))
 		{
-			$content[] = $_SERVER['SERVER_PROTOCOL']." 200 OK";
-			$content[] = 'Content-Length:'.strlen($string);
+			$string = new response($string,200);
 		}
-		else if ($string instanceof response)
+		if ($string instanceof response)
 		{
-			$content[]  = $_SERVER['SERVER_PROTOCOL'].' '.$string->getHttpStatus().' '.self::$_http_status[$string->getHttpStatus()];
-			$content[] = 'Content-Length:'.strlen($string->getBody());
+			$content[]  = $this->_server['SERVER_PROTOCOL'].' '.$string->getHttpStatus().' '.self::$_http_status[$string->getHttpStatus()];
 			$headers = $string->getHeader()->getAll();
 			foreach ($headers as $key => $header)
 			{
 				$content[] = $key.':'.$header;
 			}
 		}
+		
+		//添加额外的header
 		$content[] = 'Date:'.date(DATE_RFC2822);
 		$content[] = 'X-Powered-By:PHP/'.phpversion();
-		$content[] = 'Server:'.$_SERVER['SERVER_SOFTWARE'].'/'.APP_NAME;
-		//$content[] = 'Content-Type:text/html;charset='.strtolower(ini_get('default_charset'));
-		
 		
 		$content[] = '';
 		
-		
-		if (is_string($string))
-		{
-			$content[] = $string;
-		}
-		else if ($string instanceof response)
-		{
-			$content[] = $string->getBody();
-		}
+		$content[] = $string->getBody();
 		
 		return implode("\r\n", $content);
 	}
@@ -432,7 +450,7 @@ class http implements protocal
 	 */
 	function get($string)
 	{
-		return $_GET;
+		return $this->_get;
 	}
 	
 	/**
@@ -441,7 +459,7 @@ class http implements protocal
 	 */
 	function post($string)
 	{
-		return $_POST;
+		return $this->_post;
 	}
 	
 	/**
@@ -452,4 +470,54 @@ class http implements protocal
 	{
 		return $_COOKIE;
 	}
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::server()
+	 */
+	public function server($buffer)
+	{
+		// TODO Auto-generated method stub
+		return $this->_server;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::files()
+	 */
+	public function files($buffer)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::request()
+	 */
+	public function request($buffer)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::env()
+	 */
+	public function env($buffer)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::session()
+	 */
+	public function session($buffer)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
 }

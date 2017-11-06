@@ -39,7 +39,7 @@ class connection extends base
 		{
 			$buffer = $this->_protocal->encode($buffer);
 		}
-		var_dump($buffer);
+		//var_dump($buffer);
 		return socket_write($this->_socket, $buffer,strlen($buffer));
 	}
 	

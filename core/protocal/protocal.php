@@ -30,20 +30,50 @@ interface protocal
 	
 	
 	/**
-	 * 获取get参数
+	 * 获取$_GET
 	 * @param string $buffer
 	 */
 	function get($buffer);
 	
 	/**
-	 * 获取post参数
+	 * 获取$_POST
 	 * @param unknown $buffer
 	 */
 	function post($buffer);
 	
 	/**
-	 * 获取cookie
+	 * 获取$_COOKIE
 	 * @param unknown $buffer
 	 */
 	function cookie($buffer);
+	
+	/**
+	 * 获取$_SERVER
+	 * @param unknown $buffer
+	 */
+	function server($buffer);
+	
+	/**
+	 * 获取$_FILES
+	 * @param unknown $buffer
+	 */
+	function files($buffer);
+	
+	/**
+	 * 获取$_REQUEST
+	 * @param unknown $buffer
+	 */
+	function request($buffer);
+	
+	/**
+	 * $_ENV
+	 * @param unknown $buffer
+	 */
+	function env($buffer);
+	
+	/**
+	 * 获取$_SESSION
+	 * @param unknown $buffer
+	 */
+	function session($buffer);
 }
