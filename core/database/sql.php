@@ -572,6 +572,7 @@ class sql extends base
 	 */
 	function in($field, array $data = array(), $combine = 'and')
 	{
+		$data = array_unique($data);
 		if (count($data) > 1)
 		{
 			$sql = self::fieldFormat($field) . ' IN (' . implode(',', array_fill(0, count($data), '?')) . ')';
