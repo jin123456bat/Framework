@@ -98,75 +98,46 @@ class server extends component
 				}
 				else
 				{
-					$buffer = '';
-					do{
-						$str = socket_read($socket, 4096);
-						$buffer.=$str;
-					}while(strlen($str)==4096);
-					
-					if (empty($buffer))
+					$init_result = true;
+					if (!isset(self::$_connection[(int)$socket]))
 					{
-						//关闭socket
-						$index = array_search($socket, self::$_sockets);
-						socket_close($socket);
-						array_splice(self::$_sockets, $index, 1);
+						self::$_connection[(int)$socket] = new connection($socket);
+						if (method_exists(self::$_connection[(int)$socket], 'initlize'))
+						{
+							$init_result = call_user_func(array(self::$_connection[(int)$socket],'initlize'));
+						}
 					}
-					else
+					$connection = self::$_connection[(int)$socket];
+					
+					if ($init_result !== false)
 					{
-						$class_name= 'framework\\core\\protocal\\driver\\'.$this->_config['protocal'];
-						if (class_exists($class_name,true))
-						{
-							$protocal = new $class_name();
-							if (method_exists($protocal, 'initlize'))
+						$buffer = $connection->read();
+						$protocal = $connection->getProotcal();
+						
+						//经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
+						$request = call_user_func(array($protocal,'decode'),$buffer);
+						
+						//通常一个字符串并不能满足系统的参数需求，这里必须要将字符串转化为数组，作为系统的输入参数
+						$_GET = call_user_func(array($protocal,'get'),$request);
+						$_POST = call_user_func(array($protocal,'post'),$request);
+						$_COOKIE = call_user_func(array($protocal,'cookie'),$request);
+						$_SERVER = call_user_func(array($protocal,'server'),$request);
+						$_FILES = call_user_func(array($protocal,'files'),$request);
+						$_REQUEST = call_user_func(array($protocal,'request'),$request);
+						$_ENV = call_user_func(array($protocal,'env'),$request);
+						
+						$router = application::load('router');
+						$router->appendParameter($_GET);
+						$router->parse();
+						$control = $router->getControlName();
+						$action = $router->getActionName();
+						
+						call_user_func($this->_run_control, $control, $action, function ($response, $exit, $callback) use($connection) {
+							if ($response !== NULL)
 							{
-								call_user_func(array($protocal,'initlize'));
+								$connection->write($response);
 							}
-							
-							if (!isset(self::$_connection[(int)$socket]))
-							{
-								self::$_connection[(int)$socket] = new connection($socket, $protocal);
-							}
-							$connection = self::$_connection[(int)$socket];
-							
-							$init_result = true;
-							if (method_exists($protocal, 'init'))
-							{
-								$init_result = call_user_func(array($protocal,'init'),$buffer,self::$_connection[(int)$socket]);
-							}
-							
-							if ($init_result !== false)
-							{
-								//经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
-								$request = call_user_func(array($protocal,'decode'),$buffer);
-								
-								//通常一个字符串并不能满足系统的参数需求，这里必须要将字符串转化为数组，作为系统的输入参数
-								$_GET = call_user_func(array($protocal,'get'),$request);
-								$_POST = call_user_func(array($protocal,'post'),$request);
-								$_COOKIE = call_user_func(array($protocal,'cookie'),$request);
-								$_SERVER = call_user_func(array($protocal,'server'),$request);
-								$_FILES = call_user_func(array($protocal,'files'),$request);
-								$_REQUEST = call_user_func(array($protocal,'request'),$request);
-								$_ENV = call_user_func(array($protocal,'env'),$request);
-								
-								$router = application::load('router');
-								$router->appendParameter($_GET);
-								$router->parse();
-								$control = $router->getControlName();
-								$action = $router->getActionName();
-								
-								call_user_func($this->_run_control, $control, $action, function ($response, $exit, $callback) use($connection) {
-									if ($response !== NULL)
-									{
-										$connection->send($response);
-									}
-								});
-							}
-						}
-						else
-						{
-							console::log('无法找到协议:'.$this->_config['protocal']);
-							exit(1);
-						}
+						});
 					}
 				}
 			}

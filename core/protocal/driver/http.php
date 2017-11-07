@@ -7,6 +7,11 @@ use framework\core\server;
 
 class http implements protocal
 {
+	/**
+	 * @var connection
+	 */
+	private $_connection;
+	
 	private static $_mime_type = array(
 		'shtml' => 'text/html',
 		'html' => 'text/html',
@@ -215,95 +220,12 @@ class http implements protocal
 	private $_session = array();
 	
 	/**
-	 * 数据是否接受完成
-	 * @var boolean
-	 */
-	private static $_buffer_complete = true;
-	
-	/**
 	 * {@inheritDoc}
 	 * @see \framework\core\protocal\protocal::init()
 	 */
-	function init($request,$connection)
+	function init($connection)
 	{
-		$this->_server['REQUEST_TIME'] = time();
-		$this->_server['REQUEST_TIME_FLOAT'] = microtime(true);
-		$this->_server['QUERY_STRING'] = '';
-		//$this->_server['HTTPS'] = 'off';
-		socket_getpeername($connection->getSocket(),$this->_server['REMOTE_ADDR'],$this->_server['REMOTE_PORT']);
-		
-		$header = explode("\r\n", substr($request,0, strpos($request, "\r\n\r\n")));
-		
-		$head = array_shift($header);
-		list($method,$path,$version) = explode(' ', $head,3);
-		$method = trim($method);
-		$path = trim($path);
-		$version = trim($version);
-		
-		$this->_server['SERVER_PROTOCOL'] = $version;
-		$this->_server['REQUEST_METHOD'] = $method;
-		$this->_server['REQUEST_URI'] = $path;
-		
-		//get
-		$this->_server['QUERY_STRING'] = parse_url($path,PHP_URL_QUERY);
-		if (!empty($this->_server['QUERY_STRING']))
-		{
-			parse_str($this->_server['QUERY_STRING'],$this->_get);
-		}
-		
-		if (!in_array(strtolower($method), array('get','post','head','put','delete','trace','options')))
-		{
-			$connection->send(new response('<h1>错误的请求</h1>',400));
-			return false;
-		}
-		
-		//处理其他的请求头
-		foreach ($header as $head)
-		{
-			if (!empty($head))
-			{
-				list($name,$value) = explode(':', $head,2);
-				$name = strtolower(trim($name));
-				if (!in_array($name, array(
-					'cookie'
-				)))
-				{
-					$this->_server['HTTP_'.strtoupper(str_replace('-', '_', $name))] = trim($value);
-				}
-				else
-				{
-					switch ($name)
-					{
-						case 'cookie':
-							//处理cookie的header
-							parse_str(str_replace('; ', '&', $value), $this->_cookie);
-							break;
-					}
-				}
-			}
-		}
-		
-		if (strtolower($this->_server['REQUEST_METHOD']) == 'post')
-		{
-			//剩下的就是body了
-			$body = substr($request,strpos($request, "\r\n\r\n")+4);
-			$GLOBALS['HTTP_RAW_REQUEST_DATA'] = $GLOBALS['HTTP_RAW_POST_DATA'] = $body;
-			
-			//body的长度校验
-			if (isset($this->_server['HTTP_CONTENT_LENGTH']))
-			{
-				if ($this->_server['HTTP_CONTENT_LENGTH'] < strlen($body))
-				{
-					$body = substr($body, 0,$this->_server['HTTP_CONTENT_LENGTH']);
-				}
-				else if ($this->_server['HTTP_CONTENT_LENGTH'] > strlen($body))
-				{
-					//等待下次发送的body
-					$this->_buffer_not_complete = true;
-					return false;
-				}
-			}
-		}
+		$this->_connection = $connection;
 		
 		//处理path
 		/* if (strpos($path, '?'))
@@ -361,7 +283,7 @@ class http implements protocal
 					{
 						//处理文件请求
 						self::$_header[] = 'Content-Type:'.self::$_mime_type[$extension];
-						$connection->send(file_get_contents($_SERVER['SCRIPT_NAME']));
+						$connection->write(file_get_contents($_SERVER['SCRIPT_NAME']));
 						return false;
 					}
 				}
@@ -373,7 +295,7 @@ class http implements protocal
 			else 
 			{
 				//这里应该返回404
-				$connection->send(new response('<h1>404</h1>',404));
+				$connection->write(new response('<h1>404</h1>',404));
 				return false;
 			}
 		}
@@ -426,7 +348,7 @@ class http implements protocal
 					}
 					//处理文件请求
 					//self::$_header[] = 'Content-Type:'.self::$_mime_type[$extension];
-					$connection->send(file_get_contents($filepath));
+					$connection->write(file_get_contents($filepath));
 					return false;
 				}
 			}
@@ -503,9 +425,151 @@ class http implements protocal
 	 * {@inheritDoc}
 	 * @see \framework\core\protocal\protocal::decode()
 	 */
-	function decode($buffer)
+	function decode($request)
 	{
-		return $buffer;
+		$connection = $this->_connection;
+		
+		$this->_server['REQUEST_TIME'] = time();
+		$this->_server['REQUEST_TIME_FLOAT'] = microtime(true);
+		$this->_server['QUERY_STRING'] = '';
+		
+		socket_getpeername($connection->getSocket(),$this->_server['REMOTE_ADDR'],$this->_server['REMOTE_PORT']);
+		
+		$header = explode("\r\n", substr($request,0, strpos($request, "\r\n\r\n")));
+		
+		$head = array_shift($header);
+		list($method,$path,$version) = explode(' ', $head,3);
+		$method = trim($method);
+		$path = trim($path);
+		$version = trim($version);
+		
+		$this->_server['SERVER_PROTOCOL'] = $version;
+		$this->_server['REQUEST_METHOD'] = $method;
+		$this->_server['REQUEST_URI'] = $path;
+		
+		//get
+		$this->_server['QUERY_STRING'] = parse_url($path,PHP_URL_QUERY);
+		if (!empty($this->_server['QUERY_STRING']))
+		{
+			parse_str($this->_server['QUERY_STRING'],$this->_get);
+		}
+		
+		if (!in_array(strtolower($method), array('get','post','head','put','delete','trace','options')))
+		{
+			$connection->write(new response('<h1>错误的请求</h1>',400));
+			return false;
+		}
+		
+		//处理其他的请求头
+		foreach ($header as $head)
+		{
+			if (!empty($head))
+			{
+				list($name,$value) = explode(':', $head,2);
+				$name = strtolower(trim($name));
+				if (!in_array($name, array(
+					'cookie'
+				)))
+				{
+					$this->_server['HTTP_'.strtoupper(str_replace('-', '_', $name))] = trim($value);
+				}
+				else
+				{
+					switch ($name)
+					{
+						case 'cookie':
+							//处理cookie的header
+							parse_str(str_replace('; ', '&', $value), $this->_cookie);
+							break;
+					}
+				}
+			}
+		}
+		
+		if (strtolower($this->_server['REQUEST_METHOD']) == 'post')
+		{
+			//剩下的就是body了
+			$body = substr($request,strpos($request, "\r\n\r\n")+4);
+			$GLOBALS['HTTP_RAW_REQUEST_DATA'] = $GLOBALS['HTTP_RAW_POST_DATA'] = $body;
+			
+			//body的长度校验
+			if (isset($this->_server['HTTP_CONTENT_LENGTH']))
+			{
+				if ($this->_server['HTTP_CONTENT_LENGTH'] < strlen($body))
+				{
+					$body = substr($body, 0,$this->_server['HTTP_CONTENT_LENGTH']);
+				}
+				else if ($this->_server['HTTP_CONTENT_LENGTH'] > strlen($body))
+				{
+					//等待发送  尚未完成
+					return false;
+				}
+			}
+			
+			//默认的编码方式
+			$this_content_type = 'application/x-www-form-urlencoded';
+			foreach(explode(';', $this->_server['HTTP_CONTENT_TYPE']) as $content_type)
+			{
+				$content_type = strtolower(trim($content_type));
+				if ($content_type == 'multipart/form-data')
+				{
+					$this_content_type = 'multipart/form-data';
+					break;
+				}
+				else if ($content_type == 'application/x-www-form-urlencoded')
+				{
+					$this_content_type = 'application/x-www-form-urlencoded';
+					break;
+				}
+			}
+			
+			if ($this_content_type == 'application/x-www-form-urlencoded')
+			{
+				//x-www-form-urlencode
+				//$body = urldecode($body);
+				parse_str($body,$this->_post);
+			}
+			else if ($this_content_type == 'multipart/form-data')
+			{
+				if(preg_match('/boundary=(?<boundary>.+)/', $this->_server['HTTP_CONTENT_TYPE'],$match))
+				{
+					$boundary = $match['boundary'];
+				}
+				
+				foreach(explode('--'.$boundary, $body) as $split)
+				{
+					if (empty($split) || $split == '--')
+					{
+						continue;
+					}
+					//提取头
+					$head = trim(substr($split, 0,strpos($split, "\r\n\r\n")));
+					//提取值
+					$content = substr($split, strpos($split, "\r\n\r\n")+4);
+					
+					if (preg_match('/Content-Disposition: form-data; name="(?<name>[^"]*)"; filename="(?<filename>[^"]*)"/i', $head,$match))
+					{
+						preg_match('/Content-Type: (?<type>[^\r\n]*)/i', $head,$type);
+						$temp_file = tempnam(sys_get_temp_dir(), 'php');
+						file_put_contents($temp_file, $content);
+						//文件
+						//多文件上传看来必须文件名不能一样
+						$this->_files[$match['name']] = array(
+							'name' => $match['filename'],
+							'size' => strlen($content),
+							'type' => isset($type['type'])?$type['type']:'',
+							'error' => UPLOAD_ERR_OK,
+							'tmp_name' => $temp_file,
+						);
+					}
+					else if (preg_match('/Content-Disposition:\s*form-data;\s*name="(?<name>[^"]*)"/i', $split,$match))
+					{
+						$this->_post[$match['name']] = $content;
+					}
+				}
+			}
+		}
+		return $request;
 	}
 	
 	/**

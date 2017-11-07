@@ -8,11 +8,10 @@ interface protocal
 	/**
 	 * 当第一次连接的时候执行的方法
 	 * 以websocket为例，这里可以验证握手机制
-	 * @param string $request
-	 * $param connection $connection
+	 * @param connection $connection
 	 * @return boolean 返回false的时候代码执行完毕，不在继续执行下面的代码
 	 */
-	function init($request,$connection);
+	function init($connection);
 	
 	/**
 	 * 编码方法
