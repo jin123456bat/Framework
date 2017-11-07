@@ -100,9 +100,9 @@ class server extends component
 				{
 					$buffer = '';
 					do{
-						$str = socket_read($socket, 2048);
+						$str = socket_read($socket, 4096);
 						$buffer.=$str;
-					}while(strlen($str)==2048);
+					}while(strlen($str)==4096);
 					
 					if (empty($buffer))
 					{
@@ -127,7 +127,7 @@ class server extends component
 								self::$_connection[(int)$socket] = new connection($socket, $protocal);
 							}
 							$connection = self::$_connection[(int)$socket];
-							//var_dump($buffer);
+							
 							$init_result = true;
 							if (method_exists($protocal, 'init'))
 							{

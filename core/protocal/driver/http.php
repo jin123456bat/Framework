@@ -2,8 +2,8 @@
 namespace framework\core\protocal\driver;
 use framework\core\protocal\protocal;
 use framework\core\connection;
-use framework\core\console;
 use framework\core\response;
+use framework\core\server;
 
 class http implements protocal
 {
@@ -215,6 +215,12 @@ class http implements protocal
 	private $_session = array();
 	
 	/**
+	 * 数据是否接受完成
+	 * @var boolean
+	 */
+	private static $_buffer_complete = true;
+	
+	/**
 	 * {@inheritDoc}
 	 * @see \framework\core\protocal\protocal::init()
 	 */
@@ -223,13 +229,13 @@ class http implements protocal
 		$this->_server['REQUEST_TIME'] = time();
 		$this->_server['REQUEST_TIME_FLOAT'] = microtime(true);
 		$this->_server['QUERY_STRING'] = '';
-		$this->_server['HTTPS'] = 'off';
+		//$this->_server['HTTPS'] = 'off';
 		socket_getpeername($connection->getSocket(),$this->_server['REMOTE_ADDR'],$this->_server['REMOTE_PORT']);
 		
 		$header = explode("\r\n", substr($request,0, strpos($request, "\r\n\r\n")));
 		
 		$head = array_shift($header);
-		list($method,$path,$version) = explode(' ', $head);
+		list($method,$path,$version) = explode(' ', $head,3);
 		$method = trim($method);
 		$path = trim($path);
 		$version = trim($version);
@@ -238,6 +244,12 @@ class http implements protocal
 		$this->_server['REQUEST_METHOD'] = $method;
 		$this->_server['REQUEST_URI'] = $path;
 		
+		//get
+		$this->_server['QUERY_STRING'] = parse_url($path,PHP_URL_QUERY);
+		if (!empty($this->_server['QUERY_STRING']))
+		{
+			parse_str($this->_server['QUERY_STRING'],$this->_get);
+		}
 		
 		if (!in_array(strtolower($method), array('get','post','head','put','delete','trace','options')))
 		{
@@ -250,7 +262,7 @@ class http implements protocal
 		{
 			if (!empty($head))
 			{
-				list($name,$value) = explode(':', $head);
+				list($name,$value) = explode(':', $head,2);
 				$name = strtolower(trim($name));
 				if (!in_array($name, array(
 					'cookie'
@@ -264,11 +276,7 @@ class http implements protocal
 					{
 						case 'cookie':
 							//处理cookie的header
-							foreach (explode(';', $value) as $c)
-							{
-								list($k,$v) = explode('=', $c);
-								$this->_cookie[trim($k)] = trim($v);
-							}
+							parse_str(str_replace('; ', '&', $value), $this->_cookie);
 							break;
 					}
 				}
@@ -278,62 +286,27 @@ class http implements protocal
 		if (strtolower($this->_server['REQUEST_METHOD']) == 'post')
 		{
 			//剩下的就是body了
-			$body = trim(substr($request,strpos($request, "\r\n\r\n")));
+			$body = substr($request,strpos($request, "\r\n\r\n")+4);
+			$GLOBALS['HTTP_RAW_REQUEST_DATA'] = $GLOBALS['HTTP_RAW_POST_DATA'] = $body;
 			
-			//默认的编码方式
-			$this_content_type = 'application/x-www-form-urlencoded';
-			foreach(explode(';', $this->_server['HTTP_CONTENT_TYPE']) as $content_type)
+			//body的长度校验
+			if (isset($this->_server['HTTP_CONTENT_LENGTH']))
 			{
-				$content_type = strtolower(trim($content_type));
-				if ($content_type == 'multipart/form-data')
+				if ($this->_server['HTTP_CONTENT_LENGTH'] < strlen($body))
 				{
-					$this_content_type = 'multipart/form-data';
-					break;
+					$body = substr($body, 0,$this->_server['HTTP_CONTENT_LENGTH']);
 				}
-				else if ($content_type == 'application/x-www-form-urlencoded')
+				else if ($this->_server['HTTP_CONTENT_LENGTH'] > strlen($body))
 				{
-					$this_content_type = 'application/x-www-form-urlencoded';
-					break;
-				}
-				
-				
-			}
-			if ($this_content_type == 'application/x-www-form-urlencoded')
-			{
-				//x-www-form-urlencode
-				$body = urldecode($body);
-				parse_str($body,$this->_post);
-			}
-			else if ($this_content_type == 'multipart/form-data')
-			{
-				if(preg_match('/boundary=(?<boundary>.+)/', $this->_server['HTTP_CONTENT_TYPE'],$match))
-				{
-					$boundary = $match['boundary'];
-				}
-				
-				foreach(explode('--'.$boundary, $body) as $split)
-				{
-					if ($split == '--')
-					{
-						continue;
-					}
-					
-					if (preg_match('/Content-Disposition:\s*form-data;\s*name="(?<name>[^"]*)"/i', $split,$match))
-					{
-						$name = $match['name'];
-						$value = trim(preg_replace('/Content-Disposition:\s*form-data;\s*name="(?<name>[^"]*)"/i', '', $split,1));
-						$this->_post[$name] = $value;
-					}
+					//等待下次发送的body
+					$this->_buffer_not_complete = true;
+					return false;
 				}
 			}
 		}
 		
-		
-		var_dump($request);
-		exit();
-		
 		//处理path
-		if (strpos($path, '?'))
+		/* if (strpos($path, '?'))
 		{
 			$_SERVER['QUERY_STRING'] = substr($path, strpos($path, '?')+1);
 			$request_path = '.'.substr($path, 0,strpos($path, '?'));
@@ -462,7 +435,7 @@ class http implements protocal
 				//返回404
 				return false;
 			}
-		}
+		} */
 	}
 	
 	/**
@@ -487,10 +460,41 @@ class http implements protocal
 		//添加额外的header
 		$content[] = 'Date:'.date(DATE_RFC2822);
 		$content[] = 'X-Powered-By:PHP/'.phpversion();
+		$content[] = 'Connection: keep-alive';
+		
+		$body = $string->getBody();
+		
+		//编码压缩
+		if (function_exists('zlib_encode'))
+		{
+			if (isset($this->_server['ACCEPT-ENCODING']))
+			{
+				$encoding = explode(',', trim($this->_server['ACCEPT-ENCODING']));
+				$encoding = array_map(function($encode){
+					return strtolower(trim($encode));
+				},$encoding);
+				$encode = '';
+				$encode_string = '';
+				if (in_array('gzip', $encoding))
+				{
+					$encode = ZLIB_ENCODING_GZIP;
+					$encode_string = 'gzip';
+				}
+				else if (in_array('deflate', $encoding))
+				{
+					$encode = ZLIB_ENCODING_DEFLATE;
+					$encode_string = 'deflate';
+				}
+				if (!empty($encode) && !empty($encode_string))
+				{
+					$body = zlib_encode($body,$encode);
+					$content[] = 'Content-Encoding:'.$encode_string;
+				}
+			}
+		}
 		
 		$content[] = '';
-		
-		$content[] = $string->getBody();
+		$content[] = $body;
 		
 		return implode("\r\n", $content);
 	}
@@ -517,8 +521,80 @@ class http implements protocal
 	 * {@inheritDoc}
 	 * @see \framework\core\protocal\protocal::post()
 	 */
-	function post($string)
+	function post($request)
 	{
+		if (strtolower($this->_server['REQUEST_METHOD']) == 'post')
+		{
+			//剩下的就是body了
+			$body = substr($request,strpos($request, "\r\n\r\n")+4);
+			$GLOBALS['HTTP_RAW_REQUEST_DATA'] = $GLOBALS['HTTP_RAW_POST_DATA'] = $body;
+			
+			//body的长度校验
+			if (isset($this->_server['HTTP_CONTENT_LENGTH']))
+			{
+				if ($this->_server['HTTP_CONTENT_LENGTH'] < strlen($body))
+				{
+					$body = substr($body, 0,$this->_server['HTTP_CONTENT_LENGTH']);
+				}
+				else if ($this->_server['HTTP_CONTENT_LENGTH'] > strlen($body))
+				{
+					//等待下次发送的body
+					return false;
+				}
+			}
+			
+			//默认的编码方式
+			$this_content_type = 'application/x-www-form-urlencoded';
+			foreach(explode(';', $this->_server['HTTP_CONTENT_TYPE']) as $content_type)
+			{
+				$content_type = strtolower(trim($content_type));
+				if ($content_type == 'multipart/form-data')
+				{
+					$this_content_type = 'multipart/form-data';
+					break;
+				}
+				else if ($content_type == 'application/x-www-form-urlencoded')
+				{
+					$this_content_type = 'application/x-www-form-urlencoded';
+					break;
+				}
+			}
+			
+			if ($this_content_type == 'application/x-www-form-urlencoded')
+			{
+				//x-www-form-urlencode
+				//$body = urldecode($body);
+				parse_str($body,$this->_post);
+			}
+			else if ($this_content_type == 'multipart/form-data')
+			{
+				if(preg_match('/boundary=(?<boundary>.+)/', $this->_server['HTTP_CONTENT_TYPE'],$match))
+				{
+					$boundary = $match['boundary'];
+				}
+				
+				foreach(explode('--'.$boundary, $body) as $split)
+				{
+					if (empty($split) || $split == '--')
+					{
+						continue;
+					}
+					//提取头
+					$head = trim(substr($split, 0,strpos($split, "\r\n\r\n")));
+					//提取值
+					$content = substr($split, strpos($split, "\r\n\r\n")+4);
+					
+					if (preg_match('/Content-Disposition:\s*form-data;\s*name="(?<name>[^"]*)"/i', $split,$match))
+					{
+						//判断是否是文件
+						$name = $match['name'];
+						$value = trim(preg_replace('/Content-Disposition:\s*form-data;\s*name="(?<name>[^"]*)"/i', '', $split,1));
+						$this->_post[$name] = $value;
+					}
+				}
+			}
+		}
+		
 		return $this->_post;
 	}
 	
