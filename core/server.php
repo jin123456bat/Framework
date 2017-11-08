@@ -113,31 +113,37 @@ class server extends component
 					{
 						$buffer = $connection->read();
 						$protocal = $connection->getProotcal();
-						
-						//经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
-						$request = call_user_func(array($protocal,'decode'),$buffer);
-						
-						//通常一个字符串并不能满足系统的参数需求，这里必须要将字符串转化为数组，作为系统的输入参数
-						$_GET = call_user_func(array($protocal,'get'),$request);
-						$_POST = call_user_func(array($protocal,'post'),$request);
-						$_COOKIE = call_user_func(array($protocal,'cookie'),$request);
-						$_SERVER = call_user_func(array($protocal,'server'),$request);
-						$_FILES = call_user_func(array($protocal,'files'),$request);
-						$_REQUEST = call_user_func(array($protocal,'request'),$request);
-						$_ENV = call_user_func(array($protocal,'env'),$request);
-						
-						$router = application::load('router');
-						$router->appendParameter($_GET);
-						$router->parse();
-						$control = $router->getControlName();
-						$action = $router->getActionName();
-						
-						call_user_func($this->_run_control, $control, $action, function ($response, $exit, $callback) use($connection) {
-							if ($response !== NULL)
-							{
-								$connection->write($response);
-							}
-						});
+						if (!empty($buffer))
+						{
+							//经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
+							$request = call_user_func(array($protocal,'decode'),$buffer);
+							
+							//通常一个字符串并不能满足系统的参数需求，这里必须要将字符串转化为数组，作为系统的输入参数
+							$_GET = call_user_func(array($protocal,'get'),$request);
+							$_POST = call_user_func(array($protocal,'post'),$request);
+							$_COOKIE = call_user_func(array($protocal,'cookie'),$request);
+							$_SERVER = call_user_func(array($protocal,'server'),$request);
+							$_FILES = call_user_func(array($protocal,'files'),$request);
+							$_REQUEST = call_user_func(array($protocal,'request'),$request);
+							$_ENV = call_user_func(array($protocal,'env'),$request);
+							
+							$router = application::load('router');
+							$router->appendParameter($_GET);
+							$router->parse();
+							$control = $router->getControlName();
+							$action = $router->getActionName();
+							
+							call_user_func($this->_run_control, $control, $action, function ($response, $exit, $callback) use($connection) {
+								if ($response !== NULL)
+								{
+									$connection->write($response);
+								}
+							});
+						}
+						else
+						{
+							$connection->close();
+						}
 					}
 				}
 			}

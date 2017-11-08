@@ -545,26 +545,29 @@ class http implements protocal
 					//提取头
 					$head = trim(substr($split, 0,strpos($split, "\r\n\r\n")));
 					//提取值
-					$content = substr($split, strpos($split, "\r\n\r\n")+4);
+					$content = substr($split, strpos($split, "\r\n\r\n")+4,-2);
 					
-					if (preg_match('/Content-Disposition: form-data; name="(?<name>[^"]*)"; filename="(?<filename>[^"]*)"/i', $head,$match))
+					if (!empty($content))
 					{
-						preg_match('/Content-Type: (?<type>[^\r\n]*)/i', $head,$type);
-						$temp_file = tempnam(sys_get_temp_dir(), 'php');
-						file_put_contents($temp_file, $content);
-						//文件
-						//多文件上传看来必须文件名不能一样
-						$this->_files[$match['name']] = array(
-							'name' => $match['filename'],
-							'size' => strlen($content),
-							'type' => isset($type['type'])?$type['type']:'',
-							'error' => UPLOAD_ERR_OK,
-							'tmp_name' => $temp_file,
-						);
-					}
-					else if (preg_match('/Content-Disposition:\s*form-data;\s*name="(?<name>[^"]*)"/i', $split,$match))
-					{
-						$this->_post[$match['name']] = $content;
+						if (preg_match('/Content-Disposition: form-data; name="(?<name>[^"]*)"; filename="(?<filename>[^"]*)"/i', $head,$match))
+						{
+							preg_match('/Content-Type: (?<type>[^\r\n]*)/i', $head,$type);
+							$temp_file = tempnam(sys_get_temp_dir(), 'php');
+							file_put_contents($temp_file, $content);
+							//文件
+							//多文件上传看来必须文件名不能一样
+							$this->_files[$match['name']] = array(
+								'name' => $match['filename'],
+								'size' => strlen($content),
+								'type' => isset($type['type'])?$type['type']:'',
+								'error' => UPLOAD_ERR_OK,
+								'tmp_name' => $temp_file,
+							);
+						}
+						else if (preg_match('/Content-Disposition:\s*form-data;\s*name="(?<name>[^"]*)"/i', $split,$match))
+						{
+							$this->_post[$match['name']] = $content;
+						}
 					}
 				}
 			}
@@ -587,78 +590,6 @@ class http implements protocal
 	 */
 	function post($request)
 	{
-		if (strtolower($this->_server['REQUEST_METHOD']) == 'post')
-		{
-			//剩下的就是body了
-			$body = substr($request,strpos($request, "\r\n\r\n")+4);
-			$GLOBALS['HTTP_RAW_REQUEST_DATA'] = $GLOBALS['HTTP_RAW_POST_DATA'] = $body;
-			
-			//body的长度校验
-			if (isset($this->_server['HTTP_CONTENT_LENGTH']))
-			{
-				if ($this->_server['HTTP_CONTENT_LENGTH'] < strlen($body))
-				{
-					$body = substr($body, 0,$this->_server['HTTP_CONTENT_LENGTH']);
-				}
-				else if ($this->_server['HTTP_CONTENT_LENGTH'] > strlen($body))
-				{
-					//等待下次发送的body
-					return false;
-				}
-			}
-			
-			//默认的编码方式
-			$this_content_type = 'application/x-www-form-urlencoded';
-			foreach(explode(';', $this->_server['HTTP_CONTENT_TYPE']) as $content_type)
-			{
-				$content_type = strtolower(trim($content_type));
-				if ($content_type == 'multipart/form-data')
-				{
-					$this_content_type = 'multipart/form-data';
-					break;
-				}
-				else if ($content_type == 'application/x-www-form-urlencoded')
-				{
-					$this_content_type = 'application/x-www-form-urlencoded';
-					break;
-				}
-			}
-			
-			if ($this_content_type == 'application/x-www-form-urlencoded')
-			{
-				//x-www-form-urlencode
-				//$body = urldecode($body);
-				parse_str($body,$this->_post);
-			}
-			else if ($this_content_type == 'multipart/form-data')
-			{
-				if(preg_match('/boundary=(?<boundary>.+)/', $this->_server['HTTP_CONTENT_TYPE'],$match))
-				{
-					$boundary = $match['boundary'];
-				}
-				
-				foreach(explode('--'.$boundary, $body) as $split)
-				{
-					if (empty($split) || $split == '--')
-					{
-						continue;
-					}
-					//提取头
-					$head = trim(substr($split, 0,strpos($split, "\r\n\r\n")));
-					//提取值
-					$content = substr($split, strpos($split, "\r\n\r\n")+4);
-					
-					if (preg_match('/Content-Disposition:\s*form-data;\s*name="(?<name>[^"]*)"/i', $split,$match))
-					{
-						//判断是否是文件
-						$name = $match['name'];
-						$value = trim(preg_replace('/Content-Disposition:\s*form-data;\s*name="(?<name>[^"]*)"/i', '', $split,1));
-						$this->_post[$name] = $value;
-					}
-				}
-			}
-		}
-		
 		return $this->_post;
 	}
 	
@@ -668,7 +599,7 @@ class http implements protocal
 	 */
 	function cookie($string)
 	{
-		return $_COOKIE;
+		return $this->_cookie;
 	}
 	/**
 	 * {@inheritDoc}
@@ -697,7 +628,7 @@ class http implements protocal
 	public function request($buffer)
 	{
 		// TODO Auto-generated method stub
-		return $this->_request;
+		return array_merge($this->get($buffer),$this->post($buffer));
 	}
 
 	/**
