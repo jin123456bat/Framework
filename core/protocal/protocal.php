@@ -4,7 +4,7 @@ namespace framework\core\protocal;
 use framework\core\connection;
 
 interface protocal
-{
+{	
 	/**
 	 * 当第一次连接的时候执行的方法
 	 * 以websocket为例，这里可以验证握手机制

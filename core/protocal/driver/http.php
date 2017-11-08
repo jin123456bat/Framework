@@ -167,6 +167,7 @@ class http implements protocal
 	private $_config = array(
 		'DirectoryIndex' => 'index.php index.html',
 		'ShowDirectory' => false,
+		'DocumentRoot' => './',
 	);
 	
 	/**
@@ -429,6 +430,16 @@ class http implements protocal
 	{
 		$connection = $this->_connection;
 		
+		//重置变量
+		$this->_server = array();
+		$this->_get = array();
+		$this->_post = array();
+		$this->_cookie = array();
+		$this->_files = array();
+		$this->_env = array();
+		$this->_request = array();
+		$this->_session = array();
+		
 		$this->_server['REQUEST_TIME'] = time();
 		$this->_server['REQUEST_TIME_FLOAT'] = microtime(true);
 		$this->_server['QUERY_STRING'] = '';
@@ -446,6 +457,7 @@ class http implements protocal
 		$this->_server['SERVER_PROTOCOL'] = $version;
 		$this->_server['REQUEST_METHOD'] = $method;
 		$this->_server['REQUEST_URI'] = $path;
+		$this->_server['SCRIPT_NAME'] = parse_url($path, PHP_URL_PATH);
 		
 		//get
 		$this->_server['QUERY_STRING'] = parse_url($path,PHP_URL_QUERY);
@@ -572,7 +584,36 @@ class http implements protocal
 				}
 			}
 		}
-		return $request;
+		
+		//一下是判断解析文件
+		if (!empty($this->_server['SCRIPT_NAME']))
+		{
+			$path = rtrim($this->_config['DocumentRoot'],'/').'/'.ltrim($this->_server['SCRIPT_NAME']);
+			if (is_dir($path))
+			{
+				//这里读取目录内容来处理或者返回forbidden
+				//这里必须返回空，不为空的话会把控制权交给router
+			}
+			else if (is_file($path))
+			{
+				//假如请求的文件和当前执行的文件是同一个文件
+				if(realpath($path) == realpath(APP_ROOT.'/'.$_SERVER['PHP_SELF']))
+				{
+					//交给router来处理接下来的流程
+					return $request;
+				}
+				else
+				{
+					//这里读取文件内容来处理
+					//这里必须返回空，不为空的话会把控制权交给router
+					return '';
+				}
+			}
+			else
+			{
+				$this->_connection->write(new response('<h1>not found</h1>',404));
+			}
+		}
 	}
 	
 	/**
@@ -650,5 +691,4 @@ class http implements protocal
 		// TODO Auto-generated method stub
 		return $this->_session;
 	}
-
 }

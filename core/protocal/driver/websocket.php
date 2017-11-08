@@ -6,7 +6,6 @@ use framework\core\connection;
 
 class websocket implements protocal
 {
-
 	/**
 	 *
 	 * {@inheritdoc}
@@ -186,5 +185,4 @@ class websocket implements protocal
 		// TODO Auto-generated method stub
 		return $_SESSION;
 	}
-
 }
