@@ -30,7 +30,7 @@ class server extends component
 	 *
 	 * @var integer
 	 */
-	private $_max_connection = 3;
+	private $_max_connection = 10;
 	
 	/**
 	 * 当前链接socket

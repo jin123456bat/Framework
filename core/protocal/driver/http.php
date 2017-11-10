@@ -416,11 +416,44 @@ class http implements protocal
 	}
 	
 	/**
+	 * http下的session目前还有几个限制
+	 * 1、session.use_cookie必须=1
+	 * 2、session.name必须设置
+	 * 3、session.save_handler必须是files
+	 * 4、session.save_path不能设置深度参数
+	 * 5、session.serialize_handler必须是php不能是wddx
 	 * {@inheritDoc}
 	 * @see \framework\core\protocal\protocal::parse()
 	 */
 	public function parse($string)
 	{
+		//解析session
+		//session存储在cookie当中
+		if(ini_get('session.use_cookies'))
+		{
+			$session_name = ini_get('session.name');
+			if (isset($this->_cookie[$session_name]))
+			{
+				$key = $this->_cookie[$session_name];
+				
+				//使用文件存储session
+				if (ini_get('session.save_handler') == 'files')
+				{
+					//这里不考虑深度参数 有关深度参数可以参考http://php.net/manual/zh/session.configuration.php
+					$path = ini_get('session.save_path');
+					$file = rtrim($path,'/').'/sess_'.$key;
+					if (file_exists($file) && is_readable($file))
+					{
+						if (ini_get('session.serialize_handler') == 'php')
+						{
+							$this->_session = unserialize(file_get_contents($file));
+						}
+					}
+				}
+				
+			}
+		}
+		
 		return array(
 			'_GET' => $this->_get,
 			'_POST'=> $this->_post,
