@@ -4,8 +4,17 @@ namespace framework\core\protocal\driver;
 use framework\core\protocal\protocal;
 use framework\core\connection;
 
+/**
+ * websocket协议貌似全部都是get
+ * @author jin
+ *
+ */
 class websocket implements protocal
 {
+	private $_server = array();
+	
+	private $_cookie = array();
+	
 	/**
 	 *
 	 * {@inheritdoc}
@@ -18,9 +27,70 @@ class websocket implements protocal
 	{
 		// TODO Auto-generated method stub
 		$request = $connection->read();
-		if (preg_match('/Sec-WebSocket-Key: (.*)/i', $request, $match))
+		
+		$this->_server = array();
+		
+		$this->_server['REQUEST_TIME'] = time();
+		$this->_server['REQUEST_TIME_FLOAT'] = microtime(true);
+		$this->_server['QUERY_STRING'] = '';
+		
+		socket_getpeername($connection->getSocket(),$this->_server['REMOTE_ADDR'],$this->_server['REMOTE_PORT']);
+		
+		$header = explode("\r\n", $request);
+		$head = array_shift($header);
+		list($method,$path,$version) = explode(' ', $head,3);
+		$method = trim($method);
+		$path = trim($path);
+		$version = trim($version);
+		
+		$this->_server['SERVER_PROTOCOL'] = $version;
+		$this->_server['REQUEST_METHOD'] = $method;
+		$this->_server['REQUEST_URI'] = $path;
+		$this->_server['SCRIPT_NAME'] = parse_url($path, PHP_URL_PATH);
+		
+		$this->_server['QUERY_STRING'] = parse_url($path,PHP_URL_QUERY);
+		if (!empty($this->_server['QUERY_STRING']))
 		{
-			$Sec_WebSocket_Key = trim($match[1]);
+			parse_str($this->_server['QUERY_STRING'],$this->_get);
+		}
+		
+		if (!in_array(strtolower($method), array('get')))
+		{
+			$message = "HTTP/1.1 400 Bad Request\r\n\r\n<b>400 Bad Request</b>";
+			$connection->write($message, true);
+			$connection->close();
+			return false;
+		}
+		
+		//处理其他的请求头
+		foreach ($header as $head)
+		{
+			if (!empty($head))
+			{
+				list($name,$value) = explode(':', $head,2);
+				$name = strtolower(trim($name));
+				if (!in_array($name, array(
+					'cookie'
+				)))
+				{
+					$this->_server['HTTP_'.strtoupper(str_replace('-', '_', $name))] = trim($value);
+				}
+				else
+				{
+					switch ($name)
+					{
+						case 'cookie':
+							//处理cookie的header
+							parse_str(str_replace('; ', '&', $value), $this->_cookie);
+							break;
+					}
+				}
+			}
+		}
+		
+		if (isset($this->_server['HTTP_SEC_WEBSOCKET_KEY']))
+		{
+			$Sec_WebSocket_Key = $this->_server['HTTP_SEC_WEBSOCKET_KEY'];
 			
 			$new_key = base64_encode(sha1($Sec_WebSocket_Key . "258EAFA5-E914-47DA-95CA-C5AB0DC85B11", true));
 			
@@ -105,15 +175,16 @@ class websocket implements protocal
 	 */
 	public function parse($string)
 	{
-		return array(
+		$data = array(
 			'_GET' => json_decode($string,true),
 			'_POST'=> array(),
-			'_COOKIE' => array(),
-			'_SERVER' => array(),
+			'_COOKIE' => $this->_cookie,
+			'_SERVER' => $this->_server,
 			'_FILES' => array(),
 			'_REQUEST' => array(),
 			'_SESSION' => array(),
 		);
+		return $data;
 	}
 	
 	/**

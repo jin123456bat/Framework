@@ -125,7 +125,14 @@ class server extends component
 							if (!empty($request))
 							{
 								$request = call_user_func(array($protocal,'parse'),$request);
-								extract($request,EXTR_OVERWRITE);
+								
+								$_GET = $request['_GET'];
+								$_POST = $request['_POSt'];
+								$_COOKIE = $request['_COOKIE'];
+								$_SERVER = $request['_SERVER'];
+								$_FILES = $request['_FILES'];
+								$_REQUEST = $request['_REQUEST'];
+								$_SESSION = $request['_SESSION'];
 								
 								$router = application::load('router');
 								$router->appendParameter($_GET);
