@@ -124,13 +124,8 @@ class server extends component
 							
 							if (!empty($request))
 							{
-								$_GET = call_user_func(array($protocal,'get'),$request);
-								$_POST = call_user_func(array($protocal,'post'),$request);
-								$_COOKIE = call_user_func(array($protocal,'cookie'),$request);
-								//将http的server变量取出来，以兼容mvc模式
-								$_SERVER = call_user_func(array($protocal,'server'),$request);
-								$_FILES = call_user_func(array($protocal,'files'),$request);
-								$_REQUEST = call_user_func(array($protocal,'request'),$request);
+								$request = call_user_func(array($protocal,'parse'),$request);
+								extract($request,EXTR_OVERWRITE);
 								
 								$router = application::load('router');
 								$router->appendParameter($_GET);
@@ -142,11 +137,6 @@ class server extends component
 									if ($response !== NULL)
 									{
 										$connection->write($response);
-									}
-									
-									if ($connection->getProotcal()->closeAfterWrite())
-									{
-										$connection->close();
 									}
 								});
 							}

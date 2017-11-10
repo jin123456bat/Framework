@@ -350,6 +350,8 @@ class http implements protocal
 			}
 		}
 		
+		$this->_request = array_merge($this->_get,$this->_post);
+		
 		//一下是判断解析文件
 		if (!empty($this->_server['SCRIPT_NAME']))
 		{
@@ -415,68 +417,19 @@ class http implements protocal
 	
 	/**
 	 * {@inheritDoc}
-	 * @see \framework\core\protocal\protocal::get()
+	 * @see \framework\core\protocal\protocal::parse()
 	 */
-	function get($string)
+	public function parse($string)
 	{
-		return $this->_get;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @see \framework\core\protocal\protocal::post()
-	 */
-	function post($request)
-	{
-		return $this->_post;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @see \framework\core\protocal\protocal::cookie()
-	 */
-	function cookie($string)
-	{
-		return $this->_cookie;
-	}
-	/**
-	 * {@inheritDoc}
-	 * @see \framework\core\protocal\protocal::server()
-	 */
-	public function server($buffer)
-	{
-		// TODO Auto-generated method stub
-		return $this->_server;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * @see \framework\core\protocal\protocal::files()
-	 */
-	public function files($buffer)
-	{
-		// TODO Auto-generated method stub
-		return $this->_files;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * @see \framework\core\protocal\protocal::request()
-	 */
-	public function request($buffer)
-	{
-		// TODO Auto-generated method stub
-		return array_merge($this->get($buffer),$this->post($buffer));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * @see \framework\core\protocal\protocal::session()
-	 */
-	public function session($buffer)
-	{
-		// TODO Auto-generated method stub
-		return $this->_session;
+		return array(
+			'_GET' => $this->_get,
+			'_POST'=> $this->_post,
+			'_COOKIE' => $this->_cookie,
+			'_SERVER' => $this->_server,
+			'_FILES' => $this->_files,
+			'_REQUEST' => $this->_request,
+			'_SESSION' => $this->_session,
+		);
 	}
 	
 	/**

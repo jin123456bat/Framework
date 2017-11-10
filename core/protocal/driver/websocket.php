@@ -98,80 +98,22 @@ class websocket implements protocal
 		}
 		return $decoded;
 	}
-
+	
 	/**
-	 *
-	 * {@inheritdoc}
-	 *
-	 * @see \framework\core\protocal\protocal::get()
+	 * {@inheritDoc}
+	 * @see \framework\core\protocal\protocal::parse()
 	 */
-	public function get($string)
+	public function parse($string)
 	{
-		return json_decode($string, true);
-	}
-
-	/**
-	 *
-	 * {@inheritdoc}
-	 *
-	 * @see \framework\core\protocal\protocal::post()
-	 */
-	public function post($string)
-	{
-		return json_decode($string, true);
-	}
-
-	public function cookie($string)
-	{
-		return $_COOKIE;
-	}
-
-	/**
-	 *
-	 * {@inheritdoc}
-	 *
-	 * @see \framework\core\protocal\protocal::server()
-	 */
-	public function server($buffer)
-	{
-		// TODO Auto-generated method stub
-		return $_SERVER;
-	}
-
-	/**
-	 *
-	 * {@inheritdoc}
-	 *
-	 * @see \framework\core\protocal\protocal::files()
-	 */
-	public function files($buffer)
-	{
-		// TODO Auto-generated method stub
-		return $_FILES;
-	}
-
-	/**
-	 *
-	 * {@inheritdoc}
-	 *
-	 * @see \framework\core\protocal\protocal::request()
-	 */
-	public function request($buffer)
-	{
-		// TODO Auto-generated method stub
-		return $_REQUEST;
-	}
-
-	/**
-	 *
-	 * {@inheritdoc}
-	 *
-	 * @see \framework\core\protocal\protocal::session()
-	 */
-	public function session($buffer)
-	{
-		// TODO Auto-generated method stub
-		return $_SESSION;
+		return array(
+			'_GET' => json_decode($string,true),
+			'_POST'=> array(),
+			'_COOKIE' => array(),
+			'_SERVER' => array(),
+			'_FILES' => array(),
+			'_REQUEST' => array(),
+			'_SESSION' => array(),
+		);
 	}
 	
 	/**

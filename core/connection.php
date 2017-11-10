@@ -60,7 +60,12 @@ class connection extends component
 		{
 			$buffer = $this->_protocal->encode($buffer);
 		}
-		return socket_write($this->_socket, $buffer,strlen($buffer));
+		$result = socket_write($this->_socket, $buffer,strlen($buffer));
+		if ($this->_protocal->closeAfterWrite())
+		{
+			$this->close();
+		}
+		return $result;
 	}
 	
 	/**
