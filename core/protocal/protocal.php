@@ -65,12 +65,6 @@ interface protocal
 	function request($buffer);
 	
 	/**
-	 * $_ENV
-	 * @param unknown $buffer
-	 */
-	function env($buffer);
-	
-	/**
 	 * 获取$_SESSION
 	 * @param unknown $buffer
 	 */

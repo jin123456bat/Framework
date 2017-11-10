@@ -166,18 +166,6 @@ class websocket implements protocal
 	 *
 	 * {@inheritdoc}
 	 *
-	 * @see \framework\core\protocal\protocal::env()
-	 */
-	public function env($buffer)
-	{
-		// TODO Auto-generated method stub
-		return $_ENV;
-	}
-
-	/**
-	 *
-	 * {@inheritdoc}
-	 *
 	 * @see \framework\core\protocal\protocal::session()
 	 */
 	public function session($buffer)

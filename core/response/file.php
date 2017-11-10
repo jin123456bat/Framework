@@ -2,9 +2,7 @@
 namespace framework\core\response;
 
 use framework\core\response;
-use framework;
 use framework\core\request;
-use framework\vendor\file;
 
 class file extends response
 {
@@ -18,6 +16,8 @@ class file extends response
 	 */
 	function __construct($file,$download = false,$download_name = '')
 	{
+		parent::__construct();
+		
 		if (is_file($file))
 		{
 			$this->_path = $file;
@@ -25,7 +25,7 @@ class file extends response
 			$this->_basename = $pathinfo['basename'];
 			$this->_extension = $pathinfo['extension'];
 		}
-		else if ($file instanceof framework\vendor\file)
+		else if ($file instanceof \framework\vendor\file)
 		{
 			$this->_path = $file->path();
 			$this->_basename = $file->basename();
@@ -101,7 +101,7 @@ class file extends response
 			// Content-Range: bytes 5275648-15143085/15143086
 			// Content-Length: 9867438
 			$this->setHeader('Content-Range', 'bytes ' . self::setVariableType($start, 'i') . '-' . self::setVariableType($end, 'i') . '/' . filesize($this->_path) + 1);
-			$this->setHeader('Content-Length', self::setVariableType($end, 'i') - self::setVariableType($start, 'i') + 1);
+			//$this->setHeader('Content-Length', self::setVariableType($end, 'i') - self::setVariableType($start, 'i') + 1);
 		}
 		else
 		{

@@ -63,6 +63,10 @@ class server extends component
 	function start()
 	{
 		ini_set('max_execution_time', 0);
+		
+		//保存cmd的server变量到env里面
+		$_ENV = $_SERVER;
+		
 		$this->_master = socket_create_listen($this->_port, SOMAXCONN);
 		if ($this->_master === false)
 		{
@@ -120,14 +124,13 @@ class server extends component
 							
 							if (!empty($request))
 							{
-								//通常一个字符串并不能满足系统的参数需求，这里必须要将字符串转化为数组，作为系统的输入参数
 								$_GET = call_user_func(array($protocal,'get'),$request);
 								$_POST = call_user_func(array($protocal,'post'),$request);
 								$_COOKIE = call_user_func(array($protocal,'cookie'),$request);
+								//将http的server变量取出来，以兼容mvc模式
 								$_SERVER = call_user_func(array($protocal,'server'),$request);
 								$_FILES = call_user_func(array($protocal,'files'),$request);
 								$_REQUEST = call_user_func(array($protocal,'request'),$request);
-								$_ENV = call_user_func(array($protocal,'env'),$request);
 								
 								$router = application::load('router');
 								$router->appendParameter($_GET);

@@ -4,7 +4,7 @@ namespace framework\core;
 class header extends base
 {
 
-	private static $_header = array();
+	private $_header = array();
 
 	/**
 	 * constructor
@@ -25,7 +25,7 @@ class header extends base
 		foreach ($headers as $header)
 		{
 			$header = explode(":", $header);
-			self::$_header[trim(array_shift($header))] = trim(implode(":", $header));
+			$this->_header[trim(array_shift($header))] = trim(implode(":", $header));
 		}
 		foreach ($array as $key => $value)
 		{
@@ -35,7 +35,7 @@ class header extends base
 			}
 			else
 			{
-				self::$_header[$key] = $value;
+				$this->_header[$key] = $value;
 			}
 		}
 	}
@@ -52,34 +52,33 @@ class header extends base
 	{
 		if (empty($value))
 		{
-			$header = explode(":", $key);
+			list($name,$value) = explode(":", $key,2);
 			
-			// 防止value中出现冒号
-			$name = trim(array_shift($header));
-			$value = trim(implode(":", $header));
+			$name = trim($name);
+			$value = trim($value);
 			
-			if (isset(self::$_header[$name]))
+			if (isset($this->_header[$name]))
 			{
-				if (is_array(self::$_header[$name]))
+				if (is_array($this->_header[$name]))
 				{
-					self::$_header[$name][] = $value;
+					$this->_header[$name][] = $value;
 				}
 				else
 				{
-					self::$_header[$name] = array(
-						self::$_header[$name],
+					$this->_header[$name] = array(
+						$this->_header[$name],
 						$value
 					);
 				}
 			}
 			else
 			{
-				self::$_header[$name] = $value;
+				$this->_header[$name] = $value;
 			}
 		}
 		else
 		{
-			self::$_header[$key] = $value;
+			$this->_header[$key] = $value;
 		}
 	}
 
@@ -91,11 +90,11 @@ class header extends base
 	 */
 	function check($string)
 	{
-		if (isset(self::$_header[$string]))
+		if (isset($this->_header[$string]))
 		{
 			return true;
 		}
-		return in_array($string, self::$_header);
+		return in_array($string, $this->_header);
 	}
 
 	/**
@@ -105,17 +104,17 @@ class header extends base
 	 */
 	function delete($string)
 	{
-		foreach (self::$_header as $key => $value)
+		foreach ($this->_header as $key => $value)
 		{
 			if ($key === $string)
 			{
-				unset(self::$_header[$key]);
+				unset($this->_header[$key]);
 				return true;
 			}
 			
 			if ($key . ': ' . $value === $string)
 			{
-				unset(self::$_header[$key]);
+				unset($this->_header[$key]);
 				return true;
 			}
 			header_remove(substr($string, 0, strpos($string, ':')));
@@ -125,12 +124,37 @@ class header extends base
 	/**
 	 * 设置一个头信息，已经设置的会被覆盖
 	 * 
-	 * @param unknown $name        
-	 * @param unknown $value        
+	 * @param unknown $name
+	 * @param unknown $value 默认NULL
 	 */
-	function set($name, $value)
+	function set($name, $value = NULL)
 	{
-		self::$_header[$name] = $value;
+		if (empty($value))
+		{
+			if (is_string($name))
+			{
+				list($name,$value) = explode(':', $name,2);
+				$this->_header[$name] = $value;
+			}
+			else if (is_array($name))
+			{
+				foreach ($name as $key => $value)
+				{
+					if (is_int($key) && is_string($value))
+					{
+						$this->set($value);
+					}
+					else if (is_string($key) && is_string($value))
+					{
+						$this->set($key,$value);
+					}
+				}
+			}
+		}
+		else if (is_string($name))
+		{
+			$this->_header[$name] = $value;
+		}
 	}
 
 	/**
@@ -141,7 +165,7 @@ class header extends base
 	 */
 	function get($name)
 	{
-		return self::$_header[$name];
+		return $this->_header[$name];
 	}
 	
 	/**
@@ -150,7 +174,7 @@ class header extends base
 	 */
 	function getAll()
 	{
-		return self::$_header;
+		return $this->_header;
 	}
 
 	/**
@@ -179,9 +203,9 @@ class header extends base
 	 */
 	function sendAll()
 	{
-		if (request::php_sapi_name() == 'web')
+		if (request::php_sapi_name() == 'web') 
 		{
-			foreach (self::$_header as $key => $value)
+			foreach ($this->_header as $key => $value)
 			{
 				header($key . ': ' . $value, true);
 			}

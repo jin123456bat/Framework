@@ -153,7 +153,7 @@ class response extends component
 		}
 		else if (! empty($value))
 		{
-			$this->_header->add($header, $value);
+			$this->_header->set($header, $value);
 		}
 		else if (is_array($header))
 		{
@@ -161,11 +161,11 @@ class response extends component
 			{
 				if (is_int($k))
 				{
-					$this->_header->add($h);
+					$this->_header->set($h);
 				}
 				else if (is_string($k))
 				{
-					$this->_header->add($k,$h);
+					$this->_header->set($k,$h);
 				}
 			}
 		}

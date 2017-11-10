@@ -4,6 +4,7 @@ use framework\core\protocal\protocal;
 use framework\core\connection;
 use framework\core\response;
 use framework\core\server;
+use framework\core\response\file;
 
 class http implements protocal
 {
@@ -203,12 +204,6 @@ class http implements protocal
 	private $_files = array();
 	
 	/**
-	 * $_ENV
-	 * @var array
-	 */
-	private $_env = array();
-	
-	/**
 	 * $_REQUEST
 	 * @var array
 	 */
@@ -227,138 +222,6 @@ class http implements protocal
 	function init($connection)
 	{
 		$this->_connection = $connection;
-		
-		//处理path
-		/* if (strpos($path, '?'))
-		{
-			$_SERVER['QUERY_STRING'] = substr($path, strpos($path, '?')+1);
-			$request_path = '.'.substr($path, 0,strpos($path, '?'));
-			if (file_exists($request_path))
-			{
-				if (is_dir($request_path))
-				{
-					foreach(array_filter(explode(' ', $this->_config['DirectoryIndex'])) as $index_file_name)
-					{
-						$index_file_name = rtrim($request_path,'/').'/'.$index_file_name;
-						if (is_file($index_file_name))
-						{
-							$_SERVER['SCRIPT_NAME'] = $index_file_name;
-							break;
-						}
-					}
-				}
-				else
-				{
-					if (is_file($request_path))
-					{
-						$_SERVER['SCRIPT_NAME'] = $request_path;
-					}
-				}
-			}
-			//这里就不考虑其他的执行程序
-			if (!empty($_SERVER['SCRIPT_NAME']))
-			{
-				if (is_file($_SERVER['SCRIPT_NAME']))
-				{
-					//获取后缀名称
-					$extension = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '.')+1);
-					if (empty($extension))
-					{
-						$extension = 'html';
-					}
-					if ($extension === 'php')
-					{
-						foreach (explode('&', $_SERVER['QUERY_STRING']) as $q)
-						{
-							if (!empty($q))
-							{
-								list($k,$v) = explode('=', $q);
-								$_GET[trim($k)] = trim($v);
-							}
-						}
-						$_SERVER['PHP_SELF'] = $_SERVER['SCRIPT_NAME'];
-						//交给php来处理接下来的数据
-						return true;
-					}
-					else
-					{
-						//处理文件请求
-						self::$_header[] = 'Content-Type:'.self::$_mime_type[$extension];
-						$connection->write(file_get_contents($_SERVER['SCRIPT_NAME']));
-						return false;
-					}
-				}
-				else if (is_dir($_SERVER['SCRIPT_NAME']))
-				{
-					//这里考虑输出目录
-				}
-			}
-			else 
-			{
-				//这里应该返回404
-				$connection->write(new response('<h1>404</h1>',404));
-				return false;
-			}
-		}
-		else if (strpos($path,'.php'))
-		{
-			//处理pathinfo请求
-			$_SERVER['QUERY_STRING'] = substr($path, strpos($path, '.php')+4);
-			$_SERVER['PHP_SELF'] = substr($path, 0,strpos($path, '.php')+4);
-			
-			
-			
-			$queryString = explode('/', $_SERVER['QUERY_STRING']);
-			if (isset($queryString[0]) && !empty($queryString[0]))
-			{
-				$_GET['c'] = $queryString[0];
-			}
-			
-			if (isset($queryString[1]) && !empty($queryString[1]))
-			{
-				$_GET['a'] = $queryString[1];
-			}
-			
-			for ($i=2;$i<count($queryString);$i+=2)
-			{
-				if (isset($queryString[$i+1]))
-				{
-					$_GET[$queryString[$i]] = $queryString[$i+1];
-				}
-			}
-			//交给php处理
-			return true;
-		}
-		else
-		{
-			//处理直接文件请求
-			$filepath = '.'.$path;
-			if (file_exists($filepath))
-			{
-				if (is_dir($filepath))
-				{
-					
-				}
-				else if (is_file($filepath))
-				{
-					//获取后缀名称
-					$extension = substr($filepath, strrpos($filepath, '.')+1);
-					if (empty($extension))
-					{
-						$extension = 'html';
-					}
-					//处理文件请求
-					//self::$_header[] = 'Content-Type:'.self::$_mime_type[$extension];
-					$connection->write(file_get_contents($filepath));
-					return false;
-				}
-			}
-			else
-			{
-				//返回404
-				return false;
-			}
-		} */
 	}
 	
 	/**
@@ -591,13 +454,44 @@ class http implements protocal
 			$path = rtrim($this->_config['DocumentRoot'],'/').'/'.ltrim($this->_server['SCRIPT_NAME']);
 			if (is_dir($path))
 			{
-				//这里读取目录内容来处理或者返回forbidden
+				$index_file_path = '';
+				
+				$index_files = explode(' ', $this->_config['DirectoryIndex']);
+				foreach ($index_files as $index)
+				{
+					$file = rtrim($path).'/'.trim($index,' ');
+					if (file_exists($file) && is_file($file))
+					{
+						$index_file_path = $file;
+						break;
+					}
+				}
+				
+				if (empty($index_file_path))
+				{
+					if ($this->_config['ShowDirectory'])
+					{
+						//这里读取目录内容来处理
+					}
+					else
+					{
+						$this->_connection->write(new response('<h1>forbidden</h1>',403));
+					}
+				}
+				else
+				{
+					$path = $index_file_path;
+				}
 				//这里必须返回空，不为空的话会把控制权交给router
 			}
-			else if (is_file($path))
+			
+			if (is_file($path))
 			{
 				//假如请求的文件和当前执行的文件是同一个文件
-				if(realpath($path) == realpath(APP_ROOT.'/'.$_SERVER['PHP_SELF']))
+				var_dump(realpath($path));
+				var_dump(realpath(APP_ROOT.'/'.$_ENV['PHP_SELF']));
+				
+				if(realpath($path) == realpath(APP_ROOT.'/'.$_ENV['PHP_SELF']))
 				{
 					//交给router来处理接下来的流程
 					return $request;
@@ -605,8 +499,8 @@ class http implements protocal
 				else
 				{
 					//这里读取文件内容来处理
+					$this->_connection->write(new file($path));
 					//这里必须返回空，不为空的话会把控制权交给router
-					return '';
 				}
 			}
 			else
@@ -670,16 +564,6 @@ class http implements protocal
 	{
 		// TODO Auto-generated method stub
 		return array_merge($this->get($buffer),$this->post($buffer));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * @see \framework\core\protocal\protocal::env()
-	 */
-	public function env($buffer)
-	{
-		// TODO Auto-generated method stub
-		return $this->_env;
 	}
 
 	/**

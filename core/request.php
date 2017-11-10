@@ -27,22 +27,29 @@ class request extends base
 	 * 获取请求头
 	 * @return unknown[]
 	 */
-	public static function header()
+	public static function header($name = NULL)
 	{
-		$headers = array();
-		foreach($_SERVER as $key => $value)
+		if (empty($name))
 		{
-			if(substr($key, 0, 5) === 'HTTP_')
+			$headers = array();
+			foreach($_SERVER as $key => $value)
 			{
-				$key = substr($key, 5);
-				$key = strtolower($key);
-				$key = str_replace('_', ' ', $key);
-				$key = ucwords($key);
-				$key = str_replace(' ', '-', $key);
-				$headers[$key] = $value;
+				if(substr($key, 0, 5) === 'HTTP_')
+				{
+					$key = substr($key, 5);
+					$key = strtolower($key);
+					$key = str_replace('_', ' ', $key);
+					$key = ucwords($key);
+					$key = str_replace(' ', '-', $key);
+					$headers[$key] = $value;
+				}
 			}
+			return $headers; 
 		}
-		return $headers; 
+		else
+		{
+			return isset($_SERVER['HTTP_'.strtoupper($name)])?$_SERVER['HTTP_'.strtoupper($name)]:NULL;
+		}
 	}
 	
 	/**
