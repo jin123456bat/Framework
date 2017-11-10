@@ -69,4 +69,10 @@ interface protocal
 	 * @param unknown $buffer
 	 */
 	function session($buffer);
+	
+	/**
+	 * 发送完数据后是否需要关闭连接
+	 * @return boolean
+	 */
+	public function closeAfterWrite();
 }

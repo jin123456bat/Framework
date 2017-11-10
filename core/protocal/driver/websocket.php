@@ -173,4 +173,13 @@ class websocket implements protocal
 		// TODO Auto-generated method stub
 		return $_SESSION;
 	}
+	
+	/**
+	 * 发送完数据后是否需要关闭连接
+	 * @return boolean
+	 */
+	public function closeAfterWrite()
+	{
+		return false;
+	}
 }

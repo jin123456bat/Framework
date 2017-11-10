@@ -45,12 +45,12 @@ class server extends component
 	 * socket
 	 * @var array
 	 */
-	static private $_sockets = array();
+	static public $_sockets = array();
 	
 	/**
 	 * @var connection[]
 	 */
-	static private $_connection = array();
+	static public $_connection = array();
 	
 	function __construct()
 	{
@@ -73,7 +73,7 @@ class server extends component
 			console::log('socket创建失败');
 			exit(1);
 		}
-		self::$_sockets[] = $this->_master;
+		self::$_sockets[(int)$this->_master] = $this->_master;
 		
 		while (true)
 		{
@@ -97,7 +97,7 @@ class server extends component
 							//$this->call('error', 0, '超过最大链接数');
 							continue;
 						}
-						self::$_sockets[] = $client;
+						self::$_sockets[(int)$client] = $client;
 					}
 				}
 				else
@@ -143,6 +143,11 @@ class server extends component
 									{
 										$connection->write($response);
 									}
+									
+									if ($connection->getProotcal()->closeAfterWrite())
+									{
+										$connection->close();
+									}
 								});
 							}
 						}
@@ -171,6 +176,9 @@ class server extends component
 				console::log('进程号设置失败');
 				exit();
 			}
+			
+			//在子进程中 执行socket监听等等
+			$this->start();
 			
 			//这里来自workman的源代码，需要重新fork一次
 			// Fork again avoid SVR4 system regain the control of terminal.

@@ -13,104 +13,6 @@ class http implements protocal
 	 */
 	private $_connection;
 	
-	private static $_mime_type = array(
-		'shtml' => 'text/html',
-		'html' => 'text/html',
-		'htm' => 'text/html',
-		'css' => 'text/css',
-		'xml' => 'text/xml',
-		'gif' => 'image/gif',
-		'jpeg' => 'image/jpeg',
-		'jpg' => 'image/jpeg',
-		'js' => 'application/x-javascript',
-		'atom' => 'application/atom+xml',
-		'rss' => 'application/rss+xml',
-		'mml' => 'text/mathml',
-		'txt' => 'text/plain',
-		'jad' => 'text/vnd.sun.j2me.app-descriptor',
-		'wml' => 'text/vnd.wap.wml',
-		'htc' => 'text/x-component',
-		'png' => 'image/png',
-		'tif' => 'image/tiff',
-		'tiff' => 'image/tiff',
-		'wbmp' => 'image/vnd.wap.wbmp',
-		'ico' => 'image/x-icon',
-		'jng' => 'image/x-jng',
-		'bmp' => 'image/x-ms-bmp',
-		'svg' => 'image/svg+xml',
-		'svgz' => 'image/svg+xml',
-		'webp' => 'image/webp',
-		'jar' => 'application/java-archive',
-		'war' => 'application/java-archive',
-		'ear' => 'application/java-archive',
-		'hqx' => 'application/mac-binhex40',
-		'doc' => 'application/msword',
-		'pdf' => 'application/pdf',
-		'ps' => 'application/postscript',
-		'eps' => 'application/postscript',
-		'ai' => 'application/postscript',
-		'rtf' => 'application/rtf',
-		'xls' => 'application/vnd.ms-excel',
-		'ppt' => 'application/vnd.ms-powerpoint',
-		'wmlc' => 'application/vnd.wap.wmlc',
-		'kml' => 'application/vnd.google-earth.kml+xml',
-		'kmz' => 'application/vnd.google-earth.kmz',
-		'7z' => 'application/x-7z-compressed',
-		'cco' => 'application/x-cocoa',
-		'jardiff' => 'application/x-java-archive-diff',
-		'jnlp' => 'application/x-java-jnlp-file',
-		'run' => 'application/x-makeself',
-		'pl' => 'application/x-perl',
-		'pm' => 'application/x-perl',
-		'prc' => 'application/x-pilot',
-		'pdb' => 'application/x-pilot',
-		'rar' => 'application/x-rar-compressed',
-		'rpm' => 'application/x-redhat-package-manager',
-		'sea' => 'application/x-sea',
-		'swf' => 'application/x-shockwave-flash',
-		'sit' => 'application/x-stuffit',
-		'tcl' => 'application/x-tcl',
-		'tk' => 'application/x-tcl',
-		'der' => 'application/x-x509-ca-cert',
-		'pem' => 'application/x-x509-ca-cert',
-		'crt' => 'application/x-x509-ca-cert',
-		'xpi' => 'application/x-xpinstall',
-		'xhtml' => 'application/xhtml+xml',
-		'zip' => 'application/zip',
-		'bin' => 'application/octet-stream',
-		'exe' => 'application/octet-stream',
-		'dll' => 'application/octet-stream',
-		'deb' => 'application/octet-stream',
-		'dmg' => 'application/octet-stream',
-		'eot' => 'application/octet-stream',
-		'iso' => 'application/octet-stream',
-		'img' => 'application/octet-stream',
-		'msi' => 'application/octet-stream',
-		'msp' => 'application/octet-stream',
-		'msm' => 'application/octet-stream',
-		'mid' => 'audio/midi',
-		'midi' => 'audio/midi',
-		'kar' => 'audio/midi',
-		'mp3' => 'audio/mpeg',
-		'ogg' => 'audio/ogg',
-		'm4a' => 'audio/x-m4a',
-		'ra' => 'audio/x-realaudio',
-		'3gpp' => 'video/3gpp',
-		'3gp' => 'video/3gpp',
-		'mp4' => 'video/mp4',
-		'mpeg' => 'video/mpeg',
-		'mpg' => 'video/mpeg',
-		'mov' => 'video/quicktime',
-		'webm' => 'video/webm',
-		'flv' => 'video/x-flv',
-		'm4v' => 'video/x-m4v',
-		'mng' => 'video/x-mng',
-		'asx' => 'video/x-ms-asf',
-		'asf' => 'video/x-ms-asf',
-		'wmv' => 'video/x-ms-wmv',
-		'avi' => 'video/x-msvideo',
-	);
-	
 	/**
 	 * http状态码以及含义
 	 * @var array
@@ -240,7 +142,7 @@ class http implements protocal
 		$headers = $string->getHeader()->getAll();
 		foreach ($headers as $key => $header)
 		{
-			$content[] = $key.':'.$header;
+			$content[] = $key.':'.$header; 
 		}
 		
 		//添加额外的header
@@ -451,7 +353,7 @@ class http implements protocal
 		//一下是判断解析文件
 		if (!empty($this->_server['SCRIPT_NAME']))
 		{
-			$path = rtrim($this->_config['DocumentRoot'],'/').'/'.ltrim($this->_server['SCRIPT_NAME']);
+			$path = rtrim($this->_config['DocumentRoot'],'/').ltrim($this->_server['SCRIPT_NAME']);
 			if (is_dir($path))
 			{
 				$index_file_path = '';
@@ -460,7 +362,7 @@ class http implements protocal
 				foreach ($index_files as $index)
 				{
 					$file = rtrim($path).'/'.trim($index,' ');
-					if (file_exists($file) && is_file($file))
+					if (file_exists($file) && is_file($file) && is_readable($file))
 					{
 						$index_file_path = $file;
 						break;
@@ -488,19 +390,20 @@ class http implements protocal
 			if (is_file($path))
 			{
 				//假如请求的文件和当前执行的文件是同一个文件
-				var_dump(realpath($path));
-				var_dump(realpath(APP_ROOT.'/'.$_ENV['PHP_SELF']));
-				
 				if(realpath($path) == realpath(APP_ROOT.'/'.$_ENV['PHP_SELF']))
 				{
 					//交给router来处理接下来的流程
 					return $request;
 				}
-				else
+				else if (is_readable($path))
 				{
 					//这里读取文件内容来处理
 					$this->_connection->write(new file($path));
 					//这里必须返回空，不为空的话会把控制权交给router
+				}
+				else 
+				{
+					$this->_connection->write(new response('<h1>forbidden</h1>',403));
 				}
 			}
 			else
@@ -574,5 +477,14 @@ class http implements protocal
 	{
 		// TODO Auto-generated method stub
 		return $this->_session;
+	}
+	
+	/**
+	 * 发送完数据后是否需要关闭连接
+	 * @return boolean
+	 */
+	public function closeAfterWrite()
+	{
+		return true;
 	}
 }

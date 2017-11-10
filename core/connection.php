@@ -107,5 +107,7 @@ class connection extends component
 	function close()
 	{
 		socket_close($this->_socket);
+		unset(server::$_connection[$this->id()]);
+		unset(server::$_sockets[$this->id()]);
 	}
 }
