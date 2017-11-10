@@ -17,7 +17,8 @@ namespace framework\core;
  */
 class cookie extends component
 {
-
+	public static $_data = array();
+	
 	/**
 	 * 获取文件上传的配置信息
 	 * 配置可以直接写在cookie配置文件中
@@ -105,7 +106,31 @@ class cookie extends component
 		
 		$httponly = isset($config['httponly']) ? $config['httponly'] : true;
 		
-		return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+		self::$_data[$name] = array(
+			$name => $value,
+			'path' => $path,
+			'expires' => date(DATE_RFC2822,$expire),
+			'Max-Age' => $expire - time(),
+		);
+		
+		if (!empty($path))
+		{
+			self::$_data[$name]['path'] = $path;
+		}
+		if (!empty($domain))
+		{
+			self::$_data[$name]['domain'] = $domain;
+		}
+		if ($httponly)
+		{
+			self::$_data[$name]['HttpOnly'] = true;
+		}
+		
+		if (request::php_sapi_name() == 'web')
+		{
+			return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+		}
+		return true;
 	}
 
 	/**
@@ -126,6 +151,15 @@ class cookie extends component
 	 */
 	static function delete($name)
 	{
-		setcookie($name, false);
+		self::$_data[$name] = array(
+			$name => 'deleted',
+			'expres' => date(DATE_RFC2822,0),
+			'Max-Age' => 0,
+		);
+		
+		if (request::php_sapi_name() == 'web')
+		{
+			setcookie($name, false);
+		}
 	}
 }

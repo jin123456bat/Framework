@@ -3,6 +3,7 @@ namespace framework\core\protocal\driver;
 
 use framework\core\protocal\protocal;
 use framework\core\connection;
+use framework\core\cookie;
 
 /**
  * websocket协议貌似全部都是get
@@ -29,6 +30,7 @@ class websocket implements protocal
 		$request = $connection->read();
 		
 		$this->_server = array();
+		$this->_cookie = array();
 		
 		$this->_server['REQUEST_TIME'] = time();
 		$this->_server['REQUEST_TIME_FLOAT'] = microtime(true);
@@ -175,13 +177,15 @@ class websocket implements protocal
 	 */
 	public function parse($string)
 	{
+		cookie::$_data = $this->_cookie;
+		
 		$data = array(
 			'_GET' => json_decode($string,true),
 			'_POST'=> array(),
 			'_COOKIE' => $this->_cookie,
 			'_SERVER' => $this->_server,
 			'_FILES' => array(),
-			'_REQUEST' => array(),
+			'_REQUEST' => json_decode($string,true),
 			'_SESSION' => array(),
 		);
 		return $data;

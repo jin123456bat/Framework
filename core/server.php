@@ -127,7 +127,7 @@ class server extends component
 								$request = call_user_func(array($protocal,'parse'),$request);
 								
 								$_GET = $request['_GET'];
-								$_POST = $request['_POSt'];
+								$_POST = $request['_POST'];
 								$_COOKIE = $request['_COOKIE'];
 								$_SERVER = $request['_SERVER'];
 								$_FILES = $request['_FILES'];

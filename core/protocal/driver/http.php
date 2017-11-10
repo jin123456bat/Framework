@@ -5,6 +5,7 @@ use framework\core\connection;
 use framework\core\response;
 use framework\core\server;
 use framework\core\response\file;
+use framework\core\cookie;
 
 class http implements protocal
 {
@@ -146,9 +147,27 @@ class http implements protocal
 		}
 		
 		//添加额外的header
-		$content[] = 'Date:'.date(DATE_RFC2822);
-		$content[] = 'X-Powered-By:PHP/'.phpversion();
+		$content[] = 'Date: '.date(DATE_RFC2822);
+		$content[] = 'X-Powered-By: PHP/'.phpversion();
 		$content[] = 'Connection: keep-alive';
+		
+		//添加cookie
+		foreach (cookie::$_data as $cookie)
+		{
+			$t = array();
+			foreach ($cookie as $k => $v)
+			{
+				if ($k == 'HttpOnly' && $v)
+				{
+					$t[] = 'HttpOnly';
+				}
+				else
+				{
+					$t[] = $k.'='.$v;
+				}
+			}
+			$content[] = 'Set-Cookie: '.implode('; ', $t);
+		}
 		
 		$body = $string->getBody();
 		
@@ -453,6 +472,8 @@ class http implements protocal
 				
 			}
 		}
+		
+		cookie::$_data = $this->_cookie;
 		
 		return array(
 			'_GET' => $this->_get,
