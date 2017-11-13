@@ -15,13 +15,19 @@ abstract class tree extends data
 	 * 根节点
 	 * @var unknown
 	 */
-	protected $_root;
+	protected $_root = NULL;
 	
 	/**
 	 * 节点个数
 	 * @var int
 	 */
-	protected $_length;
+	protected $_length = 0;
+	
+	/**
+	 * 树高
+	 * @var unknown
+	 */
+	protected $_height = 0;
 	
 	/**
 	 * 树高
@@ -29,32 +35,14 @@ abstract class tree extends data
 	 */
 	function height()
 	{
-		
+		return $this->_height;
 	}
 	
 	/**
 	 * 节点个数
 	 */
-	function size()
+	function length()
 	{
 		return $this->_length;
-	}
-	
-	/**
-	 * 获取节点中的数据
-	 */
-	protected function get(\stdClass $node)
-	{
-		return $node->data;
-	}
-	
-	/**
-	 * 创建一个节点
-	 * @param mixed $data
-	 * @return \stdClass
-	 */
-	protected function node($data)
-	{
-		
 	}
 }
