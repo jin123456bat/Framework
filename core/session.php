@@ -1,6 +1,8 @@
 <?php
 namespace framework\core;
 
+use framework\core\session\saveHandler;
+
 /**
  *
  * @author fx
@@ -18,37 +20,26 @@ class session extends component
 		if (request::php_sapi_name() == 'web')
 		{
 			// 假如用户定义了SessionHandler
-			if (isset($session['handler']) && ! empty($session['handler']))
+			if (isset($session['save_handler']) && ! empty($session['save_handler']))
 			{
-				$sessionHandler = application::load($session['handler']);
+				$sessionHandler = application::load($session['save_handler']);
 				if ($sessionHandler !== null)
 				{
-					if (! $sessionHandler instanceof \SessionHandlerInterface)
+					session_set_save_handler($sessionHandler, true);
+				}
+				else
+				{
+					switch (trim(strtolower($session['save_handler'])))
 					{
-						session_set_save_handler(array(
-							$sessionHandler,
-							'open'
-						), array(
-							$sessionHandler,
-							'close'
-						), array(
-							$sessionHandler,
-							'read'
-						), array(
-							$sessionHandler,
-							'write'
-						), array(
-							$sessionHandler,
-							'destroy'
-						), array(
-							$sessionHandler,
-							'gc'
-						));
-						register_shutdown_function('session_write_close');
-					}
-					else
-					{
-						session_set_save_handler($sessionHandler, true);
+						case 'files':
+							application::setEnvironment(array(
+								'session' => $session['files']
+							));
+							break;
+						case 'redis':
+							break;
+						case 'memcache':
+							break;
 					}
 				}
 			}
