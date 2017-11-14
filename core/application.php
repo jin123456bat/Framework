@@ -31,7 +31,7 @@ class application extends component
 		// 载入用户自定义配置
 		$this->setConfig(false);
 		// 载入环境变量
-		$this->env();
+		self::setEnvironment($this->getConfig('environment'));
 		// 导入app配置中的文件类
 		$this->import(base::$APP_CONF);
 		// set_error_handler
@@ -109,9 +109,8 @@ class application extends component
 	/**
 	 * 设置app的环境变量
 	 */
-	private function env()
+	public static function setEnvironment($env)
 	{
-		$env = $this->getConfig('environment');
 		if (is_array($env) && ! empty($env))
 		{
 			foreach ($env as $name => $variable)
