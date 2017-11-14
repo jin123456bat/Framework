@@ -1,8 +1,6 @@
 <?php
 namespace framework\core;
 
-use framework\core\session\saveHandler;
-
 /**
  *
  * @author fx
@@ -33,12 +31,24 @@ class session extends component
 					{
 						case 'files':
 							application::setEnvironment(array(
-								'session' => $session['files']
+								'session' => array_merge($session['files'],array(
+									'save_handler' => 'files',
+								))
 							));
 							break;
 						case 'redis':
+							application::setEnvironment(array(
+								'session' => array_merge($session['redis'],array(
+									'save_handler' => 'redis',
+								))
+							));
 							break;
 						case 'memcache':
+							application::setEnvironment(array(
+								'session' => array_merge($session['memcache'],array(
+									'save_handler' => 'memcache',
+								))
+							));
 							break;
 					}
 				}

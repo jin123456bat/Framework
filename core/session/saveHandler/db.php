@@ -80,6 +80,7 @@ class db extends saveHandler
 	 */
 	public function destroy($session_id)
 	{
+		$this->write($session_id, '');
 		return true;
 	}
 	

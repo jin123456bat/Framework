@@ -15,10 +15,11 @@ return array(
 	
 	//当save_handler=redis的时候有效
 	'redis' => array(
+		'save_path' => 'tcp://127.0.0.1:6379',
 	),
 	
 	//当save_handler = memcache的时候有效
 	'memcache' => array(
-		
+		'save_path' => 'tcp://host1:port1?persistent=1&weight=2,tcp://host2:port2'
 	),
 );
