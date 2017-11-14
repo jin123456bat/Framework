@@ -48,7 +48,6 @@ class session extends component
 				else
 				{
 					session_set_save_handler($sessionHandler, true);
-					register_shutdown_function('session_write_close');
 				}
 			}
 		}
