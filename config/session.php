@@ -1,7 +1,6 @@
 <?php
 return array(
 	'save_handler' => 'db',//session的存储方式  默认的为files 也可以为db  redis memcache
-	'block'=>true,//session读取的时候是否是阻塞方式
 	
 	//当save_handler=db中的时候有效
 	'db' => array(
