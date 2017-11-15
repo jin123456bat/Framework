@@ -2,6 +2,7 @@
 namespace framework\core\session\saveHandler;
 
 use framework\core\session\saveHandler;
+use framework\core\database\mysql\table;
 
 /**
  * 
@@ -14,6 +15,16 @@ class db extends saveHandler
 	
 	function __construct()
 	{
+		$table = new table('session');
+		if (!$table->exist())
+		{
+			$table->field('session_id')->charset('utf8')->char(128)->comment('session_id');
+			$table->field('createtime')->datetime()->comment('创建或更新时间');
+			$table->field('content')->charset('utf8')->longtext()->comment('session序列化后的内容');
+			
+			$table->primary()->add('session_id');
+			$table->index('createtime')->add('createtime');
+		}
 	}
 	
 	/**
@@ -48,7 +59,7 @@ class db extends saveHandler
 	 */
 	public function read($session_id)
 	{
-		return $this->_db->where('session_id=?', array(
+		return (string)$this->_db->where('session_id=?', array(
 			$session_id,
 		))->scalar('content');
 	}
@@ -80,7 +91,9 @@ class db extends saveHandler
 	 */
 	public function destroy($session_id)
 	{
-		$this->write($session_id, '');
+		$this->_db->where('session_id=?', array(
+			$session_id,
+		))->limit(1)->delete();
 		return true;
 	}
 	
@@ -92,6 +105,9 @@ class db extends saveHandler
 	 */
 	public function gc($maxlifetime)
 	{
+		$this->_db->where('unix_timestamp(createtime) < ?',array(
+			time()-$maxlifetime
+		))->delete();
 		return true;
 	}
 }

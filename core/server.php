@@ -119,33 +119,52 @@ class server extends component
 						$protocal = $connection->getProotcal();
 						if (!empty($buffer))
 						{
-							//经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
-							$request = call_user_func(array($protocal,'decode'),$buffer);
-							
-							if (!empty($request))
+							$pid = pcntl_fork();
+							if ($pid == -1)
 							{
-								$request = call_user_func(array($protocal,'parse'),$request);
+								//进程创建失败
+								console::log('进程创建失败');
+								exit();
+							}
+							else if ($pid == 0)
+							{
+								//经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
+								$request = call_user_func(array($protocal,'decode'),$buffer);
 								
-								$_GET = $request['_GET'];
-								$_POST = $request['_POST'];
-								$_COOKIE = $request['_COOKIE'];
-								$_SERVER = $request['_SERVER'];
-								$_FILES = $request['_FILES'];
-								$_REQUEST = $request['_REQUEST'];
-								$_SESSION = $request['_SESSION'];
-								
-								$router = application::load('router');
-								$router->appendParameter($_GET);
-								$router->parse();
-								$control = $router->getControlName();
-								$action = $router->getActionName();
-								
-								call_user_func($this->_run_control, $control, $action, function ($response, $exit, $callback) use($connection) {
-									if ($response !== NULL)
-									{
-										$connection->write($response);
-									}
-								});
+								if (!empty($request))
+								{
+									$request = call_user_func(array($protocal,'parse'),$request);
+									
+									$_GET = $request['_GET'];
+									$_POST = $request['_POST'];
+									$_COOKIE = $request['_COOKIE'];
+									$_SERVER = $request['_SERVER'];
+									$_FILES = $request['_FILES'];
+									$_REQUEST = $request['_REQUEST'];
+									$_SESSION = $request['_SESSION'];
+									
+									$router = application::load('router');
+									$router->appendParameter($_GET);
+									$router->parse();
+									$control = $router->getControlName();
+									$action = $router->getActionName();
+									
+									call_user_func($this->_run_control, $control, $action, function ($response, $exit, $callback) use($connection) {
+										if ($response !== NULL)
+										{
+											$connection->write($response);
+										}
+									});
+								}
+								//子进程执行完逻辑代码后退出
+// 								exit();
+							}
+							else
+							{
+								//主进程挂起 等待子进程结束 防止僵尸进程 
+								pcntl_wait($status);
+								//主进程
+								console::log("执行了一次了");
 							}
 						}
 						else

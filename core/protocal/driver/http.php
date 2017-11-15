@@ -133,6 +133,9 @@ class http implements protocal
 	 */
 	function encode($string)
 	{
+		//这里还没有对session进行编码处理
+		
+		
 		$content = [];
 		if (!($string instanceof response))
 		{
@@ -441,6 +444,7 @@ class http implements protocal
 	 * 3、session.save_handler必须是files
 	 * 4、session.save_path不能设置深度参数
 	 * 5、session.serialize_handler必须是php不能是wddx
+	 * 6、即使是使用了file但是file还没有加锁
 	 * {@inheritDoc}
 	 * @see \framework\core\protocal\protocal::parse()
 	 */
@@ -463,17 +467,16 @@ class http implements protocal
 					$file = rtrim($path,'/').'/sess_'.$key;
 					if (file_exists($file) && is_readable($file))
 					{
-						if (ini_get('session.serialize_handler') == 'php')
-						{
-							$this->_session = unserialize(file_get_contents($file));
-						}
+						//这个方法会自动填充$_SESSION变量 返回true或者false  这个方法同样会自动根据php的配置来选择对应的方法
+						//session_decode(file_get_contents($file));
+						$this->_session = $this->session_decode(file_get_contents($file));
 					}
 				}
 				
 			}
 		}
 		
-		cookie::$_data = $this->_cookie;
+		//cookie::$_data = $this->_cookie;
 		
 		return array(
 			'_GET' => $this->_get,
@@ -493,5 +496,39 @@ class http implements protocal
 	public function closeAfterWrite()
 	{
 		return true;
+	}
+	
+	/**
+	 * session解码
+	 * @param string $string
+	 * @return mixed
+	 */
+	private function session_decode($string)
+	{
+		$handler = ini_get('session.serialize_handler');
+		switch ($handler)
+		{
+			case 'php':
+				return unserialize($string);
+				break;
+			case 'wddx':
+				return wddx_deserialize($string);
+				break;
+		}
+	}
+	
+	/**
+	 * session编码
+	 * @param mixed $var
+	 */
+	private function session_encode($var)
+	{
+		$handler = ini_get('session.serialize_handler');
+		switch ($handler)
+		{
+			case 'php':
+				return serialize($var);
+				break;
+		}
 	}
 }
