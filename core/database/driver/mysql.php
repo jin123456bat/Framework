@@ -315,7 +315,8 @@ class mysql extends database
 		{
 			if ($level!==NULL)
 			{
-				$this->execute("SET TRANSACTION ISOLATION LEVEL $level");
+				$level = str_replace('_', ' ', $level);
+				$this->execute("SET SESSION TRANSACTION ISOLATION LEVEL $level");
 			}
 			if ($this->_pdo->beginTransaction())
 			{
