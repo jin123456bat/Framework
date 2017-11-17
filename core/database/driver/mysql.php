@@ -304,13 +304,19 @@ class mysql extends database
 
 	/**
 	 * 开始事物
+	 * @param string|null 
+	 * 	READ_UNCOMMITTED | READ_COMMITTED | REPEATABLE_READ | SERIALIZABLE
 	 * @retun boolean 成功返回true 失败返回false
 	 */
-	public function transaction()
+	public function transaction($level = NULL)
 	{
 		$this->_transaction_level ++;
 		if ($this->_transaction_level === 1)
 		{
+			if ($level!==NULL)
+			{
+				$this->execute("SET TRANSACTION ISOLATION LEVEL $level");
+			}
 			if ($this->_pdo->beginTransaction())
 			{
 				return true;

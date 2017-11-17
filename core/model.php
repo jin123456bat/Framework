@@ -555,10 +555,13 @@ class model extends component
 
 	/**
 	 * 事务开始
+	 * @param string|null 
+	 * 	READ_UNCOMMITTED | READ_COMMITTED | REPEATABLE_READ | SERIALIZABLE
+	 * @retun boolean 成功返回true 失败返回false
 	 */
-	function transaction()
+	function transaction($level = NULL)
 	{
-		return $this->_db->transaction();
+		return $this->_db->transaction($level);
 	}
 
 	/**
