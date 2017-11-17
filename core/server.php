@@ -64,6 +64,43 @@ class server extends component
 	{
 		ini_set('max_execution_time', 0);
 		
+		$_ENV = $_SERVER;
+		
+		$context_option['socket']['backlog'] = SOMAXCONN;
+		$context = stream_context_create($context_option);
+		//reuseport
+		//stream_context_set_option($this->_context, 'socket', 'so_reuseport', 1);
+		$main_socket = stream_socket_server('tcp://0.0.0.0:80', $errno, $errmsg, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
+		
+		/* $socket = socket_import_stream($main_socket);
+		socket_set_option($socket, SOL_SOCKET, SO_KEEPALIVE, 1);
+		socket_set_option($socket, SOL_TCP, TCP_NODELAY, 1);
+		*/
+		stream_set_blocking($main_socket, 0);
+		
+		while (true)
+		{
+			$new_socket = @stream_socket_accept($main_socket,0,$remote_address);
+			if (!$new_socket)
+			{
+				continue;
+			}
+			
+			$str = fread($new_socket, 1024);
+			var_dump($str);
+		}/* $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+		socket_set_nonblock($socket);
+		socket_connect($socket, 'localhost', '80');	 */
+		
+	}
+	
+	/**
+	 * 阻塞
+	 */
+	function start_block()
+	{
+		ini_set('max_execution_time', 0);
+		
 		//保存cmd的server变量到env里面
 		$_ENV = $_SERVER;
 		
@@ -119,52 +156,33 @@ class server extends component
 						$protocal = $connection->getProotcal();
 						if (!empty($buffer))
 						{
-							$pid = pcntl_fork();
-							if ($pid == -1)
+							//经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
+							$request = call_user_func(array($protocal,'decode'),$buffer);
+							
+							if (!empty($request))
 							{
-								//进程创建失败
-								console::log('进程创建失败');
-								exit();
-							}
-							else if ($pid == 0)
-							{
-								//经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
-								$request = call_user_func(array($protocal,'decode'),$buffer);
+								$request = call_user_func(array($protocal,'parse'),$request);
 								
-								if (!empty($request))
-								{
-									$request = call_user_func(array($protocal,'parse'),$request);
-									
-									$_GET = $request['_GET'];
-									$_POST = $request['_POST'];
-									$_COOKIE = $request['_COOKIE'];
-									$_SERVER = $request['_SERVER'];
-									$_FILES = $request['_FILES'];
-									$_REQUEST = $request['_REQUEST'];
-									$_SESSION = $request['_SESSION'];
-									
-									$router = application::load('router');
-									$router->appendParameter($_GET);
-									$router->parse();
-									$control = $router->getControlName();
-									$action = $router->getActionName();
-									
-									call_user_func($this->_run_control, $control, $action, function ($response, $exit, $callback) use($connection) {
-										if ($response !== NULL)
-										{
-											$connection->write($response);
-										}
-									});
-								}
-								//子进程执行完逻辑代码后退出
-// 								exit();
-							}
-							else
-							{
-								//主进程挂起 等待子进程结束 防止僵尸进程 
-								pcntl_wait($status);
-								//主进程
-								console::log("执行了一次了");
+								$_GET = $request['_GET'];
+								$_POST = $request['_POST'];
+								$_COOKIE = $request['_COOKIE'];
+								$_SERVER = $request['_SERVER'];
+								$_FILES = $request['_FILES'];
+								$_REQUEST = $request['_REQUEST'];
+								$_SESSION = $request['_SESSION'];
+								
+								$router = application::load('router');
+								$router->appendParameter($_GET);
+								$router->parse();
+								$control = $router->getControlName();
+								$action = $router->getActionName();
+								
+								call_user_func($this->_run_control, $control, $action, function ($response, $exit, $callback) use($connection) {
+									if ($response !== NULL)
+									{
+										$connection->write($response);
+									}
+								});
 							}
 						}
 						else
