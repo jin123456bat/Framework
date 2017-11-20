@@ -231,7 +231,9 @@ class http implements protocal
 		$this->_server['REQUEST_TIME_FLOAT'] = microtime(true);
 		$this->_server['QUERY_STRING'] = '';
 		
-		socket_getpeername($connection->getSocket(),$this->_server['REMOTE_ADDR'],$this->_server['REMOTE_PORT']);
+		$this->_server['REMOTE_ADDR'] = stream_socket_get_name($connection->getSocket(), true);
+		
+		//socket_getpeername($connection->getSocket(),$this->_server['REMOTE_ADDR'],$this->_server['REMOTE_PORT']);
 		
 		$header = explode("\r\n", substr($request,0, strpos($request, "\r\n\r\n")));
 		

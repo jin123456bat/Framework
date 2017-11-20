@@ -60,7 +60,7 @@ class connection extends component
 		{
 			$buffer = $this->_protocal->encode($buffer);
 		}
-		$result = socket_write($this->_socket, $buffer,strlen($buffer));
+		$result = fwrite($this->_socket, $buffer,strlen($buffer));
 		if ($this->_protocal->closeAfterWrite())
 		{
 			$this->close();
@@ -77,7 +77,7 @@ class connection extends component
 	{
 		$buffer = '';
 		do{
-			$str = socket_read($this->_socket, 4096);
+			$str = fread($this->_socket, 4096);
 			$buffer.=$str;
 		}while(strlen($str)==4096);
 		return $buffer;
@@ -111,7 +111,7 @@ class connection extends component
 	
 	function close()
 	{
-		socket_close($this->_socket);
+		fclose($this->_socket);
 		unset(server::$_connection[$this->id()]);
 		unset(server::$_sockets[$this->id()]);
 	}
