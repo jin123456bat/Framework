@@ -28,6 +28,11 @@ interface protocal
 	public function decode($buffer);
 	
 	
+	/**
+	 * 将传递过来的数据转化为超全局变量
+	 * @param unknown $string
+	 * @return array
+	 */
 	public function parse($string);
 	
 	/**
