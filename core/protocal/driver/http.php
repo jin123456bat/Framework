@@ -173,6 +173,7 @@ class http implements protocal
 		}
 		
 		$body = $string->getBody();
+		$content[] = 'Content-Length: '.strlen($body);
 		
 		//编码压缩
 		if (function_exists('zlib_encode'))
@@ -202,6 +203,9 @@ class http implements protocal
 				}
 			}
 		}
+		
+		//去掉重复的头
+		$content = array_unique($content);
 		
 		$content[] = '';
 		$content[] = $body;

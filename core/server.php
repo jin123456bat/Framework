@@ -23,7 +23,7 @@ class server extends component
 	 *
 	 * @var integer
 	 */
-	private $_timeout = 60;
+	private $_timeout = 0;
 	
 	/**
 	 * 最大链接数量
@@ -61,6 +61,41 @@ class server extends component
 	}
 	
 	/**
+	 * 创建多个进程 分别执行2个回调函数
+	 * @param unknown $callback 主进程
+	 * @param unknown $callback 子进程
+	 */
+	function fork($callback1,$callback2)
+	{
+		$pid = pcntl_fork();
+		if ($pid<0)
+		{
+			exit("create failed");
+		}
+		else if ($pid>0)
+		{
+			call_user_func($callback1);
+		}
+		else if ($pid==0)
+		{
+			call_user_func($callback2);
+		}
+	}
+	
+	function setSignal()
+	{
+		//安装信号处理器
+		pcntl_signal(SIGCHLD, function($signo){
+			switch ($signo)
+			{
+				case SIGCHLD:
+					pcntl_wait($status);
+					break;
+			}
+		},WNOHANG);
+	}
+	
+	/**
 	 * 阻塞
 	 */
 	function start()
@@ -82,6 +117,8 @@ class server extends component
 		)));
 		stream_set_blocking($this->_master, 0);
 		self::$_sockets[(int)$this->_master] = $this->_master;
+		
+		$this->setSignal();
 		
 		while (true)
 		{
@@ -127,39 +164,47 @@ class server extends component
 						$protocal = $connection->getProotcal();
 						if (!empty($buffer))
 						{
-							//经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
-							$request = call_user_func(array($protocal,'decode'),$buffer);
-							
-							if (!empty($request))
-							{
-								$request = call_user_func(array($protocal,'parse'),$request);
+							$this->fork(function(){
+								//这个函数会阻塞
+								pcntl_signal_dispatch();
+							}, function() use($protocal,$buffer,$connection){
+								//经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
+								$request = call_user_func(array($protocal,'decode'),$buffer);
 								
-								$_GET = $request['_GET'];
-								$_POST = $request['_POST'];
-								$_COOKIE = $request['_COOKIE'];
-								$_SERVER = $request['_SERVER'];
-								$_FILES = $request['_FILES'];
-								$_REQUEST = $request['_REQUEST'];
-								$_SESSION = $request['_SESSION'];
-								
-								$router = application::load('router');
-								$router->appendParameter($_GET);
-								$router->parse();
-								$control = $router->getControlName();
-								$action = $router->getActionName();
-								
-								call_user_func($this->_run_control, $control, $action, function ($response, $exit, $callback) use($connection) {
-									if ($response !== NULL)
-									{
-										$connection->write($response);
-									}
-								});
-							}
+								if (!empty($request))
+								{
+									$request = call_user_func(array($protocal,'parse'),$request);
+									
+									$_GET = $request['_GET'];
+									$_POST = $request['_POST'];
+									$_COOKIE = $request['_COOKIE'];
+									$_SERVER = $request['_SERVER'];
+									$_FILES = $request['_FILES'];
+									$_REQUEST = $request['_REQUEST'];
+									$_SESSION = $request['_SESSION'];
+									
+									$router = application::load('router');
+									$router->appendParameter($_GET);
+									$router->parse();
+									$control = $router->getControlName();
+									$action = $router->getActionName();
+									
+									call_user_func($this->_run_control, $control, $action, function ($response, $exit, $callback) use($connection) {
+										if ($response !== NULL)
+										{
+											$connection->write($response);
+										}
+									});
+								}
+								posix_kill(posix_getppid(), SIGCHLD);
+								exit(0);
+							});
 						}
 						else
 						{
 							$connection->close();
 						}
+						
 					}
 				}
 			}
@@ -182,12 +227,9 @@ class server extends component
 				exit();
 			}
 			
-			//在子进程中 执行socket监听等等
-			$this->start();
-			
 			//这里来自workman的源代码，需要重新fork一次
 			// Fork again avoid SVR4 system regain the control of terminal.
-			/* $pid = pcntl_fork();
+			$pid = pcntl_fork();
 			if (-1 === $pid)
 			{
 				console::log('创建进程失败');
@@ -196,9 +238,10 @@ class server extends component
 			else if (0 !== $pid) 
 			{
 				exit(0);
-			} */
+			}
 			
-			
+			//在子进程中 执行socket监听等等
+			$this->start();
 		}
 		else
 		{
