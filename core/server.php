@@ -166,7 +166,7 @@ class server extends component
 						{
 							$this->fork(function(){
 								//这个函数会阻塞
-								pcntl_signal_dispatch();
+								//pcntl_signal_dispatch();
 							}, function() use($protocal,$buffer,$connection){
 								//经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
 								$request = call_user_func(array($protocal,'decode'),$buffer);
