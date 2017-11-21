@@ -312,8 +312,8 @@ class application extends component
 
 	/**
 	 * 解析cli模式下的命令
-	 * @param unknown $argc
-	 * @param unknown $argv
+	 * @param unknown $argc        
+	 * @param unknown $argv        
 	 * @return boolean[]|unknown[]|unknown[][]
 	 */
 	function parseCliCommand($argc, $argv)
