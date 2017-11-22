@@ -39,7 +39,7 @@ class http extends base
 			$port = $options['port'];
 			unset($options['port']);
 		}
-		if (($port == 80 && $default_port==80) || ($port==443 && $default_port==443))
+		if (($port == 80 && $default_port == 80) || ($port == 443 && $default_port == 443))
 		{
 			$port = '';
 		}
@@ -62,16 +62,16 @@ class http extends base
 			unset($options['fragment']);
 		}
 		
-		if (!empty($c))
+		if (! empty($c))
 		{
 			$options['c'] = $c;
 		}
-		if (!empty($a))
+		if (! empty($a))
 		{
 			$options['a'] = $a;
 		}
-		//判断是否强制使用了url中的session_id
-		if (ini_get('session.use_trans_sid')==1 && ini_get('use_cookies') ==0 && ini_get('use_only_cookies')==0)
+		// 判断是否强制使用了url中的session_id
+		if (ini_get('session.use_trans_sid') == 1 && ini_get('use_cookies') == 0 && ini_get('use_only_cookies') == 0)
 		{
 			$session_id = session_id();
 			if (empty($session_id))
@@ -79,17 +79,16 @@ class http extends base
 				application::load('session');
 				$session_id = session_id();
 			}
-			$session_id = request::get(session_name(),$session_id,null,'s');
+			$session_id = request::get(session_name(), $session_id, null, 's');
 			$options[session_name()] = $session_id;
 		}
-		$query = !empty($options)?'?' . http_build_query($options):'';
+		$query = ! empty($options) ? '?' . http_build_query($options) : '';
 		
 		return $scheme . $host . $port . $path . $query . $fragment;
 	}
 
 	/**
 	 * 发送post请求
-	 * 
 	 * @param unknown $url        
 	 * @param unknown $data        
 	 */
@@ -147,7 +146,6 @@ class http extends base
 
 	/**
 	 * 发送get请求
-	 * 
 	 * @param string $url
 	 *        请求的地址
 	 * @param array $data
@@ -157,11 +155,14 @@ class http extends base
 	 */
 	static function get($url, array $data = array(), $use_curl = true, $callback = null)
 	{
-		$url = $url . '?' . http_build_query($data);
+		$url = $url . (!empty($data)?('?' . http_build_query($data)):'');
 		if (function_exists('curl_init') && $use_curl)
 		{
 			$curl = curl_init($url);
 			curl_setopt_array($curl, array(
+				CURLOPT_HTTPHEADER => array(
+					'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.52 Safari/537.36',
+				),
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_FOLLOWLOCATION => true,
 				CURLOPT_CONNECTTIMEOUT => 60,
@@ -169,9 +170,12 @@ class http extends base
 				CURLOPT_POST => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_SSL_VERIFYPEER => false,
-				CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4
+				CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+				CURLINFO_HEADER_OUT => true,
 			));
 			$response = curl_exec($curl);
+			//打印请求头的信息
+			//var_dump(curl_getinfo( $curl, CURLINFO_HEADER_OUT));
 			curl_close($curl);
 			return $response;
 		}
@@ -196,53 +200,53 @@ class http extends base
 			return $result;
 		}
 	}
-	
+
 	/**
 	 * head请求
-	 * @param string $url
+	 * @param string $url        
 	 */
 	static function head($url)
 	{
 		$context = stream_context_get_options(stream_context_get_default());
-		stream_context_set_default(array('http'=>array('method'=>'HEAD')));
-		$headers = get_headers($url,1);
+		stream_context_set_default(array(
+			'http' => array(
+				'method' => 'HEAD'
+			)
+		));
+		$headers = get_headers($url, 1);
 		stream_context_set_default($context);
 		return $headers;
 	}
-	
+
 	/**
 	 * put请求
-	 * @param string $url
+	 * @param string $url        
 	 */
 	static function put($url)
 	{
-		
 	}
-	
+
 	/**
 	 * delete请求
-	 * @param string $url
+	 * @param string $url        
 	 */
 	static function delete($url)
 	{
-		
 	}
-	
+
 	/**
 	 * options请求
-	 * @param string $url
+	 * @param string $url        
 	 */
 	static function options($url)
 	{
-		
 	}
-	
+
 	/**
 	 * trace请求
-	 * @param string $url
+	 * @param string $url        
 	 */
 	static function trace($url)
 	{
-		
 	}
 }
