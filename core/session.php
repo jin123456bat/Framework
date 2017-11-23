@@ -97,6 +97,7 @@ class session extends component
 	{
 		self::getInstance();
 		$_SESSION[$name] = $value;
+		return true;
 	}
 
 	/**

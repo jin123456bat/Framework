@@ -120,7 +120,12 @@ class http extends base
 				CURLOPT_POSTFIELDS => $data,
 				CURLOPT_SSL_VERIFYHOST => 0,
 				CURLOPT_SSL_VERIFYPEER => false,
-				CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4
+				CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+				CURLOPT_HTTPHEADER => array(
+					'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.52 Safari/537.36',
+				),
+				CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.52 Safari/537.36',
+				CURLINFO_HEADER_OUT => true,
 			));
 			$response = curl_exec($curl);
 			curl_close($curl);
@@ -163,6 +168,7 @@ class http extends base
 				CURLOPT_HTTPHEADER => array(
 					'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.52 Safari/537.36',
 				),
+				CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.52 Safari/537.36',
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_FOLLOWLOCATION => true,
 				CURLOPT_CONNECTTIMEOUT => 60,
