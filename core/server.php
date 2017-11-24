@@ -49,6 +49,12 @@ class server extends component
 	 * @var connection[]
 	 */
 	public static $_connection = array();
+	
+	/**
+	 * 空闲的子进程的PID
+	 * @var array
+	 */
+	private static $_idle_pid = array();
 
 	function __construct()
 	{
@@ -89,7 +95,7 @@ class server extends component
 			switch ($signo)
 			{
 				case SIGCHLD:
-					pcntl_wait($status);
+					pcntl_wait($status,WNOHANG);
 				break;
 			}
 		}, WNOHANG);
@@ -98,8 +104,30 @@ class server extends component
 	/**
 	 * 阻塞
 	 */
-	function start()
+	function restart()
 	{
+		$this->setSignal();
+		
+		for($i = 0;$i<5;$i++)
+		{
+			$pid = pcntl_fork();
+			if ($pid > 0)
+			{
+				self::$_idle_pid[] = $pid;
+			}
+			else if ($pid == 0)
+			{
+				
+				
+				while (1)
+				{
+					
+				}
+			}
+		}
+		
+		exit();
+		
 		ini_set('max_execution_time', 0);
 		
 		// 保存cmd的server变量到env里面
@@ -270,7 +298,7 @@ class server extends component
 	{
 	}
 
-	function restart()
+	function start()
 	{
 		ini_set('max_execution_time', 0);
 		
@@ -292,59 +320,103 @@ class server extends component
 		
 		$this->setSignal();
 		
-		$this->fork(function ($pid) {
-			while (true)
+		while (true)
+		{
+			$read = self::$_sockets;
+			$write = NULL;
+			$except = NULL;
+			$r = stream_select($read, $write, $except, $this->_timeout);
+			if (count($read) > 0)
 			{
-				$read = self::$_sockets;
-				$write = NULL;
-				$except = NULL;
-				stream_select($read, $write, $except, $this->_timeout);
 				foreach ($read as $socket)
 				{
-					if ($socket == $this->_master)
-					{
-						$client = stream_socket_accept($this->_master);
-						if ($client === false)
+					$this->fork(function(){
+						
+					}, function() use($socket){
+						if ($socket == $this->_master)
 						{
-							continue;
+							$client = stream_socket_accept($this->_master);
+							if ($client === false)
+							{
+							}
+							else
+							{
+								self::$_sockets[(int) $client] = $client;
+							}
 						}
 						else
 						{
-							if (count(self::$_sockets) > $this->_max_connection)
+							$init_result = true;
+							if (! isset(self::$_connection[(int) $socket]))
 							{
-								// $this->call('error', 0, '超过最大链接数');
-								continue;
+								self::$_connection[(int) $socket] = new connection($socket);
+								if (method_exists(self::$_connection[(int) $socket], 'initlize'))
+								{
+									$init_result = call_user_func(array(
+										self::$_connection[(int) $socket],
+										'initlize'
+									));
+								}
 							}
-							self::$_sockets[(int) $client] = $client;
-						}
-					}
-					else
-					{
-						$init_result = true;
-						if (! isset(self::$_connection[(int) $socket]))
-						{
-							self::$_connection[(int) $socket] = new connection($socket);
-							if (method_exists(self::$_connection[(int) $socket], 'initlize'))
+							$connection = self::$_connection[(int) $socket];
+							
+							if ($init_result !== false)
 							{
-								$init_result = call_user_func(array(
-									self::$_connection[(int) $socket],
-									'initlize'
-								));
+								$buffer = $connection->read();
+								$protocal = $connection->getProotcal();
+								if (! empty($buffer))
+								{
+									// 经过socket的消息一般都是二进制的方式传递，需要进行解码之后变为字符串才可读
+									$request = call_user_func(array(
+										$protocal,
+										'decode'
+									), $buffer);
+									
+									if (! empty($request))
+									{
+										$request = call_user_func(array(
+											$protocal,
+											'parse'
+										), $request);
+										
+										$_GET = $request['_GET'];
+										$_POST = $request['_POST'];
+										$_COOKIE = $request['_COOKIE'];
+										$_SERVER = $request['_SERVER'];
+										$_FILES = $request['_FILES'];
+										$_REQUEST = $request['_REQUEST'];
+										$_SESSION = $request['_SESSION'];
+										
+										$router = application::load('router');
+										$router->appendParameter($_GET);
+										$router->parse();
+										$control = $router->getControlName();
+										$action = $router->getActionName();
+										
+										call_user_func($this->_run_control, $control, $action, function ($response, $exit, $callback) use ($connection) {
+											if ($response !== NULL)
+											{
+												$connection->write($response);
+											}
+										});
+									}
+									posix_kill(posix_getppid(), SIGCHLD);
+									exit(0);
+								}
+								else
+								{
+									$connection->close();
+									posix_kill(posix_getppid(), SIGCHLD);
+									exit(0);
+								}
 							}
 						}
-						$connection = self::$_connection[(int) $socket];
 						
-						if ($init_result !== false)
-						{
-							// 向子进程发送信号处理
-							self::list[] = array(
-								''
-							);
-						}
-					}
+						posix_kill(posix_getppid(), SIGCHLD);
+						exit(0);
+					});
 				}
 			}
-		}, function () {
-		});
+		}
 	}
 }

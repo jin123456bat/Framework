@@ -171,13 +171,32 @@ class request extends base
 	 */
 	public static function post($name = '', $defaultValue = null, $filter = null, $type = 's')
 	{
+		$config = self::getConfig(base::$APP_CONF);
+		if (isset($config['request']['parser']) && !empty($config['request']['parser']))
+		{
+			$parser = application::load('framework\\core\parser\\'.$config['request']['parser'].'\\'.$config['request']['parser']);
+			if (!empty($parser))
+			{
+				$parser->setData(file_get_contents('php://input'));
+				$requestContent = $parser->getData();
+			}
+			else
+			{
+				$requestContent = $_POST;
+			}
+		}
+		else
+		{
+			$requestContent = $_POST;
+		}
+		
 		if ($name === '')
 		{
-			return $_POST;
+			return $requestContent;
 		}
-		else if (isset($_POST[$name]) && $_POST[$name]!=='')
+		else if (isset($requestContent[$name]) && $requestContent[$name]!=='')
 		{
-			$data = $_POST[$name];
+			$data = $requestContent[$name];
 			
 			if (is_string($filter) && ! empty($filter))
 			{

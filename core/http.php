@@ -166,7 +166,15 @@ class http extends base
 			$curl = curl_init($url);
 			curl_setopt_array($curl, array(
 				CURLOPT_HTTPHEADER => array(
-					'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.52 Safari/537.36',
+					'Host: www.booktxt.net',
+					'Connection: keep-alive',
+					'Cache-Control: max-age=0',
+					'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.59 Safari/537.36',
+					'Upgrade-Insecure-Requests: 1',
+					'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+					'Accept-Encoding: gzip, deflate',
+					'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7',
+					'Cookie: bdshare_firstime=1511345530530; a9364_times=2; __51cke__=; Hm_lvt_6949867c34e7741ebac3943050f04833=1510052090,1510052102,1511345069,1511423700; a9364_pages=4; __tins__19219364=%7B%22sid%22%3A1511423699620%2C%22vd%22%3A4%2C%22expires%22%3A1511425662410%7D; __51laig__=4; Hm_lpvt_6949867c34e7741ebac3943050f04833=1511423862',
 				),
 				CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.52 Safari/537.36',
 				CURLOPT_RETURNTRANSFER => 1,
