@@ -1,6 +1,8 @@
 <?php
 namespace framework\core;
 
+use framework\core\parser\parser;
+
 class request extends base
 {
 
@@ -163,19 +165,23 @@ class request extends base
 	/**
 	 * 读取post变量
 	 * 
-	 * @param unknown $name        
-	 * @param unknown $defaultValue        
-	 * @param unknown $filter        
-	 * @param string $type        
+	 * @param unknown $name
+	 * @param unknown $defaultValue
+	 * @param unknown $filter
+	 * @param string $type
+	 * @param string|parser $parser
 	 * @return mixed|string|boolean|number|\core\StdClass|\core\unknown|string
 	 */
-	public static function post($name = '', $defaultValue = null, $filter = null, $type = 's')
+	public static function post($name = '', $defaultValue = null, $filter = null, $type = 's',$parser = '')
 	{
-		$config = self::getConfig(base::$APP_CONF);
-		if (isset($config['request']['parser']) && !empty($config['request']['parser']))
+		if (!empty($parser))
 		{
-			$parser = application::load('framework\\core\parser\\'.$config['request']['parser'].'\\'.$config['request']['parser']);
-			if (!empty($parser))
+			if (is_string($parser))
+			{
+				$parser = application::load('framework\\core\parser\\'.$parser.'\\'.$parser);
+			}
+			
+			if (!empty($parser) && $parser instanceof parser)
 			{
 				$parser->setData(file_get_contents('php://input'));
 				$requestContent = $parser->getData();
@@ -260,25 +266,43 @@ class request extends base
 
 	/**
 	 * 读取get变量
-	 * 
-	 * @param unknown $name
-	 *        参数名称
-	 * @param unknown $defaultValue
-	 *        默认值
-	 * @param unknown $filter
-	 *        过滤器名称
-	 * @param string $type
-	 *        默认是s
+	 * @param unknown $name 参数名称
+	 * @param unknown $defaultValue 默认值
+	 * @param unknown $filter 过滤器名称
+	 * @param string $type 默认是s
+	 * @return mixed
 	 */
-	public static function get($name = '', $defaultValue = null, $filter = null, $type = '')
+	public static function get($name = '', $defaultValue = null, $filter = null, $type = '',$parser = '')
 	{
+		if (!empty($parser))
+		{
+			if (is_string($parser))
+			{
+				$parser = application::load('framework\\core\parser\\'.$parser.'\\'.$parser);
+			}
+			
+			if (!empty($parser) && $parser instanceof parser)
+			{
+				$parser->setData($_SERVER['QUERY_STRING']);
+				$requestContent = $parser->getData();
+			}
+			else
+			{
+				$requestContent = $_GET;
+			}
+		}
+		else
+		{
+			$requestContent = $_GET;
+		}
+		
 		if ($name === '')
 		{
-			return $_GET;
+			return $requestContent;
 		}
-		else if (isset($_GET[$name]) && $_GET[$name]!=='')
+		else if (isset($requestContent[$name]) && $requestContent[$name]!=='')
 		{
-			$data = $_GET[$name];
+			$data = $requestContent[$name];
 			
 			if (is_string($filter) && ! empty($filter))
 			{

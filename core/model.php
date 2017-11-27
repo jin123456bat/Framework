@@ -2,7 +2,6 @@
 namespace framework\core;
 
 use framework\core\database\sql;
-use framework\core\database\driver\mysql;
 use framework\core\database\mysql\table;
 use framework;
 
