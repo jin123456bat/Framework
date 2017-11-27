@@ -178,7 +178,7 @@ class request extends base
 		{
 			if (is_string($parser))
 			{
-				$parser = application::load('framework\\core\parser\\'.$parser.'\\'.$parser);
+				$parser = application::load(parser::class);
 			}
 			
 			if (!empty($parser) && $parser instanceof parser)
@@ -215,7 +215,7 @@ class request extends base
 					}
 					else
 					{
-						$filterClass = application::load('filter');
+						$filterClass = application::load(filter::class);
 						if (is_callable(array(
 							$filterClass,
 							$filter_t
@@ -278,7 +278,7 @@ class request extends base
 		{
 			if (is_string($parser))
 			{
-				$parser = application::load('framework\\core\parser\\'.$parser.'\\'.$parser);
+				$parser = application::load(parser::class,$parser);
 			}
 			
 			if (!empty($parser) && $parser instanceof parser)
@@ -315,7 +315,7 @@ class request extends base
 					}
 					else
 					{
-						$filterClass = application::load('filter');
+						$filterClass = application::load(filter::class);
 						if (is_callable(array(
 							$filterClass,
 							$filter_t
@@ -393,7 +393,7 @@ class request extends base
 					}
 					else
 					{
-						$filterClass = application::load('filter');
+						$filterClass = application::load(filter::class);
 						if (is_callable(array(
 							$filterClass,
 							$filter_t

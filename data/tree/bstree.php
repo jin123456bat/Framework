@@ -16,7 +16,7 @@ class bstree extends btree
 	 * @param mixed $data
 	 * @param boolean true添加成功 false添加失败（数据已经存在才会失败）
 	 */
-	function push($data)
+	function push($data = NULL)
 	{
 		$temp = new \stdClass();
 		$temp->left = NULL;

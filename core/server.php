@@ -220,7 +220,7 @@ class server extends component
 									$_REQUEST = $request['_REQUEST'];
 									$_SESSION = $request['_SESSION'];
 									
-									$router = application::load('router');
+									$router = application::load(router::class);
 									$router->appendParameter($_GET);
 									$router->parse();
 									$control = $router->getControlName();
@@ -387,7 +387,7 @@ class server extends component
 										$_REQUEST = $request['_REQUEST'];
 										$_SESSION = $request['_SESSION'];
 										
-										$router = application::load('router');
+										$router = application::load(router::class);
 										$router->appendParameter($_GET);
 										$router->parse();
 										$control = $router->getControlName();

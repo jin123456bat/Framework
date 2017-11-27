@@ -8,7 +8,7 @@ class maria extends database
 	 * {@inheritDoc}
 	 * @see \framework\core\database\database::query()
 	 */
-	public function query($sql, array $array)
+	public function query($sql, array $array = array())
 	{
 		// TODO Auto-generated method stub
 		

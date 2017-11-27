@@ -36,6 +36,12 @@ class base
 	 */
 	private static $_config = array();
 	
+	/**
+	 * 核心类重写
+	 * @var array
+	 */
+	static $_rewrite = array();
+	
 	function __construct()
 	{
 	}
@@ -159,7 +165,7 @@ class base
 		$config_path = $root . '/config/';
 		foreach (scandir($config_path) as $config_file)
 		{
-			if ($config_file != '.' && $config_file != '..')
+			if ($config_file != '.' && $config_file != '..' && is_file($config_path . $config_file))
 			{
 				$config = include $config_path . $config_file;
 				if (is_array($config) && ! empty($config))

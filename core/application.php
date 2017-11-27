@@ -20,7 +20,6 @@ class application extends component
 			$configName = substr($name, 0, 3);
 			base::$APP_CONF = $configName;
 		}
-		
 		parent::__construct();
 	}
 
@@ -34,6 +33,7 @@ class application extends component
 		self::setEnvironment($this->getConfig('environment'));
 		// 导入app配置中的文件类
 		$this->import(base::$APP_CONF);
+		
 		// set_error_handler
 		$app = $this->getConfig(base::$APP_CONF);
 		if (isset($app['errorHandler']) && ! empty($app['errorHandler']))
@@ -183,7 +183,7 @@ class application extends component
 				}
 			}
 			
-			$filter = $this->load('actionFilter');
+			$filter = self::load(actionFilter::class);
 			$filter->load($controller, $action);
 			if (! $filter->allow())
 			{
@@ -360,7 +360,7 @@ class application extends component
 	 */
 	function run()
 	{
-		$router = $this->load('router');
+		$router = self::load(router::class);
 		if (request::php_sapi_name() == 'web')
 		{
 			$router->appendParameter($_GET);
@@ -374,7 +374,7 @@ class application extends component
 			{
 				request::$_php_sapi_name = 'server';
 				
-				$server = self::load('server');
+				$server = self::load(server::class);
 				$command = trim(strtolower($_SERVER['argv'][0]));
 				
 				if (method_exists($server, $command))
@@ -490,71 +490,66 @@ class application extends component
 	}
 
 	/**
-	 * 载入系统类
-	 * @param string $classname
-	 *        类名
-	 * @param string $instance
-	 *        继承的类
+	 * 检测这个类是否有被重写，假如重写了，加载重写后的类
+	 * 没有重写，检测这个类是否可以被实例化，假如可以 通过第三个参数实例化
+	 * 假如不可以，加载一个必须继承这个类的类，类名由第二个参数指定
+	 * @param string $instanceof ，没有重写加载当前类，继承的类， 要加载的类必须要继承$instanceof指定的类
+	 * @param string $classname 类名 默认为空 要加载的类的类名 假如为空 则加载找到的第一个类
 	 * @return object
-	 * @example application::load('control')
-	 *          application::load('framework\core\model')
 	 */
-	public static function load($classname, $instanceof = '')
+	public static function load($instanceof,$class_name = '',$args = array())
 	{
-		static $instance;
-		
-		$classnames = explode('\\', $classname);
-		if (count($classnames) == 1)
+		if (isset(base::$_rewrite[$instanceof]))
 		{
-			$namespaces = array(
-				base::$APP_NAME . '\\extend',
-				'framework\\core',
-				'framework\\core\\database',
-				'framework\\core\\response',
-				'framework\\lib',
-				'framework\\vendor'
-			);
-			
-			foreach ($namespaces as $namespace)
-			{
-				$class = $namespace . '\\' . $classname;
-				
-				if (isset($instance[$class]))
-				{
-					return $instance[$class];
-				}
-				else
-				{
-					if (class_exists($class, true))
-					{
-						$temp = new $class();
-						if (! empty($instanceof) && class_exists($instanceof, true))
-						{
-							if (! ($temp instanceof $instanceof))
-							{
-								return null;
-							}
-						}
-						$instance[$class] = $temp;
-						if (method_exists($instance[$class], 'initlize'))
-						{
-							$instance[$class]->initlize();
-						}
-						return $instance[$class];
-					}
-				}
-			}
+			$class = base::$_rewrite[$instanceof];
 		}
 		else
 		{
-			if (class_exists($classname, true))
+			$class = $instanceof;
+		}
+		$reflectionClass = new \ReflectionClass($class);
+		if (!$reflectionClass->isTrait() && !$reflectionClass->isAbstract() && !$reflectionClass->isInterface())
+		{
+			$object = $reflectionClass->newInstanceArgs($args);
+			if ($reflectionClass->hasMethod('initlize'))
 			{
-				$instance[$classname] = new $classname();
-				if (method_exists($instance[$classname], 'initlize'))
+				$object->initlize();
+			}
+			return $object;
+		}
+		else if (!empty($class_name))
+		{
+			function glob_recursive($pattern, $flags = 0)
+			{
+				$files = glob($pattern, $flags);
+				
+				foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir)
 				{
-					$instance[$classname]->initlize();
+					$files = array_merge($files, glob_recursive($dir.'/'.basename($pattern), $flags));
 				}
-				return $instance[$classname];
+				
+				return $files;
+			}
+			
+			$files = glob_recursive(rtrim(APP_ROOT,'/').'/'.$class_name.'.php',GLOB_BRACE);
+			foreach ($files as $file)
+			{
+				$namespace = pathinfo(trim($file,'./'),PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME);
+				include_once $file;
+				if (class_exists($namespace))
+				{
+					$reflectionClass = new \ReflectionClass($namespace);
+					$object = $reflectionClass->newInstanceWithoutConstructor();
+					if ($object instanceof $class)
+					{
+						$object = $reflectionClass->newInstanceArgs($args);
+						if ($reflectionClass->hasMethod('initlize'))
+						{
+							$object->initlize();
+						}
+						return $object;
+					}
+				}
 			}
 		}
 	}

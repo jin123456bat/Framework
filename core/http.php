@@ -76,7 +76,7 @@ class http extends base
 			$session_id = session_id();
 			if (empty($session_id))
 			{
-				application::load('session');
+				application::load(session::class);
 				$session_id = session_id();
 			}
 			$session_id = request::get(session_name(), $session_id, null, 's');

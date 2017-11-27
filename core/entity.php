@@ -570,7 +570,7 @@ class entity extends base
 			
 			if (! empty($key))
 			{
-				$validator = application::load('validator');
+				$validator = application::load(validator::class);
 				if (is_callable(array(
 					$validator,
 					$key

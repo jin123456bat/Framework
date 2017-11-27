@@ -1,6 +1,8 @@
 <?php
 namespace framework\core;
 
+use framework\core\session\saveHandler;
+
 /**
  *
  * @author fx
@@ -20,7 +22,7 @@ class session extends component
 			// 假如用户定义了SessionHandler
 			if (isset($session['save_handler']) && ! empty($session['save_handler']))
 			{
-				$sessionHandler = application::load($session['save_handler']);
+				$sessionHandler = application::load(saveHandler::class,$session['save_handler']);
 				if ($sessionHandler !== null)
 				{
 					session_set_save_handler($sessionHandler, true);

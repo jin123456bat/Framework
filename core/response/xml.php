@@ -14,11 +14,6 @@ class xml extends response
 
 	private $_charset;
 
-	private $_contentType = 'html/xml';
-
-	private $_cache;
-
-	private $_header;
 
 	/**
 	 *
@@ -40,56 +35,7 @@ class xml extends response
 		{
 			$this->loadArray($content);
 		}
-	}
-
-	function setHeader($string)
-	{
-		$this->_header = $string;
-	}
-
-	/**
-	 * 设置输出结果是否缓存
-	 * 
-	 * @param unknown $cache        
-	 */
-	function cache($cache)
-	{
-		$this->_cache = $cache;
-	}
-
-	/**
-	 * 返回是否缓存输出结果
-	 * 
-	 * @return unknown
-	 */
-	function isCache()
-	{
-		return $this->_cache;
-	}
-
-	/**
-	 * 获得mimetype
-	 * 
-	 * @return string
-	 */
-	function getContentType()
-	{
-		return $this->_contentType;
-	}
-
-	/**
-	 * 设置contentType
-	 * 
-	 * @param unknown $contentType        
-	 */
-	function setContentType($contentType)
-	{
-		$this->_contentType = $contentType;
-	}
-
-	function __toString()
-	{
-		return $this->_xml;
+		$this->setContentType('html/xml');
 	}
 
 	/**
