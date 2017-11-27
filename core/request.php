@@ -178,7 +178,7 @@ class request extends base
 		{
 			if (is_string($parser))
 			{
-				$parser = application::load(parser::class);
+				$parser = class_exists($parser)?application::load($parser):application::load(parser::class,$parser);
 			}
 			
 			if (!empty($parser) && $parser instanceof parser)
@@ -278,7 +278,7 @@ class request extends base
 		{
 			if (is_string($parser))
 			{
-				$parser = application::load(parser::class,$parser);
+				$parser = class_exists($parser)?application::load($parser):application::load(parser::class,$parser);
 			}
 			
 			if (!empty($parser) && $parser instanceof parser)
