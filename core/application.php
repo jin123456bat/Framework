@@ -56,6 +56,12 @@ class application extends component
 			}
 		}
 		
+		//rewrite
+		if (isset($app['rewrite']) && !empty($app['rewrite']))
+		{
+			base::$_rewrite = $app['rewrite'];
+		}
+		
 		// 设置默认编码
 		$charset = 'UTF-8';
 		if (isset($app['charset']) && ! empty($app['charset']))
