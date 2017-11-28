@@ -507,7 +507,7 @@ class model extends component
 			}
 			else if (!empty($value))
 			{
-				$this->_compress_sql['insert_duplicate_values'] = ' ON DUPLICATE KEY UPDATE '.$name.'="'.$value.'"';
+				$this->_compress_sql['insert_duplicate_values'] = ' ON DUPLICATE KEY UPDATE '.$name.'="'.addslashes($value).'"';
 			}
 		}
 		$this->_sql->duplicate($name, $value);
