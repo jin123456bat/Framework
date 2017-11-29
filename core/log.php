@@ -1,11 +1,31 @@
 <?php
 namespace framework\core;
 
-use framework\core\log\LogLevel;
+use framework\core\log\logger;
 
 class log extends component
 {
-
+	const LEVEL_EMERGENCY = 'emergency';
+	
+	const LEVEL_ALERT = 'alert';
+	
+	const LEVEL_CRITICAL = 'critical';
+	
+	const LEVEL_ERROR = 'error';
+	
+	const LEVEL_WARNING = 'warning';
+	
+	const LEVEL_NOTICE = 'notice';
+	
+	const LEVEL_INFO = 'info';
+	
+	const LEVEL_DEBUG = 'debug';
+	
+	/**
+	 * @var array 
+	 */
+	private $_config;
+	
 	public static $_logger;
 
 	function __construct()
@@ -16,11 +36,18 @@ class log extends component
 	{
 	}
 
-	public static function getLogger()
+	/**
+	 * @return logger
+	 */
+	private static function getLogger()
 	{
 		if (empty(self::$_logger))
 		{
-			self::$_logger = new logger(APP_ROOT . '/log/');
+			$config = self::getConfig('log');
+			$logger = $config['logger'];
+			$config = $config[$logger];
+			
+			self::$_logger = new $logger($config);
 		}
 		return self::$_logger;
 	}
@@ -34,6 +61,6 @@ class log extends component
 	public static function mysql($sql, $time)
 	{
 		$logger = self::getLogger();
-		$logger->log(LogLevel::INFO, $sql . '[' . $time . ']');
+		$logger->log(self::LEVEL_INFO, $sql . '[' . $time . ']');
 	}
 }

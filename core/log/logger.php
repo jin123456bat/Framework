@@ -2,14 +2,9 @@
 namespace framework\core\log;
 
 /**
- * 日志记录实例
- * 日志信息变量 —— message， **必须**是一个字符串或是实现了 __toString() 方法的对象。
- * 日志信息变量中**可以**包含格式如 “{foo}” (代表foo) 的占位符，
- * 它将会由上下文数组中键名为 "foo" 的键值替代。
- * 上下文数组可以携带任意的数据，唯一的限制是，当它携带的是一个 exception 对象时，它的键名 必须 是 "exception"。
- * 详情可参阅： https://github.com/PizzaLiu/PHP-FIG/blob/master/PSR-3-logger-interface-cn.md
+ * 日志写入器的接口
  */
-interface LoggerInterface
+interface logger
 {
 
 	/**

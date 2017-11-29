@@ -6,8 +6,10 @@ use framework\core\database\mysql\table;
 use framework;
 
 /**
- * 表数据
- * @author jin
+ * 表数据	
+ * @author jin	
+ * @method model where($sql,array $array = array(),$combine = 'and') 添加条件语句	
+ * @method model in($field,array $data,$combine = 'and') in语句	
  */
 class model extends component
 {
