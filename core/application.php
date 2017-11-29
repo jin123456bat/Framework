@@ -208,25 +208,7 @@ class application extends component
 			}
 			else
 			{
-				// csrf认证
-				if ($filter->csrf())
-				{
-					if (! csrf::verify(request::param('_csrf_token')))
-					{
-						$response = $filter->getMessage();
-						if ($response !== NULL)
-						{
-							if (is_callable($doResponse))
-							{
-								call_user_func($doResponse, $response, true, $callback);
-							}
-							else
-							{
-								return $response;
-							}
-						}
-					}
-				}
+				//cli模式下防止重复调用
 				if ($filter->singleThread() && $this->isRunning($control, $action))
 				{
 					exit(0);

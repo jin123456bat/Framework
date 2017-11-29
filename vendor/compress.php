@@ -5,7 +5,14 @@ use framework\core\component;
 
 class compress extends component
 {
-
+	/**
+	 * zip文件压缩
+	 */
+	static function zip()
+	{
+		
+	}
+	
 	/**
 	 * css文件压缩，返回压缩后的内容
 	 * 
