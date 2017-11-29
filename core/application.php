@@ -513,6 +513,7 @@ class application extends component
 		{
 			$class = $instanceof;
 		}
+		
 		$reflectionClass = new \ReflectionClass($class);
 		if (!$reflectionClass->isTrait() && !$reflectionClass->isAbstract() && !$reflectionClass->isInterface())
 		{
@@ -540,7 +541,28 @@ class application extends component
 			$files = glob_recursive(rtrim(APP_ROOT,'/').'/'.$class_name.'.php',GLOB_BRACE);
 			foreach ($files as $file)
 			{
-				$namespace = pathinfo(trim($file,'./'),PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME);
+				$namespace = str_replace('/', '\\', APP_NAME.str_replace(SYSTEM_ROOT, '', pathinfo($file,PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME)));
+				include_once $file;
+				if (class_exists($namespace))
+				{
+					$reflectionClass = new \ReflectionClass($namespace);
+					$object = $reflectionClass->newInstanceWithoutConstructor();
+					if ($object instanceof $class)
+					{
+						$object = $reflectionClass->newInstanceArgs($args);
+						if ($reflectionClass->hasMethod('initlize'))
+						{
+							$object->initlize();
+						}
+						return $object;
+					}
+				}
+			}
+			
+			$files = glob_recursive(rtrim(SYSTEM_ROOT,'/').'/'.$class_name.'.php',GLOB_BRACE);
+			foreach ($files as $file)
+			{
+				$namespace = str_replace('/', '\\', 'framework'.str_replace(SYSTEM_ROOT, '', pathinfo($file,PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME)));
 				include_once $file;
 				if (class_exists($namespace))
 				{

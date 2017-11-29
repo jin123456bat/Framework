@@ -191,10 +191,7 @@ class framework
 		}
 		if (file_exists($path))
 		{
-			if ((include $path) !== 1)
-			{
-				echo "include failed";
-			}
+			include_once $path;
 		}
 	}
 }

@@ -23,6 +23,7 @@ class session extends component
 			if (isset($session['save_handler']) && ! empty($session['save_handler']))
 			{
 				$sessionHandler = application::load(saveHandler::class,$session['save_handler']);
+				
 				if ($sessionHandler !== null)
 				{
 					session_set_save_handler($sessionHandler, true);
