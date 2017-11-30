@@ -3,6 +3,11 @@ namespace framework\core;
 
 use framework\core\log\logger;
 
+/**
+ * 日志模块
+ * @author jin
+ *
+ */
 class log extends component
 {
 	const LEVEL_EMERGENCY = 'emergency';

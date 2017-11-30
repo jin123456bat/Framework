@@ -1,5 +1,5 @@
 <?php
-namespace framework\core\parser;
+namespace framework\core\request\parser;
 
 abstract class parser
 {

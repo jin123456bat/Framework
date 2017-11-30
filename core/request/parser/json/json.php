@@ -1,7 +1,7 @@
 <?php
-namespace framework\core\parser\json;
+namespace framework\core\request\parser\json;
 
-use framework\core\parser\parser;
+use framework\core\request\parser\parser;
 
 /**
  * json解析器

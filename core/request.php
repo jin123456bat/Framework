@@ -1,7 +1,7 @@
 <?php
 namespace framework\core;
 
-use framework\core\parser\parser;
+use framework\core\request\parser\parser;
 
 class request extends base
 {

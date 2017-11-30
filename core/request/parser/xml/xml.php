@@ -1,7 +1,7 @@
 <?php
-namespace framework\core\parser\xml;
+namespace framework\core\request\parser\xml;
 
-use framework\core\parser\parser;
+use framework\core\request\parser\parser;
 
 /**
  * xml解析器
