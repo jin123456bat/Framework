@@ -129,8 +129,27 @@ class framework
 			}
 		}
 		
+		
 		/**
-		 * 触发
+		 * 文件搜索
+		 * @param unknown $pattern
+		 * @param number $flags
+		 * @return array
+		 */
+		function glob_recursive($pattern, $flags = 0)
+		{
+			$files = glob($pattern, $flags);
+			
+			foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir)
+			{
+				$files = array_merge($files, glob_recursive($dir.'/'.basename($pattern), $flags));
+			}
+			
+			return $files;
+		}
+		
+		/**
+		 * 除法
 		 * @param unknown $a 除数
 		 * @param unknown $b 被除数
 		 * @param number $default 当被除数为0的时候的默认值 默认为0

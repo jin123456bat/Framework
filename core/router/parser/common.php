@@ -11,16 +11,14 @@ class common extends parser
 {
 	private $_queryString;
 	
-	private $_data;
-	
 	/**
 	 * {@inheritDoc}
-	 * @see \framework\core\router\iparser::__construct()
+	 * @see \framework\core\router\iparser::setQueryString()
 	 */
-	public function __construct($queryString)
+	public function setQueryString($queryString)
 	{
 		// TODO Auto-generated method stub
-		if ($queryString[0] == '?')
+		if (isset($queryString[0]) && $queryString[0] == '?')
 		{
 			$queryString = substr($queryString, 1);
 		}
@@ -41,9 +39,9 @@ class common extends parser
 
 	/**
 	 * {@inheritDoc}
-	 * @see \framework\core\router\iparser::getControllName()
+	 * @see \framework\core\router\iparser::getControlName()
 	 */
-	public function getControllName()
+	public function getControlName()
 	{
 		// TODO Auto-generated method stub
 		if (isset($this->_data['c']) && !empty($this->_data['c']))
@@ -64,5 +62,4 @@ class common extends parser
 			return $this->_data['a'];
 		}
 	}
-
 }

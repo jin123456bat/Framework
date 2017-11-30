@@ -253,47 +253,17 @@ class application extends component
 				}
 			}
 		}
-		else if ($controller === NULL)
+		else if ($controller instanceof response)
 		{
-			// 判断是否可能是一个response
-			$router_config = self::getConfig('router');
-			if (isset($router_config['class']) && ! empty($router_config['class']))
+			if (is_callable($doResponse))
 			{
-				$class = '';
-				if (isset($router_config['class'][$control]) && class_exists($router_config['class'][$control], true))
-				{
-					$class = $router_config['class'][$control];
-				}
-				else
-				{
-					foreach ($router_config['class'] as $c)
-					{
-						$names = array_filter(explode('/', $c));
-						if (end($names) == $control)
-						{
-							$class = $c;
-							break;
-						}
-					}
-				}
-				
-				if (! empty($class))
-				{
-					$response = new $class();
-					if ($response instanceof response)
-					{
-						if (is_callable($doResponse))
-						{
-							call_user_func($doResponse, $response, true, function ($msg) {
-								echo $msg;
-							});
-						}
-						else
-						{
-							return $response;
-						}
-					}
-				}
+				call_user_func($doResponse, $controller, true, function ($msg) {
+					echo $msg;
+				});
+			}
+			else
+			{
+				return $controller;
 			}
 		}
 	}
@@ -466,6 +436,12 @@ class application extends component
 		{
 			return new $namespace();
 		}
+		//响应内容直接是一个response
+		$response = application::load(response::class,$name);
+		if ($response)
+		{
+			return $response;
+		}
 		return null;
 	}
 
@@ -508,18 +484,6 @@ class application extends component
 		}
 		else if (!empty($class_name))
 		{
-			function glob_recursive($pattern, $flags = 0)
-			{
-				$files = glob($pattern, $flags);
-				
-				foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir)
-				{
-					$files = array_merge($files, glob_recursive($dir.'/'.basename($pattern), $flags));
-				}
-				
-				return $files;
-			}
-			
 			$files = glob_recursive(rtrim(APP_ROOT,'/').'/'.$class_name.'.php',GLOB_BRACE);
 			foreach ($files as $file)
 			{

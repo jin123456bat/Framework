@@ -62,14 +62,15 @@ class http extends base
 			unset($options['fragment']);
 		}
 		
-		if (! empty($c))
-		{
-			$options['c'] = $c;
-		}
 		if (! empty($a))
 		{
-			$options['a'] = $a;
+			array_unshift($options, array('a'=>$a));
 		}
+		if (! empty($c))
+		{
+			array_unshift($options, array('c'=>$c));
+		}
+		
 		// 判断是否强制使用了url中的session_id
 		if (ini_get('session.use_trans_sid') == 1 && ini_get('use_cookies') == 0 && ini_get('use_only_cookies') == 0)
 		{

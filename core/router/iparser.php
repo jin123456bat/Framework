@@ -3,19 +3,20 @@ namespace framework\core\router;
 
 interface iparser
 {
-	/**
-	 * 构造函数
-	 * @param unknown $queryString
-	 */
-	function __construct($queryString);
+	function setQueryString($queryString);
 	
 	/**
 	 * 获取控制器名
 	 */
-	function getControllName();
+	function getControlName();
 	
 	/**
 	 * 获取方法名
 	 */
 	function getActionName();
+	
+	/**
+	 * 获取其他get请求的参数
+	 */
+	function getData();
 }
