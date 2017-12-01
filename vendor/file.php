@@ -132,18 +132,26 @@ class file extends base
 				$this->_filename = $pathinfo['filename'];
 				$this->_basename = $pathinfo['basename'];
 				$this->_dirname = $url['scheme'].'://'.$url['host'].$pathinfo['dirname'];
-				
-				$this->_size = isset($header['Content-Length'])?$header['Content-Length']:0;
-				$this->_mtime = isset($header['Last-Modified'])?strtotime($header['Last-Modified']):0;
-				$this->_atime = isset($header['Date'])?strtotime($header['Date']):0;
+				//假如是重定向请求的话header中的数据有可能是数组
+				$this->_size = isset($header['Content-Length']) && is_scalar($header['Content-Length'])?$header['Content-Length']:0;
+				$this->_mtime = isset($header['Last-Modified']) && is_scalar($header['Last-Modified'])?strtotime($header['Last-Modified']):0;
+				$this->_atime = isset($header['Date']) && is_scalar($header['Date'])?strtotime($header['Date']):0;
 				$this->_ctime = 0;
 				
-				$http_status = explode(' ', $header[0]);
+				//这段代码是为了head请求中的重定向，确定最后一次请求的结果
+				$i = 0;
+				while(isset($header[$i]))
+				{
+					$i++;
+				}
+				$i--;
+				
+				$http_status = explode(' ', $header[$i],3);
+				
 				if ($http_status[1] == 200)
 				{
 					$this->_readable = true;
 				}
-				
 				$this->_writable = false;
 			}
 			else

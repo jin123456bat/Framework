@@ -6,12 +6,22 @@ return array(
 		'action' => 'index'
 	),
 	
-	//路由解析规则
-	'parser' => array(
+	//web访问模式的路由解析规则
+	'web_parser' => array(
 		'bind',
 		'common',
 		'pathinfo',
 		'preg',
+	),
+	
+	//cli访问模式的路由解析规则
+	'cli_parser' => array(
+		'cliParser',
+	),
+	
+	//server访问模式的路由解析规则
+	'server_parser' => array(
+		'serverParser',
 	),
 	
 	//静态绑定

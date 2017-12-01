@@ -36,6 +36,11 @@ class entity extends base
 		$this->_data[$name] = $value;
 	}
 	
+	function __isset($name)
+	{
+		return isset($this->_data[$name])?!empty($this->_data[$name]):false;
+	}
+	
 	/**
 	 * 删除之后执行的函数
 	 */

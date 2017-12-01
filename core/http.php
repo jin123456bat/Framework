@@ -64,11 +64,11 @@ class http extends base
 		
 		if (! empty($a))
 		{
-			array_unshift($options, array('a'=>$a));
+			$options = array_merge(array('a'=>$a),$options);
 		}
 		if (! empty($c))
 		{
-			array_unshift($options, array('c'=>$c));
+			$options = array_merge(array('c'=>$c),$options);
 		}
 		
 		// 判断是否强制使用了url中的session_id

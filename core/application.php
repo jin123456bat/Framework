@@ -34,6 +34,18 @@ class application extends component
 		// 导入app配置中的文件类
 		$this->import(base::$APP_CONF);
 		
+		//设置当前访问模式
+		if (isset($_SERVER['argc']) && isset($_SERVER['argv']) && !empty($_SERVER['argc']) && !empty($_SERVER['argv']))
+		{
+			array_shift($_SERVER['argv']);
+			$_SERVER['argc'] --;
+			
+			if (isset($_SERVER['argc']) && $_SERVER['argc'] == 1)
+			{
+				request::$_php_sapi_name = 'server';
+			}
+		}
+		
 		// set_error_handler
 		$app = $this->getConfig(base::$APP_CONF);
 		if (isset($app['errorHandler']) && ! empty($app['errorHandler']))
@@ -269,69 +281,35 @@ class application extends component
 	}
 
 	/**
-	 * 解析cli模式下的命令
-	 * @param unknown $argc        
-	 * @param unknown $argv        
-	 * @return boolean[]|unknown[]|unknown[][]
-	 */
-	function parseCliCommand($argc, $argv)
-	{
-		$param = array();
-		foreach ($argv as $index => $value)
-		{
-			if (substr($value, 0, 1) == '-')
-			{
-				if (isset($argv[$index + 1]))
-				{
-					if (isset($param[substr($value, 1)]))
-					{
-						if (is_array($param[substr($value, 1)]))
-						{
-							$param[substr($value, 1)][] = $argv[$index + 1];
-						}
-						else if (is_string($param[substr($value, 1)]))
-						{
-							$param[substr($value, 1)] = array(
-								$param[substr($value, 1)],
-								$argv[$index + 1]
-							);
-						}
-					}
-					else
-					{
-						$param[substr($value, 1)] = $argv[$index + 1];
-					}
-					unset($argv[$index + 1]);
-				}
-				else
-				{
-					$param[substr($value, 1)] = true;
-				}
-				unset($argv[$index]);
-			}
-		}
-		return $param;
-	}
-
-	/**
 	 * 运行application
 	 */
 	function run()
 	{
-		$router = self::load(router::class);
-		if (request::php_sapi_name() == 'web')
+		switch (request::php_sapi_name())
 		{
-			$router->appendParameter($_GET);
-		}
-		elseif (request::php_sapi_name() == 'cli')
-		{
-			array_shift($_SERVER['argv']);
-			$_SERVER['argc'] --;
-			
-			if (isset($_SERVER['argc']) && $_SERVER['argc'] == 1)
-			{
-				request::$_php_sapi_name = 'server';
-				
+			case 'cli':
+				$router = self::load(router::class);
+				$query_string = $_SERVER['argv'];
+				$router->parse($query_string);
+				$control = $router->getControlName();
+				$action = $router->getActionName();
+				$this->runControl($control, $action, array(
+					$this,
+					'doResponse'
+				));
+			break;
+			case 'web':
+				$router = self::load(router::class);
+				$query_string = substr($_SERVER['REQUEST_URI'], strlen($_SERVER['SCRIPT_NAME']));
+				$router->parse($query_string);
+				$control = $router->getControlName();
+				$action = $router->getActionName();
+				$this->runControl($control, $action, array(
+					$this,
+					'doResponse'
+				));
+			break;
+			case 'server':
 				$server = self::load(server::class);
 				$command = trim(strtolower($_SERVER['argv'][0]));
 				
@@ -350,20 +328,8 @@ class application extends component
 				{
 					console::log('未知命令:' . $command);
 				}
-			}
-			else
-			{
-				$argment = $this->parseCliCommand($_SERVER['argc'], $_SERVER['argv']);
-				$router->appendParameter($argment);
-			}
+			break;
 		}
-		$router->parse();
-		$control = $router->getControlName();
-		$action = $router->getActionName();
-		$this->runControl($control, $action, array(
-			$this,
-			'doResponse'
-		));
 	}
 
 	/**
