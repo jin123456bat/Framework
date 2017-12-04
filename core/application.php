@@ -450,44 +450,62 @@ class application extends component
 		}
 		else if (!empty($class_name))
 		{
-			$files = glob_recursive(rtrim(APP_ROOT,'/').'/'.$class_name.'.php',GLOB_BRACE);
-			foreach ($files as $file)
+			//假如传入的class_name是一个带命名空间的类，则直接使用这个类
+			if (strpos('\\', $class_name)!==false)
 			{
-				$namespace = str_replace('/', '\\', APP_NAME.str_replace(SYSTEM_ROOT, '', pathinfo($file,PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME)));
-				include_once $file;
-				if (class_exists($namespace))
+				if (class_exists($class_name))
 				{
-					$reflectionClass = new \ReflectionClass($namespace);
-					$object = $reflectionClass->newInstanceWithoutConstructor();
-					if ($object instanceof $class)
+					$class = new $class_name();
+					if (method_exists($class, 'initlize'))
 					{
-						$object = $reflectionClass->newInstanceArgs($args);
-						if ($reflectionClass->hasMethod('initlize'))
-						{
-							$object->initlize();
-						}
-						return $object;
+						$class->initlize();
 					}
+					return $class;
 				}
 			}
-			
-			$files = glob_recursive(rtrim(SYSTEM_ROOT,'/').'/'.$class_name.'.php',GLOB_BRACE);
-			foreach ($files as $file)
+			else
 			{
-				$namespace = str_replace('/', '\\', 'framework'.str_replace(SYSTEM_ROOT, '', pathinfo($file,PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME)));
-				include_once $file;
-				if (class_exists($namespace))
+				//从app目录下查找对应的类
+				$files = glob_recursive(rtrim(APP_ROOT,'/').'/'.$class_name.'.php',GLOB_BRACE);
+				foreach ($files as $file)
 				{
-					$reflectionClass = new \ReflectionClass($namespace);
-					$object = $reflectionClass->newInstanceWithoutConstructor();
-					if ($object instanceof $class)
+					$namespace = str_replace('/', '\\', APP_NAME.str_replace(SYSTEM_ROOT, '', pathinfo($file,PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME)));
+					include_once $file;
+					if (class_exists($namespace))
 					{
-						$object = $reflectionClass->newInstanceArgs($args);
-						if ($reflectionClass->hasMethod('initlize'))
+						$reflectionClass = new \ReflectionClass($namespace);
+						$object = $reflectionClass->newInstanceWithoutConstructor();
+						if ($object instanceof $class)
 						{
-							$object->initlize();
+							$object = $reflectionClass->newInstanceArgs($args);
+							if ($reflectionClass->hasMethod('initlize'))
+							{
+								$object->initlize();
+							}
+							return $object;
 						}
-						return $object;
+					}
+				}
+				
+				//从系统目录中查找对应的类
+				$files = glob_recursive(rtrim(SYSTEM_ROOT,'/').'/'.$class_name.'.php',GLOB_BRACE);
+				foreach ($files as $file)
+				{
+					$namespace = str_replace('/', '\\', 'framework'.str_replace(SYSTEM_ROOT, '', pathinfo($file,PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME)));
+					include_once $file;
+					if (class_exists($namespace))
+					{
+						$reflectionClass = new \ReflectionClass($namespace);
+						$object = $reflectionClass->newInstanceWithoutConstructor();
+						if ($object instanceof $class)
+						{
+							$object = $reflectionClass->newInstanceArgs($args);
+							if ($reflectionClass->hasMethod('initlize'))
+							{
+								$object->initlize();
+							}
+							return $object;
+						}
 					}
 				}
 			}

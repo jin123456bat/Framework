@@ -5,23 +5,22 @@ return array(
 		'control' => 'index',
 		'action' => 'index'
 	),
-	
 	//web访问模式的路由解析规则
 	'web_parser' => array(
-		'bind',
-		'common',
-		'pathinfo',
-		'preg',
+		framework\core\router\parser\bind::class,
+		framework\core\router\parser\common::class,
+		framework\core\router\parser\pathinfo::class,
+		framework\core\router\parser\preg::class,
 	),
 	
 	//cli访问模式的路由解析规则
 	'cli_parser' => array(
-		'cliParser',
+		framework\core\router\parser\cliParser::class,
 	),
 	
 	//server访问模式的路由解析规则
 	'server_parser' => array(
-		'serverParser',
+		'framework\core\router\parser\serverParser',
 	),
 	
 	//静态绑定
