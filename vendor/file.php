@@ -532,4 +532,28 @@ class file extends base
 	{
 		return realpath($this->path());
 	}
+	
+	/**
+	 * 判断是否是一张图片
+	 */
+	static function isImage($file = NULL)
+	{
+		if (empty($file))
+		{
+			$file = $this->_path;
+		}
+		
+		$types = '.gif|.jpeg|.png|.bmp'; //定义检查的图片类型
+		if(file_exists($file))
+		{
+			$info = @getimagesize($file);
+			$ext = image_type_to_extension($info['2']);
+			return stripos($types,$ext);
+		}
+		else
+		{
+			return false;
+		}
+		
+	}
 }

@@ -451,9 +451,9 @@ class application extends component
 		else if (!empty($class_name))
 		{
 			//假如传入的class_name是一个带命名空间的类，则直接使用这个类
-			if (strpos('\\', $class_name)!==false)
+			if (strpos($class_name,'\\')!==false)
 			{
-				if (class_exists($class_name))
+				if (class_exists($class_name,true))
 				{
 					$class = new $class_name();
 					if (method_exists($class, 'initlize'))
