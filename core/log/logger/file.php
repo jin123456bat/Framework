@@ -2,19 +2,39 @@
 namespace framework\core\log\logger;
 
 use framework\core\log\logger;
-use framework\data\data;
 
 class file implements logger
 {
 	/**
-	 * 保存日志的文件路径
+	 * 保存日志的文件路径 目录
 	 * @var string
 	 */
 	private $_path;
 	
+	/**
+	 * 文件名前缀
+	 * @var unknown
+	 */
+	private $_prefix;
+	
+	/**
+	 * 日志单文件最大大小
+	 * 单位字节
+	 * @var int
+	 */
+	private $_file_max_size;
+	
+	/**
+	 * 日志文件路径  文件
+	 * @var string
+	 */
+	private $_file;
+	
 	function __construct($config)
 	{
 		$this->_path = $config['path'];
+		$this->_prefix = $config['prefix'];
+		$this->_file_max_size = $config['max_size'];
 	}
 	
 	/**
@@ -84,7 +104,8 @@ class file implements logger
 	public function info($message, array $context = array())
 	{
 		// TODO Auto-generated method stub
-		file_put_contents($this->_path, '['.date('Y-m-d H:i:s').'] ['.__FUNCTION__.'] '.$message,FILE_APPEND,$context);
+		$context = stream_context_create($context);
+		file_put_contents($this->_file, '['.date('Y-m-d H:i:s').'] ['.__FUNCTION__.'] '.$message,FILE_APPEND,$context);
 	}
 
 	/**
@@ -103,6 +124,14 @@ class file implements logger
 	 */
 	public function log($level, $message, array $context = array())
 	{
+		$i = 0;
+		$this->_file = rtrim($this->_path,'/').'/'.(!empty($this->_prefix)?($this->_prefix.'_'):'').$level.'_'.$i;
+		while(file_exists($this->_file) && filesize($this->_file) >= $this->_file_max_size)
+		{
+			$i++;
+			$this->_file = rtrim($this->_path,'/').'/'.(!empty($this->_prefix)?($this->_prefix.'_'):'').$level.'_'.$i;
+		}
+		
 		return call_user_func(array($this,$level),$message,$context);
 	}
 

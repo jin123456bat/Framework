@@ -51,8 +51,7 @@ class log extends component
 			$config = self::getConfig('log');
 			$logger = $config['logger'];
 			$config = $config[$logger];
-			
-			self::$_logger = new $logger($config);
+			self::$_logger = application::load(logger::class,$logger,array($config));
 		}
 		return self::$_logger;
 	}

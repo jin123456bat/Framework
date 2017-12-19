@@ -105,10 +105,12 @@ class mysql extends database
 			//或者set_exception_handler
 			exit('连接到数据库失败');
 		}
-		
 		foreach ($init_command as $command)
 		{
-			$pdo->exec($command);
+			if (!empty($command))
+			{
+				$pdo->exec($command);
+			}
 		}
 		
 		return $pdo;
