@@ -53,7 +53,14 @@ class framework
 				'entity',
 				'extend',
 				'log',
-				'template',
+				'model',
+				'template'=>array(
+					'default',
+				),
+				'language' => array(
+					'zh',
+					'en'
+				)
 			);
 			foreach ($dir as $k => $d)
 			{
@@ -82,6 +89,11 @@ class framework
 							{
 								file_put_contents($file,"<?php\nreturn array(\n\n);\n?>");
 							}
+						}
+						else
+						{
+							$file = APP_ROOT.'/'.$k.'/'.$f;
+							mkdir($file,0777,true);
 						}
 					}
 				}
