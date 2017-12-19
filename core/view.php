@@ -41,18 +41,19 @@ class view extends response
 		
 		if (file_exists($template))
 		{
+			
 			$this->_template = $template;
 			$this->_engine->setTemplate($template);
 		}
 		else
 		{
-			$view = $this->getConfig('view');
 			if ($layout !== null)
 			{
 				$this->_layout = $layout;
 			}
 			else
 			{
+				$view = $this->getConfig('view');
 				$this->_layout = isset($view['layout']) ? $view['layout'] : 'layout';
 			}
 			
@@ -107,7 +108,6 @@ class view extends response
 	function getBody()
 	{
 		$body = $this->_engine->fetch();
-		
 		// 自动开启html压缩
 		$view = $this->getConfig('view');
 		if (is_bool($view['compress']) && $view['compress'] || (is_array($view['compress']) && in_array($this->_template, $view['compress'], true)))
@@ -120,7 +120,6 @@ class view extends response
 				}
 			}
 		}
-		
 		return $body;
 	}
 }

@@ -225,7 +225,6 @@ class application extends component
 				{
 					exit(0);
 				}
-				
 				// control的初始化返回内容
 				if (method_exists($controller, 'initlize') && is_callable(array(
 					$controller,

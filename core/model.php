@@ -54,6 +54,12 @@ class model extends component
 	 * @var string
 	 */
 	private $_compress = false;
+	
+	/**
+	 * 数组下标字段
+	 * @var unknown
+	 */
+	private $_index;
 
 	/**
 	 * 存储批量提交的sql
@@ -74,6 +80,16 @@ class model extends component
 	public function history()
 	{
 		return $this->_history;
+	}
+	
+	/**
+	 * 当使用select方法获取二维数组的时候设置某个字段为下标
+	 * @param string $name
+	 */
+	public function index($name)
+	{
+		$this->_index = $name;
+		return $this;
 	}
 	
 	/**
@@ -235,6 +251,16 @@ class model extends component
 	{
 		$sql = $this->_sql->select($fields);
 		$result = $this->query($sql);
+		if (!empty($this->_index) && isset($result[0][$this->_index]))
+		{
+			$temp = array();
+			foreach ($result as $r)
+			{
+				$temp[$r[$this->_index]] = $r;
+			}
+			unset($this->_index);
+			return $temp;
+		}
 		return $result;
 	}
 	
