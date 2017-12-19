@@ -121,6 +121,48 @@ class view extends response
 				}
 			}
 		}
+		
+		
+		$assets = self::getConfig('assets');
+		if (isset($assets['global']['head']['css']) && !empty($assets['global']['head']['css']))
+		{
+			foreach ($assets['global']['head']['css'] as $css)
+			{
+				if (!empty($css))
+				{
+					$path = assets::css($css);
+					$label = '<link rel="stylesheet" href="'.$path.'" type="text/css" media="all" />';
+					$body = str_replace('</head>', $label.'</head>', $body);
+				}
+			}
+		}
+		
+		if (isset($assets['global']['head']['js']) && !empty($assets['global']['head']['js']))
+		{
+			foreach ($assets['global']['head']['js'] as $js)
+			{
+				if (!empty($js))
+				{
+					$path = assets::js($js);
+					$label = '<script src="'.$path.'" type="text/javascript" /></script>';
+					$body = str_replace('</head>', $label.'</head>', $body);
+				}
+			}
+		}
+		
+		if (isset($assets['global']['end']['js']) && !empty($assets['global']['end']['js']))
+		{
+			foreach ($assets['global']['end']['js'] as $js)
+			{
+				if (!empty($js))
+				{
+					$path = assets::js($js);
+					$label = '<script src="'.$path.'" type="text/javascript" /></script>';
+					$body = str_replace('</body>', $label.'</body>', $body);
+				}
+			}
+		}
+		
 		return $body;
 	}
 }

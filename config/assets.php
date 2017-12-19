@@ -2,16 +2,21 @@
 return array(
 	//这里可以配置全局的js和css 通过
 	'global' => array(
-		'css' => array(
-			array('head',''),//可以通过head或者end来声明位置
-			array('end',''),
-			'',//默认情况下css都是head
+		//head默认在</head>标签前面
+		'head' => array(
+			'css' => array(
+				//这里直接写名字就可以了，路径会自动从下面配置的路径中查找
+			),
+			'js' => array(
+				
+			),
 		),
-		'js' => array(
-			array('end',''),
-			array('head',''),
-			'',//默认情况下js都是end
-		),
+		//head默认在</head>标签前面
+		'end' => array(
+			'js' => array(
+				
+			),
+		)
 	),
 	
 	'host' => '',//这个可以配置资源的域名  为空的话生成的url是./XX/XXX/XX
