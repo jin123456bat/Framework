@@ -1,10 +1,6 @@
 <?php
 namespace framework\vendor;
 
-
-use framework\core\base;
-use framework\core\response;
-
 /**
  * @author jin
  *
@@ -61,6 +57,7 @@ class image extends file
 			case IMAGETYPE_PNG:
 				$this->_image = imagecreatefrompng($this->path());
 			break;
+			case IMAGETYPE_JPEG2000:
 			case IMAGETYPE_JPEG:
 				$this->_image = imagecreatefromjpeg($this->path());
 			break;
@@ -182,7 +179,6 @@ class image extends file
 		$this->_image = $image;
 		
 		return $this;
-		//imagepng($image);
 	}
 	
 	/**
@@ -266,7 +262,6 @@ class image extends file
 
 	/**
 	 * 图片增加水印
-	 * 
 	 * @param string $string
 	 *        文字或者图片路径
 	 */
@@ -306,12 +301,12 @@ class image extends file
 	
 	/**
 	 * 旋转
-	 * @see https://help.aliyun.com/document_detail/44690.html?spm=5176.doc44691.6.955.WiHIRn
 	 * @param int $r
+	 * @return $this
 	 */
 	function rotate($r)
 	{
-		$this->_image = imagerotate($this->_image,$r,2130706432);
+		$this->_image = imagerotate($this->_image,$r,0,0);
 		return $this;
 	}
 	
@@ -320,7 +315,7 @@ class image extends file
 	 * @param array $array
 	 * @return array|array|unknown
 	 */
-	public static function createWave(array $array)
+	private static function createWave(array $array)
 	{
 		if(count($array)%2 != 1)
 		{
@@ -353,60 +348,9 @@ class image extends file
 	}
 	
 	/**
-	 * 神奇的滤波函数
-	 * 这个有点问题
-	 */
-	function filter($wave)
-	{
-		$wave = self::createWave($wave);
-		
-		$image = imagecreatetruecolor($this->width(), $this->height());
-		
-		for($x=0;$x<$this->width();$x++)
-		{
-			for($y=0;$y<$this->height();$y++)
-			{
-				$color = 0;
-				$c = imagecolorat($this->_image,$x,$y);
-				$result = true;
-				
-				foreach ($wave as $key => $value)
-				{
-					$b = $key + $y;
-					
-					foreach ($value as $k => $v)
-					{
-						$a = $k + $x;
-						if ($a>=0 && $a<$this->width() && $b>=0 && $b<$this->height())
-						{
-							$color += imagecolorat($this->_image,$a,$b)* $v;
-						}
-						else
-						{
-							$result = false;
-						}
-					}
-				}
-				
-				if ($result)
-				{
-					imagesetpixel($image,$x,$y,$color);
-				}
-				else
-				{
-					imagesetpixel($image, $x, $y, $c);
-				}
-			}
-		}
-		
-		$this->_image = $image;
-		
-		return $this;
-	}
-	
-	/**
 	 * 高斯模糊效果
 	 * @param int $value 模糊程度
+	 * @return $this
 	 */
 	function blur($value)
 	{
@@ -423,6 +367,7 @@ class image extends file
 	 * 亮度调节
 	 * @param int $value
 	 * 0 表示原图亮度，小于 0 表示低于原图亮度，大于 0 表示高于原图亮度。
+	 * @return $this
 	 */
 	function bright($value)
 	{
@@ -435,8 +380,8 @@ class image extends file
 	/**
 	 * 圆角矩形
 	 * 有锯齿
-	 * @see https://help.aliyun.com/document_detail/44694.html?spm=5176.doc44696.6.952.O1o5yv
 	 * @param int $radius
+	 * @return $this
 	 */
 	function roundedCorners($radius)
 	{
@@ -450,7 +395,7 @@ class image extends file
 		
 		imagealphablending($src_image,false);
 		$transparent = imagecolorallocatealpha($src_image, 0, 0, 0, 127);
-		
+		 
 		for($x=0;$x<$this->width();$x++)
 			for($y=0;$y<$this->height();$y++){
 				$c = imagecolorat($this->_image,$x,$y);
@@ -507,13 +452,125 @@ class image extends file
 	
 	/**
 	 * 锐化
+	 * 这个目前灵命度比较高
 	 * @see https://help.aliyun.com/document_detail/44700.html?spm=5176.doc44699.6.960.LxI1Fs
 	 * @param unknown $value 默认为100 [50, 399] 
 	 * 取值为锐化参数，参数越大，越清晰
+	 * @return $this
 	 */
 	function sharpen($value = 100)
 	{
-		
+		$degree = $value;
+		$src_x = $this->width();
+		$src_y = $this->height();
+		$src_im = $this->_image;
+		$dst_im = imagecreatetruecolor($this->width(), $this->height());
+		$cnt = 0;
+		for($x = 1;$x<$src_x;$x++)
+			for($y = 1;$y<$src_y;$y++){
+				/*
+				 ImageColorsForIndex --- 从索引值取得颜色
+				 语法 : array imagecolorsforindex (int im, int index)
+				 说明 :此函数传回指定的颜色索引值的RGB值，传回的数组有red、green和blue这三个索引值，数组的值为指定的颜色索引值的RGB值。
+				 ImageColorAt --- 取得像素的颜色索引值
+				 语法 : int imagecolorat (int im, int x, int y)
+				 说明 : 传回图形中指定位置的像素的颜色索引值。
+				 */
+				$src_clr1 = imagecolorsforindex($src_im,imagecolorat($src_im,$x-1,$y-1));
+				$src_clr2 = imagecolorsforindex($src_im,imagecolorat($src_im,$x,$y));
+				$r = intval($src_clr2["red"] + $degree*($src_clr2["red"] - $src_clr1["red"]));
+				$g = intval($src_clr2["green"] + $degree*($src_clr2["green"] - $src_clr1["green"]));
+				$b = intval($src_clr2["blue"] + $degree*($src_clr2["blue"] - $src_clr1["blue"]));
+				$r = min(255,max($r,0));
+				$g = min(255,max($g,0));
+				$b = min(255,max($b,0));
+				//echo"r:$r,g:$g,b:$b<br/>";
+				if(($dst_clr=imagecolorexact($dst_im,$r,$g,$b))==-1)
+				{
+					$dst_clr=Imagecolorallocate($dst_im,$r,$g,$b);
+				}
+				$cnt++;
+				imagesetpixel($dst_im,$x,$y,$dst_clr);
+		}
+		$this->_image = $dst_im;
+		return $this;
+	}
+	
+	/**
+	 * 神奇的滤波函数
+	 * 去掉边缘
+	 * @see https://www.cnblogs.com/magic8sky/p/6104377.html
+	 * @example
+	 * $image->filter(array(
+	 * 		array(1,1,1),
+	 *		array(1,-7,1),
+	 *		array(1,1,1),
+	 *	));
+	 * @return $this
+	 */
+	function filter(array $wave)
+	{
+		$wave = self::createWave($wave);
+		if (!empty($wave))
+		{
+			$offset = floor(count($wave)/2);
+			$width = $this->width() - $offset;
+			$height = $this->height() - $offset;
+			
+			$image = imagecreatetruecolor($width, $height);
+			
+			for($x=$offset;$x<$this->width()-$offset;$x++)
+			{
+				for($y=$offset;$y<$this->height()-$offset;$y++)
+				{
+					$color_red = 0;
+					$color_green = 0;
+					$color_blue = 0;
+					
+					$c = imagecolorat($this->_image,$x,$y);
+					
+					foreach ($wave as $key => $value)
+					{
+						$b = $key + $y;
+						
+						foreach ($value as $k => $v)
+						{
+							$a = $k + $x;
+							if ($a>=0 && $a<$this->width() && $b>=0 && $b<$this->height())
+							{
+								$color = imagecolorsforindex($this->_image,imagecolorat($this->_image,$a,$b));
+								
+								$color_red += $color['red'] * $v;
+								$color_green = $color['green'] * $v;
+								$color_blue = $color['blue'] * $v;
+							}
+						}
+					}
+					
+					$color_red = abs($color_red);
+					$color_blue = abs($color_blue);
+					$color_green = abs($color_green);
+					
+					$color_red = min(255,max($color_red,0));
+					$color_green= min(255,max($color_green,0));
+					$color_blue= min(255,max($color_blue,0));
+					
+					$color = imagecolorexact($this->_image,$color_red,$color_green,$color_blue);
+					if ($color == -1)
+					{
+						$color = imagecolorclosest($this->_image,$color_red,$color_green,$color_blue);
+					}
+					
+					$pos_x = $x-$offset;
+					$pos_y = $y-$offset;
+					
+					imagesetpixel($image,$pos_x,$pos_y,$color);
+				}
+			}
+			
+			$this->_image = $image;
+		}
+		return $this;
 	}
 	
 	/**
@@ -521,6 +578,7 @@ class image extends file
 	 * 支持jpg, png, bmp, webp，gif
 	 * @see https://help.aliyun.com/document_detail/44703.html?spm=5176.doc44704.6.962.jPcTHw
 	 * @param string $format
+	 * @return $this
 	 */
 	function format($format)
 	{
@@ -559,24 +617,8 @@ class image extends file
 	}
 	
 	/**
-	 * 渐进显示
-	 * 只对jpg图片有效
-	 * jpg图片有2种显示方式
-	 * 1、自上而下的扫描式
-	 * 2、先模糊后逐渐清晰（在网络环境比较差时明显）
-	 * @ses https://help.aliyun.com/document_detail/44704.html?spm=5176.doc44703.6.963.snW3k7
-	 * @param boolean $value
-	 * 1 表示保存成渐进显示的 jpg格式
-	 * 0 表示保存成普通的 jpg 格式
-	 */
-	function interlace($value = true)
-	{
-		
-	}
-
-	/**
 	 * 裁剪
-	 * 原点为左下角
+	 * 原点为左上角
 	 * @param unknown $width 裁剪的宽度
 	 * @param unknown $height 裁剪的高度
 	 * @param unknown $pos_x 裁剪的起点横坐标
@@ -584,12 +626,32 @@ class image extends file
 	 */
 	function crop($width, $height, $pos_x, $pos_y)
 	{
+		$width = abs($width);
+		$height = abs($height);
 		
+		if ($width > $this->width())
+		{
+			$width = $this->width();
+		}
+		
+		if ($height > $this->height())
+		{
+			$height = $this->height();
+		}
+		
+		$dst_image = imagecreatetruecolor($width, $height);
+		imagealphablending($dst_image,false);
+		imagecopy($dst_image, $this->_image, 0, 0, $pos_x, $pos_y, $width, $height);
+		imagesavealpha($dst_image, true);
+		$this->_image = $dst_image;
+		
+		return $this;
 	}
 	
 	/**
 	 * 将图片保存到一个文件当中
 	 * @param unknown $file
+	 * @return $this
 	 */
 	function save($file)
 	{
@@ -598,8 +660,15 @@ class image extends file
 			case IMAGETYPE_PNG:
 				imagepng($this->_image,$file);
 				break;
+			case IMAGETYPE_JPEG2000:
 			case IMAGETYPE_JPEG:
 				imagejpeg($this->_image,$file,$this->_jpeg_quality);
+				break;
+			case IMAGETYPE_BMP:
+				image2wbmp($this->_image,$file);
+				break;
+			case IMAGETYPE_GIF:
+				imagegif($this->_image,$file);
 				break;
 		}
 		
@@ -617,7 +686,8 @@ class image extends file
 	}
 	
 	/**
-	 * 转化为一个response
+	 * 输出图像到浏览器
+	 * @return $this
 	 */
 	function output()
 	{
@@ -627,8 +697,15 @@ class image extends file
 			case IMAGETYPE_PNG:
 				imagepng($this->_image);
 			break;
+			case IMAGETYPE_JPEG2000:
 			case IMAGETYPE_JPEG:
 				imagejpeg($this->_image,NULL,$this->_jpeg_quality);
+			break;
+			case IMAGETYPE_BMP:
+				image2wbmp($this->_image);
+			break;
+			case IMAGETYPE_GIF:
+				imagegif($this->_image);
 			break;
 		}
 		return $this;

@@ -93,7 +93,10 @@ class framework
 						else
 						{
 							$file = APP_ROOT.'/'.$k.'/'.$f;
-							mkdir($file,0777,true);
+							if (!file_exists($file))
+							{
+								mkdir($file,0777,true);
+							}
 						}
 					}
 				}
