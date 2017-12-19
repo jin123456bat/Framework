@@ -188,8 +188,6 @@ class image extends file
 	/**
 	 * 内切圆
 	 * 原点为$height/2,$width/2
-	 * 格式为png、webp、 bmp的  内切圆外的区域为透明
-	 * 格式为jpg的内切圆外的区域为白色
 	 * @param int $radius 内切圆的半径  不能大于min(width,height)
 	 */
 	function circle($radius = 100)
@@ -436,12 +434,64 @@ class image extends file
 	
 	/**
 	 * 圆角矩形
+	 * 有锯齿
 	 * @see https://help.aliyun.com/document_detail/44694.html?spm=5176.doc44696.6.952.O1o5yv
-	 * @param int $r
+	 * @param int $radius
 	 */
-	function roundedCorners($r)
+	function roundedCorners($radius)
 	{
+		$radius= abs($radius);
 		
+		if (empty($radius))
+		{
+			return $this;
+		}
+		$src_image = imagecreatetruecolor($this->width(), $this->height());
+		
+		imagealphablending($src_image,false);
+		$transparent = imagecolorallocatealpha($src_image, 0, 0, 0, 127);
+		
+		for($x=0;$x<$this->width();$x++)
+			for($y=0;$y<$this->height();$y++){
+				$c = imagecolorat($this->_image,$x,$y);
+				
+				$_x_left_top = $x - $radius;
+				$_y_left_top = $y - $radius;
+				
+				$_x_right_top = $x - $this->width() + $radius;
+				$_y_right_top = $y - $radius;
+				
+				$_x_left_buttom = $x - $radius;
+				$_y_left_buttom = $y - $this->height() + $radius;
+				
+				$_x_right_buttom = $x - $this->width() + $radius;
+				$_y_right_buttom = $y - $this->height() + $radius;
+				
+				if((pow($_x_left_top,2) + pow($_y_left_top,2)) > pow($radius,2) && $x < $radius && $y < $radius)
+				{
+					imagesetpixel($src_image,$x,$y,$transparent);
+				}
+				else if ((pow($_x_right_top,2) + pow($_y_right_top,2)) > pow($radius,2) && $x > ($this->width() - $radius) && $y < $radius)
+				{
+					imagesetpixel($src_image,$x,$y,$transparent);
+				}
+				else if ((pow($_x_left_buttom,2) + pow($_y_left_buttom,2)) > pow($radius,2) && $x < $radius && $y > ($this->height() - $radius))
+				{
+					imagesetpixel($src_image,$x,$y,$transparent);
+				}
+				else if ((pow($_x_right_buttom,2) + pow($_y_right_buttom,2)) > pow($radius,2) && $x > ($this->width() - $radius) && $y > ($this->height() - $radius))
+				{
+					imagesetpixel($src_image,$x,$y,$transparent);
+				}
+				else
+				{
+					imagesetpixel($src_image,$x,$y,$c);
+				}
+		}
+		imagesavealpha($src_image, true);
+		
+		$this->_image = $src_image;
+		return $this;
 	}
 	
 	/**
