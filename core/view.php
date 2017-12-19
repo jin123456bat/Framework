@@ -3,6 +3,7 @@ namespace framework\core;
 
 use framework\view\engine;
 use framework;
+use framework\vendor\compress;
 
 class view extends response
 {

@@ -6,5 +6,5 @@ return array(
 	
 	'layout' => 'default', //布局文件夹名称
 	
-	'engine' => 'regp', //使用模板引擎的名称  默认regp  可以是php(尚未实现)
+	'engine' => 'regp', //使用模板引擎的名称  默认regp  可以是php
 );
