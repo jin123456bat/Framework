@@ -34,8 +34,8 @@ class assets extends component
 	static public function js($filename)
 	{
 		$config = self::getConfig('assets');
-		$path = $config['css']['path'];
-		$host = isset($config['css']['host']) && !empty($config['css']['host'])?$config['css']['host']:$config['host'];
+		$path = $config['js']['path'];
+		$host = isset($config['js']['host']) && !empty($config['js']['host'])?$config['js']['host']:$config['host'];
 		foreach ($path as $p)
 		{
 			$file = rtrim($p,'/').'/'.$filename;
@@ -58,8 +58,8 @@ class assets extends component
 	static public function image($filename)
 	{
 		$config = self::getConfig('assets');
-		$path = $config['css']['path'];
-		$host = isset($config['css']['host']) && !empty($config['css']['host'])?$config['css']['host']:$config['host'];
+		$path = $config['image']['path'];
+		$host = isset($config['image']['host']) && !empty($config['image']['host'])?$config['image']['host']:$config['host'];
 		foreach ($path as $p)
 		{
 			$file = rtrim($p,'/').'/'.$filename;

@@ -18,7 +18,11 @@ class csrf extends component
 		'cache' => '\\framework\\core\\cache',
 	);
 	
-	private static $_X_CSRF_TOKEN_NAME = 'X_CSRF_TOKEN';
+	/**
+	 * csrf_token在本地存储的名称
+	 * @var string
+	 */
+	public static $_X_CSRF_TOKEN_NAME = 'X_CSRF_TOKEN';
 
 	/**
 	 * 创建token

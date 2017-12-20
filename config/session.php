@@ -1,6 +1,6 @@
 <?php
 return array(
-	'save_handler' => 'db',//session的存储方式  默认的为files 也可以为db  redis memcache
+	'save_handler' => 'files',//session的存储方式  默认的为files 也可以为db  redis memcache
 	
 	//当save_handler=db中的时候有效
 	'db' => array(

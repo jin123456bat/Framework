@@ -45,6 +45,8 @@ class framework
 	{
 		if (DEBUG)
 		{
+			ini_set('display_errors', 'on');
+			error_reporting(E_ALL);
 			$dir = array(
 				'control',
 				'config' => array(
