@@ -3,7 +3,7 @@ namespace framework\core;
 
 use framework\core\database\mysql\field;
 
-class entity extends base
+abstract class entity extends base
 {
 	/**
 	 * 存放原始数据
@@ -111,6 +111,24 @@ class entity extends base
 		$result = explode('\\', $result);
 		$result = end($result);
 		return $result;
+	}
+	
+	/**
+	 * 获取数据
+	 * @return array
+	 */
+	function getData()
+	{
+		return $this->_data;
+	}
+	
+	/**
+	 * 从外部载入数据
+	 * @param unknown $data
+	 */
+	function loadData($data)
+	{
+		$this->_data = $data;
 	}
 
 	/**
@@ -271,6 +289,18 @@ class entity extends base
 	{
 		return array();
 	}
+	
+	/**
+	 * return array(
+	 * 	'username' => '用户名',
+	 * 	'pasword' => '密码',
+	 * )
+	 * @return array
+	 */
+	function __label()
+	{
+		return array();
+	}
 
 	/**
 	 *
@@ -307,6 +337,17 @@ class entity extends base
 	 */
 	private function message($string, $field, $value)
 	{
+		$label = array();
+		if (method_exists($this, '__label'))
+		{
+			$label = $this->__label();
+		}
+		
+		if (isset($label[$field]))
+		{
+			$field = $label[$field];
+		}
+		
 		return preg_replace(array(
 			'/{field}/',
 			'/{value}/'
