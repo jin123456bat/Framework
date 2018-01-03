@@ -26,6 +26,11 @@ class assets extends component
 				return $path;
 			}
 		}
+		
+		if (isset($config['css']['mapping'][$filename]))
+		{
+			return $config['css']['mapping'][$filename];
+		}
 	}
 	
 	/**
@@ -49,6 +54,11 @@ class assets extends component
 				$path = rtrim($host,'/').str_replace('\\', '/', str_replace(realpath(APP_ROOT), '', realpath($file))).'?'.$time;
 				return $path;
 			}
+		}
+		
+		if (isset($config['js']['mapping'][$filename]))
+		{
+			return $config['js']['mapping'][$filename];
 		}
 	}
 	
