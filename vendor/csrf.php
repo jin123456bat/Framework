@@ -22,7 +22,7 @@ class csrf extends component
 	 * csrf_token在本地存储的名称
 	 * @var string
 	 */
-	public static $_X_CSRF_TOKEN_NAME = 'X_CSRF_TOKEN';
+	public static $_X_CSRF_TOKEN_NAME = 'X-Csrf-Token';
 
 	/**
 	 * 创建token
