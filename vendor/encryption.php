@@ -29,6 +29,30 @@ class encryption
 	}
 	
 	/**
+	 * 单向加密
+	 * @param string $password
+	 * @return string
+	 */
+	public static function password_hash($password)
+	{
+		$options = array(
+			'cost' => 12,
+		);
+		return password_hash($password, PASSWORD_BCRYPT, $options);
+	}
+	
+	/**
+	 * 验证明文和password_hash方法创建出来的hash是否一致
+	 * @param string $password 明文
+	 * @param string $hash password_hash函数的返回值
+	 * @return boolean
+	 */
+	public static function password_verify($password,$hash)
+	{
+		return password_verify($password,$hash);
+	}
+	
+	/**
 	 * 生成随机字符串
 	 * 区分大小写
 	 * 0-9a-zA-Z
