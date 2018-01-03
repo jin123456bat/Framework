@@ -464,11 +464,14 @@ class application extends component
 			}
 			else
 			{
+				
+				
 				//从app目录下查找对应的类
 				$files = glob_recursive(rtrim(APP_ROOT,'/').'/'.$class_name.'.php',GLOB_BRACE);
+				
 				foreach ($files as $file)
 				{
-					$namespace = str_replace('/', '\\', APP_NAME.str_replace(SYSTEM_ROOT, '', pathinfo($file,PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME)));
+					$namespace = str_replace('/', '\\', APP_NAME.str_replace(APP_ROOT, '', pathinfo($file,PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME)));
 					include_once $file;
 					if (class_exists($namespace))
 					{
