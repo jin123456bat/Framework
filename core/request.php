@@ -26,6 +26,36 @@ class request extends base
 	}
 	
 	/**
+	 * 获取客户端真实IP
+	 * @return string|unknown
+	 */
+	static function getIp()
+	{
+		$cip = '';
+		if(!empty($_SERVER["HTTP_CLIENT_IP"]))
+		{
+			$cip = $_SERVER["HTTP_CLIENT_IP"];
+		}
+		else if(!empty($_SERVER["HTTP_X_FORWARDED_FOR"]))
+		{
+			$cip = $_SERVER["HTTP_X_FORWARDED_FOR"];
+		}
+		else if(!empty($_SERVER["REMOTE_ADDR"]))
+		{
+			$cip = $_SERVER["REMOTE_ADDR"];
+		}
+		return $cip;
+	}
+	
+	/**
+	 * 获取客户端的user-agent
+	 */
+	static function getUA()
+	{
+		return self::header('user_agent');
+	}
+	
+	/**
 	 * 获取请求头
 	 * @return unknown[]
 	 */
