@@ -219,4 +219,14 @@ class base
 			return self::$_config;
 		}
 	}
+	
+	/**
+	 * 获取配置目录下任意文件的路径
+	 * @param unknown $filename
+	 * @return string
+	 */
+	public static function getConfigFile($filename)
+	{
+		return rtrim(self::$APP_CONF,'/').'/'.$filename;
+	}
 }
