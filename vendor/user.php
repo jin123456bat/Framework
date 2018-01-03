@@ -2,101 +2,211 @@
 namespace framework\vendor;
 
 use framework\core\base;
+use framework\core\model;
+use framework\core\cookie;
+use framework\core\session;
+use framework\core\application;
+use framework\core\entity;
 
 class user extends base
 {
-
 	/**
-	 * 用户属性
-	 * 
+	 * 配置
+	 * @var array
+	 */
+	static private $_config = array(
+		'model' => 'admin',
+		'entity' => 'admin',
+		
+		//用户名的字段
+		'verify_key' => array(
+			'username',
+			'email',
+			'telephone',
+		),
+		
+		//用户信息通过cookie保存
+		'use_cookie' => false,
+		//用户信息通过session保存
+		'use_session' => true,
+		
+		
+		//密码的字段
+		'password_key' => 'password',
+		
+		//主键字段
+		'primary_key' => 'id',
+	);
+	
+	/**
+	 * 已经通过的用户列表的属性
+	 * @var array
+	 */
+	static private $_attributes = array();
+	
+	/**
+	 * 上次登录的用户信息
 	 * @var unknown
 	 */
-	private $_attributes;
-
+	static private $_attribute = null;
+	
 	/**
-	 * 是否自动登陆
-	 * 
-	 * @var unknown
+	 * 和用户数据相关的model
+	 * @var model
 	 */
-	public $_autologin = true;
-
+	static private $_model;
+	
+	static private $_entity;
+	
 	/**
-	 * 自动登陆的有效期 0代表不限制 单位秒
-	 * 
-	 * @var integer
+	 * 初始化
 	 */
-	public $_logintimeout = 0;
-
-	/**
-	 * 是否使用cookie作为验证信息
-	 * 
-	 * @var unknown
-	 */
-	public $_cookie = false;
-
-	/**
-	 * 是否使用session作为验证信息
-	 * 
-	 * @var unknown
-	 */
-	public $_session = true;
-
-	/**
-	 * 登陆地址
-	 * 
-	 * @var unknown
-	 */
-	public $_loginurl = null;
-
-	function __construct($user)
+	static private function init()
 	{
+		self::$_model = self::model(self::$_config['model']);
 	}
-
+	
 	/**
-	 * 判断用户是否已经登陆
+	 * 保存用户的信息
+	 * @param unknown $data
 	 */
-	static function isLogin()
+	static private function saveUserData($data)
 	{
-	}
-
-	/**
-	 * 刷新用户信息，
-	 */
-	function refresh($callback = null)
-	{
-		if (is_callable($callback))
+		self::$_attributes[] = $data;
+		self::$_attribute = $data;
+		//保存用户的登录信息
+		if(self::$_config['use_cookie'])
 		{
-			call_user_func_array($callback, [
-				$this
-			]);
+			cookie::set('__framework_user_identity_list', self::$_attributes);
+			cookie::set('__framework_user_identity', self::$_attribute);
+		}
+		if (self::$_config['use_session'])
+		{
+			session::set('__framework_user_identity_list', self::$_attributes);
+			session::set('__framework_user_identity', self::$_attribute);
 		}
 	}
-
+	
 	/**
-	 * 消除用户信息
+	 * 添加验证信息
+	 * @param unknown $data
+	 * @param string $message
 	 */
-	function logout()
+	static public function addVerify($data,&$message = '')
 	{
+		self::init();
+		
+		if (isset($data[self::$_config['primary_key']]))
+		{
+			//通过主键登录
+			$user = self::$_model->where(array(
+				self::$_config['primary_key'] => $data[self::$_config['primary_key']],
+			))->limit(1)->find();
+		}
+		else if (isset($data[self::$_config['password_key']]))
+		{
+			//通过账号和密码登录
+			$password = $data[self::$_config['password_key']];
+			if (empty($password))
+			{
+				$message = '密码不能为空';
+				return false;
+			}
+			
+			$verify_key = array();
+			settype(self::$_config['verify_key'], 'array');
+			foreach (self::$_config['verify_key'] as $key)
+			{
+				if (isset($data[$key]))
+				{
+					$verify_key[$key] = $data[$key];
+				}
+			}
+			
+			if (empty($verify_key))
+			{
+				$message = '请填写用户名';
+				return false;
+			}
+			
+			$user = self::$_model->where($verify_key,array(),'or')->limit(1)->find();	
+			
+			if (empty($user))
+			{
+				$message = '用户不存在';
+				return false;
+			}
+			
+			if(encryption::password_verify($password,$user[self::$_config['password_key']]))
+			{
+				self::saveUserData($user);
+				return true;
+			}
+			else
+			{
+				$message = '密码错误';
+				return false;
+			}
+		}
+		
+		$message = '信息不全';
+		return false;
 	}
-
+	
 	/**
-	 * 记录用户信息
+	 * 获取已经登录的用户列表
 	 */
-	function login()
+	static public function getVerifidList()
 	{
+		if (self::$_config['use_cookie'])
+		{
+			return cookie::get('__framework_user_identity_list');
+		}
+		if (self::$_config['use_session'])
+		{
+			return session::get('__framework_user_identity_list');
+		}
 	}
-
+	
 	/**
-	 * 认证过程
+	 * 获取上一次登录的用户的信息
 	 */
-	function auth($username, $password)
+	static public function getLastVerifid()
 	{
+		if (self::$_config['use_cookie'])
+		{
+			return cookie::get('__framework_user_identity');
+		}
+		if (self::$_config['use_session'])
+		{
+			return session::get('__framework_user_identity');
+		}
 	}
-
+	
 	/**
-	 * 刷新认证信息
+	 * 注册用户
+	 * @param unknown $data
+	 * @param string &$message
+	 * @return boolean
 	 */
-	function reauth()
+	static public function register($data,&$message) 
 	{
+		self::init();
+		self::$_entity = application::load(entity::class,self::$_config['entity'],array($data));
+		if (self::$_entity->validate())
+		{
+			if(self::$_entity->save())
+			{
+				$user = self::$_entity->getData();
+				self::saveUserData($user);
+				return true;
+			}
+			return false;
+		}
+		else
+		{
+			$message = self::$_entity->getError();
+			return false;
+		}
 	}
 }
