@@ -3,11 +3,21 @@ namespace framework\core;
 
 use framework;
 use framework\core\response\json;
-use framework\vendor\csrf;
 
 class application extends component
 {
-
+	/**
+	 * 将要执行的控制器的名称
+	 * @var unknown
+	 */
+	private $_control;
+	
+	/**
+	 * 将要执行的action的名称
+	 * @var unknown
+	 */
+	private $_action;
+	
 	function __construct($name, $path, $configName = '')
 	{
 		base::$APP_NAME = $name;
@@ -22,7 +32,7 @@ class application extends component
 		}
 		parent::__construct();
 	}
-
+	
 	function initlize()
 	{
 		// 载入系统默认配置
@@ -90,7 +100,7 @@ class application extends component
 		
 		parent::initlize();
 	}
-
+	
 	private function import($name)
 	{
 		$config = $this->getConfig($name);
@@ -123,7 +133,7 @@ class application extends component
 			}
 		}
 	}
-
+	
 	/**
 	 * 设置app的环境变量
 	 */
@@ -148,7 +158,7 @@ class application extends component
 			}
 		}
 	}
-
+	
 	/**
 	 * 这里还是有问题 还是需要share memory来实现
 	 * 判断程序在cli下是否在运行
@@ -160,7 +170,7 @@ class application extends component
 		exec($shell, $response);
 		return count($response) >= 2;
 	}
-
+	
 	/**
 	 * 执行控制器中的方法
 	 * @param string $control
@@ -177,6 +187,9 @@ class application extends component
 		$controller = self::control(base::$APP_NAME, $control);
 		if ($controller instanceof control)
 		{
+			$this->_control = $control;
+			$this->_action = $action;
+			
 			$callback = array(
 				$controller,
 				'__output'
@@ -278,7 +291,7 @@ class application extends component
 			}
 		}
 	}
-
+	
 	/**
 	 * 运行application
 	 */
@@ -296,7 +309,7 @@ class application extends component
 					$this,
 					'doResponse'
 				));
-			break;
+				break;
 			case 'web':
 				$router = self::load(router::class);
 				$query_string = substr($_SERVER['REQUEST_URI'], strlen($_SERVER['SCRIPT_NAME']));
@@ -307,7 +320,7 @@ class application extends component
 					$this,
 					'doResponse'
 				));
-			break;
+				break;
 			case 'server':
 				$server = self::load(server::class);
 				$command = trim(strtolower($_SERVER['argv'][0]));
@@ -327,10 +340,10 @@ class application extends component
 				{
 					console::log('未知命令:' . $command);
 				}
-			break;
+				break;
 		}
 	}
-
+	
 	/**
 	 * 输出response
 	 * @param mixed $response
@@ -348,7 +361,7 @@ class application extends component
 			$newResponse = call_user_func(array(
 				$this,
 				'onRequestEnd'
-			), $response);
+			),$this->_control,$this->_action,$response);
 			if ($newResponse !== NULL)
 			{
 				$response = $newResponse;
@@ -390,7 +403,7 @@ class application extends component
 			}
 		}
 	}
-
+	
 	/**
 	 * 实例化控制器
 	 */
@@ -409,15 +422,15 @@ class application extends component
 		}
 		return null;
 	}
-
-	public function onRequestStart()
+	
+	public function onRequestStart($control,$action)
 	{
 	}
-
-	public function onRequestEnd($response = null)
+	
+	public function onRequestEnd($control,$action,$response = null)
 	{
 	}
-
+	
 	/**
 	 * 检测这个类是否有被重写，假如重写了，加载重写后的类
 	 * 没有重写，检测这个类是否可以被实例化，假如可以 通过第三个参数实例化

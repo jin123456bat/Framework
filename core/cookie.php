@@ -161,5 +161,7 @@ class cookie extends component
 		{
 			setcookie($name, false);
 		}
+		
+		return true;
 	}
 }

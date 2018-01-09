@@ -128,6 +128,8 @@ class session extends component
 	{
 		self::getInstance();
 		unset($_SESSION[$name]);
+		
+		return true;
 	}
 
 	/**

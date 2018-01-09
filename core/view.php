@@ -14,6 +14,12 @@ class view extends response
 	 * @var unknown
 	 */
 	private $_template;
+	
+	/**
+	 * 模板文件所在目录
+	 * @var unknown
+	 */
+	private $_template_dir;
 
 	/**
 	 * 布局名
@@ -59,7 +65,8 @@ class view extends response
 			}
 			
 			$this->_template = $template;
-			$this->_engine->setTemplatePath(APP_ROOT . '/template/' . trim($this->_layout, '/\\'));
+			$this->_template_dir = APP_ROOT . '/template/' . trim($this->_layout, '/\\');
+			$this->_engine->setTemplatePath($this->_template_dir);
 			$this->_engine->setTempalteName($this->_template);
 		}
 		parent::__construct();
@@ -123,43 +130,108 @@ class view extends response
 		}
 		
 		
+		
 		$assets = self::getConfig('assets');
 		if (isset($assets['global']['head']['css']) && !empty($assets['global']['head']['css']))
 		{
-			foreach ($assets['global']['head']['css'] as $css)
+			$filepath = rtrim($this->_template_dir,'/').'/'.$this->_template;
+			$filepath = realpath($filepath);
+			
+			foreach ($assets['global']['head']['css'] as $css => $expect)
 			{
-				if (!empty($css))
+				if (is_int($css))
+				{
+					$path = assets::css($expect);
+				}
+				else if (!empty($expect))
 				{
 					$path = assets::css($css);
-					$label = '<link rel="stylesheet" href="'.$path.'" type="text/css" media="all" />';
-					$body = str_replace('</head>', $label.'</head>', $body);
+					
+					$expect = self::setVariableType($expect,'a');
+					$expect_complete_dir = array();
+					foreach ($expect as $file)
+					{
+						$templatepath = realpath(rtrim($this->_template_dir,'/').'/'.$file);
+						$expect_complete_dir[] = $templatepath;
+					}
+					
+					if (in_array($filepath, $expect_complete_dir,true))
+					{
+						continue;
+					}
 				}
+				
+				$path = assets::css($css);
+				$label = '<link rel="stylesheet" href="'.$path.'" type="text/css" media="all" />';
+				$body = str_replace('</head>', $label.'</head>', $body);
 			}
 		}
 		
 		if (isset($assets['global']['head']['js']) && !empty($assets['global']['head']['js']))
 		{
-			foreach ($assets['global']['head']['js'] as $js)
+			$filepath = rtrim($this->_template_dir,'/').'/'.$this->_template;
+			$filepath = realpath($filepath);
+			
+			foreach ($assets['global']['head']['js'] as $js => $expect)
 			{
-				if (!empty($js))
+				if (is_int($js))
+				{
+					$path = assets::js($expect);
+				}
+				else if (!empty($expect))
 				{
 					$path = assets::js($js);
-					$label = '<script src="'.$path.'" type="text/javascript" /></script>';
-					$body = str_replace('</head>', $label.'</head>', $body);
+					
+					$expect = self::setVariableType($expect,'a');
+					$expect_complete_dir = array();
+					foreach ($expect as $file)
+					{
+						$templatepath = realpath(rtrim($this->_template_dir,'/').'/'.$file);
+						$expect_complete_dir[] = $templatepath;
+					}
+					
+					if (in_array($filepath, $expect_complete_dir,true))
+					{
+						continue;
+					}
 				}
+				
+				$label = '<script src="'.$path.'" type="text/javascript" /></script>';
+				$body = str_replace('</head>', $label.'</head>', $body);
 			}
 		}
 		
 		if (isset($assets['global']['end']['js']) && !empty($assets['global']['end']['js']))
 		{
-			foreach ($assets['global']['end']['js'] as $js)
+			$filepath = rtrim($this->_template_dir,'/').'/'.$this->_template;
+			$filepath = realpath($filepath);
+			
+			foreach ($assets['global']['end']['js'] as $js => $expect)
 			{
-				if (!empty($js))
+				if (is_int($js))
+				{
+					$path = assets::js($expect);
+				}
+				else if (!empty($expect))
 				{
 					$path = assets::js($js);
-					$label = '<script src="'.$path.'" type="text/javascript" /></script>';
-					$body = str_replace('</body>', $label.'</body>', $body);
+					
+					$expect = self::setVariableType($expect,'a');
+					$expect_complete_dir = array();
+					foreach ($expect as $file)
+					{
+						$templatepath = realpath(rtrim($this->_template_dir,'/').'/'.$file);
+						$expect_complete_dir[] = $templatepath;
+					}
+					
+					if (in_array($filepath, $expect_complete_dir,true))
+					{
+						continue;
+					}
 				}
+				
+				$label = '<script src="'.$path.'" type="text/javascript" /></script>';
+				$body = str_replace('</body>', $label.'</body>', $body);
 			}
 		}
 		

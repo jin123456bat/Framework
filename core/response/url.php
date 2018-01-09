@@ -2,6 +2,7 @@
 namespace framework\core\response;
 
 use framework\core\response;
+use framework\core\http;
 
 /**
  * 302跳转
@@ -38,11 +39,6 @@ class url extends response
 
 	function __toString()
 	{
-		$data = array_merge(array(
-			'c' => $this->_control,
-			'a' => $this->_action
-		), $this->_parameter);
-		$string = empty($data) ? '' : ('?' . http_build_query($data));
-		return './index.php' . $string;
+		return http::url($this->_control,$this->_action,$this->_parameter);
 	}
 }

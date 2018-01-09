@@ -70,7 +70,7 @@ class user extends base
 	 * 保存用户的信息
 	 * @param unknown $data
 	 */
-	static private function saveUserData($data)
+	static private function saveUserData($data,$remember = false)
 	{
 		self::$_attributes[] = $data;
 		self::$_attribute = $data;
@@ -92,7 +92,7 @@ class user extends base
 	 * @param unknown $data
 	 * @param string $message
 	 */
-	static public function addVerify($data,&$message = '')
+	static public function addVerify($data,$remember,&$message = array())
 	{
 		self::init();
 		
@@ -109,7 +109,7 @@ class user extends base
 			$password = $data[self::$_config['password_key']];
 			if (empty($password))
 			{
-				$message = '密码不能为空';
+				$message[self::$_config['password_key']][] = '密码不能为空';
 				return false;
 			}
 			
@@ -125,7 +125,7 @@ class user extends base
 			
 			if (empty($verify_key))
 			{
-				$message = '请填写用户名';
+				$message[current(self::$_config['verify_key'])][] = '请填写用户名';
 				return false;
 			}
 			
@@ -133,30 +133,29 @@ class user extends base
 			
 			if (empty($user))
 			{
-				$message = '用户不存在';
+				$message[current(self::$_config['verify_key'])][] = '用户不存在';
 				return false;
 			}
 			
 			if(encryption::password_verify($password,$user[self::$_config['password_key']]))
 			{
-				self::saveUserData($user);
+				self::saveUserData($user,$remember);
 				return true;
 			}
 			else
 			{
-				$message = '密码错误';
+				$message[self::$_config['password_key']][] = '密码错误';
 				return false;
 			}
 		}
-		
-		$message = '信息不全';
+		$message[][] = '信息不全';
 		return false;
 	}
 	
 	/**
 	 * 获取已经登录的用户列表
 	 */
-	static public function getVerifidList()
+	static public function getVerifiedList()
 	{
 		if (self::$_config['use_cookie'])
 		{
@@ -169,9 +168,9 @@ class user extends base
 	}
 	
 	/**
-	 * 获取上一次登录的用户的信息
+	 * 获取当前登录的用户的信息
 	 */
-	static public function getLastVerifid()
+	static public function getLastVerified()
 	{
 		if (self::$_config['use_cookie'])
 		{
@@ -180,6 +179,23 @@ class user extends base
 		if (self::$_config['use_session'])
 		{
 			return session::get('__framework_user_identity');
+		}
+	}
+	
+	/**
+	 * 设置当前登录的用户的信息
+	 * @param unknown $user
+	 */
+	static public function setLastVerified($user)
+	{
+		self::$_attribute = $user;
+		if (self::$_config['use_cookie'])
+		{
+			cookie::set('__framework_user_identity', self::$_attribute);
+		}
+		if (self::$_config['use_session'])
+		{
+			session::set('__framework_user_identity', self::$_attribute);
 		}
 	}
 	
@@ -208,5 +224,23 @@ class user extends base
 			$message = self::$_entity->getError();
 			return false;
 		}
+	}
+	
+	/**
+	 * 退出当前登录的用户
+	 * @return boolean
+	 */
+	static public function logout()
+	{
+		self::$_attribute = null;
+		if (self::$_config['use_cookie'])
+		{
+			return cookie::delete('__framework_user_identity');
+		}
+		if (self::$_config['use_session'])
+		{
+			return session::delete('__framework_user_identity');
+		}
+		return false;
 	}
 }
