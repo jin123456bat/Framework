@@ -48,7 +48,6 @@ class sql extends base
 	function select($fields = '*')
 	{
 		$this->_do = 'select';
-		
 		if (is_array($fields))
 		{
 			foreach ($fields as $as => $field)
@@ -948,6 +947,15 @@ class sql extends base
 			'from' => $from
 		);
 		$this->_do = '';
+	}
+	
+	/**
+	 * 清空fields和limit
+	 */
+	function clearWithoutCondition()
+	{
+		unset($this->_temp['fields']);
+		unset($this->_temp['limit']);
 	}
 
 	/**
