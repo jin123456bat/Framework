@@ -85,6 +85,17 @@ class model extends component
 	 * @var array
 	 */
 	private $_compress_sql = array();
+	
+	
+	/**
+	 * @var string
+	 */
+	private $_debug = false;
+	
+	/**
+	 * @var string
+	 */
+	private $_keep = false;
 
 	function __construct($table = null)
 	{
@@ -261,6 +272,23 @@ class model extends component
 		$this->_desc = $this->query('DESC `' . $this->getTable() . '`');
 		$this->_config['max_allowed_packet'] = $this->_db->getConfig('max_allowed_packet');
 	}
+	
+	/**
+	 * 设置为debug模式
+	 */
+	function debug($debug = true)
+	{
+		$this->_debug = $debug;
+	}
+	
+	/**
+	 * 当执行完sql后不删除条件
+	 * @param string $keep
+	 */
+	function keepCondition($keep = true)
+	{
+		$this->_keep = $keep;
+	}
 
 	/**
 	 * find all rows from result
@@ -288,6 +316,10 @@ class model extends component
 	function column($fields = '*')
 	{
 		$result = $this->select($fields);
+		if ($this->_debug)
+		{
+			return $result;
+		}
 		$temp = array();
 		foreach ($result as $r)
 		{
@@ -302,6 +334,10 @@ class model extends component
 	function find($fields = '*')
 	{
 		$result = $this->limit(1)->select($fields);
+		if ($this->_debug)
+		{
+			return $result;
+		}
 		return isset($result[0]) ? $result[0] : null;
 	}
 
@@ -311,6 +347,10 @@ class model extends component
 	function scalar($field = '*')
 	{
 		$result = $this->find($field);
+		if ($this->_debug)
+		{
+			return $result;
+		}
 		if (is_array($result))
 		{
 			return array_shift($result);
@@ -326,7 +366,12 @@ class model extends component
 	 */
 	function count($field = '*')
 	{
-		return $this->scalar('count(' . $field . ')');
+		$result = $this->scalar('count(' . $field . ')');
+		if ($this->_debug)
+		{
+			return $result;
+		}
+		return $result;
 	}
 
 	/**
@@ -586,7 +631,14 @@ class model extends component
 			$this->_history[] = $complete_sql;
 			$array = $sql->getParams();
 			$sql_string = $sql->__toString();
-			$sql->clear();
+			if ($this->_keep)
+			{
+				$sql->clearWithoutCondition();
+			}
+			else
+			{
+				$sql->clear();
+			}
 			$sql = $sql_string;
 		}
 		else
@@ -599,6 +651,12 @@ class model extends component
 			$this->_compress_sql[] = $complete_sql;
 			return true;
 		}
+		
+		if ($this->_debug)
+		{
+			return $complete_sql;
+		}
+		
 		return $this->_db->query($sql, $array);
 	}
 
