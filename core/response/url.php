@@ -3,6 +3,7 @@ namespace framework\core\response;
 
 use framework\core\response;
 use framework\core\http;
+use framework\core\validator;
 
 /**
  * 302跳转
@@ -39,6 +40,13 @@ class url extends response
 
 	function __toString()
 	{
-		return http::url($this->_control,$this->_action,$this->_parameter);
+		if (validator::url($this->_control))
+		{
+			return $this->_control;
+		}
+		else
+		{
+			return http::url($this->_control,$this->_action,$this->_parameter);
+		}
 	}
 }

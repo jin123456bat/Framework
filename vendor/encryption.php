@@ -5,13 +5,14 @@ class encryption
 {
 
 	/**
-	 * 获取一个唯一的ID，长度32位
+	 * 获取一个唯一的ID，长度为prefix的长度+32位
 	 * 
 	 * @param string $prefix        
 	 * @return string
 	 */
 	public static function unique_id($prefix = '')
 	{
+		mt_srand((double) microtime() * 10000); // optional for php 4.2.0 and up.
 		return $prefix . md5(uniqid(mt_rand(), true));
 	}
 	

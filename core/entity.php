@@ -239,8 +239,11 @@ abstract class entity extends base
 			$this->model($model)->transaction();
 			if ($this->model($model)->insert($data))
 			{
-				$this->_data[$pk] = $this->model($model)->lastInsertId();
-				$data[$pk] = $this->_data[$pk];
+				if (empty($this->_data[$pk]))
+				{
+					$this->_data[$pk] = $this->model($model)->lastInsertId();
+					$data[$pk] = $this->_data[$pk];
+				}
 				
 				//获取关系数据
 				$relation_data = array();
@@ -253,14 +256,15 @@ abstract class entity extends base
 						unset($data[$key]);
 					}
 				}
-				
 				// 这里把其它的相关数据插入进去
 				foreach ($relation_data as $key => $data)
 				{
+					
 					foreach ($data as $tableName => $d_data)
 					{
 						if (isset($d_data['insert']) && ! empty($d_data['insert']) && is_array($d_data['insert']))
 						{
+							
 							foreach ($d_data['insert'] as $insert)
 							{
 								if (! $this->model($tableName)->insert($insert))
