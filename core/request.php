@@ -202,7 +202,7 @@ class request extends base
 	 * @param string|parser $parser
 	 * @return mixed|string|boolean|number|\core\StdClass|\core\unknown|string
 	 */
-	public static function post($name = '', $defaultValue = null, $filter = null, $type = 's',$parser = '')
+	public static function post($name = '', $defaultValue = null, $filter = null, $type = '',$parser = '')
 	{
 		if (!empty($parser))
 		{
@@ -402,7 +402,7 @@ class request extends base
 	 * @param unknown $filter        
 	 * @param string $type        
 	 */
-	public static function param($name = '', $defaultValue = null, $filter = null, $type = 's')
+	public static function param($name = '', $defaultValue = null, $filter = null, $type = '')
 	{
 		if ($name === '')
 		{

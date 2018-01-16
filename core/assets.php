@@ -85,4 +85,14 @@ class assets extends component
 			}
 		}
 	}
+	
+	/**
+	 * 直接通过路径来引用资源
+	 * 路径是相对项目的根目录计算
+	 * @param unknown $path
+	 */
+	static public function path($path)
+	{
+		return rtrim(APP_ROOT,'/').'/assets/'.ltrim($path,'/');
+	}
 }

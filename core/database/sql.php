@@ -853,7 +853,7 @@ class sql extends base
 				$table = '';
 				if (isset($this->_temp['from']) && ! empty($this->_temp['from']))
 				{
-					$table = '`' . implode('`,`', $this->_temp['from']) . '`';
+					$table = implode(',', $this->_temp['from']);
 				}
 				
 				$this->_temp['where'] = isset($this->_temp['where']) ? $this->_temp['where'] : '';

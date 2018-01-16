@@ -130,9 +130,60 @@ abstract class entity extends base
 	{
 		$this->_data = $data;
 	}
+	
+	/**
+	 * 删除
+	 * 这个会删除关系表中的数据
+	 */
+	function delete()
+	{
+		$pk = $this->__primaryKey();
+		$model = $this->__model();
+		
+		$this->model($model)->transaction();
+		
+		$result = 0;
+		
+		$data = $this->_data;
+		
+		$relation_data = array();
+		foreach ($data as $key => $value)
+		{
+			$relation = $this->__relation($key, $data[$pk], $value);
+			if (! empty($relation))
+			{
+				$relation_data[$key] = $relation;
+				unset($data[$key]);
+			}
+		}
+		
+		//先删除关系表中的数据
+		foreach ($relation_data as $data)
+		{
+			foreach ($data as $tableName => $d_data)
+			{
+				// 先删除数据
+				if (isset($d_data['delete']) && ! empty($d_data['delete']) && is_array($d_data['delete']))
+				{
+					$result += $this->model($tableName)->where($d_data['delete'])->delete();
+				}
+			}
+		}
+		
+		
+		//删除当前表中的数据
+		$result = $this->model($model)->where(array(
+			$pk => $this->_data[$pk]
+		))->delete();
+		
+		$this->model($model)->commit();
+		return $result;
+	}
+	
 
 	/**
-	 * 默认的delete
+	 * 移除
+	 * 这个只是删除当前表中的数据
 	 */
 	function remove()
 	{
@@ -198,13 +249,7 @@ abstract class entity extends base
 					// 先删除数据
 					if (isset($d_data['delete']) && ! empty($d_data['delete']) && is_array($d_data['delete']))
 					{
-						foreach ($d_data['delete'] as $key => $value)
-						{
-							$this->model($tableName)->where($key . '=?', [
-								$value
-							]);
-						}
-						$this->model($tableName)->delete();
+						$this->model($tableName)->where($d_data['delete'])->delete();
 					}
 					
 					// 在添加关系

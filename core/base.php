@@ -62,34 +62,48 @@ class base
 	 * @param string $type
 	 * @return string|array|boolean|number|StdClass|unknown
 	 */
-	protected static function setVariableType($variable, $type = 's')
+	protected static function setVariableType($variable, $type = '')
 	{
 		if (empty($type))
 		{
 			return $variable;
 		}
-		switch ($type)
+		
+		if (strpos($type,',') === false)
 		{
-			case 's':
-				return (string) $variable;
-			case 'a':
-				return (array) $variable;
-			case 'b':
-				return (bool) $variable;
-			case 'd': // double
-			case 'f':
-				return (float) $variable;
-			case 'o':
-				return (object) $variable;
-			case 'i':
-				return (int) $variable;
-			case 'binary':
-				return (string) $variable;
-			default:
-				if (settype($variable, $type))
-				{
-					return $variable;
-				}
+			switch ($type)
+			{
+				case 's':
+					return (string) $variable;
+				case 'a':
+					return (array) $variable;
+				case 'b':
+					return (bool) $variable;
+				case 'd': // double
+				case 'f':
+					return (float) $variable;
+				case 'o':
+					return (object) $variable;
+				case 'i':
+					return (int) $variable;
+				case 'binary':
+					return (string) $variable;
+				default:
+					if (settype($variable, $type))
+					{
+						return $variable;
+					}
+			}
+		}
+		else
+		{
+			//有英文逗号按照枚举类型
+			$enum = explode(',', $type);
+			if (in_array($variable,$enum))
+			{
+				return $variable;
+			}
+			return current($enum);
 		}
 	}
 	

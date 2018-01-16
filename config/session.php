@@ -9,7 +9,7 @@ return array(
 	
 	//当save_handler=files的时候有效  这里的配置实际上是使用php.ini中的配置 好处是这里可以使用变量以及函数
 	'files' => array(
-		'save_path' => "d:/wamp64/tmp"
+		'save_path' => ""
 	),
 	
 	
