@@ -297,7 +297,14 @@ class sql extends base
 				{
 					if (is_scalar($s))
 					{
-						$this->where(self::fieldFormat($field).'=?',array($s),$combine);
+						if (is_null($s))
+						{
+							$this->where(self::fieldFormat($field).' is NULL',array(),$combine);
+						}
+						else
+						{
+							$this->where(self::fieldFormat($field).'=?',array($s),$combine);
+						}
 					}
 					else if (is_array($s))
 					{
@@ -628,14 +635,22 @@ class sql extends base
 	{
 		if (is_array($fields))
 		{
+			$string = array();
 			foreach ($fields as $field)
 			{
-				$this->where($field . ' is NULL', array(), $combine);
+				$field = self::fieldFormat($field);
+				$string[] = $field.' is NULL';
+			}
+			
+			if (!empty($string))
+			{
+				$this->where(implode(' '.$combine.' ', $string));
 			}
 		}
 		else if (is_string($fields))
 		{
-			$this->where($fields . ' is NULL', array(), $combine);
+			$fields = self::fieldFormat($fields);
+			$this->where($fields . ' is NULL');
 		}
 		return $this;
 	}

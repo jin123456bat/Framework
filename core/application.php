@@ -10,13 +10,13 @@ class application extends component
 	 * 将要执行的控制器的名称
 	 * @var unknown
 	 */
-	private $_control;
+	static public $_control;
 	
 	/**
 	 * 将要执行的action的名称
 	 * @var unknown
 	 */
-	private $_action;
+	static public $_action;
 	
 	function __construct($name, $path, $configName = '')
 	{
@@ -187,8 +187,8 @@ class application extends component
 		$controller = self::control(base::$APP_NAME, $control);
 		if ($controller instanceof control)
 		{
-			$this->_control = $control;
-			$this->_action = $action;
+			self::$_control = $control;
+			self::$_action = $action;
 			
 			$callback = array(
 				$controller,
@@ -361,7 +361,7 @@ class application extends component
 			$newResponse = call_user_func(array(
 				$this,
 				'onRequestEnd'
-			),$this->_control,$this->_action,$response);
+			),self::$_control,self::$_action,$response);
 			if ($newResponse !== NULL)
 			{
 				$response = $newResponse;
