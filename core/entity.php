@@ -229,7 +229,6 @@ abstract class entity extends base
 			$this->model($model)->where($pk . '=?', array(
 				$this->_data[$pk]
 			))->limit(1)->update($temp);
-			
 			//获取关系数据
 			$relation_data = array();
 			foreach ($data as $key => $value)

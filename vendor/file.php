@@ -385,8 +385,8 @@ class file extends base
 					{
 						self::mkdir($path,0777);
 					}
-					move_uploaded_file($this->_path, $path.'/'.$this->_basename);
-					$new_path = $path.'/'.$this->_basename;
+					move_uploaded_file($this->_path, rtrim($path,'/').'/'.$this->filename().'.'.$this->extension(true));
+					$new_path = rtrim($path,'/').'/'.$this->filename().'.'.$this->extension(true);
 				}
 				else
 				{
@@ -396,7 +396,7 @@ class file extends base
 						self::mkdir($dir,0777);
 					}
 					move_uploaded_file($this->_path, $path);
-					$new_path = $this->_path;
+					$new_path = $path;
 				}
 			}
 			else
@@ -485,7 +485,7 @@ class file extends base
 		}
 		else
 		{
-			return str_replace(APP_ROOT, '', $this->_path);
+			return './'.ltrim(str_replace(APP_ROOT, '', $this->_path),'/');
 		}
 	}
 
@@ -507,10 +507,20 @@ class file extends base
 
 	/**
 	 * 获取文件后缀 不包括.
+	 * @param boolean $mimetype false
+	 * 是否根据mimetype获取文件后缀
 	 */
-	function extension()
+	function extension($mimetype = false)
 	{
-		return $this->_extension;
+		if ($mimetype)
+		{
+			$types = explode('/', $this->mimeType());
+			return end($types);
+		}
+		else
+		{
+			return $this->_extension;
+		}
 	}
 
 	/**

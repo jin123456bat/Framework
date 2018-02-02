@@ -279,6 +279,7 @@ class model extends component
 	function debug($debug = true)
 	{
 		$this->_debug = $debug;
+		return $this;
 	}
 	
 	/**
@@ -288,6 +289,7 @@ class model extends component
 	function keepCondition($keep = true)
 	{
 		$this->_keep = $keep;
+		return $this;
 	}
 
 	/**
@@ -416,8 +418,33 @@ class model extends component
 	 */
 	function update($name, $value = '')
 	{
-		$sql = $this->_sql->update($name, $value);
-		return $this->query($sql);
+		$fields = array();
+		foreach ($this->_desc as $x => $y)
+		{
+			$fields[] = $y['Field'];
+		}
+		$data = array();
+		if (is_array($name))
+		{
+			foreach ($name as $k => $v)
+			{
+				if (in_array($k, $fields))
+				{
+					$data[$k] = $v;
+				}
+			}
+			$sql = $this->_sql->update($data);
+			return $this->query($sql);
+		}
+		else if (is_string($name))
+		{
+			if (in_array($name, $fields))
+			{
+				$sql = $this->_sql->update($name,$value);
+				return $this->query($sql);
+			}
+		}
+		return false;
 	}
 
 	function insert($data = array())
@@ -447,75 +474,56 @@ class model extends component
 			// 填充默认数据
 			foreach ($this->_desc as $index => $value)
 			{
-				if (! in_array($value['Field'], array_keys($data)))
+				//只对数据库中有的字段做判断  没有设置默认值并且字段不可以为null  排除掉主键字段
+				if (! in_array($value['Field'], array_keys($data)) && (($value['Default'] === null && $value['Null'] == 'NO') && !(strtolower($value['Key']) == 'pri' && strtolower($value['Extra']) == 'auto_increment') ))
 				{
-					if ($value['Default'] === null)
+					switch ($value['Type'])
 					{
-						if ($value['Null'] == 'YES')
-						{
-							$data[$value['Field']] = null;
-						}
-						else
-						{
-							if (strtolower($value['Key']) == 'pri' && strtolower($value['Extra']) == 'auto_increment')
+						case 'datetime':
+						case 'timestamp':
+							$data[$value['Field']] = date('Y-m-d H:i:s');
+						break;
+						case 'date':
+							$data[$value['Field']] = date('Y-m-d');
+						break;
+						case 'year':
+						case 'year(4)':
+							$data[$value['Field']] = date('Y');
+						break;
+						case 'float':
+							$data[$value['Field']] = 0;
+						break;
+						default:
+							$zero = '$int\(\d+\)$';
+							$empty_string = '$(char)?(text)?$';
+							$double = '$double\(\d+,\d+\)$';
+							$decimal = '$decimal\(\d+,\d+\)$';
+							$bit = '$bit\(\d+\)$';
+							$enum = '/enum\((\'(?<value>[^\']+)\',?)+\)/';
+							if (preg_match($zero, $value['Type']))
 							{
-								$data[$value['Field']] = null;
+								$data[$value['Field']] = 0;
 							}
-							else
+							else if (preg_match($empty_string, $value['Type']))
 							{
-								switch ($value['Type'])
-								{
-									case 'datetime':
-									case 'timestamp':
-										$data[$value['Field']] = date('Y-m-d H:i:s');
-									break;
-									case 'date':
-										$data[$value['Field']] = date('Y-m-d');
-									break;
-									case 'year':
-									case 'year(4)':
-										$data[$value['Field']] = date('Y');
-									break;
-									case 'float':
-										$data[$value['Field']] = 0;
-									break;
-									default:
-										$zero = '$int\(\d+\)$';
-										$empty_string = '$(char)?(text)?$';
-										$double = '$double\(\d+,\d+\)$';
-										$decimal = '$decimal\(\d+,\d+\)$';
-										$bit = '$bit\(\d+\)$';
-										if (preg_match($zero, $value['Type']))
-										{
-											$data[$value['Field']] = 0;
-										}
-										else if (preg_match($empty_string, $value['Type']))
-										{
-											$data[$value['Field']] = '';
-										}
-										else if (preg_match($double, $value['Type']))
-										{
-											$data[$value['Field']] = 0;
-										}
-										else if (preg_match($decimal, $value['Type']))
-										{
-											$data[$value['Field']] = 0;
-										}
-										else if (preg_match($bit, $value['Type']))
-										{
-											$data[$value['Field']] = 0;
-										}
-								}
+								$data[$value['Field']] = '';
 							}
-						}
-					}
-					else if ($value['Default'] === 'CURRENT_TIMESTAMP')
-					{
-						unset($data[$value['Field']]);
-					}
-					else
-					{
-						$data[$value['Field']] = $value['Default'];
+							else if (preg_match($double, $value['Type']))
+							{
+								$data[$value['Field']] = 0;
+							}
+							else if (preg_match($decimal, $value['Type']))
+							{
+								$data[$value['Field']] = 0;
+							}
+							else if (preg_match($bit, $value['Type']))
+							{
+								$data[$value['Field']] = 0;
+							}
+							else if (preg_match($enum, $value['Type'],$match))
+							{
+								$data[$value['Field']] = $match['value'];
+							}
 					}
 				}
 			}

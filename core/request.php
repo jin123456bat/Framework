@@ -2,6 +2,7 @@
 namespace framework\core;
 
 use framework\core\request\parser\parser;
+use framework\vendor\file;
 
 class request extends base
 {
@@ -140,6 +141,7 @@ class request extends base
 	 *        文件上传名
 	 * @param string $config
 	 *        使用指定配置上传文件，不填写使用默认配置 配置填写在upload配置中
+	 * @return file
 	 */
 	public static function file($name, $config = null)
 	{
@@ -150,15 +152,7 @@ class request extends base
 		{
 			if (class_exists($class, true))
 			{
-				$object = new $class($files);
-				if ($object->hasError())
-				{
-					return $files;
-				}
-				else
-				{
-					return $object;
-				}
+				return new $class($files);
 			}
 			else
 			{
@@ -174,14 +168,7 @@ class request extends base
 				if (class_exists($class, true))
 				{
 					$object = new $class($file);
-					if ($object->hasError())
-					{
-						$temp[$filename] = $file;
-					}
-					else
-					{
-						$temp[$filename] = $object;
-					}
+					$temp[$filename] = $object;
 				}
 				else
 				{
