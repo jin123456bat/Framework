@@ -7,7 +7,7 @@ class http extends base
 	/**
 	 * 创建一个url
 	 */
-	static function url($c = '', $a = '', array $options = array())
+	static function url($c = '', $a = '', array $options = array(), $with_head = true)
 	{
 		$default_port = 0;
 		if (request::isHttps())
@@ -64,11 +64,15 @@ class http extends base
 		
 		if (! empty($a))
 		{
-			$options = array_merge(array('a'=>$a),$options);
+			$options = array_merge(array(
+				'a' => $a
+			), $options);
 		}
 		if (! empty($c))
 		{
-			$options = array_merge(array('c'=>$c),$options);
+			$options = array_merge(array(
+				'c' => $c
+			), $options);
 		}
 		
 		// 判断是否强制使用了url中的session_id
@@ -83,6 +87,12 @@ class http extends base
 			$session_id = request::get(session_name(), $session_id, null, 's');
 			$options[session_name()] = $session_id;
 		}
+		
+		if (!$with_head)
+		{
+			return http_build_query($options);
+		}
+		
 		$query = ! empty($options) ? '?' . http_build_query($options) : '';
 		
 		return $scheme . $host . $port . $path . $query . $fragment;
@@ -90,6 +100,7 @@ class http extends base
 
 	/**
 	 * 发送post请求
+	 * 
 	 * @param unknown $url        
 	 * @param unknown $data        
 	 */
@@ -124,10 +135,10 @@ class http extends base
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
 				CURLOPT_HTTPHEADER => array(
-					'User-Agent: '.$user_agent,
+					'User-Agent: ' . $user_agent
 				),
 				CURLOPT_USERAGENT => $user_agent,
-				CURLINFO_HEADER_OUT => true,
+				CURLINFO_HEADER_OUT => true
 			));
 			$response = curl_exec($curl);
 			curl_close($curl);
@@ -153,6 +164,7 @@ class http extends base
 
 	/**
 	 * 发送get请求
+	 * 
 	 * @param string $url
 	 *        请求的地址
 	 * @param array $data
@@ -162,14 +174,14 @@ class http extends base
 	 */
 	static function get($url, array $data = array(), $use_curl = true, $callback = null)
 	{
-		$url = $url . (!empty($data)?('?' . http_build_query($data)):'');
+		$url = $url . (! empty($data) ? ('?' . http_build_query($data)) : '');
 		if (function_exists('curl_init') && $use_curl)
 		{
 			$curl = curl_init($url);
 			$user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.59 Safari/537.36';
 			curl_setopt_array($curl, array(
 				CURLOPT_HTTPHEADER => array(
-					'User-Agent: '.$user_agent,
+					'User-Agent: ' . $user_agent
 				),
 				CURLOPT_USERAGENT => $user_agent,
 				CURLOPT_RETURNTRANSFER => 1,
@@ -180,7 +192,7 @@ class http extends base
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-				CURLINFO_HEADER_OUT => true,
+				CURLINFO_HEADER_OUT => true
 			));
 			$response = curl_exec($curl);
 			//打印请求头的信息
@@ -212,23 +224,56 @@ class http extends base
 
 	/**
 	 * head请求
+	 * 
 	 * @param string $url        
 	 */
-	static function head($url)
+	static function head($url, $http_head = true)
 	{
-		$context = stream_context_get_options(stream_context_get_default());
-		stream_context_set_default(array(
-			'http' => array(
-				'method' => 'HEAD'
-			)
-		));
-		$headers = get_headers($url, 1);
-		stream_context_set_default($context);
-		return $headers;
+		if ($http_head)
+		{
+			$context = stream_context_get_options(stream_context_get_default());
+			stream_context_set_default(array(
+				'http' => array(
+					'method' => 'HEAD'
+				)
+			));
+			$headers = get_headers($url, 1);
+			stream_context_set_default($context);
+			return $headers;
+		}
+		else
+		{
+			$ch = curl_init($url);
+			curl_setopt($ch, CURLOPT_HEADER, true);
+			curl_setopt($ch, CURLOPT_NOBODY, true);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			$response = curl_exec($ch);
+			curl_close($ch);
+			$response = explode("\n", $response);
+			$temp = array();
+			foreach ($response as $r)
+			{
+				$r = trim($r);
+				if (! empty($r))
+				{
+					if (strpos($r, ':') === false)
+					{
+						$temp[] = trim($r);
+					}
+					else
+					{
+						list($k, $v) = explode(':', $r, 2);
+						$temp[trim($k)] = trim($v);
+					}
+				}
+			}
+			return $temp;
+		}
 	}
 
 	/**
 	 * put请求
+	 * 
 	 * @param string $url        
 	 */
 	static function put($url)
@@ -237,6 +282,7 @@ class http extends base
 
 	/**
 	 * delete请求
+	 * 
 	 * @param string $url        
 	 */
 	static function delete($url)
@@ -245,6 +291,7 @@ class http extends base
 
 	/**
 	 * options请求
+	 * 
 	 * @param string $url        
 	 */
 	static function options($url)
@@ -253,6 +300,7 @@ class http extends base
 
 	/**
 	 * trace请求
+	 * 
 	 * @param string $url        
 	 */
 	static function trace($url)

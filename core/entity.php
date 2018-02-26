@@ -140,6 +140,12 @@ abstract class entity extends base
 		$pk = $this->__primaryKey();
 		$model = $this->__model();
 		
+		$result = $this->__preRemove();
+		if ($result === false)
+		{
+			return false;
+		}
+		
 		$this->model($model)->transaction();
 		
 		$result = 0;
@@ -177,6 +183,9 @@ abstract class entity extends base
 		))->delete();
 		
 		$this->model($model)->commit();
+		
+		$this->__afterRemove();
+		
 		return $result;
 	}
 	

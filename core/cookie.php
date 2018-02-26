@@ -126,7 +126,7 @@ class cookie extends component
 			self::$_data[$name]['HttpOnly'] = true;
 		}
 		
-		if (request::php_sapi_name() == 'web')
+		if (env::php_sapi_name() == 'web')
 		{
 			return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
 		}
@@ -157,7 +157,7 @@ class cookie extends component
 			'Max-Age' => 0,
 		);
 		
-		if (request::php_sapi_name() == 'web')
+		if (env::php_sapi_name() == 'web')
 		{
 			setcookie($name, false);
 		}

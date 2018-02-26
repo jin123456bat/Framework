@@ -664,7 +664,6 @@ class model extends component
 		{
 			return $complete_sql;
 		}
-		
 		return $this->_db->query($sql, $array);
 	}
 

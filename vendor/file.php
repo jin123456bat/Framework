@@ -123,7 +123,7 @@ class file extends base
 			$this->_is_url = validator::url($this->_path);
 			if ($this->_is_url)
 			{
-				$header = http::head($this->_path);
+				$header = http::head($this->_path,false);
 				$this->_mimeType = isset($header['Content-Type'])?$header['Content-Type']:'';
 				
 				$url = parse_url($this->_path);
@@ -147,7 +147,6 @@ class file extends base
 				$i--;
 				
 				$http_status = explode(' ', $header[$i],3);
-				
 				if ($http_status[1] == 200)
 				{
 					$this->_readable = true;
@@ -242,7 +241,6 @@ class file extends base
 					'user_agent' => 'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.49 Safari/537.36',
 				)
 			);
-			
 			$default = stream_context_set_default($default_opts);
 			return file_get_contents($this->_path);
 		}
@@ -351,6 +349,7 @@ class file extends base
 	{
 		if($this->_is_url)
 		{
+			
 			if (self::is_dir($path))
 			{
 				if (!file_exists($path))
