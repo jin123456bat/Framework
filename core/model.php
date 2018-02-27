@@ -723,6 +723,16 @@ class model extends component
 	{
 		$this->_compress = true;
 	}
+	
+	/**
+	 * like
+	 * @param unknown $field
+	 * @param unknown $value
+	 */
+	function like($field,$value)
+	{
+		$this->_sql->where($field.' like ?',array('%'.$value.'%'));
+	}
 
 	/**
 	 * 提交压缩后的sql
