@@ -17,7 +17,7 @@ class session extends component
 	function initlize()
 	{
 		$session = $this->getConfig('session');
-		if (request::php_sapi_name() == 'web')
+		if (env::php_sapi_name() == 'web')
 		{
 			// 假如用户定义了SessionHandler
 			if (isset($session['save_handler']) && ! empty($session['save_handler']))

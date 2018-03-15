@@ -26,7 +26,7 @@ class router extends component
 	{
 		$config = $this->getConfig('router');
 		
-		switch (request::php_sapi_name())
+		switch (env::php_sapi_name())
 		{
 			case 'web':
 				$config_parser = $config['web_parser'];

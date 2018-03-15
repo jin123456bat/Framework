@@ -93,6 +93,6 @@ class assets extends component
 	 */
 	static public function path($path)
 	{
-		return rtrim(APP_ROOT,'/').'/assets/'.ltrim($path,'/');
+		return env::path().'/assets/'.ltrim($path,'/');
 	}
 }

@@ -664,7 +664,6 @@ class model extends component
 		{
 			return $complete_sql;
 		}
-		
 		return $this->_db->query($sql, $array);
 	}
 
@@ -723,6 +722,16 @@ class model extends component
 	function startCompress()
 	{
 		$this->_compress = true;
+	}
+	
+	/**
+	 * like
+	 * @param unknown $field
+	 * @param unknown $value
+	 */
+	function like($field,$value)
+	{
+		$this->_sql->where($field.' like ?',array('%'.$value.'%'));
 	}
 
 	/**

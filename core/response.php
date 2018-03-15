@@ -46,8 +46,7 @@ class response extends component
 
 	function initlize()
 	{
-		$app = $this->getConfig('app');
-		$this->_charset = $app['charset'];
+		$this->_charset = ini_get('default_charset');
 		$this->setHeader('Content-Type', $this->getContentType() . '; charset=' . $this->getCharset());
 		$this->setHeader('Server','framework/'.APP_NAME);
 		//$this->setHeader('Date',date(DATE_RFC2822));

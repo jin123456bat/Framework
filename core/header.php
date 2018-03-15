@@ -185,7 +185,7 @@ class header extends base
 	 */
 	static function send($key, $value = null)
 	{
-		if (request::php_sapi_name() == 'web')
+		if (env::php_sapi_name() == 'web')
 		{
 			if (empty($value))
 			{
@@ -203,7 +203,7 @@ class header extends base
 	 */
 	function sendAll()
 	{
-		if (request::php_sapi_name() == 'web') 
+		if (env::php_sapi_name() == 'web') 
 		{
 			foreach ($this->_header as $key => $value)
 			{

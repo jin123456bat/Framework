@@ -52,7 +52,7 @@ class application extends component
 			
 			if (isset($_SERVER['argc']) && $_SERVER['argc'] == 1)
 			{
-				request::$_php_sapi_name = 'server';
+				env::$_php_sapi_name = 'server';
 			}
 		}
 		
@@ -297,7 +297,7 @@ class application extends component
 	 */
 	function run()
 	{
-		switch (request::php_sapi_name())
+		switch (env::php_sapi_name())
 		{
 			case 'cli':
 				$router = self::load(router::class);
@@ -376,7 +376,7 @@ class application extends component
 			}
 			else if ($response instanceof response)
 			{
-				if (request::php_sapi_name() == 'web')
+				if (env::php_sapi_name() == 'web')
 				{
 					$response->initlize();
 					

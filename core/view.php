@@ -48,7 +48,6 @@ class view extends response
 		
 		if (file_exists($template))
 		{
-			
 			$this->_template = $template;
 			$this->_engine->setTemplate($template);
 		}
@@ -70,8 +69,7 @@ class view extends response
 			$this->_engine->setTempalteName($this->_template);
 		}
 		parent::__construct();
-		$this->setHeader('Content-Type','text/html;charset='.strtolower(ini_get('default_charset')));
-	}
+	 }
 
 	/**
 	 * 设置模板文件夹
@@ -196,7 +194,7 @@ class view extends response
 					}
 				}
 				
-				$label = '<script src="'.$path.'" type="text/javascript" /></script>';
+				$label = '<script src="'.$path.'" type="text/javascript"></script>';
 				$body = str_replace('</head>', $label.'</head>', $body);
 			}
 		}

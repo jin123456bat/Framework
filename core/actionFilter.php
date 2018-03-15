@@ -106,7 +106,7 @@ class actionFilter extends component
 	 */
 	function csrf()
 	{
-		if (request::php_sapi_name() == 'cli')
+		if (env::php_sapi_name() == 'cli')
 		{
 			return false;
 		}
@@ -144,7 +144,7 @@ class actionFilter extends component
 	 */
 	function singleThread()
 	{
-		if (request::php_sapi_name() == 'cli')
+		if (env::php_sapi_name() == 'cli')
 		{
 			if (method_exists($this->_control, '__single'))
 			{

@@ -5,27 +5,7 @@ use framework\core\request\parser\parser;
 use framework\vendor\file;
 
 class request extends base
-{
-
-	public static $_php_sapi_name = 'cli';
-
-	/**
-	 * 代码执行方式 cli web server
-	 * @return string
-	 */
-	static function php_sapi_name()
-	{
-		if (stripos(php_sapi_name(), 'cli') !== false)
-		{
-			return self::$_php_sapi_name;
-		}
-		else
-		{
-			self::$_php_sapi_name = 'web';
-			return self::$_php_sapi_name;
-		}
-	}
-	
+{	
 	/**
 	 * 获取客户端真实IP
 	 * @return string|unknown
