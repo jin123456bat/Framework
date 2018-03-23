@@ -3,7 +3,7 @@ namespace framework\core;
 
 use framework\core\database\mysql\field;
 
-abstract class entity extends base
+abstract class entity extends base implements \ArrayAccess 
 {
 	/**
 	 * 存放原始数据
@@ -22,13 +22,47 @@ abstract class entity extends base
 		$this->_data = $data;
 	}
 	
+	/**
+	 * 魔术方法，用于使entity可以通过对象的方式访问数据
+	 * @param unknown $name
+	 * @return mixed|NULL
+	 */
 	function __get($name)
 	{
 		if (isset($this->_data[$name]))
 		{
-			return $this->_data[$name];
+			if (method_exists($this, '__getter'))
+			{
+				$getter = call_user_func(array($this,'__getter'));
+				if (isset($getter[$name]) && is_callable($getter[$name]))
+				{
+					$result = call_user_func($getter[$name],$this->_data);
+					return $result;
+				}
+			}
+			$result = $this->_data[$name];
+			return $result;
 		}
 		return NULL;
+	}
+	
+	/**
+	 * 请求器，当使用对象访问或者数组访问实体中的数据的时候，假如在请求器中定义了访问方式
+	 * 会返回请求器中的数据，而不是从原始数据中获取
+	 * 用于数据层和应用层分离
+	 * 参数$data是原始数据，不会经过请求器
+	 * @example
+	 * return array(
+	 * 		'status' => function($data){
+	 * 			return !$data['status]
+	 * 		}
+	 * );
+	 * @param unknown $offset
+	 * @return array
+	 */
+	function __getter($offset)
+	{
+		return array();
 	}
 	
 	function __set($name,$value)
@@ -38,7 +72,7 @@ abstract class entity extends base
 	
 	function __isset($name)
 	{
-		return isset($this->_data[$name])?!empty($this->_data[$name]):false;
+		return isset($this->_data[$name]);
 	}
 	
 	/**
@@ -797,4 +831,43 @@ abstract class entity extends base
 	{
 		$this->_error[$field][] = $message;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see ArrayAccess::offsetExists()
+	 */
+	public function offsetExists($offset)
+	{
+		// TODO 自动生成的方法存根
+		return isset($this->$offset);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see ArrayAccess::offsetGet()
+	 */
+	public function offsetGet($offset)
+	{
+		return $this->$offset;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see ArrayAccess::offsetSet()
+	 */
+	public function offsetSet($offset, $value)
+	{
+		$this->$offset = $value;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see ArrayAccess::offsetUnset()
+	 */
+	public function offsetUnset($offset)
+	{
+		// TODO 自动生成的方法存根
+		unset($this->$offset);
+	}
+
 }
