@@ -5,29 +5,31 @@ use framework\core\request\parser\parser;
 use framework\vendor\file;
 
 class request extends base
-{	
+{
+
 	/**
 	 * 获取客户端真实IP
+	 * 
 	 * @return string|unknown
 	 */
 	static function getIp()
 	{
 		$cip = '';
-		if(!empty($_SERVER["HTTP_CLIENT_IP"]))
+		if (! empty($_SERVER["HTTP_CLIENT_IP"]))
 		{
 			$cip = $_SERVER["HTTP_CLIENT_IP"];
 		}
-		else if(!empty($_SERVER["HTTP_X_FORWARDED_FOR"]))
+		else if (! empty($_SERVER["HTTP_X_FORWARDED_FOR"]))
 		{
 			$cip = $_SERVER["HTTP_X_FORWARDED_FOR"];
 		}
-		else if(!empty($_SERVER["REMOTE_ADDR"]))
+		else if (! empty($_SERVER["REMOTE_ADDR"]))
 		{
 			$cip = $_SERVER["REMOTE_ADDR"];
 		}
 		return $cip;
 	}
-	
+
 	/**
 	 * 获取客户端的user-agent
 	 */
@@ -35,9 +37,10 @@ class request extends base
 	{
 		return self::header('user_agent');
 	}
-	
+
 	/**
 	 * 获取请求头
+	 * 
 	 * @return unknown[]
 	 */
 	public static function header($name = NULL)
@@ -45,9 +48,9 @@ class request extends base
 		if (empty($name))
 		{
 			$headers = array();
-			foreach($_SERVER as $key => $value)
+			foreach ($_SERVER as $key => $value)
 			{
-				if(substr($key, 0, 5) === 'HTTP_')
+				if (substr($key, 0, 5) === 'HTTP_')
 				{
 					$key = substr($key, 5);
 					$key = strtolower($key);
@@ -57,17 +60,18 @@ class request extends base
 					$headers[$key] = $value;
 				}
 			}
-			return $headers; 
+			return $headers;
 		}
 		else
 		{
-			return isset($_SERVER['HTTP_'.strtoupper($name)])?$_SERVER['HTTP_'.strtoupper($name)]:NULL;
+			return isset($_SERVER['HTTP_' . strtoupper($name)]) ? $_SERVER['HTTP_' . strtoupper($name)] : NULL;
 		}
 	}
-	
+
 	/**
 	 * 获取post提交的原始数据
 	 * enctype="multipart/form-data" 的时候无效
+	 * 
 	 * @return string
 	 */
 	static function body()
@@ -84,14 +88,14 @@ class request extends base
 	{
 		return strtolower($_SERVER['REQUEST_METHOD']);
 	}
-	
+
 	/**
 	 * 获取当前的url
 	 */
 	static function url()
 	{
-		$secheme = self::isHttps()?'https://':'http://';
-		return $secheme.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+		$secheme = self::isHttps() ? 'https://' : 'http://';
+		return $secheme . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 	}
 
 	/**
@@ -162,23 +166,23 @@ class request extends base
 	/**
 	 * 读取post变量
 	 * 
-	 * @param unknown $name
-	 * @param unknown $defaultValue
-	 * @param unknown $filter
-	 * @param string $type
-	 * @param string|parser $parser
+	 * @param unknown $name  
+	 * @param unknown $defaultValue 默认值       
+	 * @param string $type 变量类型
+	 * @param unknown $filter 过滤器
+	 * @param string|parser $parser 请求解析器
 	 * @return mixed|string|boolean|number|\core\StdClass|\core\unknown|string
 	 */
-	public static function post($name = '', $defaultValue = null, $filter = null, $type = '',$parser = '')
+	public static function post($name = '', $defaultValue = null, $type = '', $filter = null, $parser = '')
 	{
-		if (!empty($parser))
+		if (! empty($parser))
 		{
 			if (is_string($parser))
 			{
-				$parser = class_exists($parser)?application::load($parser):application::load(parser::class,$parser);
+				$parser = class_exists($parser) ? application::load($parser) : application::load(parser::class, $parser);
 			}
 			
-			if (!empty($parser) && $parser instanceof parser)
+			if (! empty($parser) && $parser instanceof parser)
 			{
 				$parser->setData(file_get_contents('php://input'));
 				$requestContent = $parser->getData();
@@ -197,7 +201,7 @@ class request extends base
 		{
 			return $requestContent;
 		}
-		else if (isset($requestContent[$name]) && $requestContent[$name]!=='')
+		else if (isset($requestContent[$name]) && $requestContent[$name] !== '')
 		{
 			$data = $requestContent[$name];
 			
@@ -225,7 +229,7 @@ class request extends base
 						}
 						else if (! empty($filter_t))
 						{
-							list ($func, $param) = explode(':', $filter_t);
+							list($func, $param) = explode(':', $filter_t);
 							if (is_callable($func))
 							{
 								$pattern = '$["\'].["\']$';
@@ -263,22 +267,28 @@ class request extends base
 
 	/**
 	 * 读取get变量
-	 * @param unknown $name 参数名称
-	 * @param unknown $defaultValue 默认值
-	 * @param unknown $filter 过滤器名称
-	 * @param string $type 默认是s
+	 * 
+	 * @param unknown $name
+	 *        参数名称
+	 * @param unknown $defaultValue
+	 *        默认值
+	 * @param string $type
+	 *        默认是s
+	 * @param unknown $filter
+	 *        过滤器名称
+	 * @param parser|string $parser 请求解析器
 	 * @return mixed
 	 */
-	public static function get($name = '', $defaultValue = null, $filter = null, $type = '',$parser = '')
+	public static function get($name = '', $defaultValue = null, $type = '', $filter = null, $parser = '')
 	{
-		if (!empty($parser))
+		if (! empty($parser))
 		{
 			if (is_string($parser))
 			{
-				$parser = class_exists($parser)?application::load($parser):application::load(parser::class,$parser);
+				$parser = class_exists($parser) ? application::load($parser) : application::load(parser::class, $parser);
 			}
 			
-			if (!empty($parser) && $parser instanceof parser)
+			if (! empty($parser) && $parser instanceof parser)
 			{
 				$parser->setData($_SERVER['QUERY_STRING']);
 				$requestContent = $parser->getData();
@@ -297,7 +307,7 @@ class request extends base
 		{
 			return $requestContent;
 		}
-		else if (isset($requestContent[$name]) && $requestContent[$name]!=='')
+		else if (isset($requestContent[$name]) && $requestContent[$name] !== '')
 		{
 			$data = $requestContent[$name];
 			
@@ -325,7 +335,7 @@ class request extends base
 						}
 						else if (! empty($filter_t))
 						{
-							list ($func, $param) = explode(':', $filter_t);
+							list($func, $param) = explode(':', $filter_t);
 							if (is_callable($func))
 							{
 								$pattern = '/["\'][^"\']+["\']/';
@@ -364,18 +374,18 @@ class request extends base
 	/**
 	 * 读取request变量
 	 * 
-	 * @param unknown $name        
-	 * @param unknown $defaultValue        
-	 * @param unknown $filter        
-	 * @param string $type        
+	 * @param unknown $name        变量名称
+	 * @param unknown $defaultValue       默认值 
+	 * @param string $type  变量类型
+	 * @param unknown $filter     过滤器        
 	 */
-	public static function param($name = '', $defaultValue = null, $filter = null, $type = '')
+	public static function param($name = '', $defaultValue = null, $type = '',$filter = null)
 	{
 		if ($name === '')
 		{
 			return $_REQUEST;
 		}
-		else if (isset($_REQUEST[$name]) && $_REQUEST[$name]!=='')
+		else if (isset($_REQUEST[$name]) && $_REQUEST[$name] !== '')
 		{
 			$data = $_REQUEST[$name];
 			
@@ -403,7 +413,7 @@ class request extends base
 						}
 						else if (! empty($filter_t))
 						{
-							list ($func, $param) = explode(':', $filter_t);
+							list($func, $param) = explode(':', $filter_t);
 							if (is_callable($func))
 							{
 								$pattern = '$["\'].["\']$';
