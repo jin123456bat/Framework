@@ -1,9 +1,9 @@
 <?php
 namespace framework\core;
 
-use framework\core\database\sql;
 use framework\core\database\mysql\table;
 use framework;
+use framework\core\database\sql;
 
 /**
  * 表数据	
@@ -187,8 +187,6 @@ class model extends component
 	 */
 	function initlize()
 	{
-		$this->_sql = new sql();
-		
 		if (method_exists($this, '__config'))
 		{
 			$config = $this->__config();
@@ -204,14 +202,17 @@ class model extends component
 		
 		// 实例化mysql的类
 		$type = $config['type'];
-		$type = '\\framework\\core\\database\\driver\\' . $type;
+		$db = '\\framework\\core\\database\\driver\\' . $type;
 		
-		$this->_db = $type::getInstance($config);
+		$this->_db = $db::getInstance($config);
 		
 		if (method_exists($this, '__tableName'))
 		{
 			$this->_table = $this->__tableName();
 		}
+		
+		$sql = '\\framework\\core\\database\\'.$type.'\\sql';
+		$this->_sql = application::load($sql);
 		
 		$this->setTable($this->getTable());
 		parent::initlize();
@@ -579,7 +580,7 @@ class model extends component
 	 * 
 	 * @param unknown $name        
 	 * @param string $value        
-	 * @return \framework\core\database\sql
+	 * @return $this
 	 */
 	function duplicate($name, $value = '')
 	{

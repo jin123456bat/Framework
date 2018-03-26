@@ -2,7 +2,7 @@
 namespace framework\core\database\driver;
 
 use \PDO;
-use framework\core\database\sql;
+use framework\core\database\mysql\sql;
 use framework\core\log;
 use framework\core\database\database;
 
