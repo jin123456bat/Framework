@@ -57,9 +57,9 @@ class base
 	
 	/**
 	 * 变量类型强制转换
-	 *
+	 * 
 	 * @param unknown $variable
-	 * @param string $type
+	 * @param string $type  假如用逗号分割，按照枚举类型算
 	 * @return string|array|boolean|number|StdClass|unknown
 	 */
 	protected static function setVariableType($variable, $type = '')
