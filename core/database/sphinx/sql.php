@@ -31,9 +31,10 @@ class sql extends \framework\core\database\sql
 		}
 	}
 
-	function insert($data)
+	function insert($data = array())
 	{
 		$this->_temp['do'] = 'insert';
+		$this->_temp['insert_data'] = $data;
 	}
 
 	function delete()
@@ -41,8 +42,44 @@ class sql extends \framework\core\database\sql
 		$this->_temp['do'] = 'delete';
 	}
 
-	function update()
+	function update($name,$value = NULL)
 	{
 		$this->_temp['do'] = 'update';
+		
+		if (is_scalar($name))
+		{
+			$this->_temp['update_data'] = array(
+				$name => $value
+			);
+		}
+		else if (is_array($name) && !array_key_exists(0, $name))
+		{
+			$this->_temp['update_data'] = $name;
+		}
+	}
+	
+	function where($condition,$params = array())
+	{
+		
+	}
+	
+	function from($table)
+	{
+		$this->_temp['table'] = $table;
+	}
+	
+	function __toString()
+	{
+		switch ($this->_temp['do'])
+		{
+			case 'insert':
+				break;
+			case 'delete':
+				break;
+			case 'select':
+				break;
+			case 'update':
+				break;
+		}
 	}
 }

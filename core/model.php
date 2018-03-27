@@ -134,9 +134,6 @@ class model extends component
 			if (empty(array_diff(array(
 				'type',
 				'server',
-				'dbname',
-				'user',
-				'password',
 			), array_keys($config))))
 			{
 				return $config;
@@ -190,7 +187,7 @@ class model extends component
 		if (method_exists($this, '__config'))
 		{
 			$config = $this->__config();
-			if (is_scalar($config))
+			if (!empty($config) && is_scalar($config))
 			{
 				$config = self::getDefaultConfig($this->getTable(),$config);
 			}

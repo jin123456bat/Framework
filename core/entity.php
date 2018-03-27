@@ -57,10 +57,9 @@ abstract class entity extends base implements \ArrayAccess
 	 * 			return !$data['status]
 	 * 		}
 	 * );
-	 * @param unknown $offset
-	 * @return array
+	 * @return array 
 	 */
-	function __getter($offset)
+	function __getter()
 	{
 		return array();
 	}
