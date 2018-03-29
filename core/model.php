@@ -248,7 +248,7 @@ class model extends component
 	function setTable($table)
 	{
 		$this->_table = $table;
-		$this->_sql->from($this->getTable());
+		$this->_sql->from($table);
 		$this->parse();
 	}
 
@@ -643,7 +643,7 @@ class model extends component
 			}
 			else
 			{
-				$sql->clear();
+				$sql->clear()->from($this->getTable());
 			}
 			$sql = $sql_string;
 		}

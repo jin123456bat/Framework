@@ -3,11 +3,6 @@ namespace framework\core\database\mysql;
 
 class sql extends \framework\core\database\sql
 {
-
-	private $_temp = array();
-
-	private $_do = '';
-
 	function __construct()
 	{
 	}
@@ -38,72 +33,16 @@ class sql extends \framework\core\database\sql
 		}
 	}
 
-	/**
-	 * do select
-	 * 
-	 * @param unknown $field        
-	 */
-	function select($fields = '*')
-	{
-		$this->_do = 'select';
-		if (is_array($fields))
-		{
-			foreach ($fields as $as => $field)
-			{
-				if ($field instanceof sql)
-				{
-					$field = $field->__toString();
-				}
-				if (is_string($as))
-				{
-					$this->_temp['fields'][$as] = $field;
-				}
-				else if (is_int($as))
-				{
-					$this->_temp['fields'][] = $field;
-				}
-			}
-		}
-		else if ($fields instanceof sql)
-		{
-			$this->_temp['fields'][] = $fields->__toString();
-		}
-		else if (is_string($fields))
-		{
-			$this->_temp['fields'][] = $fields;
-		}
-		return $this;
-	}
-
-	function update($key, $value = null)
-	{
-		$this->_do = 'update';
-		
-		if (is_array($key))
-		{
-			foreach ($key as $index => $value)
-			{
-				if (is_string($index))
-				{
-					$this->_temp['update'][$index] = $value;
-				}
-			}
-		}
-		else if (is_string($key))
-		{
-			$this->_temp['update'][$key] = $value;
-		}
-		return $this;
-	}
+	
 
 	/**
 	 * replace into
 	 */
 	function replace($key, $value = null)
 	{
-		if (empty($this->_do))
+		if (empty($this->_temp['do']))
 		{
-			$this->_do = 'REPLACE';
+			$this->_temp['do'] = 'REPLACE';
 			
 			if ($value instanceof sql)
 			{
@@ -127,42 +66,6 @@ class sql extends \framework\core\database\sql
 					$this->_params[] = $val;
 				}
 			}
-		}
-		return $this;
-	}
-
-	/**
-	 * $this->insert('a',1)->insert('b',2);
-	 * $this->insert(['a'=>1,'b'=>2]);
-	 * insert into
-	 * 
-	 * @param unknown $name        
-	 * @param unknown $value        
-	 * @return $this
-	 */
-	function insert($name, $value = null)
-	{
-		$this->_do = 'INSERT';
-		
-		if (is_array($name))
-		{
-			foreach ($name as $index => $val)
-			{
-				$this->insert($index, $val);
-			}
-		}
-		else if (is_string($name))
-		{
-			$this->_temp['insert'][$name] = $value;
-		}
-		else if (is_int($name))
-		{
-			$this->_temp['insert'][] = $value;
-		}
-		else if ($name instanceof sql && $name->getType() == 'select')
-		{
-			// insert select
-			$this->_temp['insert'] = $name;
 		}
 		return $this;
 	}
@@ -206,31 +109,6 @@ class sql extends \framework\core\database\sql
 	function ignore()
 	{
 		$this->_temp['ignore'] = true;
-		return $this;
-	}
-
-	function delete()
-	{
-		$this->_do = 'DELETE ';
-		return $this;
-	}
-
-	/**
-	 * 添加额外的表
-	 * 
-	 * @param unknown $table        
-	 * @return $this
-	 */
-	function from($table, $as = '')
-	{
-		if (empty($as))
-		{
-			$this->_temp['from'][] = self::fieldFormat($table);
-		}
-		else
-		{
-			$this->_temp['from'][$as] = self::fieldFormat($table);
-		}
 		return $this;
 	}
 
@@ -525,6 +403,11 @@ class sql extends \framework\core\database\sql
 		return $this;
 	}
 
+	/**
+	 * @param unknown $start
+	 * @param unknown $length
+	 * @return $this
+	 */
 	function limit($start, $length = null)
 	{
 		if ($length === null)
@@ -686,25 +569,13 @@ class sql extends \framework\core\database\sql
 		return $this;
 	}
 
-	public static function fieldFormat($field)
-	{
-		$field = trim($field, '` ');
-		$fields = explode('.', $field);
-		$string = array();
-		foreach ($fields as $value)
-		{
-			$string[] = '`' . trim($value, '` ') . '`';
-		}
-		return implode('.', $string);
-	}
-
 	function __toString()
 	{
 		if (isset($this->_temp['union']) && ! empty($this->_temp['union']))
 		{
 			return $this->_temp['union'];
 		}
-		switch (strtolower(trim($this->_do)))
+		switch (strtolower(trim($this->_temp['do'])))
 		{
 			case 'insert':
 				$table = '';
@@ -881,38 +752,6 @@ class sql extends \framework\core\database\sql
 		return '';
 	}
 
-	function getParams()
-	{
-		$this->_temp['params'] = isset($this->_temp['params']) ? $this->_temp['params'] : array();
-		$this->_temp['_having_params'] = isset($this->_temp['_having_params']) ? $this->_temp['_having_params'] : array();
-		$this->_temp['duplicate_params'] = isset($this->_temp['duplicate_params']) ? $this->_temp['duplicate_params'] : array();
-		$this->_temp['other_sql_params'] = isset($this->_temp['other_sql_params']) ? $this->_temp['other_sql_params'] : array();
-		
-		return array_merge($this->_temp['params'], $this->_temp['_having_params'], $this->_temp['duplicate_params'], $this->_temp['other_sql_params']);
-	}
-
-	/**
-	 * 除了from外都清空
-	 */
-	function clear()
-	{
-		// 保留from
-		$from = $this->_temp['from'];
-		$this->_temp = array(
-			'from' => $from
-		);
-		$this->_do = '';
-	}
-	
-	/**
-	 * 清空fields和limit
-	 */
-	function clearWithoutCondition()
-	{
-		unset($this->_temp['fields']);
-		unset($this->_temp['limit']);
-	}
-
 	/**
 	 * sql查询的类型
 	 * 
@@ -920,6 +759,6 @@ class sql extends \framework\core\database\sql
 	 */
 	function getType()
 	{
-		return strtolower(trim($this->_do));
+		return strtolower(trim($this->_temp['do']));
 	}
 }
