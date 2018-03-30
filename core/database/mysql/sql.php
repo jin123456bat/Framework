@@ -33,8 +33,6 @@ class sql extends \framework\core\database\sql
 		}
 	}
 
-	
-
 	/**
 	 * replace into
 	 */

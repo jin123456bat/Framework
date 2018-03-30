@@ -96,7 +96,13 @@ class model extends component
 	 * @var string
 	 */
 	private $_keep = false;
-
+	
+	/**
+	 * 配置
+	 * @var array
+	 */
+	private $_config = array();
+	
 	function __construct($table = null)
 	{
 		$this->_table = $table;
@@ -660,7 +666,6 @@ class model extends component
 			$this->_compress_sql[] = $complete_sql;
 			return true;
 		}
-		var_dump($sql);
 		
 		if ($this->_debug)
 		{
@@ -735,7 +740,7 @@ class model extends component
 	{
 		$this->_sql->where($field.' like ?',array('%'.$value.'%'));
 	}
-
+	
 	/**
 	 * 提交压缩后的sql
 	 */
@@ -783,5 +788,23 @@ class model extends component
 			return $result;
 		}
 		return false;
-	}	
+	}
+	
+	/**
+	 * sphinx专用
+	 * @return boolean
+	 */
+	function getMeta()
+	{
+		if(strtolower($this->_config['type']) == 'sphinx')
+		{
+			$result = $this->query('show meta');
+			$temp = array();
+			foreach ($result as $r)
+			{
+				$temp[$r['Variable_name']] = $r['Value'];
+			}
+			return $temp;
+		}
+	}
 }

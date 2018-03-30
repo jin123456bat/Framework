@@ -197,7 +197,27 @@ class sphinx extends database
 			$statement = $this->_pdo->prepare($sql);
 			if ($statement)
 			{
-				$statement->execute($array);
+				foreach ($array as $key => $value)
+				{
+					$type = PDO::PARAM_STR;
+					switch (gettype($value))
+					{
+						case 'integer':$type = PDO::PARAM_INT;break;
+						case 'string':$type = PDO::PARAM_STR;break;
+						case 'boolean':$type = PDO::PARAM_BOOL;break;
+						case 'NULL':$type = PDO::PARAM_NULL;break;
+					}
+					if (is_int($key))
+					{
+						$key = $key+1;
+					}
+					else if (is_string($key))
+					{
+						$key = ':'.$key;
+					}
+					$statement->bindValue($key, $value,$type);
+				}
+				$statement->execute();
 				$result = $statement->fetchAll(PDO::FETCH_ASSOC);
 			}
 		}
@@ -206,7 +226,27 @@ class sphinx extends database
 			$statement = $this->_pdo->prepare($sql);
 			if ($statement)
 			{
-				$statement->execute($array);
+				foreach ($array as $key => $value)
+				{
+					$type = PDO::PARAM_STR;
+					switch (gettype($value))
+					{
+						case 'integer':$type = PDO::PARAM_INT;break;
+						case 'string':$type = PDO::PARAM_STR;break;
+						case 'boolean':$type = PDO::PARAM_BOOL;break;
+						case 'NULL':$type = PDO::PARAM_NULL;break;
+					}
+					if (is_int($key))
+					{
+						$key = $key+1;
+					}
+					else if (is_string($key))
+					{
+						$key = ':'.$key;
+					}
+					$statement->bindValue($key, $value,$type);
+				}
+				$statement->execute();
 				$result = $statement->rowCount();
 			}
 		}
@@ -215,7 +255,27 @@ class sphinx extends database
 			$statement = $this->_pdo->prepare($sql);
 			if ($statement)
 			{
-				$statement->execute($array);
+				foreach ($array as $key => $value)
+				{
+					$type = PDO::PARAM_STR;
+					switch (gettype($value))
+					{
+						case 'integer':$type = PDO::PARAM_INT;break;
+						case 'string':$type = PDO::PARAM_STR;break;
+						case 'boolean':$type = PDO::PARAM_BOOL;break;
+						case 'NULL':$type = PDO::PARAM_NULL;break;
+					}
+					if (is_int($key))
+					{
+						$key = $key+1;
+					}
+					else if (is_string($key))
+					{
+						$key = ':'.$key;
+					}
+					$statement->bindValue($key, $value,$type);
+				}
+				$statement->execute();
 				$result = $statement->fetchAll(PDO::FETCH_ASSOC);
 			}
 		}
@@ -241,7 +301,27 @@ class sphinx extends database
 		$statement = $this->_pdo->prepare($sql);
 		if ($statement)
 		{
-			$statement->execute($array);
+			foreach ($array as $key => $value)
+			{
+				$type = PDO::PARAM_STR;
+				switch (gettype($value))
+				{
+					case 'integer':$type = PDO::PARAM_INT;break;
+					case 'string':$type = PDO::PARAM_STR;break;
+					case 'boolean':$type = PDO::PARAM_BOOL;break;
+					case 'NULL':$type = PDO::PARAM_NULL;break;
+				}
+				if (is_int($key))
+				{
+					$key = $key+1;
+				}
+				else if (is_string($key))
+				{
+					$key = ':'.$key;
+				}
+				$statement->bindValue($key, $value,$type);
+			}
+			$statement->execute();
 			$result = $statement->fetchAll(PDO::FETCH_ASSOC);
 		}
 		list ($end_m_second, $end_second) = explode(' ', microtime());
@@ -271,7 +351,27 @@ class sphinx extends database
 		$result = array();
 		if ($statement)
 		{
-			$statement->execute($array);
+			foreach ($array as $key => $value)
+			{
+				$type = PDO::PARAM_STR;
+				switch (gettype($value))
+				{
+					case 'integer':$type = PDO::PARAM_INT;break;
+					case 'string':$type = PDO::PARAM_STR;break;
+					case 'boolean':$type = PDO::PARAM_BOOL;break;
+					case 'NULL':$type = PDO::PARAM_NULL;break;
+				}
+				if (is_int($key))
+				{
+					$key = $key+1;
+				}
+				else if (is_string($key))
+				{
+					$key = ':'.$key;
+				}
+				$statement->bindValue($key, $value,$type);
+			}
+			$statement->execute();
 			if (is_callable($callback))
 			{
 				$sql_result = $statement->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_NEXT);
@@ -300,7 +400,8 @@ class sphinx extends database
 	{
 		if (in_array(strtolower(substr(trim($sql), 0, stripos(trim($sql), ' '))), array(
 			'select',
-			'show'
+			'show',
+			'desc',
 		), true))
 		{
 			return 1;

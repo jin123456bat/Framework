@@ -113,31 +113,21 @@ class sql extends \framework\core\database\sql
 		return $this;
 	}
 	
-	function options($data)
+	/**
+	 * 设置options
+	 * @param array $data
+	 * @return \framework\core\database\sphinx\sql
+	 */
+	function options(array $data = array())
 	{
-		$support = array(
-			'agent_query_timeout',
-			'boolean_simplify',
-			'comment',
-			'cutoff',
-			'field_weights',
-			'global_idf',
-			'idf',
-			'local_df',
-			'index_weights',
-			'max_matches',
-			'max_query_time',
-			'max_predicted_time',
-			'ranker',
-			'retry_count',
-			'retry_delay',
-			'reverse_scan',
-			'sort_method',
-			'rand_seed',
-		);
-		if (empty($data))
+		$string = array();
+		foreach($data as $key => $value)
 		{
-			$this->_temp['option'] = array();
+			$string[] = $key.'='.$value;
+		}
+		if (!empty($string))
+		{
+			$this->_temp['options'] = ' OPTION '.implode(',', $string);
 		}
 		return $this;
 	}
@@ -203,7 +193,9 @@ class sql extends \framework\core\database\sql
 				
 				$this->_temp['limit'] = isset($this->_temp['limit']) ? $this->_temp['limit'] : '';
 				
-				$sql = 'select '.$fields.' from '.$table .$this->_temp['where'] . $this->_temp['group'] . $this->_temp['having'] . $this->_temp['order'] . $this->_temp['limit'];
+				$this->_temp['options'] = isset($this->_temp['options']) ? $this->_temp['options']:'';
+				
+				$sql = 'select '.$fields.' from '.$table .$this->_temp['where'] . $this->_temp['group'] . $this->_temp['having'] . $this->_temp['order'] . $this->_temp['limit'].$this->_temp['options'];
 				return $sql;
 				break;
 			case 'update':
