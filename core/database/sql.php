@@ -60,7 +60,16 @@ abstract class sql extends base
 	{
 		if (empty($as))
 		{
-			$this->_temp['from'][] = self::fieldFormat($table);
+			if (is_string($table))
+			{
+				$this->_temp['from'][] = self::fieldFormat($table);
+			}
+			else
+			{
+				$this->_temp['from'] = array_map(function($field){
+					return self::fieldFormat($field);
+				}, $table);
+			}
 		}
 		else
 		{

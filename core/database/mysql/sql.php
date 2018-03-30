@@ -702,19 +702,13 @@ class sql extends \framework\core\database\sql
 				{
 					foreach ($this->_temp['update'] as $index => $value)
 					{
-						if (substr($index, - 2) == '+=')
-						{
-							$index = substr($index, 0, - 2);
-							$set .= self::fieldFormat($index) . '=' . self::fieldFormat($index) . '+' . $value . ',';
-						}
-						else if (substr($index, - 2) == '-=')
-						{
-							$index = substr($index, 0, - 2);
-							$set .= self::fieldFormat($index) . '=' . self::fieldFormat($index) . '-' . $value . ',';
-						}
-						else
+						if (is_string($value))
 						{
 							$set .= self::fieldFormat($index) . '=\'' . addslashes($value) . '\',';
+						}
+						else if ($value instanceof expression)
+						{
+							$set .= self::fieldFormat($index) . '=' .$value.',';
 						}
 					}
 					$set = rtrim($set, ',');

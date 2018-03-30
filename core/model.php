@@ -8,26 +8,6 @@ use framework\core\database\sql;
 /**
  * 表数据	
  * @author jin	
- * @method model where($sql,array $array = array(),$combine = 'and') 添加条件语句	
- * @method model in($field,array $data,$combine = 'and') in语句	
- * @method model forUpdate() select for update
- * @method model forceIndex($index) 强制索引
- * @method model replace($key, $value = null)  replace into
- * @method model join($table, $on, $combine = 'AND')
- * @method model leftJoin($table, $on, $combine = 'AND')
- * @method model rightJoin($table, $on, $combine = 'AND')
- * @method model innerJoin($table, $on, $combine = 'AND')
- * @method model fullJoin($table, $on, $combine = 'AND')
- * @method model union($all = false, $sql_)
- * @method model order($field, $order = 'ASC')
- * @method model group($fields)
- * @method model limit($start, $length = null)
- * @method model between($field, $a, $b, $combine = 'and')
- * @method model notbetween($field, $a, $b, $combine = 'and')
- * @method model notIn($field, array $data = array(), $combine = 'and')
- * @method model isNULL($fields, $combine = 'and')
- * @method model having($sql, array $data = array(), $combine = 'and')
- * @method model distinct()
  */
 class model extends component
 {

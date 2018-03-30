@@ -190,6 +190,8 @@ class mysql extends database
 		}
 		else if ($isSelect == - 1)
 		{
+			var_dump($sql->__toString());
+			exit();
 			$statement = $this->_pdo->prepare($sql);
 			if ($statement)
 			{
