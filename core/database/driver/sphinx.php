@@ -113,7 +113,7 @@ class sphinx extends database
 		}
 		catch (\Exception $e)
 		{
-			var_dump($e);
+			var_dump($e->getMessage());
 			//连接数据库的时候必须trycatch，因为假如连接失败会导致页面提示错误信息，而这个错误信息中会包含数据库的相关信息，引发泄露
 			//或者set_exception_handler
 			exit('连接到数据库失败');
