@@ -2,6 +2,7 @@
 namespace framework\core\database;
 
 use framework\core\base;
+use framework\vendor\encryption;
 
 abstract class sql extends base
 {
@@ -193,56 +194,55 @@ abstract class sql extends base
 	 */
 	function getSql($sql = null, $params = array())
 	{
-		if (empty($sql))
+		if ($sql === NULL && count($params)==0)
 		{
 			$sql = $this->__toString();
-		}
-		
-		// 去掉sql中的百分号
-		$sql = str_replace('%', '#', $sql);
-		
-		$sql_s = str_replace('?', '%s', $sql);
-		if (empty($params))
-		{
 			$params = $this->getParams();
 		}
-		// echo $sql.'<br>|';
-		
+		//把变量参数和？号参数区分开
 		$num_params = array();
 		$word_params = array();
 		foreach ($params as $index => $value)
 		{
 			if (is_int($index))
 			{
-				$num_params[] = '\'' . $value . '\'';
+				$num_params[] = is_int($value)?$value:'\'' . $value . '\'';
 			}
-			else
+			else if (is_string($index))
 			{
-				$word_params[$index] = '\'' . $value . '\'';
+				$word_params[$index] = is_int($value)?$value:'\'' . $value . '\'';
 			}
 		}
 		
-		// 排序，防止出现 a把ab替换掉了
-		uksort($word_params, function ($a, $b) {
-			if (strlen($a) > strlen($b))
-			{
-				return - 1;
-			}
-			elseif (strlen($a) == strlen($b))
-			{
-				return 0;
-			}
-			return 1;
-		});
-			$sql_w = vsprintf($sql_s, $num_params);
-			// 把#替换为% 恢复sql
-			$sql_w = str_replace('#', '%', $sql_w);
+		if (!empty($num_params))
+		{
+			do{
+				$guid = encryption::random(12,'lower_word');
+			}while(stripos($sql, $guid) !== FALSE);
 			
-			foreach ($word_params as $index => $value)
+			$sql_s = '';
+			foreach (explode('?', $sql) as $k => $item)
 			{
-				$sql_w = str_replace(':' . $index, $value, $sql_w);
+				$sql_s .= $item.':'.$guid.'_'.$k;
+				if (isset($num_params[$k]))
+				{
+					$word_params[$guid.'_'.$k] = $num_params[$k];
+				}
 			}
-			return $sql_w;
+			$sql = substr($sql_s, 0,strlen($sql_s)-strlen($guid.'_'.$k));
+		}
+		
+		//把:name 替换成对应的数据
+		if (!empty($word_params))
+		{
+			$index = array_map(function($item){
+				return ':'.$item;
+			}, array_keys($word_params));
+			$value = array_values($word_params);
+			$sql= str_replace($index, $value, $sql);
+		}
+		
+		return $sql;
 	}
 	
 	

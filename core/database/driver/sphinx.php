@@ -107,7 +107,7 @@ class sphinx extends database
 				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // 使用默认的索引模式
 				PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false, // 不使用buffer，防止数据量过大导致php内存溢出，但是这个东西貌似需要直接操作pdo效果才会体现
 				PDO::ATTR_ERRMODE => (defined('DEBUG') && DEBUG) ? PDO::ERRMODE_EXCEPTION : PDO::ERRMODE_SILENT, // 抛出异常模式
-				PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $charset
+				PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $charset,
 			)); // 设置字符集
 			
 		}

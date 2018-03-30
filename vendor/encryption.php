@@ -80,7 +80,7 @@ class encryption
 		}
 		if (in_array('supper_word', $types))
 		{
-			for($i = ord('a');$i <= ord('z');$i++)
+			for($i = ord('A');$i <= ord('Z');$i++)
 			{
 				if (in_array(chr($i), $skip_content))
 				{
@@ -92,7 +92,7 @@ class encryption
 		
 		if (in_array('lower_word', $types))
 		{
-			for($i = ord('A');$i <= ord('Z');$i++)
+			for($i = ord('a');$i <= ord('z');$i++)
 			{
 				if (in_array(chr($i), $skip_content))
 				{
