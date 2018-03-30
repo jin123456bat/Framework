@@ -718,11 +718,13 @@ class sql extends \framework\core\database\sql
 					$set = '';
 				}
 				
+				$this->_temp['join'] = isset($this->_temp['join']) ? $this->_temp['join'] : '';
+				
 				$this->_temp['where'] = isset($this->_temp['where']) ? $this->_temp['where'] : '';
 				
 				$this->_temp['limit'] = isset($this->_temp['limit']) ? $this->_temp['limit'] : '';
 				
-				$sql = 'UPDATE ' . $table . $set . $this->_temp['where'] . $this->_temp['limit'];
+				$sql = 'UPDATE ' . $table .$this->_temp['join'] . $set . $this->_temp['where'] . $this->_temp['limit'];
 				
 				return $sql;
 			case 'delete':
