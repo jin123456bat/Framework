@@ -1,6 +1,12 @@
 <?php
 namespace framework\vendor\formatter;
 
+/**
+ * html代码格式化
+ * 用于显示在浏览器上
+ * @author jin12
+ *
+ */
 class html extends formatter
 {
 	function __construct($string,$charset = NULL)
