@@ -110,4 +110,32 @@ class encryption
 		}
 		return $string;
 	}
+	
+	/**
+	 * 加密
+	 * 可以通过decode方法解密
+	 * @param string $string
+	 * 要加密的明文
+	 * @param string $salt
+	 * 盐值
+	 */
+	static function encode($string,$salt = '')
+	{
+		
+	}
+	
+	/**
+	 * 尚未实现
+	 * 解密encode的返回值
+	 * 假如encode的时候salt非空，这里的salt参数也非空
+	 * 
+	 * @param string $string
+	 * 要解密的密文
+	 * @param string $salt
+	 * 加密的时候用到的盐值
+	 */
+	static function decode($string,$salt)
+	{
+		
+	}
 }
