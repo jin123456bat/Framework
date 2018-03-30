@@ -186,22 +186,22 @@ class model extends component
 	{
 		if (method_exists($this, '__config'))
 		{
-			$config = $this->__config();
-			if (!empty($config) && is_scalar($config))
+			$this->_config = $this->__config();
+			if (!empty($this->_config) && is_scalar($this->_config))
 			{
-				$config = self::getDefaultConfig($this->getTable(),$config);
+				$this->_config= self::getDefaultConfig($this->getTable(),$this->_config);
 			}
 		}
 		else
 		{
-			$config = self::getDefaultConfig($this->getTable());
+			$this->_config= self::getDefaultConfig($this->getTable());
 		}
 		
 		// 实例化mysql的类
-		$type = $config['type'];
+		$type = $this->_config['type'];
 		$db = '\\framework\\core\\database\\driver\\' . $type;
 		
-		$this->_db = $db::getInstance($config);
+		$this->_db = $db::getInstance($this->_config);
 		
 		if (method_exists($this, '__tableName'))
 		{
@@ -268,7 +268,10 @@ class model extends component
 	private function parse()
 	{
 		$this->_desc = $this->query('DESC `' . $this->getTable() . '`');
-		$this->_config['max_allowed_packet'] = $this->_db->getConfig('max_allowed_packet');
+		if (strtolower($this->_config['type']) == 'mysql')
+		{
+			$this->_config['max_allowed_packet'] = $this->_db->getConfig('max_allowed_packet');
+		}
 	}
 	
 	/**
@@ -657,6 +660,7 @@ class model extends component
 			$this->_compress_sql[] = $complete_sql;
 			return true;
 		}
+		var_dump($sql);
 		
 		if ($this->_debug)
 		{

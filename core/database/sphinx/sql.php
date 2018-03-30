@@ -59,7 +59,7 @@ class sql extends \framework\core\database\sql
 				}
 			}
 		}
-		else if (is_string($sql))
+		else if (is_string($sql) || $sql instanceof match)
 		{
 			if (empty($this->_temp['where']))
 			{

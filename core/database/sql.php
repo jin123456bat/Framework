@@ -244,4 +244,10 @@ abstract class sql extends base
 			}
 			return $sql_w;
 	}
+	
+	
+	function __call($method,$arguments)
+	{
+		exit('unsupport method:'.$method);
+	}
 }

@@ -51,7 +51,7 @@ class match
 	
 	function __toString()
 	{
-		return $this->_match;
+		return 'match(\''.addslashes($this->_match).'\')';
 	}
 	
 	/**
