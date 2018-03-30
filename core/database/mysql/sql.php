@@ -109,30 +109,35 @@ class sql extends \framework\core\database\sql
 		$this->_temp['ignore'] = true;
 		return $this;
 	}
-
+	
 	/**
-	 * 重新设定from
-	 * 
-	 * @param unknown $table        
-	 * @param string $as        
-	 * @return $this
+	 * {@inheritDoc}
+	 * @see \framework\core\database\sql::from()
 	 */
-	function setFrom($table, $as = '')
+	function from($table, $as = '')
 	{
-		if ($table instanceof sql)
+		if ($table instanceof sql && !empty($as))
 		{
-			$this->_temp['params'] = array_merge($table->getParams(), $this->getParams());
+			$sql = $table->getSql();
+			$this->_temp['from'][$as] = '('.$sql.')';
 		}
-		if (empty($as))
+		else if (empty($as))
+		{
+			if (is_string($table))
+			{
+				$this->_temp['from'] = array(
+					self::fieldFormat($table)
+				);
+			}
+			else if (is_array($table))
+			{
+				$this->_temp['from'] = $table;
+			}
+		}
+		else if (!empty($as) && is_string($table))
 		{
 			$this->_temp['from'] = array(
-				$table
-			);
-		}
-		else
-		{
-			$this->_temp['from'] = array(
-				$as => $table
+				$as => self::fieldFormat($table)
 			);
 		}
 		return $this;
@@ -238,6 +243,12 @@ class sql extends \framework\core\database\sql
 		return $this;
 	}
 
+	/**
+	 * @param unknown $table
+	 * @param unknown $on
+	 * @param string $combine
+	 * @return \framework\core\database\mysql\sql
+	 */
 	function join($table, $on, $combine = 'AND')
 	{
 		$table = '`' . trim($table, '`') . '`';
@@ -256,6 +267,12 @@ class sql extends \framework\core\database\sql
 		return $this;
 	}
 
+	/**
+	 * @param unknown $table
+	 * @param unknown $on
+	 * @param string $combine
+	 * @return \framework\core\database\mysql\sql
+	 */
 	function leftJoin($table, $on, $combine = 'AND')
 	{
 		$table = '`' . trim($table, '`') . '`';
@@ -274,6 +291,12 @@ class sql extends \framework\core\database\sql
 		return $this;
 	}
 
+	/**
+	 * @param unknown $table
+	 * @param unknown $on
+	 * @param string $combine
+	 * @return \framework\core\database\mysql\sql
+	 */
 	function rightJoin($table, $on, $combine = 'AND')
 	{
 		$table = '`' . trim($table, '`') . '`';
@@ -310,6 +333,12 @@ class sql extends \framework\core\database\sql
 		return $this;
 	}
 
+	/**
+	 * @param unknown $table
+	 * @param unknown $on
+	 * @param string $combine
+	 * @return \framework\core\database\mysql\sql
+	 */
 	function fullJoin($table, $on, $combine = 'AND')
 	{
 		$table = '`' . trim($table, '`') . '`';
@@ -354,162 +383,11 @@ class sql extends \framework\core\database\sql
 		return $this;
 	}
 
-	function order($field, $order = 'ASC')
-	{
-		if (is_array($field))
-		{
-			foreach ($field as $asc => $field_temp)
-			{
-				if (in_array(strtolower(trim($asc)), array(
-					'asc',
-					'desc'
-				)))
-				{
-					$this->order($field_temp, $asc);
-				}
-				else if (is_int($asc))
-				{
-					$this->order($field_temp, $order);
-				}
-				else
-				{
-					$this->order($asc, $field_temp);
-				}
-			}
-		}
-		else if (is_string($field))
-		{
-			if (empty($this->_temp['order']))
-			{
-				$this->_temp['order'] = ' ORDER BY ' . $field . ' ' . $order;
-			}
-			else
-			{
-				$this->_temp['order'] .= ',' . $field . ' ' . $order;
-			}
-		}
-		return $this;
-	}
-
-	function group($fields)
-	{
-		if (is_array($fields))
-		{
-			$fields = implode(',', $fields);
-		}
-		$this->_temp['group'] = ' GROUP BY ' . $fields;
-		return $this;
-	}
-
 	/**
-	 * @param unknown $start
-	 * @param unknown $length
-	 * @return $this
+	 * @param unknown $fields
+	 * @param string $combine
+	 * @return \framework\core\database\mysql\sql
 	 */
-	function limit($start, $length = null)
-	{
-		if ($length === null)
-		{
-			$this->_temp['limit'] = ' LIMIT ' . $start;
-		}
-		else
-		{
-			$this->_temp['limit'] = ' LIMIT ' . $start . ',' . $length;
-		}
-		return $this;
-	}
-
-	/**
-	 * between(a,1,10,'and')
-	 * 
-	 * @param unknown $field        
-	 * @param unknown $a        
-	 * @param unknown $b        
-	 * @param string $combine        
-	 * @return $this
-	 */
-	function between($field, $a, $b, $combine = 'and')
-	{
-		$this->where($field . ' BETWEEN ? and ?', array(
-			$a,
-			$b
-		), $combine);
-		return $this;
-	}
-
-	function notbetween($field, $a, $b, $combine = 'and')
-	{
-		$this->where($field . ' NOT BETWEEN ? and ?', array(
-			$a,
-			$b
-		), $combine);
-		return $this;
-	}
-
-	/**
-	 * field in (data1,data2...)
-	 * 当data的数据只有一个的时候会自动转化为field = data
-	 * 
-	 * @param unknown $field        
-	 * @param array $data        
-	 * @param string $combine        
-	 * @return $this
-	 */
-	function in($field, array $data = array(), $combine = 'and')
-	{
-		$data = array_unique($data);
-		if (count($data) > 1)
-		{
-			$sql = self::fieldFormat($field) . ' IN (' . implode(',', array_fill(0, count($data), '?')) . ')';
-			$this->where($sql, $data, $combine);
-		}
-		else if (count($data) == 1)
-		{
-			$data = array_shift($data);
-			if (is_scalar($data))
-			{
-				$sql = self::fieldFormat($field) . ' = ?';
-				$this->where($sql, array(
-					$data
-				), $combine);
-			}
-		}
-		return $this;
-	}
-
-	/**
-	 * field not in (data1,data2...)
-	 * 当data的数据只有一个的时候会自动转化为field = data
-	 * 
-	 * @param unknown $field        
-	 * @param array $data        
-	 * @param string $combine        
-	 * @return $this
-	 */
-	function notIn($field, array $data = array(), $combine = 'and')
-	{
-		if (! empty($data))
-		{
-			if (count($data) > 1)
-			{
-				$sql = self::fieldFormat($field) . ' NOT IN (' . implode(',', array_fill(0, count($data), '?')) . ')';
-				$this->where($sql, $data, $combine);
-			}
-			else if (count($data) == 1)
-			{
-				$data = array_shift($data);
-				if (is_scalar($data))
-				{
-					$sql = self::fieldFormat($field) . ' != ?';
-					$this->where($sql, array(
-						$data
-					), $combine);
-				}
-			}
-		}
-		return $this;
-	}
-
 	function isNULL($fields, $combine = 'and')
 	{
 		if (is_array($fields))
@@ -534,39 +412,19 @@ class sql extends \framework\core\database\sql
 		return $this;
 	}
 
-	function having($sql, array $data = array(), $combine = 'and')
-	{
-		if (is_array($sql))
-		{
-			$sql = '(' . implode(') ' . $combine . ' (', $sql) . ')';
-		}
-		
-		if (empty($this->_temp['having']))
-		{
-			$this->_temp['having'] = ' HAVING (' . $sql . ')';
-		}
-		else
-		{
-			$this->_temp['having'] .= ' ' . $combine . ' (' . $sql . ')';
-		}
-		
-		if (empty($this->_temp['_having_params']))
-		{
-			$this->_temp['_having_params'] = $data;
-		}
-		else
-		{
-			$this->_temp['_having_params'] = array_merge($this->_temp['_having_params'], $data);
-		}
-		return $this;
-	}
-
+	/**
+	 * @return \framework\core\database\mysql\sql
+	 */
 	function distinct()
 	{
 		$this->_temp['distinct'] = true;
 		return $this;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\database\sql::__toString()
+	 */
 	function __toString()
 	{
 		if (isset($this->_temp['union']) && ! empty($this->_temp['union']))

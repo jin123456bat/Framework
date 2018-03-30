@@ -83,34 +83,11 @@ class sql extends \framework\core\database\sql
 	}
 	
 	/**
-	 * field in (data1,data2...)
-	 * 当data的数据只有一个的时候会自动转化为field = data
-	 *
-	 * @param unknown $field
-	 * @param array $data
-	 * @param string $combine
-	 * @return $this
+	 * 尚未实现
 	 */
-	function in($field, array $data = array())
+	function facet()
 	{
-		$data = array_unique($data);
-		if (count($data) > 1)
-		{
-			$sql = self::fieldFormat($field) . ' IN (' . implode(',', array_fill(0, count($data), '?')) . ')';
-			$this->where($sql, $data);
-		}
-		else if (count($data) == 1)
-		{
-			$data = array_shift($data);
-			if (is_scalar($data))
-			{
-				$sql = self::fieldFormat($field) . ' = ?';
-				$this->where($sql, array(
-					$data
-				));
-			}
-		}
-		return $this;
+		
 	}
 	
 	/**
@@ -132,6 +109,10 @@ class sql extends \framework\core\database\sql
 		return $this;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 * @see \framework\core\database\sql::__toString()
+	 */
 	function __toString()
 	{
 		switch ($this->_temp['do'])
