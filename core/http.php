@@ -84,7 +84,7 @@ class http extends base
 				application::load(session::class);
 				$session_id = session_id();
 			}
-			$session_id = request::get(session_name(), $session_id, null, 's');
+			$session_id = request::get(session_name(), $session_id, 's');
 			$options[session_name()] = $session_id;
 		}
 		

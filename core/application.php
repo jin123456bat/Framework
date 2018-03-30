@@ -451,6 +451,7 @@ class application extends component
 		}
 		
 		$reflectionClass = new \ReflectionClass($class);
+		
 		if (!$reflectionClass->isTrait() && !$reflectionClass->isAbstract() && !$reflectionClass->isInterface())
 		{
 			$object = $reflectionClass->newInstanceArgs($args);

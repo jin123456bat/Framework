@@ -1,9 +1,9 @@
 <?php
 namespace framework\core;
 
-use framework\core\database\sql;
 use framework\core\database\mysql\table;
 use framework;
+use framework\core\database\sql;
 
 /**
  * 表数据	
@@ -96,7 +96,13 @@ class model extends component
 	 * @var string
 	 */
 	private $_keep = false;
-
+	
+	/**
+	 * 配置
+	 * @var array
+	 */
+	private $_config = array();
+	
 	function __construct($table = null)
 	{
 		$this->_table = $table;
@@ -134,9 +140,6 @@ class model extends component
 			if (empty(array_diff(array(
 				'type',
 				'server',
-				'dbname',
-				'user',
-				'password',
 			), array_keys($config))))
 			{
 				return $config;
@@ -187,31 +190,32 @@ class model extends component
 	 */
 	function initlize()
 	{
-		$this->_sql = new sql();
-		
 		if (method_exists($this, '__config'))
 		{
-			$config = $this->__config();
-			if (is_scalar($config))
+			$this->_config = $this->__config();
+			if (!empty($this->_config) && is_scalar($this->_config))
 			{
-				$config = self::getDefaultConfig($this->getTable(),$config);
+				$this->_config= self::getDefaultConfig($this->getTable(),$this->_config);
 			}
 		}
 		else
 		{
-			$config = self::getDefaultConfig($this->getTable());
+			$this->_config= self::getDefaultConfig($this->getTable());
 		}
 		
 		// 实例化mysql的类
-		$type = $config['type'];
-		$type = '\\framework\\core\\database\\driver\\' . $type;
+		$type = $this->_config['type'];
+		$db = '\\framework\\core\\database\\driver\\' . $type;
 		
-		$this->_db = $type::getInstance($config);
+		$this->_db = $db::getInstance($this->_config);
 		
 		if (method_exists($this, '__tableName'))
 		{
 			$this->_table = $this->__tableName();
 		}
+		
+		$sql = '\\framework\\core\\database\\'.$type.'\\sql';
+		$this->_sql = application::load($sql);
 		
 		$this->setTable($this->getTable());
 		parent::initlize();
@@ -250,7 +254,7 @@ class model extends component
 	function setTable($table)
 	{
 		$this->_table = $table;
-		$this->_sql->from($this->getTable());
+		$this->_sql->from($table);
 		$this->parse();
 	}
 
@@ -270,7 +274,10 @@ class model extends component
 	private function parse()
 	{
 		$this->_desc = $this->query('DESC `' . $this->getTable() . '`');
-		$this->_config['max_allowed_packet'] = $this->_db->getConfig('max_allowed_packet');
+		if (strtolower($this->_config['type']) == 'mysql')
+		{
+			$this->_config['max_allowed_packet'] = $this->_db->getConfig('max_allowed_packet');
+		}
 	}
 	
 	/**
@@ -579,7 +586,7 @@ class model extends component
 	 * 
 	 * @param unknown $name        
 	 * @param string $value        
-	 * @return \framework\core\database\sql
+	 * @return $this
 	 */
 	function duplicate($name, $value = '')
 	{
@@ -645,7 +652,7 @@ class model extends component
 			}
 			else
 			{
-				$sql->clear();
+				$sql->clear()->from($this->getTable());
 			}
 			$sql = $sql_string;
 		}
@@ -733,7 +740,7 @@ class model extends component
 	{
 		$this->_sql->where($field.' like ?',array('%'.$value.'%'));
 	}
-
+	
 	/**
 	 * 提交压缩后的sql
 	 */
@@ -781,5 +788,23 @@ class model extends component
 			return $result;
 		}
 		return false;
-	}	
+	}
+	
+	/**
+	 * sphinx专用
+	 * @return boolean
+	 */
+	function getMeta()
+	{
+		if(strtolower($this->_config['type']) == 'sphinx')
+		{
+			$result = $this->query('show meta');
+			$temp = array();
+			foreach ($result as $r)
+			{
+				$temp[$r['Variable_name']] = $r['Value'];
+			}
+			return $temp;
+		}
+	}
 }
