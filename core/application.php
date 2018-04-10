@@ -260,6 +260,8 @@ class application extends component
 						}
 					}
 				}
+				
+				//执行action
 				$response = call_user_func(array(
 					$controller,
 					$action
