@@ -14,6 +14,19 @@ class sql extends \framework\core\database\sql
 	{
 		$this->_temp['forUpdate'] = true;
 	}
+	
+	/**
+	 * insert delayed
+	 * replace delayed
+	 * 服务器会忽略用于on duplicate key update语句
+	 * 不能获取上次插入的ID
+	 * 如果在插入之前数据库关闭了，数据会丢失
+	 * 通常用来写入日志
+	 */
+	function delayed()
+	{
+		$this->_temp['delayed'] = true;
+	}
 
 	/**
 	 * 强制索引
@@ -442,6 +455,9 @@ class sql extends \framework\core\database\sql
 				
 				$this->_temp['ignore'] = isset($this->_temp['ignore']) && $this->_temp['ignore'] ? ' IGNORE' : '';
 				
+				
+				$this->_temp['delayed'] = (isset($this->_temp['delayed']) && $this->_temp['delayed'])?' DELAYED ':'';
+				
 				$sql = '';
 				if (isset($this->_temp['insert']))
 				{
@@ -465,7 +481,7 @@ class sql extends \framework\core\database\sql
 								return ':' . $value;
 							}, array_keys($this->_temp['insert']));
 						}
-						$sql = 'INSERT' . $this->_temp['ignore'] . ' INTO ' . $table . ' ' . $fields . ' VALUES (' . implode(',', $values) . ') ' . $this->_temp['duplicate'];
+						$sql = 'INSERT' .$this->_temp['delayed']. $this->_temp['ignore'] . ' INTO ' . $table . ' ' . $fields . ' VALUES (' . implode(',', $values) . ') ' . $this->_temp['duplicate'];
 					}
 					else if ($this->_temp['insert'] instanceof sql)
 					{
