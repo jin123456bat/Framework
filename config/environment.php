@@ -1,4 +1,6 @@
 <?php
+use framework\core\request;
+
 return array(
 	'display_errors' => 'On',
 	'error_reporting' => E_ALL,
@@ -6,15 +8,23 @@ return array(
 	
 	'max_execution_time' => 60,
 	'session' => array(
-		'cookie_lifetime' => 0,
-		'gc_maxlifetime' => 3600,
 		'use_cookies' => 1, // session的传递通过cookie实现
-		'name' => 'framework',
-		'use_trans_sid' => 0, // 禁止url中的session_id
 		'use_only_cookies' => 1, // 只使用cookie中的session_id
+		
+		//下面的参数只有当use_cookies为1的时候有效
+		'cookie_lifetime' => 0,//当sessionid通过cookie来传递的话，这个参数代表cookie的有效期，0代表一直到浏览器关闭
+		'cookie_domain' => '',//当sessionid通过cookie来传递的话
 		'cookie_httponly' => 'On', // 禁止js读取cookie
-		                           // 'cookie_secure' => 'On',//https
-		'hash_function' => 'sha256'
+		'cookie_secure' => request::isHttps()?'On':'Off',//https
+		
+		
+		'use_trans_sid' => 0, // 禁止url中的session_id
+		
+		
+		//下面的东西是全局的
+		'gc_maxlifetime' => 3600,
+		'name' => 'framework',//sessionid的名称
+		'hash_function' => 'sha256',
 		
 		// 只需要配置这2个东西就可以实现session存储在memcached中
 		// 'save_handler' => 'memcached',
