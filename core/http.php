@@ -76,7 +76,7 @@ class http extends base
 		}
 		
 		// 判断是否强制使用了url中的session_id
-		if (ini_get('session.use_trans_sid') == 1 && ini_get('use_cookies') == 0 && ini_get('use_only_cookies') == 0)
+ 		if (ini_get('session.use_trans_sid') == 1)
 		{
 			$session_id = session_id();
 			if (empty($session_id))
