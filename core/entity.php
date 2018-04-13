@@ -838,7 +838,7 @@ abstract class entity extends base implements \ArrayAccess
 	public function offsetExists($offset)
 	{
 		// TODO 自动生成的方法存根
-		return isset($this->$offset);
+		return isset($this->_data[$offset]);
 	}
 
 	/**
@@ -847,7 +847,20 @@ abstract class entity extends base implements \ArrayAccess
 	 */
 	public function offsetGet($offset)
 	{
-		return $this->$offset;
+		if (isset($this->_data[$offset]))
+		{
+			if (method_exists($this, '__getter'))
+			{
+				$getter = call_user_func(array($this,'__getter'));
+				if (isset($getter[$name]) && is_callable($getter[$offset]))
+				{
+					$result = call_user_func($getter[$offset],$this->_data);
+					return $result;
+				}
+			}
+			return $this->_data[$offset];
+		}
+		return NULL;
 	}
 
 	/**
@@ -856,7 +869,7 @@ abstract class entity extends base implements \ArrayAccess
 	 */
 	public function offsetSet($offset, $value)
 	{
-		$this->$offset = $value;
+		$this->_data[$offset] = $value;
 	}
 
 	/**
@@ -866,7 +879,7 @@ abstract class entity extends base implements \ArrayAccess
 	public function offsetUnset($offset)
 	{
 		// TODO 自动生成的方法存根
-		unset($this->$offset);
+		unset($this->_data[$offset]);
 	}
 
 }
