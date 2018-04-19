@@ -1,6 +1,8 @@
 <?php
 namespace framework\core\database\mysql;
 
+use framework\core\validator;
+
 class sql extends \framework\core\database\sql
 {
 	function __construct()
@@ -576,9 +578,16 @@ class sql extends \framework\core\database\sql
 				{
 					foreach ($this->_temp['update'] as $index => $value)
 					{
-						if (is_string($value))
+						if (is_scalar($value))
 						{
-							$set .= self::fieldFormat($index) . '=\'' . addslashes($value) . '\',';
+							if (validator::int($value))
+							{
+								$set .= self::fieldFormat($index) . '=' . $value . ',';
+							}
+							else
+							{
+								$set .= self::fieldFormat($index) . '=\'' . addslashes($value) . '\',';
+							}
 						}
 						else if ($value instanceof expression)
 						{
