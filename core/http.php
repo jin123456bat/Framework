@@ -88,14 +88,43 @@ class http extends base
 			$options[session_name()] = $session_id;
 		}
 		
-		if (!$with_head)
+		$config = self::getConfig('router');
+		if ($config['mode'] == 'common')
 		{
-			return http_build_query($options);
+			if (!$with_head)
+			{
+				return http_build_query($options);
+			}
+			
+			$query = ! empty($options) ? '?' . http_build_query($options) : '';
+			
+			return $scheme . $host . $port . $path . $query . $fragment;
+		}
+		else if ($config['mode'] == 'pathinfo')
+		{
+			$c = isset($options['c'])?$options['c']:$config['default']['control'];
+			$a = isset($options['a'])?$options['a']:$config['default']['action'];
+			unset($options['c']);
+			unset($options['a']);
+			$string = '/'.$c.'/'.$a;
+			if (!empty($options))
+			{
+				$temp = array();
+				foreach ($options as $k => $v)
+				{
+					$temp[] = $k.'/'.$v;
+				}
+				$string .= ('/'.implode('/', $temp));
+			}
+			if (!$with_head)
+			{
+				return $string;
+			}
+			
+			return $scheme . $host . $port . $path . $string . $fragment;
 		}
 		
-		$query = ! empty($options) ? '?' . http_build_query($options) : '';
 		
-		return $scheme . $host . $port . $path . $query . $fragment;
 	}
 
 	/**

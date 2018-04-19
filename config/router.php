@@ -5,6 +5,8 @@ return array(
 		'control' => 'index',
 		'action' => 'index'
 	),
+	//url生成的方式 默认为common
+	'mode' => 'common',
 	//web访问模式的路由解析规则
 	'web_parser' => array(
 		framework\core\router\parser\bind::class,
