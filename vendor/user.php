@@ -151,6 +151,7 @@ class user extends base
 	 */
 	static public function getLastVerified()
 	{
+		$config = self::getConfig('user');
 		if ($config['use_cookie'])
 		{
 			return cookie::get('__framework_user_identity');
