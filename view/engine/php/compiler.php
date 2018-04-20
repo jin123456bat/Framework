@@ -73,7 +73,14 @@ class compiler extends \framework\view\engine\compiler
 		ob_start();
 		ob_implicit_flush(false);
 		extract($this->_assign, EXTR_OVERWRITE);
-		include($this->_template_path);
+		if (file_exists($this->_template_path))
+		{
+			include($this->_template_path);
+		}
+		else
+		{
+			trigger_error('模板文件不存在:'.$this->_template_path,E_USER_ERROR);
+		}
 		return ob_get_clean();
 	}
 
