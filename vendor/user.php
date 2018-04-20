@@ -11,34 +11,6 @@ use framework\core\entity;
 class user extends base
 {
 	/**
-	 * 配置
-	 * @var array
-	 */
-	static private $_config = array(
-		'model' => 'admin',
-		'entity' => 'admin',
-		
-		//用户名的字段
-		'verify_key' => array(
-			'username',
-			'email',
-			'telephone',
-		),
-		
-		//用户信息通过cookie保存
-		'use_cookie' => false,
-		//用户信息通过session保存
-		'use_session' => true,
-		
-		
-		//密码的字段
-		'password_key' => 'password',
-		
-		//主键字段
-		'primary_key' => 'id',
-	);
-	
-	/**
 	 * 已经通过的用户列表的属性
 	 * @var array
 	 */
@@ -63,7 +35,8 @@ class user extends base
 	 */
 	static private function init()
 	{
-		self::$_model = self::model(self::$_config['model']);
+		$config = self::getConfig('user');
+		self::$_model = self::model($config['model']);
 	}
 	
 	/**
@@ -74,13 +47,14 @@ class user extends base
 	{
 		self::$_attributes[] = $data;
 		self::$_attribute = $data;
+		$config = self::getConfig('user');
 		//保存用户的登录信息
-		if(self::$_config['use_cookie'])
+		if($config['use_cookie'])
 		{
 			cookie::set('__framework_user_identity_list', self::$_attributes);
 			cookie::set('__framework_user_identity', self::$_attribute);
 		}
-		if (self::$_config['use_session'])
+		if ($config['use_session'])
 		{
 			session::set('__framework_user_identity_list', self::$_attributes);
 			session::set('__framework_user_identity', self::$_attribute);
@@ -89,43 +63,47 @@ class user extends base
 	
 	/**
 	 * 添加验证信息
-	 * @param unknown $data
-	 * @param string $message
+	 * @param array $data
+	 * @param boolean $remember 是否记住用户信息
+	 * @param string $message 当登陆失败的时候保存失败原因
 	 */
-	static public function addVerify($data,$remember,&$message = array())
+	static public function addVerify(array $data,$remember = false,&$message = array())
 	{
 		self::init();
+		$config = self::getConfig('user');
 		
-		if (isset($data[self::$_config['primary_key']]))
+		if (isset($data[$config['primary_key']]))
 		{
 			//通过主键登录
 			$user = self::$_model->where(array(
-				self::$_config['primary_key'] => $data[self::$_config['primary_key']],
+				$config['primary_key'] => $data[$config['primary_key']],
 			))->limit(1)->find();
 		}
-		else if (isset($data[self::$_config['password_key']]))
+		else if (isset($data[$config['password_key']]))
 		{
 			//通过账号和密码登录
-			$password = $data[self::$_config['password_key']];
+			$password = $data[$config['password_key']];
 			if (empty($password))
 			{
-				$message[self::$_config['password_key']][] = '密码不能为空';
+				$message[$config['password_key']][] = '密码不能为空';
 				return false;
 			}
 			
 			$verify_key = array();
-			settype(self::$_config['verify_key'], 'array');
-			foreach (self::$_config['verify_key'] as $key)
+			settype($config['verify_key'], 'array');
+			foreach ($config['verify_key'] as $key)
 			{
 				if (isset($data[$key]))
 				{
 					$verify_key[$key] = $data[$key];
 				}
 			}
+			//上面的foreach会导致内部指针超出去  导致下面的current返回false
+			reset($config['verify_key']);
 			
 			if (empty($verify_key))
 			{
-				$message[current(self::$_config['verify_key'])][] = '请填写用户名';
+				$message[current($config['verify_key'])][] = '请填写用户名';
 				return false;
 			}
 			
@@ -133,18 +111,18 @@ class user extends base
 			
 			if (empty($user))
 			{
-				$message[current(self::$_config['verify_key'])][] = '用户不存在';
+				$message[current($config['verify_key'])][] = '用户不存在';
 				return false;
 			}
 			
-			if(encryption::password_verify($password,$user[self::$_config['password_key']]))
+			if(encryption::password_verify($password,$user[$config['password_key']]))
 			{
 				self::saveUserData($user,$remember);
 				return true;
 			}
 			else
 			{
-				$message[self::$_config['password_key']][] = '密码错误';
+				$message[$config['password_key']][] = '密码错误';
 				return false;
 			}
 		}
@@ -157,11 +135,12 @@ class user extends base
 	 */
 	static public function getVerifiedList()
 	{
-		if (self::$_config['use_cookie'])
+		$config = self::getConfig('user');
+		if ($config['use_cookie'])
 		{
 			return cookie::get('__framework_user_identity_list');
 		}
-		if (self::$_config['use_session'])
+		if ($config['use_session'])
 		{
 			return session::get('__framework_user_identity_list');
 		}
@@ -172,11 +151,11 @@ class user extends base
 	 */
 	static public function getLastVerified()
 	{
-		if (self::$_config['use_cookie'])
+		if ($config['use_cookie'])
 		{
 			return cookie::get('__framework_user_identity');
 		}
-		if (self::$_config['use_session'])
+		if ($config['use_session'])
 		{
 			return session::get('__framework_user_identity');
 		}
@@ -189,11 +168,12 @@ class user extends base
 	static public function setLastVerified($user)
 	{
 		self::$_attribute = $user;
-		if (self::$_config['use_cookie'])
+		$config = self::getConfig('user');
+		if ($config['use_cookie'])
 		{
 			cookie::set('__framework_user_identity', self::$_attribute);
 		}
-		if (self::$_config['use_session'])
+		if ($config['use_session'])
 		{
 			session::set('__framework_user_identity', self::$_attribute);
 		}
@@ -208,7 +188,8 @@ class user extends base
 	static public function register($data,&$message) 
 	{
 		self::init();
-		self::$_entity = application::load(entity::class,self::$_config['entity'],array($data));
+		$config = self::getConfig('user');
+		self::$_entity = application::load(entity::class,$config['entity'],array($data));
 		if (self::$_entity->validate())
 		{
 			if(self::$_entity->save())
@@ -233,11 +214,12 @@ class user extends base
 	static public function logout()
 	{
 		self::$_attribute = null;
-		if (self::$_config['use_cookie'])
+		$config = self::getConfig('user');
+		if ($config['use_cookie'])
 		{
 			return cookie::delete('__framework_user_identity');
 		}
-		if (self::$_config['use_session'])
+		if ($config['use_session'])
 		{
 			return session::delete('__framework_user_identity');
 		}
