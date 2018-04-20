@@ -25,6 +25,16 @@ class actionFilter extends component
 	 * @var response
 	 */
 	private $_message = null;
+	
+	/**
+	 * 禁止访问的action
+	 * @var array
+	 */
+	private $_forbidden_action = array(
+		'__access',
+		'__output',
+		'initlize'
+	);
 
 	function load(control $control, $action)
 	{
@@ -38,7 +48,7 @@ class actionFilter extends component
 	function allow()
 	{
 		// 不存在
-		if (! method_exists($this->_control, $this->_action))
+		if (! method_exists($this->_control, $this->_action) && !method_exists($this->_control, '__call'))
 		{
 			$this->_message = new response('not found', 404);
 			return false;
@@ -46,7 +56,7 @@ class actionFilter extends component
 		if (! is_callable(array(
 			$this->_control,
 			$this->_action
-		)))
+		)) || in_array($this->_action, $this->_forbidden_action,true))
 		{
 			$this->_message = new response('forbidden', 403);
 			return false;
