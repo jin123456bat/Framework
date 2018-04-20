@@ -18,20 +18,25 @@ class event extends base
 	 * 事件添加绑定
 	 * 不会覆盖原来的事件
 	 * 按照绑定的顺序先后执行
-	 * @param unknown $eventName
-	 * @param string $callback_name callback的名称  如果存在会覆盖
-	 * @param unknown $callback  假如返回false则不会执行后面的事件
+	 * @param string $eventName
+	 * @param string $callback_name callback的名称  如果存在会覆盖 可以通过off方法删除
+	 * @param callable $callback  假如返回false则不会执行后面的事件
 	 */
 	static function on($eventName,$callback_name,$callback)
 	{
 		self::$_events[$eventName][$callback_name] = array(
 			'callback' => $callback,
+			'class' => '',
+			'function' => '',
+			'data' => '',
 		);
 	}
 	
 	/**
 	 * 事件删除
 	 * 只删除绑定的一个
+	 * @param string $eventName
+	 * @param string $callback_name
 	 */
 	static function off($eventName,$callback_name)
 	{
@@ -41,12 +46,17 @@ class event extends base
 	/**
 	 * 事件绑定
 	 * 和on不同这个会覆盖原来的所有的事件
+	 * @param string $eventName
+	 * @param callable $callback
 	 */
 	static function bind($eventName,$callback)
 	{
 		self::$_events[$eventName] = array(
 			array(
 				'callback' => $callback,
+				'class' => '',
+				'function' => '',
+				'data' => '',
 			)
 		);
 	}
@@ -54,6 +64,7 @@ class event extends base
 	/**
 	 * 事件删除
 	 * 删除所有绑定的事件
+	 * @param string $eventName
 	 */
 	static function unbind($eventName)
 	{
@@ -61,8 +72,8 @@ class event extends base
 	}
 	
 	/**
-	 * 触发事件
-	 * @param unknown $eventName
+	 * 触发事件中所有绑定的函数
+	 * @param string $eventName
 	 */
 	static function trigger($eventName)
 	{
