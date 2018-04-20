@@ -6,18 +6,21 @@ use framework\core\response\json;
 
 class application extends component
 {
+
 	/**
 	 * 将要执行的控制器的名称
+	 * 
 	 * @var unknown
 	 */
-	static public $_control;
-	
+	public static $_control;
+
 	/**
 	 * 将要执行的action的名称
+	 * 
 	 * @var unknown
 	 */
-	static public $_action;
-	
+	public static $_action;
+
 	function __construct($name, $path, $configName = '')
 	{
 		base::$APP_NAME = $name;
@@ -32,7 +35,7 @@ class application extends component
 		}
 		parent::__construct();
 	}
-	
+
 	function initlize()
 	{
 		// 载入系统默认配置
@@ -44,8 +47,8 @@ class application extends component
 		// 导入app配置中的文件类
 		$this->import(base::$APP_CONF);
 		
-		//设置当前访问模式
-		if (isset($_SERVER['argc']) && isset($_SERVER['argv']) && !empty($_SERVER['argc']) && !empty($_SERVER['argv']))
+		// 设置当前访问模式
+		if (isset($_SERVER['argc']) && isset($_SERVER['argv']) && ! empty($_SERVER['argc']) && ! empty($_SERVER['argv']))
 		{
 			array_shift($_SERVER['argv']);
 			$_SERVER['argc'] --;
@@ -78,8 +81,8 @@ class application extends component
 			}
 		}
 		
-		//rewrite
-		if (isset($app['rewrite']) && !empty($app['rewrite']))
+		// rewrite
+		if (isset($app['rewrite']) && ! empty($app['rewrite']))
 		{
 			base::$_rewrite = $app['rewrite'];
 		}
@@ -100,7 +103,7 @@ class application extends component
 		
 		parent::initlize();
 	}
-	
+
 	private function import($name)
 	{
 		$config = $this->getConfig($name);
@@ -133,7 +136,7 @@ class application extends component
 			}
 		}
 	}
-	
+
 	/**
 	 * 设置app的环境变量
 	 */
@@ -158,10 +161,11 @@ class application extends component
 			}
 		}
 	}
-	
+
 	/**
 	 * 这里还是有问题 还是需要share memory来实现
 	 * 判断程序在cli下是否在运行
+	 * 
 	 * @return boolean
 	 */
 	private function isRunning($control, $action)
@@ -170,15 +174,16 @@ class application extends component
 		exec($shell, $response);
 		return count($response) >= 2;
 	}
-	
+
 	/**
 	 * 执行控制器中的方法
+	 * 
 	 * @param string $control
-	 *        控制器名称
+	 *        	控制器名称
 	 * @param string $action
-	 *        控制器方法
+	 *        	控制器方法
 	 * @param string $doResponse
-	 *        是否输出方法的返回值， 这个是回调函数 假如没有回调函数，则返回方法的返回值
+	 *        	是否输出方法的返回值， 这个是回调函数 假如没有回调函数，则返回方法的返回值
 	 * @example function($response,$exit = false,$callback = NULL){} 参考application::doResponse方法
 	 * @return NULL|response
 	 */
@@ -233,7 +238,7 @@ class application extends component
 			}
 			else
 			{
-				//cli模式下防止重复调用
+				// cli模式下防止重复调用
 				if ($filter->singleThread() && $this->isRunning($control, $action))
 				{
 					exit(0);
@@ -261,7 +266,7 @@ class application extends component
 					}
 				}
 				
-				//执行action
+				// 执行action
 				$response = call_user_func(array(
 					$controller,
 					$action
@@ -283,7 +288,8 @@ class application extends component
 		{
 			if (is_callable($doResponse))
 			{
-				call_user_func($doResponse, $controller, true, function ($msg) {
+				call_user_func($doResponse, $controller, true, function ($msg)
+				{
 					echo $msg;
 				});
 			}
@@ -293,7 +299,7 @@ class application extends component
 			}
 		}
 	}
-	
+
 	/**
 	 * 运行application
 	 */
@@ -345,15 +351,16 @@ class application extends component
 				break;
 		}
 	}
-	
+
 	/**
 	 * 输出response
+	 * 
 	 * @param mixed $response
-	 *        输出的对象
+	 *        	输出的对象
 	 * @param bool $exit
-	 *        输出完毕后是否exit()
+	 *        	输出完毕后是否exit()
 	 * @param callback $callback
-	 *        对输出对像使用什么样的方法输出
+	 *        	对输出对像使用什么样的方法输出
 	 * @example $this->doResponse('123',true,function($msg){echo $msg;})
 	 */
 	protected function doResponse($response, $exit = true, $callback = NULL)
@@ -363,7 +370,7 @@ class application extends component
 			$newResponse = call_user_func(array(
 				$this,
 				'onRequestEnd'
-			),self::$_control,self::$_action,$response);
+			), self::$_control, self::$_action, $response);
 			if ($newResponse !== NULL)
 			{
 				$response = $newResponse;
@@ -405,7 +412,7 @@ class application extends component
 			}
 		}
 	}
-	
+
 	/**
 	 * 实例化控制器
 	 */
@@ -416,32 +423,35 @@ class application extends component
 		{
 			return new $namespace();
 		}
-		//响应内容直接是一个response
-		$response = application::load(response::class,$name);
+		// 响应内容直接是一个response
+		$response = application::load(response::class, $name);
 		if ($response)
 		{
 			return $response;
 		}
 		return null;
 	}
-	
-	public function onRequestStart($control,$action)
+
+	public function onRequestStart($control, $action)
 	{
 	}
-	
-	public function onRequestEnd($control,$action,$response = null)
+
+	public function onRequestEnd($control, $action, $response = null)
 	{
 	}
-	
+
 	/**
 	 * 检测这个类是否有被重写，假如重写了，加载重写后的类
 	 * 没有重写，检测这个类是否可以被实例化，假如可以 通过第三个参数实例化
 	 * 假如不可以，加载一个必须继承这个类的类，类名由第二个参数指定
-	 * @param string $instanceof ，没有重写加载当前类，继承的类， 要加载的类必须要继承$instanceof指定的类
-	 * @param string $classname 类名 默认为空 要加载的类的类名 假如为空 则加载找到的第一个类
+	 * 
+	 * @param string $instanceof
+	 *        	，没有重写加载当前类，继承的类， 要加载的类必须要继承$instanceof指定的类
+	 * @param string $classname
+	 *        	类名 默认为空 要加载的类的类名 假如为空 则加载找到的第一个类
 	 * @return object
 	 */
-	public static function load($instanceof,$class_name = '',$args = array())
+	public static function load($instanceof, $class_name = '', $args = array())
 	{
 		if (isset(base::$_rewrite[$instanceof]))
 		{
@@ -451,10 +461,9 @@ class application extends component
 		{
 			$class = $instanceof;
 		}
-		
 		$reflectionClass = new \ReflectionClass($class);
 		
-		if (!$reflectionClass->isTrait() && !$reflectionClass->isAbstract() && !$reflectionClass->isInterface())
+		if (! $reflectionClass->isTrait() && ! $reflectionClass->isAbstract() && ! $reflectionClass->isInterface())
 		{
 			$object = $reflectionClass->newInstanceArgs($args);
 			if ($reflectionClass->hasMethod('initlize'))
@@ -463,12 +472,12 @@ class application extends component
 			}
 			return $object;
 		}
-		else if (!empty($class_name))
+		else if (! empty($class_name))
 		{
-			//假如传入的class_name是一个带命名空间的类，则直接使用这个类
-			if (strpos($class_name,'\\')!==false)
+			// 假如传入的class_name是一个带命名空间的类，则直接使用这个类
+			if (strpos($class_name, '\\') !== false)
 			{
-				if (class_exists($class_name,true))
+				if (class_exists($class_name, true))
 				{
 					$class = new $class_name();
 					if (method_exists($class, 'initlize'))
@@ -481,13 +490,12 @@ class application extends component
 			else
 			{
 				
-				
-				//从app目录下查找对应的类
-				$files = glob_recursive(rtrim(APP_ROOT,'/').'/'.$class_name.'.php',GLOB_BRACE);
+				// 从app目录下查找对应的类
+				$files = glob_recursive(rtrim(APP_ROOT, '/') . '/' . $class_name . '.php', GLOB_BRACE);
 				
 				foreach ($files as $file)
 				{
-					$namespace = str_replace('/', '\\', APP_NAME.str_replace(APP_ROOT, '', pathinfo($file,PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME)));
+					$namespace = str_replace('/', '\\', APP_NAME . str_replace(APP_ROOT, '', pathinfo($file, PATHINFO_DIRNAME) . '/' . pathinfo($file, PATHINFO_FILENAME)));
 					include_once $file;
 					if (class_exists($namespace))
 					{
@@ -505,11 +513,11 @@ class application extends component
 					}
 				}
 				
-				//从系统目录中查找对应的类
-				$files = glob_recursive(rtrim(SYSTEM_ROOT,'/').'/'.$class_name.'.php',GLOB_BRACE);
+				// 从系统目录中查找对应的类
+				$files = glob_recursive(rtrim(SYSTEM_ROOT, '/') . '/' . $class_name . '.php', GLOB_BRACE);
 				foreach ($files as $file)
 				{
-					$namespace = str_replace('/', '\\', 'framework'.str_replace(SYSTEM_ROOT, '', pathinfo($file,PATHINFO_DIRNAME).'/'.pathinfo($file,PATHINFO_FILENAME)));
+					$namespace = str_replace('/', '\\', 'framework' . str_replace(SYSTEM_ROOT, '', pathinfo($file, PATHINFO_DIRNAME) . '/' . pathinfo($file, PATHINFO_FILENAME)));
 					include_once $file;
 					if (class_exists($namespace))
 					{

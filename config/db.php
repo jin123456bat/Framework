@@ -7,7 +7,7 @@
  */
 return array(
 	'test' => array(
-		'default' => true,
+		'default' => false,
 		'type' => 'mysql',
 		'server' => 'localhost',
 		'dbname' => 'test',

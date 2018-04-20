@@ -1,9 +1,11 @@
 <?php
 namespace framework\core;
+
 use framework\vendor\file;
 
 class assets extends component
 {
+
 	/**
 	 * 加载css文件
 	 */
@@ -11,18 +13,18 @@ class assets extends component
 	{
 		$config = self::getConfig('assets');
 		$path = $config['css']['path'];
-		$host = isset($config['css']['host']) && !empty($config['css']['host'])?$config['css']['host']:$config['host'];
+		$host = isset($config['css']['host']) && ! empty($config['css']['host']) ? $config['css']['host'] : $config['host'];
 		foreach ($path as $p)
 		{
-			$file = rtrim($p,'/').'/'.$filename;
+			$file = rtrim($p, '/') . '/' . $filename;
 			if (file_exists($file))
 			{
 				$time = filemtime($file);
 				if (empty($host))
 				{
-					$host = '.';
+					$host = env::path();
 				}
-				$path = rtrim($host,'/').str_replace('\\', '/', str_replace(realpath(APP_ROOT), '', realpath($file))).'?'.$time;
+				$path = rtrim($host, '/') . str_replace('\\', '/', str_replace(realpath(APP_ROOT), '', realpath($file))) . '?' . $time;
 				return $path;
 			}
 		}
@@ -32,7 +34,7 @@ class assets extends component
 			return $config['css']['mapping'][$filename];
 		}
 	}
-	
+
 	/**
 	 * 加载js文件
 	 */
@@ -40,18 +42,18 @@ class assets extends component
 	{
 		$config = self::getConfig('assets');
 		$path = $config['js']['path'];
-		$host = isset($config['js']['host']) && !empty($config['js']['host'])?$config['js']['host']:$config['host'];
+		$host = isset($config['js']['host']) && ! empty($config['js']['host']) ? $config['js']['host'] : $config['host'];
 		foreach ($path as $p)
 		{
-			$file = rtrim($p,'/').'/'.$filename;
+			$file = rtrim($p, '/') . '/' . $filename;
 			if (file_exists($file))
 			{
 				$time = filemtime($file);
 				if (empty($host))
 				{
-					$host = '.';
+					$host = env::path();
 				}
-				$path = rtrim($host,'/').str_replace('\\', '/', str_replace(realpath(APP_ROOT), '', realpath($file))).'?'.$time;
+				$path = rtrim($host, '/') . str_replace('\\', '/', str_replace(realpath(APP_ROOT), '', realpath($file))) . '?' . $time;
 				return $path;
 			}
 		}
@@ -61,7 +63,7 @@ class assets extends component
 			return $config['js']['mapping'][$filename];
 		}
 	}
-	
+
 	/**
 	 * 加载图像
 	 */
@@ -69,30 +71,31 @@ class assets extends component
 	{
 		$config = self::getConfig('assets');
 		$path = $config['image']['path'];
-		$host = isset($config['image']['host']) && !empty($config['image']['host'])?$config['image']['host']:$config['host'];
+		$host = isset($config['image']['host']) && ! empty($config['image']['host']) ? $config['image']['host'] : $config['host'];
 		foreach ($path as $p)
 		{
-			$file = rtrim($p,'/').'/'.$filename;
+			$file = rtrim($p, '/') . '/' . $filename;
 			if (file_exists($file))
 			{
 				$time = filemtime($file);
 				if (empty($host))
 				{
-					$host = '.';
+					$host = env::path();
 				}
-				$path = rtrim($host,'/').str_replace('\\', '/', str_replace(realpath(APP_ROOT), '', realpath($file))).'?'.$time;
+				$path = rtrim($host, '/') . str_replace('\\', '/', str_replace(realpath(APP_ROOT), '', realpath($file))) . '?' . $time;
 				return $path;
 			}
 		}
 	}
-	
+
 	/**
 	 * 直接通过路径来引用资源
 	 * 路径是相对项目的根目录计算
-	 * @param unknown $path
+	 * 
+	 * @param unknown $path        	
 	 */
 	static public function path($path)
 	{
-		return env::path().'/assets/'.ltrim($path,'/');
+		return env::path() . '/assets/' . ltrim($path, '/');
 	}
 }
