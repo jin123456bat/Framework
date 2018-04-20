@@ -9,88 +9,29 @@ use framework\core\base;
  */
 class event extends base
 {
-	
-	private static $_events = array(
-		
-	);
-	
-	/**
-	 * 事件添加绑定
-	 * 不会覆盖原来的事件
-	 * 按照绑定的顺序先后执行
-	 * @param string $eventName
-	 * @param string $callback_name callback的名称  如果存在会覆盖 可以通过off方法删除
-	 * @param callable $callback  假如返回false则不会执行后面的事件
-	 */
-	static function on($eventName,$callback_name,$callback)
-	{
-		self::$_events[$eventName][$callback_name] = array(
-			'callback' => $callback,
-			'class' => '',
-			'function' => '',
-			'data' => '',
-		);
-	}
-	
-	/**
-	 * 事件删除
-	 * 只删除绑定的一个
-	 * @param string $eventName
-	 * @param string $callback_name
-	 */
-	static function off($eventName,$callback_name)
-	{
-		unset(self::$_events[$eventName][$callback_name]);
-	}
-	
-	/**
-	 * 事件绑定
-	 * 和on不同这个会覆盖原来的所有的事件
-	 * @param string $eventName
-	 * @param callable $callback
-	 */
-	static function bind($eventName,$callback)
-	{
-		self::$_events[$eventName] = array(
-			array(
-				'callback' => $callback,
-				'class' => '',
-				'function' => '',
-				'data' => '',
-			)
-		);
-	}
-	
-	/**
-	 * 事件删除
-	 * 删除所有绑定的事件
-	 * @param string $eventName
-	 */
-	static function unbind($eventName)
-	{
-		self::$_events[$eventName] = array();
-	}
-	
 	/**
 	 * 触发事件中所有绑定的函数
-	 * @param string $eventName
+	 * @param string $eventName 事件名称中间通过.来分割
 	 */
-	static function trigger($eventName)
+	static function trigger($eventName,$data)
 	{
-		foreach (self::$_events[$eventName] as $eventName=>$event)
+		$backtrace = debug_backtrace();
+		
+		$param = new param();
+		$param->_class = isset($backtrace[1]['class'])?$backtrace[1]['class']:NULL;
+		$param->_function = isset($backtrace[1]['function'])?$backtrace[1]['function']:NULL;
+		$param->_object = isset($backtrace[1]['object'])?$backtrace[1]['object']:NULL;
+		$param->_data = $data;
+		
+		list($class,$function) = explode('.', $eventName,2);
+		
+		$namespace = APP_NAME.'\\event\\'.$class;
+		if (class_exists($namespace))
 		{
-			if (isset($event['callback']) && is_callable($event['callback']))
+			$class = new $namespace();
+			if (method_exists($class, $function))
 			{
-				$param = new param();
-				$param->_type = $eventName;
-				$param->_class = $event['class'];
-				$param->_function = $event['function'];
-				$param->_data = $event['data'];
-				$result = call_user_func($event['callback'],$param);
-				if ($result === false)
-				{
-					break;
-				}
+				call_user_func(array($class,$function),$param);
 			}
 		}
 	}

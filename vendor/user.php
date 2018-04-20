@@ -7,6 +7,7 @@ use framework\core\cookie;
 use framework\core\session;
 use framework\core\application;
 use framework\core\entity;
+use framework\event\event;
 
 class user extends base
 {
@@ -72,12 +73,34 @@ class user extends base
 		self::init();
 		$config = self::getConfig('user');
 		
+		event::trigger('user.before_login', array(
+			'data' => $data,
+			'remember' => $remember,
+		));
+		
 		if (isset($data[$config['primary_key']]))
 		{
 			//通过主键登录
 			$user = self::$_model->where(array(
 				$config['primary_key'] => $data[$config['primary_key']],
 			))->limit(1)->find();
+			if (!empty($user))
+			{
+				self::saveUserData($user,$remember);
+				event::trigger('user.after_login', array(
+					'success' => true,
+					'type' => 'primary_auth',
+				));
+				return true;
+			}
+			else
+			{
+				event::trigger('user.after_login', array(
+					'success' => false,
+					'type' => 'primary_auth',
+				));
+				return false;
+			}
 		}
 		else if (isset($data[$config['password_key']]))
 		{
@@ -86,6 +109,11 @@ class user extends base
 			if (empty($password))
 			{
 				$message[$config['password_key']][] = '密码不能为空';
+				event::trigger('user.after_login', array(
+					'success' => false,
+					'message' => $message,
+					'type' => 'password_auth',
+				));
 				return false;
 			}
 			
@@ -104,6 +132,11 @@ class user extends base
 			if (empty($verify_key))
 			{
 				$message[current($config['verify_key'])][] = '请填写用户名';
+				event::trigger('user.after_login', array(
+					'success' => false,
+					'message' => $message,
+					'type' => 'password_auth',
+				));
 				return false;
 			}
 			
@@ -112,17 +145,32 @@ class user extends base
 			if (empty($user))
 			{
 				$message[current($config['verify_key'])][] = '用户不存在';
+				event::trigger('user.after_login', array(
+					'success' => false,
+					'message' => $message,
+					'type' => 'password_auth',
+				));
 				return false;
 			}
 			
 			if(encryption::password_verify($password,$user[$config['password_key']]))
 			{
 				self::saveUserData($user,$remember);
+				event::trigger('user.after_login', array(
+					'success' => true,
+					'user' => $user,
+					'type' => 'password_auth',
+				));
 				return true;
 			}
 			else
 			{
 				$message[$config['password_key']][] = '密码错误';
+				event::trigger('user.after_login', array(
+					'success' => false,
+					'message' => $message,
+					'type' => 'password_auth',
+				));
 				return false;
 			}
 		}
@@ -173,10 +221,16 @@ class user extends base
 		if ($config['use_cookie'])
 		{
 			cookie::set('__framework_user_identity', self::$_attribute);
+			event::trigger('user.change_verified', array(
+				'user'=>self::$_attribute
+			));
 		}
 		if ($config['use_session'])
 		{
 			session::set('__framework_user_identity', self::$_attribute);
+			event::trigger('user.change_verified', array(
+				'user'=>self::$_attribute
+			));
 		}
 	}
 	
@@ -197,6 +251,9 @@ class user extends base
 			{
 				$user = self::$_entity->getData();
 				self::saveUserData($user);
+				event::trigger('user.register', array(
+					'user'=>$user
+				));
 				return true;
 			}
 			return false;
@@ -214,6 +271,9 @@ class user extends base
 	 */
 	static public function logout()
 	{
+		event::trigger('user.logout', array(
+			'user' => self::$_attribute
+		));
 		self::$_attribute = null;
 		$config = self::getConfig('user');
 		if ($config['use_cookie'])
