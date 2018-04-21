@@ -53,6 +53,7 @@ class router extends component
 		
 		$this->_control_name = empty($this->_control_name)?$config['default']['control']:$this->_control_name;
 		$this->_action_name= empty($this->_action_name)?$config['default']['action']:$this->_action_name;
+		$this->_data = $parser->getData();
 	}
 
 	public function getControlName()
@@ -63,5 +64,10 @@ class router extends component
 	public function getActionName()
 	{
 		return $this->_action_name;
+	}
+	
+	public function getRequestParam()
+	{
+		return $this->_data;
 	}
 }

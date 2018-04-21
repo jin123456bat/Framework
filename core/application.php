@@ -313,6 +313,7 @@ class application extends component
 				$router->parse($query_string);
 				$control = $router->getControlName();
 				$action = $router->getActionName();
+				$_GET = $router->getRequestParam();
 				$this->runControl($control, $action, array(
 					$this,
 					'doResponse'
@@ -324,6 +325,7 @@ class application extends component
 				$router->parse($query_string);
 				$control = $router->getControlName();
 				$action = $router->getActionName();
+				$_GET = $router->getRequestParam();
 				$this->runControl($control, $action, array(
 					$this,
 					'doResponse'
@@ -332,7 +334,6 @@ class application extends component
 			case 'server':
 				$server = self::load(server::class);
 				$command = trim(strtolower($_SERVER['argv'][0]));
-				
 				if (method_exists($server, $command))
 				{
 					$server->_run_control = array(
